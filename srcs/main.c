@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/01/24 14:03:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/02/10 14:50:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,14 @@
 Start point for the minishell program.
 */
 
-char *reader(void)
+static char	*reader(void)
 {
-    char *line;
-    
+    char	*line;
+
     line = readline("bleshell$ ");
     if (!line)
     {
-        printf("exit\n");
+        ft_putendl_fd("exit", STDOUT_FILENO);
         exit(0);
     }
     if (*line)
@@ -116,7 +116,6 @@ void load_history(void)
     }
     close(fd);
 }
-
 
 int main(int ac, char **av, char **envp)
 {

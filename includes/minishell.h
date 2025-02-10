@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/01/24 14:49:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/02/10 14:46:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,13 @@
 
 # define PROMPT "bleshell$> "
 # define HISTORY_FILE "bleshell_history.txt"
+
+typedef enum e_quote_state
+{
+    QUOTE_NONE = 0,
+    QUOTE_SINGLE,
+    QUOTE_DOUBLE
+} t_quote_state;
 
 typedef enum e_tokentype
 {
@@ -55,7 +62,7 @@ typedef struct s_node
 
 typedef struct s_vars
 {
-	t_node		*root;
+	t_node		*astroot;
 	t_node		*head;
     t_node		*current;
 	t_tokentype	curr_type;
@@ -64,6 +71,8 @@ typedef struct s_vars
 	int			dquoflag;
 	int			pos;
 	int			start;
+	int			error_code;
+    char		*error_msg; 
 }	t_vars;
 
 void    lexerlist(char *str, t_vars *vars);
@@ -74,3 +83,10 @@ t_node  *initnode(char *data, t_tokentype type);
 void    tokenize(char *input, t_vars *vars);
 int     operators(char *input, int i, int token_start, t_vars *vars);
 void    maketoken(char *input, t_vars *vars);
+char	*extract_quoted_content(char *input, int *pos, char quote);
+char	*handle_expansion(char *input, int *pos, t_vars *vars);
+void	update_quote_state(char c, t_vars *vars);
+char	*get_cmd_path(char *cmd, char **envp);
+char	**dup_env(char **envp);
+int		execute_cmd(t_node *cmd_node, char **envp);
+void	handle_pipe(t_node *pipe_node, char **envp);
