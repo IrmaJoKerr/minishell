@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/02/10 15:05:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/01 08:14:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "includes\minishell.h"
 
 char	*get_cmd_path(char *cmd, char **envp)
 {
@@ -253,7 +253,7 @@ void	maketoken(char *input, t_vars *vars)
 }
 
 /*
-Add function to build AST from tokens
+Function to build AST from tokens
 */
 t_node *build_ast(t_vars *vars)
 {
@@ -269,17 +269,6 @@ t_node *build_ast(t_vars *vars)
         current = current->right;
     }
     return (vars->root);
-}
-
-void	free_ast(t_node *node)
-{
-    if (!node)
-        return ;
-    free_ast(node->left);
-    free_ast(node->right);
-    if (node->args)
-        ft_free_2d(node->args, ft_arrlen(node->args));
-    free(node);
 }
 
 char	*handle_unclosed_quotes(char *input, t_vars *vars)

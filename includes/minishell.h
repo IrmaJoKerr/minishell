@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/02/10 14:46:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/01 08:06:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@
 #include <readline/history.h>
 
 # define PROMPT "bleshell$> "
-# define HISTORY_FILE "bleshell_history.txt"
+# define HISTORY_FILE "bleshell_history"
+# define HIST_BUFFER_SZ 4096
+# define HIST_LINE_SZ 1024
 
 typedef enum e_quote_state
 {
@@ -74,6 +76,24 @@ typedef struct s_vars
 	int			error_code;
     char		*error_msg; 
 }	t_vars;
+
+/*
+Entry point functions. In main.c
+*/
+char	*reader(void);
+
+/*
+Signal handlers. In signals.c
+*/
+void	sigint_handler(int sig);
+void	sigquit_handler(int sig);
+
+/*
+History functions. In history.c
+*/
+int		init_history_fd(int mode);
+void	save_history(void);
+void	load_history(void);
 
 void    lexerlist(char *str, t_vars *vars);
 t_node  *init_head_node(t_vars *vars);
