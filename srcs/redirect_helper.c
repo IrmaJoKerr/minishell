@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 07:59:58 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:59:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Check file permissions for redirection

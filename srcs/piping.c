@@ -6,16 +6,16 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:39:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:58:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Prepares the pipe infrastructure for execution.
 */
-void init_pipe(t_node *cmd, int *pipe_fd)
+void	init_pipe(t_node *cmd, int *pipe_fd)
 {
 	if (cmd->type == TYPE_PIPE)
 	{
@@ -28,7 +28,7 @@ void init_pipe(t_node *cmd, int *pipe_fd)
 /*
 Executes the pipeline.
 */
-void execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
+int	execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
 {
 	int		pipefd[2];
 	pid_t	pid;

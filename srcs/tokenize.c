@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 13:04:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Creates a new token from the input string. Works with handle_quote_content.
@@ -21,10 +21,10 @@ void	maketoken(char *input, t_vars *vars)
 	t_node	*node;
 
 	if (!input || !vars || vars->pos <= vars->start)
-		return;
+		return ;
 	token = ft_substr(input, vars->start, vars->pos - vars->start);
 	if (!token)
-		return;
+		return ;
 	if (vars->curr_type == TYPE_CMD)
 		node = handle_cmd_token(token);
 	else
@@ -32,7 +32,7 @@ void	maketoken(char *input, t_vars *vars)
 	if (!node)
 	{
 		free(token);
-		return;
+		return ;
 	}
 	if (vars->curr_type == TYPE_CMD)
 		vars->current = node;
@@ -58,24 +58,28 @@ int	handle_expand(t_vars *vars)
 Function to selectively decide how to process the character.
 Works with tokenize.
 */
-void process_char(char *input, int *i, t_vars *vars)
+void	process_char(char *input, int *i, t_vars *vars)
 {
+	char	*content;
+
 	if (!input || !i || !vars)
-		return;
+		return ;
+	if (*i == 0 || ft_isspace(input[*i - 1]))
+		vars->start = *i;
 	if (input[*i] == '\'' || input[*i] == '\"')
 	{
 		handle_quotes(input, i, vars);
 		if (vars->quote_depth > 0)
 		{
-			char *content = read_quoted_content(input, i, 
-				vars->quote_ctx[vars->quote_depth - 1].type);
+			content = read_quoted_content(input, i,
+					vars->quote_ctx[vars->quote_depth - 1].type);
 			if (content)
 			{
 				maketoken(content, vars);
 				free(content);
 			}
 		}
-		return;
+		return ;
 	}
 	(*i)++;
 }

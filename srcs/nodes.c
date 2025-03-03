@@ -6,23 +6,22 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:57:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Creates and links a new node in a linked list.
 */
-int makenode(t_vars *vars, char *data)
+int	makenode(t_vars *vars, char *data)
 {
-	t_node *newnode;
+	t_node	*newnode;
 
-	newnode = initnode(data, vars->curr_type);
+	newnode = initnode(vars->curr_type, data);
 	if (!newnode)
 		return (0);
-	
 	if (vars->current)
 	{
 		vars->current->next = newnode;
@@ -38,7 +37,7 @@ Adds a child node to a parent node, if the parent node has an empty child node.
 void	add_child(t_node *parent, t_node *child)
 {
 	if (!parent || !child)
-		return;
+		return ;
 	if (!parent->left)
 	{
 		parent->left = child;
@@ -56,7 +55,7 @@ Handles pipe node in AST construction
 */
 void	handle_pipe_node(t_node **root, t_node *pipe_node)
 {
-	t_node *new_pipe;
+	t_node	*new_pipe;
 
 	new_pipe = initnode(TYPE_PIPE, NULL);
 	if (!*root)
@@ -78,7 +77,7 @@ Handles redirection node in AST construction
 */
 void	redirection_node(t_node *root, t_node *redir_node)
 {
-	t_node *cmd_node;
+	t_node	*cmd_node;
 
 	cmd_node = root;
 	while (cmd_node && cmd_node->type == TYPE_PIPE)

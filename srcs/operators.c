@@ -6,18 +6,18 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:57:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
-Handles operators. Used for handling operators and strings. Works with 
+Handles operators. Used for handling operators and strings.
 */
 int	operators(char *input, int i, int token_start, t_vars *vars)
 {
-	int next_pos;
+	int	next_pos;
 
 	handle_string(input, i, token_start, vars);
 	next_pos = handle_double_operator(input, i, vars);
@@ -40,6 +40,21 @@ int	handle_string(char *input, int i, int token_start, t_vars *vars)
 		maketoken(input, vars);
 	}
 	return (i);
+}
+
+/*
+Converts an operator character to its corresponding token type.
+Works with handle_single_operator.
+*/
+t_tokentype	get_operator_type(char op)
+{
+	if (op == '|')
+		return (TYPE_PIPE);
+	else if (op == '>')
+		return (TYPE_OUT_REDIRECT);
+	else if (op == '<')
+		return (TYPE_IN_REDIRECT);
+	return (TYPE_STRING);
 }
 
 /*

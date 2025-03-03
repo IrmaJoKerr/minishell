@@ -6,15 +6,16 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:36:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:34:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:33:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Create an array of arguments(flags) for the node.
 Works like malloc for the array.
+Example: "ls" -> ["ls"]
 */
 void	create_args_array(t_node *node, char *token)
 {
@@ -36,6 +37,7 @@ void	create_args_array(t_node *node, char *token)
 /*
 Append a new argument to the node's argument array.
 Works like realloc for the array.
+Example: ["ls", "-l"] + "-a" -> ["ls", "-l", "-a"]
 */
 void	append_arg(t_node *node, char *new_arg)
 {
@@ -43,23 +45,24 @@ void	append_arg(t_node *node, char *new_arg)
 	size_t	len;
 	size_t	i;
 
+	if (!node || !new_arg || !node->args)
+		return ;
 	len = ft_arrlen(node->args);
 	new_args = malloc(sizeof(char *) * (len + 2));
 	if (!new_args)
 		return ;
-	i = 0;
-	while (i < len)
+	i = -1;
+	while (++i < len)
 	{
-		new_args[i] = ft_strdup(node->args[i]);
+		new_args[i] = node->args[i];
 		if (!new_args[i])
 		{
-			ft_free_2d(new_args, i);
+			free(new_args);
 			return ;
 		}
-		i++;
 	}
 	new_args[len] = ft_strdup(new_arg);
 	new_args[len + 1] = NULL;
-	ft_free_2d(node->args, len);
+	free(node->args);
 	node->args = new_args;
 }

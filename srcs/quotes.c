@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:59:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Handles single and double quotes. Handles nested quotes.
@@ -18,9 +18,9 @@ Handles single and double quotes. Handles nested quotes.
 void	handle_quotes(char *input, int *pos, t_vars *vars)
 {
 	char	quote;
-	
+
 	if (!input || !pos || !vars)
-		return;
+		return ;
 	quote = input[*pos];
 	if (quote == '\'' || quote == '\"')
 	{
@@ -42,7 +42,7 @@ void	handle_quotes(char *input, int *pos, t_vars *vars)
 /*
 Handles unclosed quotes. Prompts the user to close the quotes.
 */
-char *handle_unclosed_quotes(char *input, t_vars *vars)
+char	*handle_unclosed_quotes(char *input, t_vars *vars)
 {
 	char	*line;
 	char	*temp;
@@ -50,8 +50,8 @@ char *handle_unclosed_quotes(char *input, t_vars *vars)
 	char	*result;
 
 	prompt = "DQUOTE> ";
-	if (vars->quote_depth > 0 && 
-		vars->quote_ctx[vars->quote_depth - 1].type == '\'')
+	if (vars->quote_depth > 0
+		&& vars->quote_ctx[vars->quote_depth - 1].type == '\'')
 		prompt = "SQUOTE> ";
 	while (vars->quote_depth > 0)
 	{
@@ -74,7 +74,7 @@ char *handle_unclosed_quotes(char *input, t_vars *vars)
 /*
 Extracts the content of a quoted string.
 */
-char *read_quoted_content(char *input, int *pos, char quote)
+char	*read_quoted_content(char *input, int *pos, char quote)
 {
 	int		start;
 	char	*content;

@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:48:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Checks and initialise the history fd. 
@@ -68,42 +68,13 @@ int	get_history_count(void)
 	fd = init_history_fd(O_RDONLY);
 	if (fd == -1)
 		return (0);
-	while ((line = get_next_line(fd)))
+	line = get_next_line(fd);
+	while (line)
 	{
 		count++;
 		free(line);
+		line = get_next_line(fd);
 	}
 	close(fd);
 	return (count);
-}
-
-/*
-Load history into memory with limit. Works with init_history_fd.
-*/
-void    load_history(void)
-{
-	int     fd;
-	char    *line;
-	int     count;
-	int     skip;
-
-	count = get_history_count();
-	if (count == 0)
-		return;
-	fd = init_history_fd(O_RDONLY);
-	if (fd == -1)
-		return;
-	if (count > HIST_MEM_MAX)
-		skip = count - HIST_MEM_MAX;
-	else
-		skip = 0;
-	while (skip-- > 0 && (line = get_next_line(fd)))
-		free(line);
-	while ((line = get_next_line(fd)))
-	{
-		if (*line)
-			add_history(line);
-		free(line);
-	}
-	close(fd);
 }

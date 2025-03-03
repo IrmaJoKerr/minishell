@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 18:10:33 by bleow             #+#    #+#              #
-#    Updated: 2024/11/08 12:13:51 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/03 12:01:20 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,6 +32,8 @@ CFILES = lib_ft/ft_arrlen.c \
 	lib_ft/ft_isascii.c \
 	lib_ft/ft_isdigit.c \
 	lib_ft/ft_isprint.c \
+	lib_ft/ft_isquote.c \
+	lib_ft/ft_isspace.c \
 	lib_ft/ft_itoa.c \
 	lib_ft/ft_memchr.c \
 	lib_ft/ft_memcmp.c \
@@ -46,6 +48,7 @@ CFILES = lib_ft/ft_arrlen.c \
 	lib_ft/ft_putnbr.c \
 	lib_ft/ft_putstr_fd.c \
 	lib_ft/ft_putstr.c \
+	lib_ft/ft_safefree.c \
 	lib_ft/ft_split.c \
 	lib_ft/ft_splitstr.c \
 	lib_ft/ft_strchr.c \

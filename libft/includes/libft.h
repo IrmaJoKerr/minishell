@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 18:10:58 by bleow             #+#    #+#             */
-/*   Updated: 2024/11/08 12:14:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 11:57:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ int			ft_isalpha(int c);
 int			ft_isascii(int c);
 int			ft_isdigit(int c);
 int			ft_isprint(int c);
+int			ft_isquote(char c);
+int			ft_isspace(int c);
 char		*ft_itoa(int n);
 void		*ft_memchr(const void *str, int c, size_t n);
 int			ft_memcmp(const void *s1, const void *s2, size_t n);
@@ -67,6 +69,7 @@ void		ft_putnbr_fd(int n, int fd);
 void		ft_putnbr(int n);
 void		ft_putstr_fd(char *s, int fd);
 void		ft_putstr(char *s);
+void		ft_safefree(void **ptr);
 char		**ft_split(char const *s, char c);
 char		**ft_splitstr(char const *s, char *delimiters);
 char		*ft_strchr(const char *str, int character);

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/13 15:17:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:35:12 by bleow            ###   ########.fr       */
+/*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
+/*   Updated: 2025/03/03 12:55:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Function to read a line from the user.
@@ -39,8 +39,7 @@ void	init_shell(t_vars *vars, char **envp)
 	vars->env = envp;
 	vars->quote_depth = 0;
 	load_history();
-	signal(SIGINT, sigint_handler);
-	signal(SIGQUIT, sigquit_handler);
+	load_signals();
 }
 
 /*
@@ -51,6 +50,9 @@ int	process_command(char *command, t_vars *vars)
 	if (!command)
 		return (0);
 	lexerlist(command, vars);
+	vars->astroot = build_ast(vars);
+	if (vars->astroot)
+		execute_cmd(vars->astroot, vars->env, vars);
 	free(command);
 	return (1);
 }
@@ -72,7 +74,7 @@ int	main(int ac, char **av, char **envp)
 	{
 		command = reader();
 		if (!process_command(command, &vars))
-			break;
+			break ;
 	}
 	save_history();
 	return (0);

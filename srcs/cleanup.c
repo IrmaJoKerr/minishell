@@ -6,11 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:09:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/02 17:34:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/03 12:37:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes\minishell.h"
+#include "../includes/minishell.h"
 
 /*
 Cleanup function to free allocated memory for proper exit.
@@ -18,18 +18,20 @@ Cleanup function to free allocated memory for proper exit.
 void	cleanup_vars(t_vars *vars)
 {
 	if (!vars)
-		return;
+		return ;
 	if (vars->env)
 		ft_free_2d(vars->env, ft_arrlen(vars->env));
-	if (vars->error_msg)
-		free(vars->error_msg);
+	ft_safefree((void **)&vars->error_msg);
 	if (vars->astroot)
 		free_ast(vars->astroot);
 	if (vars->head && vars->head != vars->astroot)
 		free_ast(vars->head);
+	vars->astroot = NULL;
+	vars->head = NULL;
+	vars->current = NULL;
+	vars->env = NULL;
 	vars->quote_depth = 0;
 	vars->error_code = 0;
-	vars->current = NULL;
 }
 
 /*
