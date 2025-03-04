@@ -6,15 +6,22 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 13:00:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 14:39:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Handle input redirection. Works by opening the file and setting the
-file descriptor and permissions.
+Handles input redirection (< filename).
+1) Validates the node structure and arguments
+2) Checks read permissions on the target file with chk_permissions(). Error
+   message is displayed if permissions are denied.
+3) Opens the file in read-only mode
+4) Sets the provided fd_in pointer to the new FD
+Returns 1 on success, 0 on any failure 
+(invalid args, permission denied, open failure).
+Works with handle_redirect_nodes().
 */
 int	input_redirect(t_node *node, int *fd_in)
 {
@@ -30,8 +37,20 @@ int	input_redirect(t_node *node, int *fd_in)
 }
 
 /*
-Handle output redirection. Works by opening the file and setting the
-file descriptor and permissions.
+Handle output redirection (> filename or >> filename).
+1) Validates the node structure and arguments
+2) Sets flags based on append mode (> vs >>) with set_output_flags()
+3) Checks read permissions on the target file with chk_permissions(). Error
+   message is displayed if permissions are denied.
+4) Opens the file with mode type and set permissions (0644)
+6) Sets the provided fd_out pointer to the new FD
+Parameters:
+- node: AST node with the filename as args[0]
+- fd_out: Pointer to store the opened FD
+- append: Flag for APPEND based on mode (0 for >, 1 for >>)
+Returns 1 on success, 0 on any failure
+(invalid args, permission denied, open failure).
+Works with handle_redirect_nodes().
 */
 int	output_redirect(t_node *node, int *fd_out, int append)
 {
@@ -51,9 +70,20 @@ int	output_redirect(t_node *node, int *fd_out, int append)
 
 /*
 Open file for redirection based on mode.
-Mode: 0 for input, 1 for output, 2 for append
-Returns: 1 on success, 0 on failure
-Works with handle_redirect.
+1) Checks the node structure and arguments
+2) Sets flags based on mode using set_redirect_flags()
+3) Checks read permissions on the target file with chk_permissions(). Error
+   message is displayed if permissions are denied.
+4) Opens the file with mode type and set permissions (0644)
+6) Sets the provided fd pointer to the new FD
+7) Reports errors if file open fails
+Parameters:
+- node: AST node with the filename as args[0] 
+- fd: Pointer to store the opened FD
+- mode: 0 for INPUT (<), 1 for OUTPUT (>), 2 for APPEND (>>)
+Returns 1 on success, 0 on any failure.
+(invalid args, permission denied, open failure).
+Works with handle_redirect().
 */
 int	open_redirect_file(t_node *node, int *fd, int mode)
 {
@@ -80,9 +110,20 @@ int	open_redirect_file(t_node *node, int *fd, int mode)
 }
 
 /*
-Handle file redirection. Works for input, output and append.
-mode: 0 for input, 1 for output, 2 for append
-Returns: 1 on success, 0 on failure
+Main redirection controller function.
+1) Opens the file using open_redirect_file()
+2) Checks the standard file descriptor to redirect (STDIN or STDOUT)
+3) Uses dup2() to redirect the standard descriptor to the opened file:
+   - INPUT(mode 0): STDIN_FILENO becomes the opened file
+   - OUTPUT (modes 1,2): STDOUT_FILENO becomes the opened file
+4) Closes the original file descriptor to prevent leaks
+5) Returns success/failure status
+Parameters:
+- node: AST node with the filename as args[0] 
+- fd: Pointer to store the opened FD
+- mode: 0 for INPUT (<), 1 for OUTPUT (>), 2 for APPEND (>>)
+Returns 1 on success, 0 on any failure.
+Works with execute_redirects().
 */
 int	handle_redirect(t_node *node, int *fd, int mode)
 {

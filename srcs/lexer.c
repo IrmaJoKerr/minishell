@@ -6,14 +6,17 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:55:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:45:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Skips whitespace characters. Works with lexerlist.
+Skips whitespace characters specifically space, \t, and \n.
+Advances vars->pos to the next non-whitespace character.
+For skipping whitespace between tokens.
+Works with lexerlist().
 */
 void	skip_whitespace(char *str, t_vars *vars)
 {
@@ -23,8 +26,14 @@ void	skip_whitespace(char *str, t_vars *vars)
 }
 
 /*
-Checks for quoted strings. Handles quoted tokens. 
-Unrecognized tokens are treated as normal characters. Works with lexerlist.
+Identifies and processes different token types in the input string.
+Handles these specific cases:
+1. Quoted content (single or double quotes)
+2. Expansion variables (starting with $)
+3. Operators (like pipes and redirections)
+Advances vars->pos past the processed token.
+If no special token is found, advances to next character.
+Works with lexerlist().
 */
 void	handle_token(char *str, t_vars *vars)
 {
@@ -42,7 +51,17 @@ void	handle_token(char *str, t_vars *vars)
 }
 
 /*
-Controller function for the lexer. Works with tokenize.
+Main controller function for lex analysis.
+Takes an input string and converts it into a linked list of tokens.
+Steps:
+1. Initializes position tracking and creates a head node
+2. Processes tokens until end of input is reached, while skipping any
+   whitespaces between tokens using skip_whitespace().
+3. Calls handle_token() to process each token.
+4. Handles any unclosed quotes at the end of input with
+   handle_unclosed_quotes().
+Result: vars->current populated with the token list.
+Works with tokenize().
 */
 void	lexerlist(char *str, t_vars *vars)
 {

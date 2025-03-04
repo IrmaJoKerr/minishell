@@ -6,14 +6,21 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 07:59:58 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:59:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 14:23:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Check file permissions for redirection
+Check file permissions before redirection starts.
+1) Read mode (O_RDONLY): Checks if file exists and is readable
+2) Write mode (O_WRONLY): Checks if file exists and is writable,
+   or if it doesn't exist, whether it can be created
+Returns:
+- 1 (true) if the file can be accessed with the current mode
+- 1 (true) for write mode if file doesn't exist (creates new file)
+- 0 (false) if permission is denied or other access error
 */
 int	chk_permissions(char *filename, int mode)
 {
@@ -29,7 +36,17 @@ int	chk_permissions(char *filename, int mode)
 }
 
 /*
-Set flags for output redirection. Works for both output and append.
+Sets file open flags for output redirection.
+Can set flags for two output modes:
+1) STDOUT redirection (>): Uses O_TRUNC to overwrite existing file
+2) APPEND redirection (>>): Uses O_APPEND to add to existing file
+Also sets for both modes:
+- O_WRONLY: Write-only access
+- O_CREAT: Create file if it doesn't exist
+Parameters:
+- 1 for APPEND mode (>>), 0 for STDOUT mode (>)
+Returns: The combined flag value for open().
+Used with handle_output_redirect().
 */
 int	set_output_flags(int append)
 {
@@ -44,8 +61,15 @@ int	set_output_flags(int append)
 }
 
 /*
-Set flags based on redirection mode.
-mode: 0 for input, 1 for output, 2 for append
+Sets file open flags for 3 redirection types:
+1) INPUT redirection (<): O_RDONLY
+2) OUTPUT redirection (>): O_WRONLY | O_CREAT | O_TRUNC
+3) APPEND redirection (>>): O_WRONLY | O_CREAT | O_APPEND
+Creates OUTPUT files with permission 0644 if they don't exist.
+Parameters:
+- mode: 0 for INPUT, 1 for OUTPUT, 2 for APPEND
+Returns: The combined flag value for open().
+Used by handle_redirect() to open files with correct modes.
 */
 int	set_redirect_flags(int mode)
 {

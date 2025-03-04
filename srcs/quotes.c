@@ -6,14 +6,21 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:59:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 14:10:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Handles single and double quotes. Handles nested quotes.
+Tracks opening and closing of single and double quotes.
+1) Identifies single (') and double (") quotes in the input
+2) Tracks a stack of quote contexts in vars->quote_ctx
+3) Increments quote_depth when opening a new quote
+4) Decrements quote_depth when matching closing quote is found
+5) Advances the position pointer past the quote character
+This tracking handles nested quotes and detection of unclosed quotes.
+Works with tokenize().
 */
 void	handle_quotes(char *input, int *pos, t_vars *vars)
 {
@@ -40,7 +47,15 @@ void	handle_quotes(char *input, int *pos, t_vars *vars)
 }
 
 /*
-Handles unclosed quotes. Prompts the user to close the quotes.
+Handles unclosed quotes. Prompts the user to close the quotes with new input.
+1) Checks which type of quote is unclosed (single or double)
+2) Displays matching prompt (SQUOTE> or DQUOTE>)
+3) Reads new input from user with readline()
+4) Joins the new input with the existing input string using ft_strjoin()
+5) Retokenizes the combined input to check if quotes are now closed
+6) Repeats until all quotes are closed (quote_depth == 0)
+Returns the completed input string with balanced quotes, or NULL on error.
+Works with tokenize() and lexerlist().
 */
 char	*handle_unclosed_quotes(char *input, t_vars *vars)
 {
@@ -72,7 +87,14 @@ char	*handle_unclosed_quotes(char *input, t_vars *vars)
 }
 
 /*
-Extracts the content of a quoted string.
+Extracts the string between matching quote characters.
+1) Starts from the position +1 after the opening quote
+2) Advances the position pointer until closing quote or end of string
+3) Creates a substring with just the quoted content (without quotes)
+4) Advances position +1 past the closing quote
+5) Returns a new string with the quoted content, or NULL if unclosed.
+Note: Caller is responsible for freeing the returned string after use.
+Works with handle_quote_token().
 */
 char	*read_quoted_content(char *input, int *pos, char quote)
 {

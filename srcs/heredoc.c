@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:40:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:55:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Example with delimiter "EOF" and expand_vars=true:
 - Reads lines like "line 1", "$USER", "EOF" 
 - Writes "line 1" and expanded "$USER" to fd[1]
 - Stops when "EOF" is encountered or readline returns NULL
+Works with handle_heredoc().
 */
 int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 {
@@ -52,17 +53,19 @@ int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 /*
 Write line to heredoc pipe with optional variable expansion.
 Adds a newline after each input line.
-If expand_vars is true, expands environment variables in the line.
+If expand_vars() is true, expands environment variables in the line.
 Takes:
-- fd: File descriptor to write to
-- line: Input string to write
-- vars: Shell variables structure (for environment variables)
-- expand_vars: Whether to expand variables (based on delimiter quotes)
+- fd: File descriptor to write to.
+- line: Input string to write.
+- vars: Shell variables structure (for environment variables).
+- expand_vars: Whether to expand variables (based on delimiter quotes).
+- frees memory for expanded_line if it was allocated.
 Returns 1 on success, 0 on failure.
 Example: For line "echo $HOME" with expand_vars=true:
 - Expands to "echo /Users/bleow"
 - Writes to fd and adds newline
 - Returns 1 if both writes succeed, 0 otherwise
+Works with read_heredoc().
 */
 int	write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
 {
@@ -97,6 +100,7 @@ Takes a delimiter string.
 Returns 1 if variables should be expanded (no quotes), 0 if not.
 Example: "EOF" -> 1 (expand variables)
 		 "'EOF'" -> 0 (don't expand variables)
+Works with handle_heredoc().
 */
 int	expand_heredoc_check(char *delimiter)
 {
@@ -129,6 +133,7 @@ Example for node with quoted delimiter "'EOF'":
 - Creates pipe
 - Does NOT expand variables in content
 - Returns read end of pipe for later use
+Works with run_heredoc().
 */
 int	handle_heredoc(t_node *node, t_vars *vars)
 {
@@ -160,7 +165,7 @@ int	handle_heredoc(t_node *node, t_vars *vars)
 }
 
 /*
-Runs and controls the heredoc redirection process.
+Main function controlling the heredoc redirection process.
 This is the main entry point for heredoc functionality.
 Takes a node with the heredoc delimiter and vars for error handling.
 Works in these steps:

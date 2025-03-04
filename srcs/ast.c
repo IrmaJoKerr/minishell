@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:43:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:35:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 12:09:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,9 @@ t_node	*build_ast(t_vars *vars)
 /*
 Function to initialize a new node.
 Uses e_tokentype and s_node struct to create a new node.
+Sets default values for all pointers (NULL).
+Returns the new node or NULL on allocation failure.
+Works with build_ast().
 */
 t_node	*initnode(t_tokentype type, char *token)
 {

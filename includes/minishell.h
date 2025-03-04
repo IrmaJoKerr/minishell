@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 13:17:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 10:59:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,16 @@
 
 extern volatile sig_atomic_t	g_signal_received;
 
+/*
+HISTORY_FILE - Stores the history from previous session
+			   and is loaded into memory on startup.
+HISTORY_FILE_TMP - Temporary file for copying history
+				   to prevent data loss.
+HISTORY_FILE_MAX - Maximum number of lines in history file.
+HIST_MEM_MAX - Maximum number of lines to load in memory using add_history.
+HIST_BUFFER_SZ - Buffer size for reading history file in bytes.
+HIST_LINE_SZ - Buffer size for reading each history line in bytes.
+*/
 # define PROMPT "bleshell$> "
 # define HISTORY_FILE "bleshell_history"
 # define HISTORY_FILE_TMP "bleshell_history_tmp"
@@ -38,6 +48,10 @@ extern volatile sig_atomic_t	g_signal_received;
 # define HIST_BUFFER_SZ 4096
 # define HIST_LINE_SZ 1024
 
+/*
+This structure is used to store the context of quotes.
+Example: "'Hello 'world'!'" has 2 quotes, one single and one double.
+*/
 typedef struct s_quote_context
 {
 	char	type;
@@ -45,6 +59,9 @@ typedef struct s_quote_context
 	int		depth;
 }	t_quote_context;
 
+/*
+This enum stores the possible token types.
+*/
 typedef enum e_tokentype
 {
 	TYPE_CMD = 0,
@@ -77,6 +94,10 @@ typedef struct s_node
 	struct s_node	*right;
 }	t_node;
 
+/*
+Main structure for storing variables and context.
+Makes it easier to access and pass around.
+*/
 typedef struct s_vars
 {
 	t_node			*astroot;

@@ -6,14 +6,20 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:57:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 12:37:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Creates and links a new node in a linked list.
+Creates and links a new node in a linked list of tokens.
+Uses the s_vars struct and token data.
+1) Initializes a new node with the current token type
+2) Links the new node to the existing list if there is one
+3) Updates vars->current to point to the new node
+Returns 1 on success, 0 on allocation failure.
+Works with lexerlist().
 */
 int	makenode(t_vars *vars, char *data)
 {
@@ -32,7 +38,13 @@ int	makenode(t_vars *vars, char *data)
 }
 
 /*
-Adds a child node to a parent node, if the parent node has an empty child node.
+Adds a child node to a parent node in the AST.
+Follows a left-to-right priority when adding children:
+1) If the left child position is empty, adds the child there
+2) Otherwise, if the right child position is empty, adds it there
+3) Does nothing if both positions are already filled
+Both arguments must be non-NULL for operation to proceed.
+Works with build_ast().
 */
 void	add_child(t_node *parent, t_node *child)
 {
@@ -51,7 +63,15 @@ void	add_child(t_node *parent, t_node *child)
 }
 
 /*
-Handles pipe node in AST construction
+Handles pipe node insertion during AST construction.
+Creates a new pipe node and restructures the tree accordingly.
+Two cases:
+1) If root is NULL: Create new pipe node as root with
+   previous node as left child and next node as right child
+2) If root exists: Create new pipe node with current root as left child,
+   pipe_node->next as right child, and make this new node the root
+This implements the shell's pipe operator (cmd1 | cmd2).
+Works with build_ast().
 */
 void	handle_pipe_node(t_node **root, t_node *pipe_node)
 {
@@ -73,7 +93,14 @@ void	handle_pipe_node(t_node **root, t_node *pipe_node)
 }
 
 /*
-Handles redirection node in AST construction
+Handles redirection node insertion during AST construction.
+Finds the appropriate command node to attach the redirection to by:
+1) Starting from root and traversing right through pipe nodes
+2) When a non-pipe node is found, attach the redirection:
+   - If cmd_node->right is empty, put redirection there
+   - Otherwise, push existing right child down and insert redirection
+This ensures redirections are properly associated with their commands.
+Works with build_ast().
 */
 void	redirection_node(t_node *root, t_node *redir_node)
 {

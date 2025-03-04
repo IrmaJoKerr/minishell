@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:29:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:33:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 Copy lines to temporary file.
 This is for safety in case anything goes wrong during
 reading/writing to the HISTORY_FILE.
+Returns 1 on success, 0 on failure.
 */
 int	copy_to_temp(int fd_read)
 {
@@ -38,7 +39,9 @@ int	copy_to_temp(int fd_read)
 }
 
 /*
-Skip specified number of lines in file
+Skip specified number of lines in file. 
+Uses get_next_line to skip to the target line.
+Works with trim_history.
 */
 void	skip_lines(int fd, int count)
 {
@@ -58,7 +61,12 @@ void	skip_lines(int fd, int count)
 
 /*
 Trim history file to maximum size by copying to temporary file
-then only the required lines back. Works with save_history.
+then only the required lines back using 
+1) skip_lines to skip to required point in the history file
+2) copy_to_temp for temporary storage in case there is a simultaneous write
+   that corrupts the data during the read process.
+3) copy_file back from temporary storage for final product. 
+Works with save_history.
 */
 void	trim_history(int excess_lines)
 {
@@ -80,6 +88,12 @@ void	trim_history(int excess_lines)
 
 /*
 Save commands to history file. Main function controlling history saving.
+It performs several steps:
+1. Reads a command line from user input
+2. Validates the input is not empty
+3. Opens the history file for appending
+4. Adds the command to both the file and readline's history
+5. Trims the history file to maximum size limit (HISTORY_FILE_MAX)
 */
 void	save_history(void)
 {

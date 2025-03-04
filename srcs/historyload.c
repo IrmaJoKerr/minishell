@@ -6,14 +6,14 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:51:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:54:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Skip specified number of lines from history file.
+Skip specified number of lines from history file using get_next_line.
 Used by load_history to skip excess history entries.
 */
 void	skip_history_lines(int fd, int skip_count)
@@ -31,7 +31,7 @@ void	skip_history_lines(int fd, int skip_count)
 }
 
 /*
-Read history lines from file and add them to memory.
+Read history lines from file and add them to memory using add_history.
 Helper function for load_history.
 */
 void	read_history_lines(int fd)
@@ -49,7 +49,10 @@ void	read_history_lines(int fd)
 }
 
 /*
-Load history into memory with limit. Works with init_history_fd.
+Load history from HISTORY_FILE into memory with limit (HIST_MEM_MAX).
+Counts how many lines are in history file and skips excess lines.
+Then it reads the history lines into memory.
+Works with init_history_fd().
 */
 void	load_history(void)
 {

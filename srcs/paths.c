@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:58:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 14:13:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 /*
 Gets PATH from environment variables.
+1) Searches through environment variables to find one starting with "PATH"
+2) If found, splits the PATH string by ':' delimiter into an array of paths
+3) Returns NULL if PATH is not found
+Works with get_cmd_path() to find executable commands.
 */
 char	**get_path_env(char **envp)
 {
@@ -28,7 +32,12 @@ char	**get_path_env(char **envp)
 }
 
 /*
-Tries to find command in a specific path.
+Tries to find a command in a specific directory path.
+1) Constructs a full path by joining directory path + "/" + command name
+2) Checks if the file exists and is accessible using access()
+3) Returns the full path if found, or NULL otherwise
+Note: Caller is responsible for freeing the returned path string after use.
+Works with get_cmd_path().
 */
 char	*try_path(char *path, char *cmd)
 {
@@ -45,8 +54,13 @@ char	*try_path(char *path, char *cmd)
 }
 
 /*
-Searches for the command in the PATH environment variable.
-Returns the full path.
+Searches for the command in all PATH directories.
+1) Gets the PATH environment variable
+2) Searches through each directory in PATH trying to find the command
+3) When done, it cleans up allocated memory for path list
+4) Returns the first valid full path or NULL if not found
+Note: Caller is responsible for freeing the returned path string after use.
+Works with execute_cmd().
 */
 char	*get_cmd_path(char *cmd, char **envp)
 {
@@ -73,8 +87,14 @@ char	*get_cmd_path(char *cmd, char **envp)
 }
 
 /*
-Duplicates the environment variables.
-Returns a pointer to the new environment.
+Creates a deep copy of the environment variables array. (PATH, HOME, etc.)
+1) Allocates memory for a new 2d string array
+2) Copies each environment string individually
+3) Sets NULL terminator at the end of the array
+4) Handles memory errors by freeing partial allocations
+Returns a newly allocated environment array or NULL on failure.
+Used for safely executing commands with modified environment variables
+like "export" and "unset".
 */
 char	**dup_env(char **envp)
 {

@@ -6,15 +6,22 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:47:09 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:37:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 12:10:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Handle memory allocation errors. Free all allocated memory and
-exit with error code 1.
+Handle memory allocation errors.
+This function:
+1) Frees any existing error message
+2) Attempts to set a standard error message
+3) Has a fallback for when even the error message can't be allocated
+4) Cleans up all allocated resources with cleanup_vars()
+5) Displays the error message to stderr
+6) Exits the program with error code 1
+Free all allocated memory and exit with error code 1.
 */
 void	ft_error(t_vars *vars)
 {
@@ -37,6 +44,10 @@ void	ft_error(t_vars *vars)
 
 /*
 Handle error messages for redirection
+Display error message for file redirection permission issues.
+Prints error message to stderr (fd 2) that includes the 
+filename that caused the error.
+Does not exit the program.
 */
 void	redirect_error(char *filename)
 {

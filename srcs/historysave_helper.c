@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:22:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:54:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:25:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 /*
 Helper function to perform actual file copy operation.
 Takes file descriptors and returns 1 on success, 0 on failure.
+Works with copy_file.
 */
 int	copy_file_content(int fd_src, int fd_dst)
 {
@@ -35,6 +36,9 @@ int	copy_file_content(int fd_src, int fd_dst)
 Copy file contents from src to dst.
 Opens source and destination files, then calls copy_file_content.
 Returns 1 on success, 0 on failure.
+Used to save history to temporary file and then back to the actual
+history file.
+Works with save_history.
 */
 int	copy_file(const char *src, const char *dst)
 {

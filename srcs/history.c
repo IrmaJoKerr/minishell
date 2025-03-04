@@ -6,16 +6,16 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:48:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/04 11:54:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Checks and initialise the history fd. 
-If no HISTORY_FILE it will make one. Works with load_history and
-save_history.
+Checks for HISTORY_FILE if it exists and if it can be accessed. 
+If no HISTORY_FILE found it will make new one with appropriate permissions.
+Works with load_history() and save_history().
 */
 int	init_history_fd(int mode)
 {
@@ -37,7 +37,8 @@ int	init_history_fd(int mode)
 }
 
 /*
-Append line to both history file and memory. Works with save_history.
+Append line to both history file (write) and memory (using add_history)
+Works with save_history().
 */
 int	append_history(int fd, const char *line)
 {
@@ -56,7 +57,9 @@ int	append_history(int fd, const char *line)
 }
 
 /*
-Count lines in history file. Works with load_history.
+Count lines in history file by using get_next_line() to "skip" through
+the history until it reaches EOF. Counts each line as it goes.
+Works with load_history().
 */
 int	get_history_count(void)
 {
