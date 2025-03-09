@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 10:59:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/09 23:04:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,27 @@ typedef struct s_vars
 	char			*error_msg;
 }	t_vars;
 
+/* 
+Builtin commands functions. In srcs/builtins directory.
+*/
+/*
+Builtin Echo command. Outputs arguments to STDOUT. In builtin_echo.c
+*/
+int			builtin_echo(char **args);
+
+/*
+Builtin ENV command. Outputs the environment variables. In builtin_env.c
+*/
+int			builtin_env(t_vars *vars);
+
+/*
+Builtin PWD command. Outputs the current working directory. In builtin_pwd.c
+*/
+int			builtin_pwd(t_vars *vars);
+
+/*
+Main functions. In srcs directory.
+*/
 /*
 Argument handling. In arguments.c
 */
@@ -128,10 +149,9 @@ t_node		*initnode(t_tokentype type, char *data);
 
 /*
 Builtin control handling. In builtin.c
-
+*/
 int	is_builtin(char *cmd);
 int	execute_builtin(char *cmd, char **args, t_vars *vars);
-*/
 
 /*
 Cleanup functions. In cleanup.c

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:38:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/09 21:31:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,8 @@ int	execute_cmd(t_node *cmd_node, char **envp, t_vars *vars)
 
 	if (!cmd_node || !cmd_node->args || !cmd_node->args[0])
 		return (1);
-	/*
-	Builtin to be implemented by lechan
-	
 	if (is_builtin(cmd_node->args[0]))
 		return (execute_builtin(cmd_node->args[0], cmd_node->args, vars));
-	*/
 	cmd_path = get_cmd_path(cmd_node->args[0], envp);
 	if (!cmd_path)
 	{
