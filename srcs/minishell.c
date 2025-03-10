@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 12:26:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/10 13:55:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,12 @@ Called once when shell starts up. Works with main().
 void	init_shell(t_vars *vars, char **envp)
 {
 	ft_memset(vars, 0, sizeof(t_vars));
-	vars->env = envp;
+	vars->env = dup_env(envp);
+	if (!vars->env)
+    {
+        ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
+        exit(1);
+    }
 	vars->quote_depth = 0;
 	load_history();
 	load_signals();
@@ -102,5 +107,10 @@ int	main(int ac, char **av, char **envp)
 			break ;
 	}
 	save_history();
+	if (vars.env)
+	{
+        ft_free_2d(vars.env, ft_arrlen(vars.env));
+		vars.env = NULL;
+	}
 	return (0);
 }

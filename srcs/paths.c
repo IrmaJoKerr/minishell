@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 14:13:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/10 13:59:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,20 +100,23 @@ char	**dup_env(char **envp)
 {
 	char	**env;
 	size_t	env_size;
+	size_t i;
 
-	env_size = ft_arrlen(envp);
-	env = malloc(sizeof(char *) * (env_size + 1));
-	if (!env)
-		return (NULL);
-	while (env_size--)
-	{
-		env[env_size] = ft_strdup(envp[env_size]);
-		if (!env[env_size])
-		{
-			ft_free_2d(env, env_size);
-			return (NULL);
-		}
-	}
-	env[ft_arrlen(envp)] = NULL;
-	return (env);
+    env_size = ft_arrlen(envp);
+    env = malloc(sizeof(char *) * (env_size + 1));
+    if (!env)
+        return (NULL);
+    i = 0;
+    while (i < env_size)
+    {
+        env[i] = ft_strdup(envp[i]);
+        if (!env[i])
+        {
+            ft_free_2d(env, i);
+            return (NULL);
+        }
+        i++;
+    }
+    env[env_size] = NULL;
+    return (env);
 }

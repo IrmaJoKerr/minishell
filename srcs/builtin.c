@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:33:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/09 21:42:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/10 13:31:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ int	is_builtin(char *cmd)
         return (1);
     // if (!ft_strcmp(cmd, "export"))
     //     return (1);
-    // if (!ft_strcmp(cmd, "unset"))
-    //     return (1);
+    if (!ft_strcmp(cmd, "unset"))
+        return (1);
     if (!ft_strcmp(cmd, "env"))
         return (1);
     // if (!ft_strcmp(cmd, "exit"))
@@ -55,8 +55,8 @@ int	execute_builtin(char *cmd, char **args, t_vars *vars)
 		return (builtin_pwd(vars));
 	// if (!ft_strcmp(cmd, "export"))
 	// 	return (builtin_export(args, vars));
-	// if (!ft_strcmp(cmd, "unset"))
-	// 	return (builtin_unset(args, vars));
+	if (!ft_strcmp(cmd, "unset"))
+		return (builtin_unset(args, vars));
 	if (!ft_strcmp(cmd, "env"))
 		return (builtin_env(vars));
 	// if (!ft_strcmp(cmd, "exit"))

@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/03/09 23:09:01 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/10 13:32:45 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,6 +55,7 @@ MINISHELL_SRCS = srcs/minishell.c \
 MINISHELL_BUILTIN_SRCS = srcs/builtins/builtin_echo.c \
 			 srcs/builtins/builtin_pwd.c \
 			 srcs/builtins/builtin_env.c \
+			 srcs/builtins/builtin_unset.c
 
 MINISHELL_OBJS_DIR = objects
 MINISHELL_BI_OBJS_DIR = $(MINISHELL_OBJS_DIR)/builtins

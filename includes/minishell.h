@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/09 23:04:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/10 13:31:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,14 @@ int			builtin_env(t_vars *vars);
 Builtin PWD command. Outputs the current working directory. In builtin_pwd.c
 */
 int			builtin_pwd(t_vars *vars);
+
+/*
+Builtin Unset command. Unsets an environment variable. In builtin_unset.c
+*/
+int			get_env_pos(char *var, char **env);
+char		**realloc_until_var(int changes, char **env, char *var, int count, int pos);
+void		modify_env(char ***env, int changes, char *var);
+int 		builtin_unset(char **args, t_vars *vars);
 
 /*
 Main functions. In srcs directory.

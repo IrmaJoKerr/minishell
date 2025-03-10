@@ -2,15 +2,24 @@
 
 int	builtin_env(t_vars *vars)
 {
-	int i;
+    int i;
 
-	if (!vars || !vars->env)
-		return (1);
-	i = 0;
-	while (vars->env[i])
-	{
-		printf("%s\n", vars->env[i]);
-		i++;
-	}
-	return (0);
+    if (!vars)
+    {
+        printf("Debug: vars is NULL\n");
+        return (1);
+    }
+    if (!vars->env)
+    {
+        printf("Debug: vars->env is NULL\n");
+        return (1);
+    }
+    printf("Debug: env array at %p\n", (void*)vars->env);
+    i = 0;
+    while (vars->env[i])
+    {
+        printf("Debug: env[%d] = %s\n", i, vars->env[i]);
+        i++;
+    }
+    return (0);
 }
