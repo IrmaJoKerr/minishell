@@ -1,0 +1,4 @@
+export MY_VAR="Hello Testing"
+echo $MY_VAR
+export | grep MY_VAR
+ls -l

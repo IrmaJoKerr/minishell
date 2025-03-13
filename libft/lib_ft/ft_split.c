@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/12 14:16:17 by bleow             #+#    #+#             */
-/*   Updated: 2024/10/13 01:30:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 03:04:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,10 @@ static void	free_splits(char **splits, size_t i)
 {
 	while (i > 0)
 	{
-		free(splits[--i]);
+		i--;
+		ft_safefree((void **)&splits[i]);
 	}
-	free(splits);
+	ft_safefree((void **)&splits);
 }
 
 static char	*find_next_substring(char **start, char delimiter)

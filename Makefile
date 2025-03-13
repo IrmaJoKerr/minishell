@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/03/10 13:32:45 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/14 00:55:37 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,37 +25,46 @@ MINISHELL_DIR = srcs
 INCLUDE_DIRS = includes $(LIBFT_DIR)/includes
 INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 
-MINISHELL_SRCS = srcs/minishell.c \
-			 srcs/arguments.c \
-			 srcs/ast.c \
-			 srcs/builtin.c \
-			 srcs/cleanup.c \
-			 srcs/error.c \
-			 srcs/execute.c \
-			 srcs/expansion.c \
-			 srcs/heredoc.c \
-			 srcs/heredoc_expand.c \
-			 srcs/history.c \
-			 srcs/historyload.c \
-			 srcs/historysave_helper.c \
-			 srcs/historysave.c \
-			 srcs/lexer.c \
-			 srcs/nodes.c \
-			 srcs/operators.c \
-			 srcs/paths.c \
-			 srcs/piping.c \
-			 srcs/quotes.c \
-			 srcs/redirect.c \
-			 srcs/redirect_helper.c \
-			 srcs/signals.c \
-			 srcs/tokenclass.c \
-			 srcs/tokenize.c \
-			 srcs/tokens.c
+MINISHELL_SRCS = \
+			srcs/minishell.c \
+			srcs/arguments.c \
+			srcs/ast.c \
+			srcs/builtin.c \
+			srcs/cleanup.c \
+			srcs/error.c \
+			srcs/execute.c \
+			srcs/expansion.c \
+			srcs/heredoc.c \
+			srcs/heredoc_expand.c \
+			srcs/history.c \
+			srcs/historyload.c \
+			srcs/historysave_helper.c \
+			srcs/historysave.c \
+			srcs/initnode.c \
+			srcs/lexer.c \
+			srcs/nodes.c \
+			srcs/operators.c \
+			srcs/paths.c \
+			srcs/piping.c \
+			srcs/quotes.c \
+			srcs/redirect_helper.c \
+			srcs/redirect.c \
+			srcs/shell_level.c \
+			srcs/signals.c \
+			srcs/tokenclass.c \
+			srcs/tokenize_helper.c \
+			srcs/tokenize.c \
+			srcs/tokens.c \
+			srcs/typeconvert.c
 			 
-MINISHELL_BUILTIN_SRCS = srcs/builtins/builtin_echo.c \
-			 srcs/builtins/builtin_pwd.c \
-			 srcs/builtins/builtin_env.c \
-			 srcs/builtins/builtin_unset.c
+MINISHELL_BUILTIN_SRCS = \
+			srcs/builtins/builtin_cd.c \
+			srcs/builtins/builtin_echo.c \
+			srcs/builtins/builtin_env.c \
+			srcs/builtins/builtin_exit.c \
+			srcs/builtins/builtin_export.c \
+			srcs/builtins/builtin_pwd.c \
+			srcs/builtins/builtin_unset.c
 
 MINISHELL_OBJS_DIR = objects
 MINISHELL_BI_OBJS_DIR = $(MINISHELL_OBJS_DIR)/builtins
@@ -96,6 +105,14 @@ fclean: clean
 	@echo "Performing full clean..."
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_DIR) fclean
+	@if [ -f bleshell_history ]; then \
+		echo "Removing history file..."; \
+		rm -f bleshell_history; \
+	fi
+	@if [ -f bleshell_history_tmp ]; then \
+		echo "Removing temporary history file..."; \
+		rm -f bleshell_history_tmp; \
+	fi
 
 re: fclean all
 

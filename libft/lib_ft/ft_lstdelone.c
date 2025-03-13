@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 18:28:14 by bleow             #+#    #+#             */
-/*   Updated: 2024/10/13 02:38:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 03:09:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,5 @@ void	ft_lstdelone(t_list *lst, void (*del)(void *))
 	if (!lst || !del)
 		return ;
 	del(lst->content);
-	free(lst);
+	ft_safefree((void **)&lst);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 12:37:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 14:15:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ Two cases:
 This implements the shell's pipe operator (cmd1 | cmd2).
 Works with build_ast().
 */
+/*
 void	handle_pipe_node(t_node **root, t_node *pipe_node)
 {
 	t_node	*new_pipe;
@@ -90,6 +91,28 @@ void	handle_pipe_node(t_node **root, t_node *pipe_node)
 		new_pipe->right = pipe_node->next;
 		*root = new_pipe;
 	}
+}
+*/
+void handle_pipe_node(t_node **root, t_node *pipe_node)
+{
+    t_node *new_pipe;
+
+    new_pipe = initnode(TYPE_PIPE, "|");  // Changed from NULL to "|"
+    if (!new_pipe)
+        return;
+        
+    if (!*root)
+    {
+        *root = new_pipe;
+        (*root)->left = pipe_node->prev;
+        (*root)->right = pipe_node->next;
+    }
+    else
+    {
+        new_pipe->left = *root;
+        new_pipe->right = pipe_node->next;
+        *root = new_pipe;
+    }
 }
 
 /*

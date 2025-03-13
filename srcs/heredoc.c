@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 11:55:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:54:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,11 @@ int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 			break ;
 		if (ft_strcmp(line, delimiter) == 0)
 		{
-			free(line);
+			ft_safefree((void **)&line);
 			break ;
 		}
 		write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
-		free(line);
+		ft_safefree((void **)&line);
 		if (!write_success)
 			return (0);
 	}

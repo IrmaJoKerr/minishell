@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/10 13:31:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 01:24:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,25 @@ HIST_LINE_SZ - Buffer size for reading each history line in bytes.
 # define HIST_LINE_SZ 1024
 
 /*
+String representations of token types.
+These constants match the enum e_tokentype values.
+This enables easy conversion between enum and string.
+*/
+# define TOKEN_TYPE_CMD              "CMD"
+# define TOKEN_TYPE_ARGS             "ARGS"
+# define TOKEN_TYPE_STRING           "STRING"
+# define TOKEN_TYPE_DOUBLE_QUOTE     "\""
+# define TOKEN_TYPE_SINGLE_QUOTE     "'"
+# define TOKEN_TYPE_HEREDOC          "<<"
+# define TOKEN_TYPE_IN_REDIRECT      "<"
+# define TOKEN_TYPE_OUT_REDIRECT     ">"
+# define TOKEN_TYPE_APPEND_REDIRECT  ">>"
+# define TOKEN_TYPE_EXPANSION        "$"
+# define TOKEN_TYPE_PIPE             "|"
+# define TOKEN_TYPE_EXIT_STATUS      "$?"
+# define TOKEN_TYPE_UNKNOWN          "UNKNOWN"
+
+/*
 This structure is used to store the context of quotes.
 Example: "'Hello 'world'!'" has 2 quotes, one single and one double.
 */
@@ -76,7 +95,7 @@ typedef enum e_tokentype
 	TYPE_EXPANSION = 9,
 	TYPE_PIPE = 10,
 	TYPE_EXIT_STATUS = 11,
-	TYPE_HEAD = 12
+	TYPE_UNKNOWN = 12
 }	t_tokentype;
 
 /*
@@ -109,6 +128,7 @@ typedef struct s_vars
 	int				quote_depth;
 	int				pos;
 	int				start;
+	int				shell_level;
 	int				error_code;
 	char			*error_msg;
 }	t_vars;
@@ -117,27 +137,48 @@ typedef struct s_vars
 Builtin commands functions. In srcs/builtins directory.
 */
 /*
-Builtin Echo command. Outputs arguments to STDOUT. In builtin_echo.c
+builtin_cd.c - Builtin "cd" command. Changes the current working directory.
+*/
+int			builtin_cd(char **args, t_vars *vars);
+int			handle_cd_path(char **args, t_vars *vars);
+int			update_env_pwd(t_vars *vars, char *oldpwd);
+
+/*
+Builtin "echo" command. Outputs arguments to STDOUT. In builtin_echo.c
 */
 int			builtin_echo(char **args);
 
 /*
-Builtin ENV command. Outputs the environment variables. In builtin_env.c
+Builtin "env" command. Outputs the environment variables. In builtin_env.c
 */
 int			builtin_env(t_vars *vars);
 
 /*
-Builtin PWD command. Outputs the current working directory. In builtin_pwd.c
+Builtin "exit" command. Exits the shell. In builtin_exit.c
+*/
+int			builtin_exit(t_vars *vars);
+
+/*
+Builtin "export" command. Sets an environment variable. In builtin_export.c
+*/
+char		*valid_export(char *args);
+char		**asc_order(char **sort_env, int count);
+char		**make_sorted_env(int count, t_vars *vars);
+int			sort_env(int count, t_vars *vars);
+int			builtin_export(char **args, t_vars *vars);
+
+/*
+Builtin "pwd" command. Outputs the current working directory. In builtin_pwd.c
 */
 int			builtin_pwd(t_vars *vars);
 
 /*
-Builtin Unset command. Unsets an environment variable. In builtin_unset.c
+Builtin "unset" command. Unsets an environment variable. In builtin_unset.c
 */
 int			get_env_pos(char *var, char **env);
-char		**realloc_until_var(int changes, char **env, char *var, int count, int pos);
+char		**realloc_until_var(int changes, char **env, char *var, int count);
 void		modify_env(char ***env, int changes, char *var);
-int 		builtin_unset(char **args, t_vars *vars);
+int			builtin_unset(char **args, t_vars *vars);
 
 /*
 Main functions. In srcs directory.
@@ -151,21 +192,24 @@ void		append_arg(t_node *node, char *new_arg);
 /*
 AST handling. In ast.c
 */
-t_node		*init_head_node(t_vars *vars);
 t_node		*build_ast(t_vars *vars);
 t_node		*initnode(t_tokentype type, char *data);
+void		print_token_list(t_vars *vars);
 
 /*
 Builtin control handling. In builtin.c
 */
-int	is_builtin(char *cmd);
-int	execute_builtin(char *cmd, char **args, t_vars *vars);
+int			is_builtin(char *cmd);
+int			execute_builtin(char *cmd, char **args, t_vars *vars);
 
 /*
 Cleanup functions. In cleanup.c
 */
 void		cleanup_vars(t_vars *vars);
-void		free_ast(t_node *node);
+void		cleanup_ast(t_node *node);
+void		cleanup_token_list(t_vars *vars);
+void		cleanup_env_error(char **env, int n);
+void		cleanup_exit(t_vars *vars);
 
 /*
 Error handling. In error.c
@@ -185,6 +229,7 @@ Expansion handling. In expansion.c
 char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_value(const char *var_name, char **env);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
+void		expand_command_args(t_node *node, t_vars *vars);
 
 /*
 Here document handling. In heredoc.c
@@ -232,6 +277,12 @@ int			copy_to_temp(int fd_read);
 void		skip_lines(int fd, int count);
 void		trim_history(int excess_lines);
 void		save_history(void);
+
+/*
+Node initialization functions. In initnode.c
+*/
+int			make_nodeframe(t_node *node, t_tokentype type, char *token);
+t_node		*initnode(t_tokentype type, char *token);
 
 /*
 Lexer functions. In lexer.c
@@ -284,6 +335,7 @@ Quote handling. In quotes.c
 void		handle_quotes(char *input, int *pos, t_vars *vars);
 char		*handle_unclosed_quotes(char *input, t_vars *vars);
 char		*read_quoted_content(char *input, int *pos, char quote);
+void		process_quotes_in_arg(char **arg);
 
 /*
 Redirection helper functions. In redirect_helper.c
@@ -295,10 +347,17 @@ int			set_redirect_flags(int mode);
 /*
 Redirection handling. In redirect.c
 */
+int			is_redirection(t_tokentype type);
 int			input_redirect(t_node *node, int *fd_in);
 int			output_redirect(t_node *node, int *fd_out, int append);
 int			open_redirect_file(t_node *node, int *fd, int mode);
 int			handle_redirect(t_node *node, int *fd, int mode);
+
+/*
+Shell level handling. In shell_level.c
+*/
+int			get_shell_level(t_vars *vars);
+int			incr_shell_level(t_vars *vars);
 
 /*
 Signal handlers. In signals.c
@@ -315,6 +374,15 @@ t_tokentype	redirection_type(char *str, int mode);
 t_tokentype	classify(char *str);
 
 /*
+Tokenizing helper functions. In tokenize_helper.c
+*/
+void		debug_cmd_tokens(char **args);
+t_node		*build_cmdarg_node(char **args);
+void		build_token_linklist(t_vars *vars, t_node *node);
+void		process_cmd_token(char *input, t_vars *vars);
+void		process_other_token(char *input, t_vars *vars);
+
+/*
 Tokenizing functions. In tokenize.c
 */
 void		maketoken(char *token, t_vars *vars);
@@ -327,9 +395,14 @@ void		tokenize(char *input, t_vars *vars);
 Token handling. In tokens.c
 */
 t_node		*make_cmdnode(char *token);
-t_node		*handle_cmd_token(char *token);
+t_node		*new_cmd_node(char *token);
+t_node		*new_other_node(char *token, t_tokentype type);
 void		handle_quote_token(char *str, t_vars *vars, int *pos);
-int			is_redirection(t_tokentype type);
-t_node		*handle_other_token(char *token, t_tokentype type);
+
+/*
+Type conversion functions. In typeconvert.c
+*/
+const char	*get_token_str(t_tokentype type);
+t_tokentype	get_token_type(const char *str);
 
 #endif

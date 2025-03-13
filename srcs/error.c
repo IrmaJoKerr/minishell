@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:47:09 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 12:10:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:52:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	ft_error(t_vars *vars)
 	char	*error_msg;
 
 	if (vars->error_msg)
-		free(vars->error_msg);
+		ft_safefree((void **)&vars->error_msg);
 	vars->error_msg = ft_strdup("Error: Memory allocation failed");
 	if (!vars->error_msg)
 	{

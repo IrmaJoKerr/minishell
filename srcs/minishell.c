@@ -6,11 +6,12 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/10 13:55:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:53:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
 
 /*
 Function to read input line from the user using readline.
@@ -27,7 +28,7 @@ char	*reader(void)
 	if (!line)
 	{
 		ft_putendl_fd("exit", STDOUT_FILENO);
-		exit(0);
+		return (NULL);
 	}
 	if (*line)
 		add_history(line);
@@ -44,38 +45,58 @@ This function:
 Called once when shell starts up. Works with main().
 */
 void	init_shell(t_vars *vars, char **envp)
-{
+{	
 	ft_memset(vars, 0, sizeof(t_vars));
 	vars->env = dup_env(envp);
 	if (!vars->env)
-    {
-        ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
-        exit(1);
-    }
+	{
+		ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
+		exit(1);
+	}
+	vars->shell_level = get_shell_level(vars);
+	if (vars->shell_level == -1)
+	{
+		ft_putstr_fd("bleshell: error: Failed to get shell level\n", 2);
+		exit(1);
+	}
+	vars->shell_level = incr_shell_level(vars);
+	if (!vars->shell_level)
+		ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
 	vars->quote_depth = 0;
 	load_history();
 	load_signals();
 }
 
 /*
-Main command processing loop.
-Process a single command line through the shell pipeline:
-1) Validate input is not NULL
-2) Perform lexing to break into tokens
-3) Build the abstract syntax tree (AST)
-4) Execute the command if AST was built successfully
-5) Free the command string after processing
-Returns 1 if processing was successful, 0 if command was NULL.
-Works with main().
+Process the user command by:
+1) Cleaning up previous token list.
+2) Lexing the command into tokens.
+3) Building the AST from the tokens.
 */
-int	process_command(char *command, t_vars *vars)
+int process_command(char *command, t_vars *vars)
 {
+	if (vars->head)
+	{
+		printf("DEBUG: Cleaning up previous token list\n");
+		cleanup_token_list(vars);
+	}
 	if (!command)
 		return (0);
+	printf("DEBUG: Processing command: '%s'\n", command);
 	lexerlist(command, vars);
+	print_token_list(vars);
 	vars->astroot = build_ast(vars);
 	if (vars->astroot)
+	{
+		printf("DEBUG: Built AST successfully\n");
+		if (vars->astroot->args && vars->astroot->args[0])
+			printf("DEBUG: Root command: %s\n", vars->astroot->args[0]);
 		execute_cmd(vars->astroot, vars->env, vars);
+	}
+	else
+	{
+		printf("DEBUG: Failed to build AST\n");
+	}
 	free(command);
 	return (1);
 }
@@ -103,14 +124,22 @@ int	main(int ac, char **av, char **envp)
 	while (1)
 	{
 		command = reader();
+		if (!command)  // EOF detected
+		{
+			ft_putendl_fd("exit", STDOUT_FILENO);
+			break ;  // Break the loop instead of exiting immediately
+		}
 		if (!process_command(command, &vars))
 			break ;
 	}
+	// This will now be reached when Ctrl+D is pressed
+	printf("DEBUG: Saving history before exit\n");
 	save_history();
 	if (vars.env)
 	{
-        ft_free_2d(vars.env, ft_arrlen(vars.env));
+		ft_free_2d(vars.env, ft_arrlen(vars.env));
 		vars.env = NULL;
 	}
+	cleanup_exit(&vars);
 	return (0);
 }

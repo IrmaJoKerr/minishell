@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 11:54:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:54:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	skip_history_lines(int fd, int skip_count)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
-		free(line);
+		ft_safefree((void **)&line);
 		skip_count--;
 	}
 }
@@ -43,7 +43,7 @@ void	read_history_lines(int fd)
 	{
 		if (*line)
 			add_history(line);
-		free(line);
+		ft_safefree((void **)&line);
 		line = get_next_line(fd);
 	}
 }

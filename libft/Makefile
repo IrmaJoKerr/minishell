@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 18:10:33 by bleow             #+#    #+#              #
-#    Updated: 2025/03/03 12:01:20 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/13 09:54:05 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,8 @@ CFLAGS = -Wall -Wextra -Werror -std=c89 $(INCLUDES) -c
 DEBUG_FLAGS = -gdwarf-4
 SANITIZE_FLAGS = -fsanitize=address
 
-CFILES = lib_ft/ft_arrlen.c \
+CFILES = \
+	lib_ft/ft_arrlen.c \
 	lib_ft/ft_atoi.c \
 	lib_ft/ft_atoiarr_cln.c \
 	lib_ft/ft_atoiarr_errcln.c \
@@ -30,6 +31,8 @@ CFILES = lib_ft/ft_arrlen.c \
 	lib_ft/ft_isalnum.c \
 	lib_ft/ft_isalpha.c \
 	lib_ft/ft_isascii.c \
+	lib_ft/ft_isdelimiter_quote.c \
+	lib_ft/ft_isdelimiter.c \
 	lib_ft/ft_isdigit.c \
 	lib_ft/ft_isprint.c \
 	lib_ft/ft_isquote.c \
@@ -79,10 +82,12 @@ CFILES = lib_ft/ft_arrlen.c \
 	lib_ft/ft_lstnew.c \
 	lib_ft/ft_lstsize.c 
 
-GNLFILES = get_next_line/get_next_line.c \
+GNLFILES = \
+	get_next_line/get_next_line.c \
 	get_next_line/get_next_line_utils.c
 	
-PRINTF_FILES = libftprintf/ft_printf.c \
+PRINTF_FILES = \
+	libftprintf/ft_printf.c \
 	libftprintf/master_parser.c \
 	libftprintf/arg_c.c \
 	libftprintf/arg_s.c \

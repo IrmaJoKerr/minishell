@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 12:39:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 17:47:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ Example: Input: $HOME
 		 Input: $NONSENSE
 		 Output: ""
 */
+/*
 char	*handle_expansion(char *input, int *pos, t_vars *vars)
 {
 	int		start;
@@ -93,4 +94,58 @@ char	*handle_expansion(char *input, int *pos, t_vars *vars)
 	}
 	ft_safefree((void **)&var_name);
 	return (value);
+}
+*/
+char	*handle_expansion(char *input, int *pos, t_vars *vars)
+{
+	int		start;
+	char	*var_name;
+	char	*value;
+
+	if (input && input[*pos] == '$')
+        printf("DEBUG: Processing %s token\n", get_token_str(TYPE_EXPANSION));
+	if (!input || input[*pos] != '$')
+		return (NULL);
+	start = ++(*pos);
+	while (input[*pos] && (ft_isalnum(input[*pos]) || input[*pos] == '_'))
+		(*pos)++;
+	var_name = ft_substr(input, start, *pos - start);
+	if (!var_name)
+		return (NULL);
+	value = handle_special_var(var_name, vars);
+	if (!value)
+	{
+		value = get_env_value(var_name, vars->env);
+	}
+	ft_safefree((void **)&var_name);
+	return (value);
+}
+
+/*
+ * Expand all command arguments containing environment variables
+ * Replaces any argument starting with $ with its expanded value
+ */
+ void	expand_command_args(t_node *node, t_vars *vars)
+ {
+	int		i;
+	char	*expanded;
+	int		pos;
+	
+	if (!node || !node->args)
+		return;	 
+	i = 0;
+	while (node->args[i])
+	{
+		if (node->args[i][0] == '$')
+		{
+			pos = 0;
+			expanded = handle_expansion(node->args[i], &pos, vars);
+			if (expanded)
+			{
+				ft_safefree((void **)&node->args[i]);
+				node->args[i] = expanded;
+			}
+		}
+		i++;
+	}
 }

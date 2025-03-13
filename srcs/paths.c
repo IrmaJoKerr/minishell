@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/10 13:59:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:53:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,14 @@ Gets PATH from environment variables.
 3) Returns NULL if PATH is not found
 Works with get_cmd_path() to find executable commands.
 */
-char	**get_path_env(char **envp)
+char **get_path_env(char **envp)
 {
-	int	i;
+	int i;
 
 	i = 0;
-	while (!ft_strnstr(envp[i], "PATH", 4) && envp[i])
+	if (!envp)
+		return (NULL);
+	while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
 		i++;
 	if (!envp[i])
 		return (NULL);
@@ -46,10 +48,10 @@ char	*try_path(char *path, char *cmd)
 
 	part_path = ft_strjoin(path, "/");
 	full_path = ft_strjoin(part_path, cmd);
-	free(part_path);
+	ft_safefree((void **)&part_path);
 	if (access(full_path, F_OK) == 0)
 		return (full_path);
-	free(full_path);
+	ft_safefree((void **)&full_path);
 	return (NULL);
 }
 
@@ -68,20 +70,39 @@ char	*get_cmd_path(char *cmd, char **envp)
 	char	*path;
 	int		i;
 
+	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
+		|| (cmd[1] == '.' && cmd[2] == '/'))))
+	{
+		 if (access(cmd, X_OK) == 0)
+		 {
+			 printf("DEBUG: Using direct path: %s\n", cmd);
+			 return (ft_strdup(cmd));
+		 }
+		 printf("DEBUG: Direct path access denied: %s\n", cmd);
+		 return (NULL);
+	}
+	printf("DEBUG: Looking for command: %s\n", cmd);
 	paths = get_path_env(envp);
 	if (!paths)
+	{
+		printf("DEBUG: No PATH found in environment\n");
 		return (NULL);
+	}
+	printf("DEBUG: PATH directories found:\n");
 	i = 0;
 	while (paths[i])
 	{
+		printf("DEBUG: %s\n", paths[i]);
 		path = try_path(paths[i], cmd);
 		if (path)
 		{
+			printf("DEBUG: Found command at %s\n", path);
 			ft_free_2d(paths, ft_arrlen(paths));
 			return (path);
 		}
 		i++;
 	}
+	printf("DEBUG: Command not found in any PATH directory\n");
 	ft_free_2d(paths, ft_arrlen(paths));
 	return (NULL);
 }
@@ -102,21 +123,21 @@ char	**dup_env(char **envp)
 	size_t	env_size;
 	size_t i;
 
-    env_size = ft_arrlen(envp);
-    env = malloc(sizeof(char *) * (env_size + 1));
-    if (!env)
-        return (NULL);
-    i = 0;
-    while (i < env_size)
-    {
-        env[i] = ft_strdup(envp[i]);
-        if (!env[i])
-        {
-            ft_free_2d(env, i);
-            return (NULL);
-        }
-        i++;
-    }
-    env[env_size] = NULL;
-    return (env);
+	env_size = ft_arrlen(envp);
+	env = (char **)malloc(sizeof(char *) * (env_size + 1));
+	if (!env)
+		return (NULL);
+	i = 0;
+	while (i < env_size)
+	{
+		env[i] = ft_strdup(envp[i]);
+		if (!env[i])
+		{
+			ft_free_2d(env, i);
+			return (NULL);
+		}
+		i++;
+	}
+	env[env_size] = NULL;
+	return (env);
 }

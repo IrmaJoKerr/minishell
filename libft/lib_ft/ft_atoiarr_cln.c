@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 02:29:06 by bleow             #+#    #+#             */
-/*   Updated: 2024/10/16 23:40:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 03:08:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,9 @@ int	*ft_atoiarr_cln(char **temparr, int len)
 	i = 0;
 	while (i < len)
 	{
-		free(temparr[i]);
+		ft_safefree((void **)&temparr[i]);
 		i++;
 	}
-	free(temparr);
+	ft_safefree((void **)&temparr);
 	return (intarr);
 }

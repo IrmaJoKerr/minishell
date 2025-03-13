@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 18:10:58 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 11:57:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 09:53:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,9 @@ void		ft_free_2d(char **splits, size_t i);
 int			ft_isalnum(int c);
 int			ft_isalpha(int c);
 int			ft_isascii(int c);
+int			ft_isdelimiter_quote(char c, char *delimiters, int *in_quotes,
+				char *quote_char);
+int			ft_isdelimiter(char c, char *delimiters);
 int			ft_isdigit(int c);
 int			ft_isprint(int c);
 int			ft_isquote(char c);

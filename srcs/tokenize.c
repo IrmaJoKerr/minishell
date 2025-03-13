@@ -6,39 +6,25 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/03 13:04:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:53:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Creates a new token from the input string. Works with handle_quote_content.
+Main token creation function. Creates a new token from the input string.
+Uses functions process_cmd_token and process_other_token to create the token.
+Works with handle_quote_content.
 */
-void	maketoken(char *input, t_vars *vars)
+void maketoken(char *input, t_vars *vars)
 {
-	char	*token;
-	t_node	*node;
-
-	if (!input || !vars || vars->pos <= vars->start)
-		return ;
-	token = ft_substr(input, vars->start, vars->pos - vars->start);
-	if (!token)
+	if (!input || !vars)
 		return ;
 	if (vars->curr_type == TYPE_CMD)
-		node = handle_cmd_token(token);
+		process_cmd_token(input, vars);
 	else
-		node = handle_other_token(token, vars->curr_type);
-	if (!node)
-	{
-		free(token);
-		return ;
-	}
-	if (vars->curr_type == TYPE_CMD)
-		vars->current = node;
-	else if (vars->current)
-		add_child(vars->current, node);
-	free(token);
+		process_other_token(input, vars);
 }
 
 /*
@@ -76,7 +62,7 @@ void	process_char(char *input, int *i, t_vars *vars)
 			if (content)
 			{
 				maketoken(content, vars);
-				free(content);
+				ft_safefree((void **)&content);
 			}
 		}
 		return ;

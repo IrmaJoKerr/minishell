@@ -6,11 +6,24 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 14:39:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:53:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+/*
+Check if token type is a redirection.
+Returns 1 if it's a redirection type, 0 otherwise.
+Types: TYPE_HEREDOC, TYPE_IN_REDIRECT, TYPE_OUT_REDIRECT, TYPE_APPEND_REDIRECT
+*/
+int	is_redirection(t_tokentype type)
+{
+	return (type == TYPE_HEREDOC
+		|| type == TYPE_IN_REDIRECT
+		|| type == TYPE_OUT_REDIRECT
+		|| type == TYPE_APPEND_REDIRECT);
+}
 
 /*
 Handles input redirection (< filename).
@@ -125,6 +138,7 @@ Parameters:
 Returns 1 on success, 0 on any failure.
 Works with execute_redirects().
 */
+/*
 int	handle_redirect(t_node *node, int *fd, int mode)
 {
 	int	std_fd;
@@ -139,8 +153,36 @@ int	handle_redirect(t_node *node, int *fd, int mode)
 	else
 		std_fd = STDOUT_FILENO;
 	result = dup2(*fd, std_fd);
+	if (result == -1)
+	{
+		close(*fd);
+		return (0);
+	}
 	close(*fd);
 	if (result == -1)
 		return (0);
+	return (1);
+}
+*/
+int	handle_redirect(t_node *node, int *fd, int mode)
+{
+	int	std_fd;
+	int	result;
+	int	success;
+
+	success = open_redirect_file(node, fd, mode);
+	if (!success)
+		return (0);
+	if (mode == 0)
+		std_fd = STDIN_FILENO;
+	else
+		std_fd = STDOUT_FILENO;
+	result = dup2(*fd, std_fd);
+	if (result == -1)
+	{
+		close(*fd);
+		return (0);
+	}
+	close(*fd);
 	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/04 11:33:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:54:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	copy_to_temp(int fd_read)
 	{
 		write(fd_write, line, ft_strlen(line));
 		write(fd_write, "\n", 1);
-		free(line);
+		ft_safefree((void **)&line);
 		line = get_next_line(fd_read);
 	}
 	close(fd_write);
@@ -54,7 +54,7 @@ void	skip_lines(int fd, int count)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
-		free(line);
+		ft_safefree((void **)&line);
 		i++;
 	}
 }
@@ -94,29 +94,45 @@ It performs several steps:
 3. Opens the history file for appending
 4. Adds the command to both the file and readline's history
 5. Trims the history file to maximum size limit (HISTORY_FILE_MAX)
+Save readline history to the HISTORY_FILE.
+Called when the shell is about to exit.
 */
-void	save_history(void)
+void save_history(void)
 {
-	int		fd;
-	char	*line;
-	int		count;
-
-	line = readline(PROMPT);
-	if (!line || !*line)
-	{
-		free(line);
-		return ;
-	}
-	fd = init_history_fd(O_WRONLY | O_CREAT | O_APPEND);
+	int fd;
+	HIST_ENTRY **hist_list;
+	int i;
+	int history_count;
+	int excess_lines;
+	  
+	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
 	{
-		free(line);
+		perror("bleshell: error opening history file");
 		return ;
 	}
-	append_history(fd, line);
+	hist_list = history_list();
+	if (!hist_list)
+	{
+		close(fd);
+		return ;
+	}
+	history_count = history_length;
+	excess_lines = history_count - HISTORY_FILE_MAX;
+	if (excess_lines > 0)
+		i = excess_lines;
+	else
+		i = 0;         
+	printf("DEBUG: Saving history with %d entries\n", history_length);
+	while (i < history_count && hist_list[i])
+	{
+		if (hist_list[i]->line && *hist_list[i]->line)
+		{
+			write(fd, hist_list[i]->line, strlen(hist_list[i]->line));
+			write(fd, "\n", 1);
+			printf("DEBUG: Saving history with %d entries\n", history_length);
+		}
+		i++;
+	} 
 	close(fd);
-	free(line);
-	count = get_history_count();
-	if (count > HISTORY_FILE_MAX)
-		trim_history(count - HISTORY_FILE_MAX);
 }

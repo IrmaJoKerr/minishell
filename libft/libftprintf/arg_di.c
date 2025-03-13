@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/26 21:44:54 by bleow             #+#    #+#             */
-/*   Updated: 2024/09/24 21:11:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 03:00:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,5 @@ void	ft_arg_di(int num, unsigned int *printed)
 		return ;
 	}
 	*printed += ft_putstr_rtn(convert, 1);
-	free (convert);
+	ft_safefree((void **)&convert);
 }

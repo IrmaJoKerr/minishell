@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 10:27:06 by bleow             #+#    #+#             */
-/*   Updated: 2024/10/13 03:49:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/13 02:59:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,13 @@ char	*ft_trim(char *last_pos)
 		i++;
 	if (!last_pos[i])
 	{
-		free(last_pos);
+		ft_safefree((void **)&last_pos);
 		return (NULL);
 	}
 	str = (char *)malloc(sizeof(char) * (ft_strlen(last_pos) - i + 1));
 	if (!str)
 	{
-		free(str);
+		ft_safefree((void **)&str);
 		return (NULL);
 	}
 	i++;
@@ -69,7 +69,7 @@ char	*ft_trim(char *last_pos)
 	while (last_pos[i])
 		str[j++] = last_pos[i++];
 	str[j] = '\0';
-	free(last_pos);
+	ft_safefree((void **)&last_pos);
 	return (str);
 }
 
@@ -89,14 +89,14 @@ char	*ft_read_fd(int fd, char *last_pos)
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
 		{
-			free(buffer);
-			free(last_pos);
+			ft_safefree((void **)&buffer);
+			ft_safefree((void **)&last_pos);
 			return (NULL);
 		}
 		buffer[bytes_read] = '\0';
 		last_pos = ft_gstrjoin(last_pos, buffer);
 	}
-	free(buffer);
+	ft_safefree((void **)&buffer);
 	return (last_pos);
 }
 
