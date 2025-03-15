@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:30:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/15 08:50:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,56 +35,39 @@ Advances vars->pos past the processed token.
 If no special token is found, advances to next character.
 Works with lexerlist().
 */
-/*
-void	handle_token(char *str, t_vars *vars)
+void handle_token(char *str, t_vars *vars)
 {
-	int	token_start;
-
-	token_start = vars->pos;
-	if (ft_isquote(str[vars->pos]))
+	// Process operators and quotes
+	if (str[vars->pos] == '|' || str[vars->pos] == '<' || str[vars->pos] == '>')
+	{
+		// If there's text before the operator, process it first
+		if (vars->pos > vars->start)
+		{
+			int temp_pos = vars->pos;
+			vars->pos = vars->start;
+			vars->curr_type = TYPE_STRING;
+			maketoken(str, vars);
+			vars->pos = temp_pos;
+			vars->start = temp_pos;
+		}
+		vars->pos = operators(str, vars->pos, vars->pos, vars);
+	}
+	else if (ft_isquote(str[vars->pos]))
 		handle_quote_token(str, vars, &vars->pos);
 	else if (str[vars->pos] == '$')
 		handle_expansion(str, &vars->pos, vars);
 	else
-		vars->pos = operators(str, vars->pos, token_start, vars);
-	if (vars->pos == token_start && str[vars->pos])
-		vars->pos++;
-}
-*/
-void handle_token(char *str, t_vars *vars)
-{
-    // Process operators and quotes
-    if (str[vars->pos] == '|' || str[vars->pos] == '<' || str[vars->pos] == '>')
-    {
-        // If there's text before the operator, process it first
-        if (vars->pos > vars->start)
-        {
-            int temp_pos = vars->pos;
-            vars->pos = vars->start;
-            vars->curr_type = TYPE_STRING;
-            maketoken(str, vars);
-            vars->pos = temp_pos;
-            vars->start = temp_pos;
-        }
-        vars->pos = operators(str, vars->pos, vars->pos, vars);
-    }
-    else if (ft_isquote(str[vars->pos]))
-        handle_quote_token(str, vars, &vars->pos);
-    else if (str[vars->pos] == '$')
-        handle_expansion(str, &vars->pos, vars);
-    else
-        vars->pos++;  // Move to next character for normal text
-        
-    // If we reached whitespace or end, process accumulated text
-    if (!str[vars->pos] || ft_isspace(str[vars->pos]))
-    {
-        if (vars->pos > vars->start)
-        {
-            vars->curr_type = TYPE_STRING;
-            maketoken(str, vars);
-            vars->start = vars->pos;
-        }
-    }
+		vars->pos++;  // Move to next character for normal text
+	// If we reached whitespace or end, process accumulated text
+	if (!str[vars->pos] || ft_isspace(str[vars->pos]))
+	{
+		if (vars->pos > vars->start)
+		{
+			vars->curr_type = TYPE_STRING;
+			maketoken(str, vars);
+			vars->start = vars->pos;
+		}
+	}
 }
 
 /*
@@ -99,72 +82,132 @@ Steps:
    handle_unclosed_quotes().
 Result: vars->current populated with the token list.
 Works with tokenize().
-*/
-/*
-void	lexerlist(char *str, t_vars *vars)
-{
-	vars->pos = 0;
-	vars->current = NULL;
-	vars->current = init_head_node(vars);
-	if (!vars->current)
-	{
-		ft_error(vars);
-		return;
-	}
-	printf("DEBUG: Initial head node created\n");
-	if (str && !ft_strchr(str, '|') && !ft_strchr(str, '<') && !ft_strchr(str, '>'))
-	{
-		printf("DEBUG: Simple command detected: %s\n", str);
-		vars->curr_type = TYPE_CMD;
-		maketoken(str, vars);
-	}
-	else
-	{
-		while (str && str[vars->pos])
-		{
-			skip_whitespace(str, vars);
-			if (str[vars->pos])
-				handle_token(str, vars);
-		}
-	}
-	if (vars->quote_depth > 0 && str)
-		str = handle_unclosed_quotes(str, vars);
-	printf("DEBUG: Tokens created, first token type: %d\n", 
-		vars->current ? (int)vars->current->type : 0);
-}
-*/
-/*
+OLD VERSION 
 void lexerlist(char *str, t_vars *vars)
 {
     vars->pos = 0;
+    vars->start = 0;
+    vars->head = NULL;
     vars->current = NULL;
-    vars->head = init_head_node(vars);
-    if (!vars->head)
+    
+    // Process each character looking for operators and handling quotes
+    while (str && str[vars->pos])
     {
-        ft_error(vars);
-        return;
-    }
-    printf("DEBUG: Initial head node created\n");
-    if (str && !ft_strchr(str, '|') && !ft_strchr(str, '<') && !ft_strchr(str, '>'))
-    {
-        printf("DEBUG: Simple command detected: %s\n", str);
-        vars->curr_type = TYPE_CMD;
-        maketoken(str, vars);
-    }
-    else
-    {
-        vars->current = vars->head;
-        while (str && str[vars->pos])
+        // Skip whitespace at the beginning of a token
+        if (str[vars->pos] == ' ' && vars->pos == vars->start)
         {
-            skip_whitespace(str, vars);
-            if (str[vars->pos])
-                handle_token(str, vars);
+            vars->pos++;
+            vars->start++;
+            continue;
+        }
+        
+        // Check for operators: pipe or redirections
+        if (vars->quote_depth == 0 && 
+            (str[vars->pos] == '|' || str[vars->pos] == '>' || str[vars->pos] == '<'))
+        {
+            // If there's text before the operator, process it as a command
+            if (vars->pos > vars->start)
+            {
+                char *cmd_str = ft_substr(str, vars->start, vars->pos - vars->start);
+                if (cmd_str)
+                {
+                    fprintf(stderr, "DEBUG: Processing command: '%s'\n", cmd_str);
+                    vars->curr_type = TYPE_CMD;
+                    maketoken(cmd_str, vars);
+                    ft_safefree((void **)&cmd_str);
+                }
+            }
+            
+            // Check for double operators (>> or <<)
+            if ((str[vars->pos] == '>' && str[vars->pos + 1] == '>') ||
+                (str[vars->pos] == '<' && str[vars->pos + 1] == '<'))
+            {
+                // Create double operator token
+                t_tokentype op_type = (str[vars->pos] == '>') ? 
+                                        TYPE_APPEND_REDIRECT : TYPE_HEREDOC;
+                                        
+                fprintf(stderr, "DEBUG: Processing %s operator\n", 
+                       get_token_str(op_type));
+                       
+                t_node *op_node = initnode(op_type, 
+                                   (op_type == TYPE_APPEND_REDIRECT) ? ">>" : "<<");
+                                   
+                if (op_node)
+                    build_token_linklist(vars, op_node);
+                
+                vars->pos += 2;
+                vars->start = vars->pos;
+            }
+            else
+            {
+                // Create single operator token
+                t_tokentype op_type;
+                if (str[vars->pos] == '|')
+                    op_type = TYPE_PIPE;
+                else if (str[vars->pos] == '>')
+                    op_type = TYPE_OUT_REDIRECT;
+                else // '<'
+                    op_type = TYPE_IN_REDIRECT;
+                    
+                fprintf(stderr, "DEBUG: Processing %s operator\n", 
+                       get_token_str(op_type));
+                       
+                t_node *op_node = initnode(op_type, 
+                                  (op_type == TYPE_PIPE) ? "|" : 
+                                  ((op_type == TYPE_OUT_REDIRECT) ? ">" : "<"));
+                                  
+                if (op_node)
+                    build_token_linklist(vars, op_node);
+                
+                vars->pos++;
+                vars->start = vars->pos;
+            }
+        }
+        // Handle quotes
+        else if ((str[vars->pos] == '\'' || str[vars->pos] == '"') && 
+                 vars->quote_depth == 0)
+        {
+            char quote = str[vars->pos];
+            vars->pos++;
+            vars->quote_depth = 1;
+            vars->quote_ctx[0].type = quote;
+            
+            while (str[vars->pos] && str[vars->pos] != quote)
+                vars->pos++;
+                
+            if (str[vars->pos] == quote)
+            {
+                vars->pos++;
+                vars->quote_depth = 0;
+            }
+        }
+        else
+        {
+            vars->pos++;
         }
     }
+    
+    // Process any remaining content after the last operator
+    if (vars->pos > vars->start)
+    {
+        char *cmd_str = ft_substr(str, vars->start, vars->pos - vars->start);
+        if (cmd_str)
+        {
+            fprintf(stderr, "DEBUG: Processing final command: '%s'\n", cmd_str);
+            vars->curr_type = TYPE_CMD;
+            maketoken(cmd_str, vars);
+            ft_safefree((void **)&cmd_str);
+        }
+    }
+    
+    // Handle unclosed quotes
     if (vars->quote_depth > 0 && str)
         str = handle_unclosed_quotes(str, vars);
-    printf("DEBUG: Tokens created, first token type: %d\n", 
-        vars->head ? (int)vars->head->type : 0);
+        
+    if (vars->head)
+        fprintf(stderr, "DEBUG: Tokens created, first token type: %d\n", vars->head->type);
+    else
+        fprintf(stderr, "DEBUG: No tokens created!\n");
 }
 */
 void lexerlist(char *str, t_vars *vars)
@@ -174,70 +217,111 @@ void lexerlist(char *str, t_vars *vars)
     vars->head = NULL;
     vars->current = NULL;
     
-    printf("DEBUG: Processing command: '%s'\n", str);
+    fprintf(stderr, "DEBUG: Starting lexer list processing for: '%s'\n", str);
     
-    // First handle simple commands without special operators
-    if (str && !ft_strchr(str, '|') && !ft_strchr(str, '<') && !ft_strchr(str, '>'))
+    // Process each character looking for operators and handling quotes
+    while (str && str[vars->pos])
     {
-        printf("DEBUG: Simple command detected: %s\n", str);
-        vars->curr_type = TYPE_CMD;
-        maketoken(str, vars);
-    }
-    else
-    {
-        // Process first part before pipe
-        char *pipe_pos = ft_strchr(str, '|');
-        if (pipe_pos)
+        // Skip whitespace at the beginning of a token
+        if (str[vars->pos] == ' ' && vars->pos == vars->start)
         {
-            // Process the command before pipe
-            int cmd_len = pipe_pos - str;
-            if (cmd_len > 0)
+            vars->pos++;
+            vars->start++;
+            continue;
+        }
+        
+        // Process operators: pipe or redirections
+        if (vars->quote_depth == 0 && 
+            (str[vars->pos] == '|' || str[vars->pos] == '>' || str[vars->pos] == '<'))
+        {
+            // If there's text before the operator, process it as a command
+            if (vars->pos > vars->start)
             {
-                char *cmd = ft_substr(str, 0, cmd_len);
-                printf("DEBUG: Processing left command: '%s'\n", cmd);
-                vars->curr_type = TYPE_CMD;
-                maketoken(cmd, vars);
-                ft_safefree((void **)&cmd);  // Safe free
-            }
-            
-            // Process the pipe operator - create an actual PIPE token
-        	printf("DEBUG: Processing pipe operator\n");
-        	vars->curr_type = TYPE_PIPE;
-        	t_node *pipe_node = initnode(TYPE_PIPE, "|");
-       		if (pipe_node)
-            	build_token_linklist(vars, pipe_node);  // Add the pipe node to the token list
-            
-            // Process the command after pipe - FIXED VERSION
-            if (*(pipe_pos + 1))
-            {
-                char *right_cmd_original = ft_strdup(pipe_pos + 1); // Keep original pointer
-                char *right_cmd = right_cmd_original; // Working copy
-                
-                // Skip leading whitespace but don't modify the pointer
-                while (*right_cmd && (*right_cmd == ' ' || *right_cmd == '\t'))
-                    right_cmd++;
-                
-                if (*right_cmd)
+                char *cmd_str = ft_substr(str, vars->start, vars->pos - vars->start);
+                if (cmd_str)
                 {
-                    printf("DEBUG: Processing right command: '%s'\n", right_cmd);
                     vars->curr_type = TYPE_CMD;
-                    // Make a new copy of the trimmed string
-                    char *trimmed = ft_strdup(right_cmd);
-                    maketoken(trimmed, vars);
-                    ft_safefree((void **)&trimmed);  // Safe free
+                    fprintf(stderr, "DEBUG: Processing command token: '%s'\n", cmd_str);
+                    process_cmd_token(cmd_str, vars);
+                    ft_safefree((void **)&cmd_str);
                 }
-                
-                ft_safefree((void **)&right_cmd_original);  // Safe free
             }
+            
+            // Process the operator token
+            fprintf(stderr, "DEBUG: Processing operator at position %d\n", vars->pos);
+            if (str[vars->pos] == '|')
+            {
+                vars->curr_type = TYPE_PIPE;
+                t_node *pipe_node = initnode(TYPE_PIPE, "|");
+                if (pipe_node)
+                    build_token_linklist(vars, pipe_node);
+            }
+            else if (str[vars->pos] == '>' && str[vars->pos + 1] == '>')
+            {
+                vars->curr_type = TYPE_APPEND_REDIRECT;
+                t_node *append_node = initnode(TYPE_APPEND_REDIRECT, ">>");
+                if (append_node)
+                    build_token_linklist(vars, append_node);
+                vars->pos++; // Skip the extra '>'
+            }
+            else if (str[vars->pos] == '<' && str[vars->pos + 1] == '<')
+            {
+                vars->curr_type = TYPE_HEREDOC;
+                t_node *heredoc_node = initnode(TYPE_HEREDOC, "<<");
+                if (heredoc_node)
+                    build_token_linklist(vars, heredoc_node);
+                vars->pos++; // Skip the extra '<'
+            }
+            else if (str[vars->pos] == '>')
+            {
+                vars->curr_type = TYPE_OUT_REDIRECT;
+                t_node *out_node = initnode(TYPE_OUT_REDIRECT, ">");
+                if (out_node)
+                    build_token_linklist(vars, out_node);
+            }
+            else if (str[vars->pos] == '<')
+            {
+                vars->curr_type = TYPE_IN_REDIRECT;
+                t_node *in_node = initnode(TYPE_IN_REDIRECT, "<");
+                if (in_node)
+                    build_token_linklist(vars, in_node);
+            }
+            
+            // Set start position for next token
+            vars->pos++;
+            vars->start = vars->pos;
+            continue;
+        }
+        else if ((str[vars->pos] == '\'' || str[vars->pos] == '"') && 
+                 vars->quote_depth == 0)
+        {
+            // Handle quotes
+            handle_quotes(str, &vars->pos, vars);
+            continue;
+        }
+        
+        vars->pos++;
+    }
+    
+    // Process any remaining content after the last operator
+    if (vars->pos > vars->start)
+    {
+        char *cmd_str = ft_substr(str, vars->start, vars->pos - vars->start);
+        if (cmd_str)
+        {
+            vars->curr_type = TYPE_CMD;
+            fprintf(stderr, "DEBUG: Processing final command token: '%s'\n", cmd_str);
+            process_cmd_token(cmd_str, vars);
+            ft_safefree((void **)&cmd_str);
         }
     }
     
     // Handle unclosed quotes
     if (vars->quote_depth > 0 && str)
         str = handle_unclosed_quotes(str, vars);
-    
+        
     if (vars->head)
-        printf("DEBUG: Tokens created, first token type: %d\n", vars->head->type);
+        fprintf(stderr, "DEBUG: Tokens created, first token type: %d\n", vars->head->type);
     else
-        printf("DEBUG: No tokens created!\n");
+        fprintf(stderr, "DEBUG: No tokens (vars->head is NULL)!\n");
 }

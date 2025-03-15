@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:53:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 10:29:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,32 +137,6 @@ Parameters:
 - mode: 0 for INPUT (<), 1 for OUTPUT (>), 2 for APPEND (>>)
 Returns 1 on success, 0 on any failure.
 Works with execute_redirects().
-*/
-/*
-int	handle_redirect(t_node *node, int *fd, int mode)
-{
-	int	std_fd;
-	int	result;
-	int	success;
-
-	success = open_redirect_file(node, fd, mode);
-	if (!success)
-		return (0);
-	if (mode == 0)
-		std_fd = STDIN_FILENO;
-	else
-		std_fd = STDOUT_FILENO;
-	result = dup2(*fd, std_fd);
-	if (result == -1)
-	{
-		close(*fd);
-		return (0);
-	}
-	close(*fd);
-	if (result == -1)
-		return (0);
-	return (1);
-}
 */
 int	handle_redirect(t_node *node, int *fd, int mode)
 {

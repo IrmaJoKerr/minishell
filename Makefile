@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/03/14 00:55:37 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/14 16:39:31 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 MINISHELL_SRCS = \
 			srcs/minishell.c \
 			srcs/arguments.c \
-			srcs/ast.c \
+			srcs/buildast.c \
 			srcs/builtin.c \
 			srcs/cleanup.c \
 			srcs/error.c \

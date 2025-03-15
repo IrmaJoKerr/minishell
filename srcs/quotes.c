@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 11:21:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 01:51:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,33 +117,33 @@ Helper function to remove quotes from an argument
 */
 void	process_quotes_in_arg(char **arg)
 {
-    char	*str;
-    char	*new_str;
-    size_t	len;
-    
-    str = *arg;
-    if (!str)
-        return ;
-    len = ft_strlen(str);
-    if (len < 2)
-        return ;
-    if (str[0] == '"' && str[len-1] == '"')
-    {
-        new_str = ft_substr(str, 1, len-2);
-        if (new_str)
-        {
-            ft_safefree((void **)&str);
-            *arg = new_str;
-        }
-        return ;
-    }
-    if (str[0] == '\'' && str[len-1] == '\'')
-    {
-        new_str = ft_substr(str, 1, len-2);
-        if (new_str)
-        {
-            ft_safefree((void **)&str);
-            *arg = new_str;
-        }
-    }
+	char	*str;
+	char	*new_str;
+	size_t	len;
+	
+	str = *arg;
+	if (!str)
+		return ;
+	len = ft_strlen(str);
+	if (len < 2)
+		return ;
+	if (str[0] == '"' && str[len-1] == '"')
+	{
+		new_str = ft_substr(str, 1, len-2);
+		if (new_str)
+		{
+			ft_safefree((void **)&str);
+			*arg = new_str;
+		}
+		return ;
+	}
+	if (str[0] == '\'' && str[len-1] == '\'')
+	{
+		new_str = ft_substr(str, 1, len-2);
+		if (new_str)
+		{
+			ft_safefree((void **)&str);
+			*arg = new_str;
+		}
+	}
 }

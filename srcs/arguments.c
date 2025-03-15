@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:36:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:52:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 16:43:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /*
 Create an array of arguments(flags) for the node.
 Works like malloc for the array.
-Example: "ls" -> ["ls"]
+Example: "ls" -> args array: ["ls", NULL]
 */
 void	create_args_array(t_node *node, char *token)
 {
@@ -37,7 +37,8 @@ void	create_args_array(t_node *node, char *token)
 /*
 Append a new argument to the node's argument array.
 Works like realloc for the array.
-Example: ["ls", "-l"] + "-a" -> ["ls", "-l", "-a"]
+Example: node->args is ["ls", "-l", NULL]
+After append_arg(node, "-a"), node->args becomes ["ls", "-l", "-a", NULL]
 */
 void	append_arg(t_node *node, char *new_arg)
 {

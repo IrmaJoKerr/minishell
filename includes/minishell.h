@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:24:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/15 07:52:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,9 @@ String representations of token types.
 These constants match the enum e_tokentype values.
 This enables easy conversion between enum and string.
 */
+# define TOKEN_TYPE_STRING           "STRING"
 # define TOKEN_TYPE_CMD              "CMD"
 # define TOKEN_TYPE_ARGS             "ARGS"
-# define TOKEN_TYPE_STRING           "STRING"
 # define TOKEN_TYPE_DOUBLE_QUOTE     "\""
 # define TOKEN_TYPE_SINGLE_QUOTE     "'"
 # define TOKEN_TYPE_HEREDOC          "<<"
@@ -65,7 +65,6 @@ This enables easy conversion between enum and string.
 # define TOKEN_TYPE_EXPANSION        "$"
 # define TOKEN_TYPE_PIPE             "|"
 # define TOKEN_TYPE_EXIT_STATUS      "$?"
-# define TOKEN_TYPE_UNKNOWN          "UNKNOWN"
 
 /*
 This structure is used to store the context of quotes.
@@ -83,19 +82,18 @@ This enum stores the possible token types.
 */
 typedef enum e_tokentype
 {
-	TYPE_CMD = 0,
-	TYPE_ARGS = 1,
-	TYPE_STRING = 2,
-	TYPE_DOUBLE_QUOTE = 3,
-	TYPE_SINGLE_QUOTE = 4,
-	TYPE_HEREDOC = 5,
-	TYPE_IN_REDIRECT = 6,
-	TYPE_OUT_REDIRECT = 7,
-	TYPE_APPEND_REDIRECT = 8,
-	TYPE_EXPANSION = 9,
-	TYPE_PIPE = 10,
-	TYPE_EXIT_STATUS = 11,
-	TYPE_UNKNOWN = 12
+	TYPE_STRING = 1,
+	TYPE_CMD = 2,
+	TYPE_ARGS = 3,
+	TYPE_DOUBLE_QUOTE = 4,
+	TYPE_SINGLE_QUOTE = 5,
+	TYPE_HEREDOC = 6,
+	TYPE_IN_REDIRECT = 7,
+	TYPE_OUT_REDIRECT = 8,
+	TYPE_APPEND_REDIRECT = 9,
+	TYPE_EXPANSION = 10,
+	TYPE_PIPE = 11,
+	TYPE_EXIT_STATUS = 12,
 }	t_tokentype;
 
 /*
@@ -119,6 +117,8 @@ Makes it easier to access and pass around.
 */
 typedef struct s_vars
 {
+	t_node      	*cmd_nodes[100];
+	int				cmd_count;
 	t_node			*astroot;
 	t_node			*head;
 	t_node			*current;
@@ -190,10 +190,13 @@ void		create_args_array(t_node *node, char *token);
 void		append_arg(t_node *node, char *new_arg);
 
 /*
-AST handling. In ast.c
+AST token processing and AST tree building. In buildast.c
 */
+t_node		*process_token_list(t_vars *vars);
+t_node		*set_ast_root(t_node *pipe_node, t_vars *vars);
+int			check_pipe_syntax_errors(t_vars *vars);
+char		*handle_unfinished_pipe(char *input, t_vars *vars);
 t_node		*build_ast(t_vars *vars);
-t_node		*initnode(t_tokentype type, char *data);
 void		print_token_list(t_vars *vars);
 
 /*
@@ -292,9 +295,9 @@ void		handle_token(char *str, t_vars *vars);
 void		lexerlist(char *str, t_vars *vars);
 
 /*
-Entry point functions. In main.c
+Entry point functions. In minishell.c
 */
-char		*reader(void);
+char		*reader(t_vars *vars);
 void		init_shell(t_vars *vars, char **envp);
 int			process_command(char *command, t_vars *vars);
 

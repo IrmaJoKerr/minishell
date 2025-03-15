@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/14 01:42:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 08:37:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,27 @@ Checks if the argument is a valid environment variable.
 */
 char	*valid_export(char *args)
 {
-	int	i;
-
-	i = 0;
-	if (!ft_isalpha(args[0]) && args[0] != '_')
-		return (NULL);
-	while (args[i] && args[i] != '=')
-	{
-		if (!(ft_isalnum(args[i]) || args[i] == '_'))
-			return (NULL);
-		i++;
-	}
-	return (args);
+    int	i;
+    int len;
+    char *equal_sign;
+    
+    i = 0;
+    if (!ft_isalpha(args[0]) && args[0] != '_')
+        return (NULL);
+        
+    equal_sign = ft_strchr(args, '=');
+    if (equal_sign)
+        len = equal_sign - args;
+    else
+        len = ft_strlen(args);
+        
+    while (i < len)
+    {
+        if (!(ft_isalnum(args[i]) || args[i] == '_'))
+            return (NULL);
+        i++;
+    }
+    return (args);
 }
 
 /*
@@ -90,85 +99,52 @@ char	**make_sorted_env(int count, t_vars *vars)
 /*
 Sorts the environment variables in ascending order.
 */
-/*
 int	sort_env(int count, t_vars *vars)
 {
-	int		i;
-	char	**sort_env;
-
-	i = 0;
-	sort_env = (char **)malloc((count + 1) * sizeof(char *));
-	if (!sort_env)
-		return (1);
-	while (i < count)
-	{
-		sort_env[i] = ft_strdup(vars->env[i]);
-		if (!sort_env[i])
-		{
-			while (i > 0)
-			{
-				i--;
-				ft_safefree((void **)&sort_env[i]);	
-			}
-			ft_safefree((void **)&sort_env);
-			return (1);
-		}
-		i++;
-	}
-	sort_env[i] = '\0';
-	sort_env = asc_order(sort_env, count);
-	i = 0;
-	while (sort_env[i])
-	{
-		printf("declare -x %s", sort_env[i]);
-		if (sort_env[i][ft_strlen(sort_env[i]) - 1] == '=')
-			printf("\"\"");
-		ft_safefree((void **)&sort_env[i++]);
-		printf("\n");
-	}
-	ft_safefree((void **)&sort_env);
-	return (0);
-}
-*/
-
-/*
-Sorts and prints environment variables in export format.
-Returns 0 on success, 1 on failure.
-*/
-int	sort_env(int count, t_vars *vars)
-{
-	int		i;
-	char	**sort_env;
-	char    *equal_pos;
-	
-	i = 0;
-	sort_env = make_sorted_env(count, vars);
-	if (!sort_env)
-		return (1);
-	while (sort_env[i])
-	{
-		equal_pos = ft_strchr(sort_env[i], '=');
-		if (equal_pos)
-		{
-			*equal_pos = '\0';
-			// Use ft_putstr_fd instead of printf to respect redirection
-			ft_putstr_fd("declare -x ", STDOUT_FILENO);
-			ft_putstr_fd(sort_env[i], STDOUT_FILENO);
-			ft_putstr_fd("=\"", STDOUT_FILENO);
-			ft_putstr_fd(equal_pos + 1, STDOUT_FILENO);
-			ft_putstr_fd("\"", STDOUT_FILENO);
-			*equal_pos = '=';
-		}
-		else
-		{
-			ft_putstr_fd("declare -x ", STDOUT_FILENO);
-			ft_putstr_fd(sort_env[i], STDOUT_FILENO);
-		}
-		ft_safefree((void **)&sort_env[i++]);
-		ft_putstr_fd("\n", STDOUT_FILENO);
-	}
-	ft_safefree((void **)&sort_env);
-	return (0);
+    int		i;
+    char	**sort_env;
+    char    *equal_pos;
+    char    *value;
+    
+    i = 0;
+    sort_env = make_sorted_env(count, vars);
+    if (!sort_env)
+        return (1);
+    while (sort_env[i])
+    {
+        equal_pos = ft_strchr(sort_env[i], '=');
+        if (equal_pos)
+        {
+            *equal_pos = '\0';
+            value = equal_pos + 1;
+            // Display the variable name and equals sign
+            ft_putstr_fd("declare -x ", STDOUT_FILENO);
+            ft_putstr_fd(sort_env[i], STDOUT_FILENO);
+            ft_putstr_fd("=", STDOUT_FILENO);
+            // Add quotes around the value
+            ft_putstr_fd("\"", STDOUT_FILENO);
+            // Print the value, properly handling any existing quotes
+            while (*value)
+            {
+                // Escape double quotes within the value
+                if (*value == '"')
+                    ft_putstr_fd("\\", STDOUT_FILENO);
+                ft_putchar_fd(*value, STDOUT_FILENO);
+                value++;
+            }
+            ft_putstr_fd("\"", STDOUT_FILENO);
+            *equal_pos = '=';
+        }
+        else
+        {
+            ft_putstr_fd("declare -x ", STDOUT_FILENO);
+            ft_putstr_fd(sort_env[i], STDOUT_FILENO);
+        }
+        ft_safefree((void **)&sort_env[i++]);
+        ft_putstr_fd("\n", STDOUT_FILENO);
+    }
+    ft_safefree((void **)&sort_env);
+    return (0);
 }
 
 /*

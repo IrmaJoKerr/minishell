@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:02:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 21:08:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,35 +20,22 @@ Operator handling function that processes both string content and operators.
 3) Checks for a single operator (|, >, <) with handle_single_operator()
 Returns the new position after operator is processed. Works with handle_token()
 */
-/*
-int	operators(char *input, int i, int token_start, t_vars *vars)
+int operators(char *input, int i, int token_start, t_vars *vars)
 {
-	int	next_pos;
-
-	handle_string(input, i, token_start, vars);
-	next_pos = handle_double_operator(input, i, vars);
+	// If there's text before the operator, process it first as a string/command
+	if (i > token_start)
+	{
+		vars->start = token_start;
+		vars->pos = i;
+		vars->curr_type = TYPE_STRING;
+		maketoken(input, vars);
+		vars->start = i;  // Reset start position to current position
+	}
+	// Then process the operator
+	int next_pos = handle_double_operator(input, i, vars);
 	if (next_pos != i)
 		return (next_pos);
 	return (handle_single_operator(input, i, vars));
-}
-*/
-int operators(char *input, int i, int token_start, t_vars *vars)
-{
-    // If there's text before the operator, process it first as a string/command
-    if (i > token_start)
-    {
-        vars->start = token_start;
-        vars->pos = i;
-        vars->curr_type = TYPE_STRING;
-        maketoken(input, vars);
-        vars->start = i;  // Reset start position to current position
-    }
-    
-    // Then process the operator
-    int next_pos = handle_double_operator(input, i, vars);
-    if (next_pos != i)
-        return (next_pos);
-    return (handle_single_operator(input, i, vars));
 }
 
 /*
@@ -104,50 +91,31 @@ Returns the position after the operator (i+1) or the unchanged position
 if no operator was found.
 Works with operators().
 */
-/*
-int	handle_single_operator(char *input, int i, t_vars *vars)
+int handle_single_operator(char *input, int i, t_vars *vars)
 {
 	if (input[i] == '|' || input[i] == '>' || input[i] == '<')
 	{
+		// If there's text before the operator, process it first as a string/command
+		if (i > vars->start)
+		{
+			int temp_pos = i;
+			vars->curr_type = TYPE_STRING;
+			vars->pos = vars->start; // Save current position
+			maketoken(ft_substr(input, vars->start, temp_pos - vars->start), vars);
+		}
+		// Now process the operator token
 		vars->start = i;
 		vars->pos = i + 1;
 		vars->curr_type = get_operator_type(input[i]);
-		maketoken(input, vars);
+		// Debug the operator being processed
+		fprintf(stderr, "DEBUG: Processing operator %s token\n", get_token_str(vars->curr_type));
+		// Make a token for the operator
+		maketoken(ft_substr(input, i, 1), vars);
+		// Set start position for next token
+		vars->start = i + 1;
 		return (i + 1);
 	}
 	return (i);
-}
-*/
-int handle_single_operator(char *input, int i, t_vars *vars)
-{
-    if (input[i] == '|' || input[i] == '>' || input[i] == '<')
-    {
-        // If there's text before the operator, process it first as a string/command
-        if (i > vars->start)
-        {
-            int temp_pos = i;
-            vars->curr_type = TYPE_STRING;
-            vars->pos = vars->start; // Save current position
-            maketoken(ft_substr(input, vars->start, temp_pos - vars->start), vars);
-        }
-        
-        // Now process the operator token
-        vars->start = i;
-        vars->pos = i + 1;
-        vars->curr_type = get_operator_type(input[i]);
-        
-        // Debug the operator being processed
-        printf("DEBUG: Processing operator %s token\n", get_token_str(vars->curr_type));
-        
-        // Make a token for the operator
-        maketoken(ft_substr(input, i, 1), vars);
-        
-        // Set start position for next token
-        vars->start = i + 1;
-        
-        return (i + 1);
-    }
-    return (i);
 }
 
 /*

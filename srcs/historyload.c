@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:54:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 10:34:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,24 @@ Helper function for load_history.
 */
 void	read_history_lines(int fd)
 {
-	char	*line;
+    char	*line;
+    size_t	len;
 
-	line = get_next_line(fd);
-	while (line)
-	{
-		if (*line)
-			add_history(line);
-		ft_safefree((void **)&line);
-		line = get_next_line(fd);
-	}
+    line = get_next_line(fd);
+    while (line)
+    {
+        if (*line)
+        {
+            // Remove trailing newline if present
+            len = ft_strlen(line);
+            if (len > 0 && line[len - 1] == '\n')
+                line[len - 1] = '\0';
+                
+            add_history(line);
+        }
+        ft_safefree((void **)&line);
+        line = get_next_line(fd);
+    }
 }
 
 /*

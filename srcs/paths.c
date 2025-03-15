@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:53:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 21:08:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,34 +75,34 @@ char	*get_cmd_path(char *cmd, char **envp)
 	{
 		 if (access(cmd, X_OK) == 0)
 		 {
-			 printf("DEBUG: Using direct path: %s\n", cmd);
+			 fprintf(stderr, "DEBUG: Using direct path: %s\n", cmd);
 			 return (ft_strdup(cmd));
 		 }
-		 printf("DEBUG: Direct path access denied: %s\n", cmd);
+		 fprintf(stderr, "DEBUG: Direct path access denied: %s\n", cmd);
 		 return (NULL);
 	}
-	printf("DEBUG: Looking for command: %s\n", cmd);
+	fprintf(stderr, "DEBUG: Looking for command: %s\n", cmd);
 	paths = get_path_env(envp);
 	if (!paths)
 	{
-		printf("DEBUG: No PATH found in environment\n");
+		fprintf(stderr, "DEBUG: No PATH found in environment\n");
 		return (NULL);
 	}
-	printf("DEBUG: PATH directories found:\n");
+	fprintf(stderr, "DEBUG: PATH directories found:\n");
 	i = 0;
 	while (paths[i])
 	{
-		printf("DEBUG: %s\n", paths[i]);
+		fprintf(stderr, "DEBUG: %s\n", paths[i]);
 		path = try_path(paths[i], cmd);
 		if (path)
 		{
-			printf("DEBUG: Found command at %s\n", path);
+			fprintf(stderr, "DEBUG: Found command at %s\n", path);
 			ft_free_2d(paths, ft_arrlen(paths));
 			return (path);
 		}
 		i++;
 	}
-	printf("DEBUG: Command not found in any PATH directory\n");
+	fprintf(stderr, "DEBUG: Command not found in any PATH directory\n");
 	ft_free_2d(paths, ft_arrlen(paths));
 	return (NULL);
 }

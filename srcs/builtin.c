@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:33:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:52:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 21:07:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ Each builtin sets it's own error codes and outputs if failure.
 */
 int execute_builtin(char *cmd, char **args, t_vars *vars)
 {
-	printf("DEBUG: execute_builtin called with cmd: %s\n", cmd);
+	fprintf(stderr, "DEBUG: execute_builtin called with cmd: %s\n", cmd);
 	
 	if (!ft_strcmp(cmd, "cd"))
 		return (builtin_cd(args, vars));

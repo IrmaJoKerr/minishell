@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/13 08:33:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 09:09:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ Returns 0 on success, non-zero on failure.
 */
 int	handle_cd_path(char **args, t_vars *vars)
 {
+	char *oldpwd_value;
+	
 	if ((!args[1]) || ((args[1][0] == '~') && (args[1][1] == '\0')))
 	{
 		if (chdir(get_env_value("HOME", vars->env)) != 0)
@@ -25,8 +27,10 @@ int	handle_cd_path(char **args, t_vars *vars)
 	}
 	else if (args[1][0] == '-' && args[1][1] == '\0')
 	{
+		oldpwd_value = get_env_value("OLDPWD", vars->env);
 		if (chdir(get_env_value("OLDPWD", vars->env)) != 0)
 			return (printf("cd: OLDPWD not set or no access\n"), 1);
+		printf("%s\n", oldpwd_value); // Print the destination directory
 	}
 	else if (chdir(args[1]) != 0)
 		return (printf("cd: no such file or directory: %s\n", args[1]), 1);
@@ -59,30 +63,6 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 
 /*
 Built-in command: cd. Changes the current working directory.
-*/
-/*
-int	builtin_cd(char **args, t_vars *vars)
-{
-	char	cwd[1024];
-	char 	*oldpwd;
-	char	*tmp;
-
-	oldpwd = ft_strdup(get_env_value("OLDPWD", vars->env));
-	if (!args[1] || (args[1][0] == '~' && args[1][1] == '\0'))
-		chdir(get_env_value("HOME", vars->env));
-	else if (args[1][0] == '-' && args[1][1] == '\0')
-		chdir(get_env_value("OLDPWD", vars->env));
-	else if(chdir(args[1]))
-		return (printf("cd: no such file or directory: %s\n", args[1]), 0);
-	tmp = ft_strjoin("OLDPWD=", oldpwd);
-	modify_env(&vars->env, 1, tmp);
-	ft_safefree((void **)&tmp);
-	ft_safefree((void **)&oldpwd);
-	tmp = ft_strjoin("PWD=", getcwd(cwd, sizeof(cwd)));
-	modify_env(&vars->env, 1, tmp);
-	ft_safefree((void **)&tmp);
-	return (0);
-}
 */
 int builtin_cd(char **args, t_vars *vars)
 {

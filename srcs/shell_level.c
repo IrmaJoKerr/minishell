@@ -6,18 +6,18 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 14:19:12 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 02:53:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 10:29:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
- * Gets the shell level from environment variables.
- * If SHLVL doesn't exist, creates it with value "1".
- * Stores the current SHLVL value in vars->shell_level.
- * Returns 1 on success, 0 on failure.
- */
+Gets the shell level from environment variables.
+If SHLVL doesn't exist, creates it with value "1".
+Stores the current SHLVL value in vars->shell_level.
+Returns 1 on success, 0 on failure.
+*/
 int get_shell_level(t_vars *vars)
 {
 	int     i;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:09:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 08:16:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 09:45:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,12 @@ Frees a partially allocated environment array up to index n-1.
 */
 void	cleanup_env_error(char **env, int n)
 {
-    while (n > 0)
-    {
-        n--;
-        ft_safefree((void **)&env[n]);
-    }
-    ft_safefree((void **)&env);
+	while (n > 0)
+	{
+		n--;
+		ft_safefree((void **)&env[n]);
+	}
+	ft_safefree((void **)&env);
 }
 
 /*
@@ -109,6 +109,7 @@ Perform complete cleanup before program exit.
 Frees all allocated resources in vars struct.
 Should be called before any exit() call.
 */
+/*
 void	cleanup_exit(t_vars *vars)
 {
 	if (!vars)
@@ -118,4 +119,15 @@ void	cleanup_exit(t_vars *vars)
 	cleanup_vars(vars);
 	rl_clear_history();
 	ft_safefree((void **)&vars->error_msg);
+}
+*/
+void	cleanup_exit(t_vars *vars)
+{
+    if (!vars)
+        return ;
+    // REMOVED: save_history() call - it's already called in builtin_exit()
+    cleanup_token_list(vars); 
+    cleanup_vars(vars);
+    // REMOVED: rl_clear_history() - also already called in builtin_exit()
+    ft_safefree((void **)&vars->error_msg);
 }

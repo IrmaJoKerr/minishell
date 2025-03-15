@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 07:54:40 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:03:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/15 08:10:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,21 +19,17 @@ void	debug_cmd_tokens(char **args)
 {
 	int	i;
 
-	printf("DEBUG: Command tokens: ");
+	fprintf(stderr, "DEBUG: Command tokens: ");
 	i = 0;
 	while (args[i])
 	{
-		printf("'%s'", args[i]);
-		if (args[i+1])
-		{
-			printf(", ");
-		}
-		else
-		{
-			printf("\n");
-		}
-		i++;
-	}
+        fprintf(stderr, "'%s'", args[i]);
+        if (args[i+1])
+            fprintf(stderr, ", ");
+        else
+            fprintf(stderr, "\n");
+        i++;
+    }
 }
  
 /*
@@ -61,76 +57,62 @@ t_node	*build_cmdarg_node(char **args)
 /*
 Update the node pointers in the token chain
 */
-/*
-void	build_token_linklist(t_vars *vars, t_node *node)
-{
-	vars->current = node;
- 
-	if (!vars->head || vars->head->type == TYPE_HEAD)
-	{
-		if (vars->head)
-		{
-			if (vars->head->args)
-				ft_free_2d(vars->head->args, ft_arrlen(vars->head->args));
-			free(vars->head);
-		}
-		vars->head = node;
-	}
-	else if (vars->head)
-	{
-		vars->head->next = node;
-		node->prev = vars->head;
-	}
-}
-*/
 void build_token_linklist(t_vars *vars, t_node *node)
 {
-    if (!vars->head)
-    {
-        // First token becomes the head
-        vars->head = node;
-        vars->current = node;
-        printf("DEBUG: First token created as head: type=%d\n", node->type);
-    }
-    else
-    {
-        // Add to the end of the list
-        vars->current->next = node;
-        node->prev = vars->current;
-        vars->current = node;
-        printf("DEBUG: Added token to list: type=%d\n", node->type);
-    }
+	if (!vars->head)
+	{
+		// First token becomes the head
+		vars->head = node;
+		vars->current = node;
+		fprintf(stderr, "DEBUG: First token created as head: type=%d\n", node->type);
+	}
+	else
+	{
+		// Add to the end of the list
+		vars->current->next = node;
+		node->prev = vars->current;
+		vars->current = node;
+		fprintf(stderr, "DEBUG: Added token to list: type=%d\n", node->type);
+	}
 }
  
 /*
 Process command tokens by splitting input string
 with whitespace as delimiter. Uses ft_splitstr()
 to handle quotes during splitting.
-*/
-/*
+OLD VERSION
 void process_cmd_token(char *input, t_vars *vars)
 {
-    char    **args;
-    t_node  *node;
-    int     i;
+	char    **args;
+	t_node  *node;
+	int     i;
  
-    args = ft_splitstr(input, " \t\n\v\f\r");
-    if (!args)
-        return ;
-    i = 0;
-    while (args[i])
-    {
-        process_quotes_in_arg(&args[i]);
-        i++;
-    }
-    debug_cmd_tokens(args);
-    node = build_cmdarg_node(args);
-    ft_free_2d(args, ft_arrlen(args));
-    if (!node)
-        return ;
-    build_token_linklist(vars, node);
+	args = ft_splitstr(input, " \t\n\v\f\r");
+	if (!args)
+		return ;
+	// Process quotes in arguments
+	i = 0;
+	while (args[i])
+	{
+		process_quotes_in_arg(&args[i]);
+		i++;
+	}
+	debug_cmd_tokens(args);
+	// Create command node
+	if (args[0])
+	{
+		node = build_cmdarg_node(args);
+		if (node)
+			build_token_linklist(vars, node);
+	}
+	ft_free_2d(args, ft_arrlen(args));
 }
 */
+/*
+Process command tokens by splitting input string
+with whitespace as delimiter. Uses ft_splitstr()
+to handle quotes during splitting.
+*/
 void process_cmd_token(char *input, t_vars *vars)
 {
     char    **args;
@@ -139,18 +121,36 @@ void process_cmd_token(char *input, t_vars *vars)
  
     args = ft_splitstr(input, " \t\n\v\f\r");
     if (!args)
-        return;
-        
+        return ;
     // Process quotes in arguments
     i = 0;
     while (args[i])
     {
         process_quotes_in_arg(&args[i]);
+        // Handle flags with dash correctly - don't split them
+        if (i > 0 && args[i][0] == '-' && ft_strlen(args[i]) == 1 && args[i+1] && ft_isalpha(args[i+1][0]))
+        {
+            // The argument is just a '-' and the next arg is a letter - combine them
+            char *combined = ft_strjoin(args[i], args[i+1]);
+            if (combined)
+            {
+                free(args[i]);
+                free(args[i+1]);
+                args[i] = combined;
+                
+                // Shift remaining arguments
+                int j = i + 1;
+                while (args[j+1])
+                {
+                    args[j] = args[j+1];
+                    j++;
+                }
+                args[j] = NULL;
+            }
+        }
         i++;
     }
-    
     debug_cmd_tokens(args);
-    
     // Create command node
     if (args[0])
     {
@@ -158,7 +158,6 @@ void process_cmd_token(char *input, t_vars *vars)
         if (node)
             build_token_linklist(vars, node);
     }
-    
     ft_free_2d(args, ft_arrlen(args));
 }
 

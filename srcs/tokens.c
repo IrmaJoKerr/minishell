@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 04:36:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/13 18:05:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 21:08:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ t_node	*make_cmdnode(char *token)
 	}
 	node->args[0] = ft_strdup(token);
 	if (!node->args[0])
-    {
-        ft_safefree((void **)&node->args);
-        ft_safefree((void **)&node);
-        return (NULL);
-    }
+	{
+		ft_safefree((void **)&node->args);
+		ft_safefree((void **)&node);
+		return (NULL);
+	}
 	node->args[1] = NULL;
 	return (node);
 }
@@ -77,92 +77,39 @@ Updates position pointer to after closing quote.
 Creates token from the quoted content.
 Example: "hello world" -> processes the token and moves position
 */
-/*
-Process quoted tokens during lexical analysis.
-Updates position pointer to after closing quote.
-Creates token from the quoted content.
-Example: "hello world" -> processes the token and moves position
-*/
-/*
-void	handle_quote_token(char *str, t_vars *vars, int *pos)
-{
-    char		quote_char;
-    int			start;
-    t_tokentype	quote_type;
-
-    if (!str || !vars || !pos)
-        return ;
-    
-    quote_char = str[*pos];
-    if (quote_char == '"')
-        quote_type = TYPE_DOUBLE_QUOTE;
-    else
-        quote_type = TYPE_SINGLE_QUOTE;
-    printf("DEBUG: Processing %s token\n", get_token_str(quote_type));
-    
-    start = *pos;
-    (*pos)++;
-    
-    while (str[*pos])
-    {
-        if (str[*pos] == quote_char)
-            break;
-        (*pos)++;
-    }
-    
-    if (str[*pos] == quote_char)
-    {
-        (*pos)++;
-        vars->start = start;
-        vars->curr_type = quote_type;
-        maketoken(str, vars);
-        vars->start = *pos;
-    }
-    else
-    {
-        vars->quote_depth++;
-        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
-    }
-}
-*/
 void handle_quote_token(char *str, t_vars *vars, int *pos)
 {
-    char quote_char;
-    int start;
-    t_tokentype quote_type;
+	char		quote_char;
+	int			start;
+	t_tokentype	quote_type;
 
-    if (!str || !vars || !pos)
-        return;
-    
-    quote_char = str[*pos];
-    if (quote_char == '"')
-        quote_type = TYPE_DOUBLE_QUOTE;
-    else
-        quote_type = TYPE_SINGLE_QUOTE;
-    
-    printf("DEBUG: Processing %s token\n", get_token_str(quote_type));
-    
-    start = *pos;
-    (*pos)++;
-    
-    while (str[*pos])
-    {
-        if (str[*pos] == quote_char)
-            break;
-        (*pos)++;
-    }
-    
-    if (str[*pos] == quote_char)
-    {
-        (*pos)++;
-        vars->start = start;
-        vars->curr_type = quote_type;
-        maketoken(str, vars);
-        vars->start = *pos;
-    }
-    else
-    {
-        vars->quote_depth++;
-        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
-    }
+	if (!str || !vars || !pos)
+		return ;
+	quote_char = str[*pos];
+	if (quote_char == '"')
+		quote_type = TYPE_DOUBLE_QUOTE;
+	else
+		quote_type = TYPE_SINGLE_QUOTE;
+	fprintf(stderr, "DEBUG: Processing %s token\n", get_token_str(quote_type));	
+	start = *pos;
+	(*pos)++;
+	while (str[*pos])
+	{
+		if (str[*pos] == quote_char)
+			break ;
+		(*pos)++;
+	}
+	if (str[*pos] == quote_char)
+	{
+		(*pos)++;
+		vars->start = start;
+		vars->curr_type = quote_type;
+		maketoken(str, vars);
+		vars->start = *pos;
+	}
+	else
+	{
+		vars->quote_depth++;
+		vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
+	}
 }

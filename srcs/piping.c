@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:39:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:40:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/14 21:08:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,57 +60,88 @@ Returns: Exit status of the rightmost command in the pipeline,
 or 1 on error (pipe creation failure, NULL parameters).
 Works with execute_cmd() in a recursive manner for multiple pipelines.
 Example: ls | grep txt.c | wc -l
-*/
-/*
-int	execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
+OLD VERSION
+int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
 {
-	int		pipefd[2];
-	pid_t	pid;
+	int     pipefd[2];
+	pid_t   left_pid, right_pid;
+	int     status;
 
-	if (!pipe_node || !envp)
-		return (1);
+	fprintf(stderr, "DEBUG: Setting up pipeline\n");
+	if (!pipe_node || pipe_node->type != TYPE_PIPE || !pipe_node->left || !pipe_node->right)
+	{
+		fprintf(stderr, "DEBUG: Invalid pipe node\n");
+		return 1;
+	}
 	if (pipe(pipefd) == -1)
 	{
-		vars->error_code = 1;
-		return (1);
+		perror("pipe");
+		return 1;
 	}
-	pid = fork();
-	if (pid == 0)
+	// Fork process for left command
+	left_pid = fork();
+	if (left_pid == 0)
 	{
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
-		execute_cmd(pipe_node->left, envp, vars);
-		exit(0);
+		// Child process (left command)
+		close(pipefd[0]);  // Close read end
+		dup2(pipefd[1], STDOUT_FILENO);  // Redirect stdout to pipe write end
+		close(pipefd[1]);  // Close original pipe write end
+		
+		exit(execute_cmd(pipe_node->left, envp, vars));
 	}
-	close(pipefd[1]);
-	dup2(pipefd[0], STDIN_FILENO);
+	else if (left_pid < 0)
+	{
+		perror("fork");
+		close(pipefd[0]);
+		close(pipefd[1]);
+		return 1;
+	}
+	// Fork process for right command
+	right_pid = fork();
+	if (right_pid == 0)
+	{
+		// Child process (right command)
+		close(pipefd[1]);  // Close write end
+		dup2(pipefd[0], STDIN_FILENO);  // Redirect stdin to pipe read end
+		close(pipefd[0]);  // Close original pipe read end
+		exit(execute_cmd(pipe_node->right, envp, vars));
+	}
+	else if (right_pid < 0)
+	{
+		perror("fork");
+		close(pipefd[0]);
+		close(pipefd[1]);
+		return 1;
+	}
+	// Parent process
 	close(pipefd[0]);
-	return (execute_cmd(pipe_node->right, envp, vars));
+	close(pipefd[1]);
+	// Wait for both processes to complete
+	waitpid(left_pid, &status, 0);
+	waitpid(right_pid, &status, 0);
+	return handle_cmd_status(status, vars);
 }
 */
-/*
 int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
 {
-    int     pipefd[2];
-    pid_t   left_pid, right_pid;
-    int     status;
+    int pipefd[2];
+    pid_t left_pid, right_pid;
+    int status;
 
-    printf("DEBUG: Setting up pipeline\n");
-
+    fprintf(stderr, "DEBUG: Executing pipeline\n");
     if (!pipe_node || pipe_node->type != TYPE_PIPE || !pipe_node->left || !pipe_node->right)
     {
-        printf("DEBUG: Invalid pipe node\n");
+        fprintf(stderr, "DEBUG: Invalid pipe node structure\n");
         return 1;
     }
-
+    
     if (pipe(pipefd) == -1)
     {
         perror("pipe");
         return 1;
     }
-
-    // Fork process for left command
+    
+    // Create left child process
     left_pid = fork();
     if (left_pid == 0)
     {
@@ -119,6 +150,7 @@ int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
         dup2(pipefd[1], STDOUT_FILENO);  // Redirect stdout to pipe write end
         close(pipefd[1]);  // Close original pipe write end
         
+        // Execute left side, which might be a command or another pipe
         exit(execute_cmd(pipe_node->left, envp, vars));
     }
     else if (left_pid < 0)
@@ -128,8 +160,8 @@ int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
         close(pipefd[1]);
         return 1;
     }
-
-    // Fork process for right command
+    
+    // Create right child process
     right_pid = fork();
     if (right_pid == 0)
     {
@@ -138,6 +170,7 @@ int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
         dup2(pipefd[0], STDIN_FILENO);  // Redirect stdin to pipe read end
         close(pipefd[0]);  // Close original pipe read end
         
+        // Execute right side, which might be a command or another pipe
         exit(execute_cmd(pipe_node->right, envp, vars));
     }
     else if (right_pid < 0)
@@ -145,84 +178,16 @@ int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
         perror("fork");
         close(pipefd[0]);
         close(pipefd[1]);
+        waitpid(left_pid, NULL, 0);
         return 1;
     }
-
+    
     // Parent process
     close(pipefd[0]);
     close(pipefd[1]);
     
-    // Wait for both processes to complete
-    waitpid(left_pid, &status, 0);
-    waitpid(right_pid, &status, 0);
-    
-    return handle_cmd_status(status, vars);
-}
-*/
-int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
-{
-    int     pipefd[2];
-    pid_t   left_pid, right_pid;
-    int     status;
-
-    printf("DEBUG: Setting up pipeline\n");
-
-    if (!pipe_node || pipe_node->type != TYPE_PIPE || !pipe_node->left || !pipe_node->right)
-    {
-        printf("DEBUG: Invalid pipe node\n");
-        return 1;
-    }
-
-    if (pipe(pipefd) == -1)
-    {
-        perror("pipe");
-        return 1;
-    }
-
-    // Fork process for left command
-    left_pid = fork();
-    if (left_pid == 0)
-    {
-        // Child process (left command)
-        close(pipefd[0]);  // Close read end
-        dup2(pipefd[1], STDOUT_FILENO);  // Redirect stdout to pipe write end
-        close(pipefd[1]);  // Close original pipe write end
-        
-        exit(execute_cmd(pipe_node->left, envp, vars));
-    }
-    else if (left_pid < 0)
-    {
-        perror("fork");
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return 1;
-    }
-
-    // Fork process for right command
-    right_pid = fork();
-    if (right_pid == 0)
-    {
-        // Child process (right command)
-        close(pipefd[1]);  // Close write end
-        dup2(pipefd[0], STDIN_FILENO);  // Redirect stdin to pipe read end
-        close(pipefd[0]);  // Close original pipe read end
-        
-        exit(execute_cmd(pipe_node->right, envp, vars));
-    }
-    else if (right_pid < 0)
-    {
-        perror("fork");
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return 1;
-    }
-
-    // Parent process
-    close(pipefd[0]);
-    close(pipefd[1]);
-    
-    // Wait for both processes to complete
-    waitpid(left_pid, &status, 0);
+    // Wait for children to complete
+    waitpid(left_pid, NULL, 0);
     waitpid(right_pid, &status, 0);
     
     return handle_cmd_status(status, vars);
