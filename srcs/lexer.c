@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 04:32:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 01:20:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,184 +92,6 @@ Works with handle_token_boundary() and handle_token().
 Example: With first_token=1 and TYPE_CMD type
 - Creates command token for current text segment
 - Sets first_token to 0 after processing
-OLD VERSION
-void process_text(char *str, t_vars *vars, int *first_token, t_tokentype override_type)
-{
-    char *token;
-    int len = vars->pos - vars->start;
-    
-    if (len <= 0)
-        return;
-    
-    token = ft_substr(str, vars->start, len);
-    if (!token)
-        return;
-    
-    fprintf(stderr, "DEBUG: process_text: len=%d, text='%s', first_token=%d\n", 
-            len, token, *first_token);
-    
-    // If this is the first token, it's a command
-    if (*first_token)
-    {
-        fprintf(stderr, "DEBUG: Classifying as command\n");
-        vars->curr_type = TYPE_CMD;
-        *first_token = 0;
-    }
-    // If override_type is provided, use it
-    else if (override_type != TYPE_NULL)
-    {
-        fprintf(stderr, "DEBUG: Using override type %d\n", override_type);
-        vars->curr_type = override_type;
-    }
-    // Otherwise, if token starts with '-', it's an argument to previous command
-    else if (token[0] == '-')
-    {
-        fprintf(stderr, "DEBUG: Classifying as argument to command '%s'\n", 
-                vars->head ? vars->head->args[0] : "unknown");
-        vars->curr_type = TYPE_ARGS;
-    }
-    // For all other cases, determine based on context
-    else
-    {
-        fprintf(stderr, "DEBUG: Classifying as STRING\n");
-        vars->curr_type = TYPE_STRING;
-        
-        // After a pipe, the next string is likely a command
-        if (vars->current && vars->current->type == TYPE_PIPE)
-        {
-            fprintf(stderr, "DEBUG: Reclassifying after pipe as CMD\n");
-            vars->curr_type = TYPE_CMD;
-        }
-    }
-    
-    fprintf(stderr, "DEBUG: process_text: extracted token='%s'\n", token);
-    maketoken(token, vars);
-    ft_safefree((void **)&token);
-}
-*/
-/*HOPEFULLY LAST OLD VERSION
-void process_text(char *str, t_vars *vars, int *first_token, t_tokentype override_type)
-{
-    char *token;
-    int len;
-    
-    // Extract the token from the string
-    len = vars->pos - vars->start;
-    token = ft_substr(str, vars->start, len);
-    if (!token)
-        return;
-        
-    fprintf(stderr, "DEBUG: process_text: len=%d, text='%s', first_token=%d\n", 
-            len, token, *first_token);
-            
-    // Process token based on type
-    if (override_type != TYPE_NULL)
-    {
-        vars->curr_type = override_type;
-        fprintf(stderr, "DEBUG: Using override type %d\n", override_type);
-    }
-    else if (*first_token)
-    {
-        vars->curr_type = TYPE_CMD;
-        fprintf(stderr, "DEBUG: Classifying as command\n");
-    }
-    else
-    {
-        vars->curr_type = TYPE_STRING;
-        fprintf(stderr, "DEBUG: Classifying as STRING\n");
-    }
-    
-    fprintf(stderr, "DEBUG: process_text: extracted token='%s'\n", token);
-    
-    // Handle quoted tokens properly - NEW CODE FOR QUOTE HANDLING
-    if ((token[0] == '"' && token[len-1] == '"') || 
-        (token[0] == '\'' && token[len-1] == '\'')) 
-    {
-        fprintf(stderr, "DEBUG: Found balanced quotes in token '%s'\n", token);
-        // Don't increase quote depth for balanced quotes
-    }
-    else if (token[0] == '"' || token[0] == '\'' || 
-             ft_strchr(token, '"') || ft_strchr(token, '\''))
-    {
-        // Only count as unbalanced if not properly closed
-        int balanced = 1; 
-        char quote_char = token[0];
-        int in_quote = 0;
-        
-        for (int i = 0; i < len; i++) {
-            if (token[i] == quote_char) {
-                in_quote = !in_quote;
-            }
-        }
-        if (in_quote) {
-            fprintf(stderr, "DEBUG: Found unbalanced quote in token '%s'\n", token);
-            balanced = 0;
-        }
-        
-        if (!balanced) {
-            vars->quote_depth = 1;
-            vars->quote_ctx[0].type = quote_char;
-        }
-    }
-    maketoken(token, vars);
-    *first_token = 0;
-    ft_safefree((void **)&token);
-    vars->start = vars->pos;
-}
-*/
-/*
-Processes text and adds to token list with optional type override.
-OLD VERSION
-void process_text(char *str, t_vars *vars, int *first_token, t_tokentype override_type)
-{
-    char *token;
-    int len;
-    
-    // Extract the token from the string
-    len = vars->pos - vars->start;
-    token = ft_substr(str, vars->start, len);
-    if (!token)
-        return;
-        
-    fprintf(stderr, "DEBUG: process_text: len=%d, text='%s', first_token=%d\n", 
-            len, token, *first_token);
-            
-    // Process token based on type
-    if (override_type != TYPE_NULL)
-    {
-        vars->curr_type = override_type;
-        fprintf(stderr, "DEBUG: Using override type %d\n", override_type);
-    }
-    else if (*first_token)
-    {
-        vars->curr_type = TYPE_CMD;
-        fprintf(stderr, "DEBUG: Classifying as command\n");
-    }
-    else
-    {
-        vars->curr_type = TYPE_STRING;
-        fprintf(stderr, "DEBUG: Classifying as STRING\n");
-    }
-    
-    fprintf(stderr, "DEBUG: process_text: extracted token='%s'\n", token);
-    
-    // Handle quoted tokens properly - Check for balanced quotes
-    if ((len >= 2 && token[0] == '"' && token[len-1] == '"') || 
-        (len >= 2 && token[0] == '\'' && token[len-1] == '\''))
-    {
-        fprintf(stderr, "DEBUG: Found balanced quotes in token '%s'\n", token);
-        // Don't increase quote depth for balanced quotes
-        vars->quote_depth = 0;
-    }
-    
-    maketoken(token, vars);
-    *first_token = 0;
-    free(token);
-    vars->start = vars->pos;
-}
-*/
-/*
-Processes text and adds to token list with optional type override.
 */
 void process_text(char *str, t_vars *vars, int *first_token, t_tokentype override_type)
 {
@@ -343,110 +165,6 @@ Example: For input with unclosed quote "echo "hello
 - User enters "world""
 - Function returns "echo "hello\nworld""
 - Quote depth is reset after processing
-OLDER VERSION
-char *lexing_unclosed_quo(char *input, t_vars *vars)
-{
-    char *processed_cmd = input;
-    
-    while (vars->quote_depth > 0)
-    {
-        char *addon = get_quote_input(vars);
-		fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo\n");
-        if (!addon)
-            return (NULL);
-		fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo.before calling appnd\n");
-        processed_cmd = append_input(processed_cmd, addon);
-		fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo.after calling appnd\n");
-        if (!processed_cmd)
-            return (NULL);
-        tokenize(processed_cmd, vars);
-    }
-    return processed_cmd;
-}
-*/
-/*
-Handles incomplete quoted input by reading additional lines.
-- Provides continuation prompts with quote> prefix.
-- Appends new input to existing command string.
-- Re-tokenizes the combined input to check quote closure.
-Returns:
-- Modified string with complete quoted content
-- NULL on memory allocation failure or input error
-NEW OLDER VERSION
-char	*lexing_unclosed_quo(char *input, t_vars *vars)
-{
-    char	*processed_cmd;
-    char	*addon;
-    char	*temp;
-    int		attempts;
-    
-    // Initialize variables
-    attempts = 0;
-    processed_cmd = input;
-    
-    // Process quotes until they're all closed or max attempts reached
-    while (vars->quote_depth > 0 && attempts < 10)
-    {
-        // Count this attempt
-        attempts++;
-        
-        // Get additional input
-        addon = get_quote_input(vars);
-        fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo\n");
-        
-        // Check for EOF or error
-        if (!addon)
-            return (NULL);
-            
-        fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo.before calling appnd\n");
-        
-        // Join strings properly without losing characters
-        temp = append_input(processed_cmd, addon);
-        
-        // Free addon right after using it
-        ft_safefree((void **)&addon);
-        
-        // Check if append was successful
-        if (!temp)
-            return (NULL);
-            
-        // Update processed_cmd and free old one if needed
-        if (processed_cmd != input)
-            ft_safefree((void **)&processed_cmd);
-        processed_cmd = temp;
-        
-        fprintf(stderr, "DEBUG: get_quo_put fr lex_uncl_quo.after calling appnd\n");
-        
-        // Reset parser state completely before retokenizing
-        cleanup_token_list(vars);
-        vars->quote_depth = 0;
-        vars->head = NULL;
-        vars->current = NULL;
-        
-        // Debug output for the string being tokenized
-        fprintf(stderr, "DEBUG: Tokenizing combined string: '%s'\n", processed_cmd);
-        
-        // Retokenize with combined input
-        tokenize(processed_cmd, vars);
-        
-        fprintf(stderr, "DEBUG: After tokenizing with added quote, depth=%d\n", 
-                vars->quote_depth);
-                
-        // If quotes are now balanced, exit the loop
-        if (vars->quote_depth == 0)
-            break;
-    }
-    
-    // Handle too many unclosed quotes
-    if (vars->quote_depth > 0 && attempts >= 10)
-    {
-        fprintf(stderr, "DEBUG: Failed to close quotes after multiple attempts\n");
-        print_error("Too many unclosed quotes, aborting input", NULL, 0);
-    }
-    
-    // Return processed command string
-    return (processed_cmd);
-}
 */
 char *lexing_unclosed_quo(char *input, t_vars *vars)
 {
@@ -534,7 +252,7 @@ Works with handle_token().
 Example: For $HOME in input
 - Creates expansion token for HOME variable
 - Updates position to end of variable name
-*/
+OLD VERSION
 void	handle_expansion_token(char *str, t_vars *vars, int *first_token)
 {
     char	*expanded;
@@ -544,6 +262,108 @@ void	handle_expansion_token(char *str, t_vars *vars, int *first_token)
     expanded = handle_expansion(str, &vars->pos, vars);
     if (expanded)
         ft_safefree((void **)&expanded);
+    
+    vars->start = vars->pos;
+}
+*/
+/*
+Processes variable expansion tokens.
+- Handles $VAR syntax for variable expansion.
+- Creates appropriate expansion nodes.
+- Special handling for $? to show exit status
+Returns:
+Nothing (void function).
+Works with handle_token().
+*/
+void handle_expansion_token(char *str, t_vars *vars, int *first_token)
+{
+    char *expanded;
+    t_node *cmd_node;
+    
+    // Process any text before the $ if needed
+    if (vars->pos > vars->start)
+        process_text(str, vars, first_token, 0);
+    
+    // Special handling for $?
+    if (str[vars->pos] == '$' && str[vars->pos + 1] == '?')
+    {
+        // Find the most recent command node if we're not the first token
+        if (!(*first_token) && vars->head)
+        {
+            // Try to find the last command node to add $? as an argument
+            cmd_node = find_last_command(vars->head);
+            
+            if (cmd_node && cmd_node->type == TYPE_CMD)
+            {
+                // Append $? as an argument to the command
+                fprintf(stderr, "DEBUG: Adding $? as argument to command '%s'\n", 
+                       cmd_node->args[0]);
+                append_arg(cmd_node, "$?");
+            }
+            else
+            {
+                // If we can't find a command to attach to, create a token with proper type
+                vars->curr_type = TYPE_EXIT_STATUS;  // Use proper type
+                maketoken("$?", vars);
+                fprintf(stderr, "DEBUG: Created standalone $? token with TYPE_EXIT_STATUS\n");
+            }
+        }
+        else
+        {
+            // First token - create as command if it's the first thing in the input
+            vars->curr_type = *first_token ? TYPE_CMD : TYPE_EXIT_STATUS;
+            maketoken("$?", vars);
+            *first_token = 0;  // No longer the first token
+            fprintf(stderr, "DEBUG: Created $? token as %s\n", 
+                  *first_token ? "command" : "exit status");
+        }
+        
+        vars->pos += 2; // Skip past $?
+    }
+    else
+    {
+        // Regular variable expansion
+        expanded = handle_expansion(str, &vars->pos, vars);
+        
+        if (expanded)
+        {
+            // Similar logic as for $? - if we're not first token and have a command,
+            // add as an argument to that command
+            if (!(*first_token) && vars->head)
+            {
+                cmd_node = find_last_command(vars->head);
+                if (cmd_node && cmd_node->type == TYPE_CMD)
+                {
+                    fprintf(stderr, "DEBUG: Adding expanded value '%s' as argument to command '%s'\n", 
+                           expanded, cmd_node->args[0]);
+                    append_arg(cmd_node, expanded);
+                }
+                else
+                {
+                    // Otherwise create a standalone token
+                    vars->curr_type = TYPE_STRING;
+                    maketoken(expanded, vars);
+                    fprintf(stderr, "DEBUG: Created standalone token from expanded value: '%s'\n", expanded);
+                }
+            }
+            else
+            {
+                // First token - create as command
+                vars->curr_type = *first_token ? TYPE_CMD : TYPE_STRING;
+                maketoken(expanded, vars);
+                *first_token = 0;  // No longer the first token
+            }
+            
+            ft_safefree((void **)&expanded);
+        }
+        else
+        {
+            // Empty expansion
+            vars->curr_type = TYPE_STRING;
+            maketoken("", vars);
+            fprintf(stderr, "DEBUG: Created empty token for undefined variable\n");
+        }
+    }
     
     vars->start = vars->pos;
 }
@@ -611,30 +431,6 @@ Works with handle_token().
 Example: For input with ">" operator
 - Creates output redirection token
 - Updates position past the operator
-OLDER VERSION
-void	handle_operator_token(char *str, t_vars *vars, int *first_token)
-{
-    if (vars->pos > vars->start)
-        process_text(str, vars, first_token, 0);
-    if (str[vars->pos] == '|')
-        create_operator_token(vars, TYPE_PIPE, "|");
-    else if (str[vars->pos] == '>' && str[vars->pos + 1] == '>')
-    {
-        create_operator_token(vars, TYPE_APPEND_REDIRECT, ">>");
-        vars->pos++;
-    }
-    else if (str[vars->pos] == '<' && str[vars->pos + 1] == '<')
-    {
-        create_operator_token(vars, TYPE_HEREDOC, "<<");
-        vars->pos++;
-    }
-    else if (str[vars->pos] == '>')
-        create_operator_token(vars, TYPE_OUT_REDIRECT, ">");
-    else if (str[vars->pos] == '<')
-        create_operator_token(vars, TYPE_IN_REDIRECT, "<");
-    vars->pos++;
-    vars->start = vars->pos;
-}
 */
 void	handle_operator_token(char *str, t_vars *vars, int *first_token)
 {
@@ -741,46 +537,3 @@ void	lexerlist(char *str, t_vars *vars)
     else
         fprintf(stderr, "DEBUG: No tokens created!\n");
 }
-
-/*
-Processes command token and arguments.
-- Splits command string by whitespace.
-- Creates command node with arguments.
-- Updates token list.
-Returns:
-Nothing (void function).
-Works with process_text().
-
-Example: For "echo hello world"
-- Creates TYPE_CMD node with "echo" as command
-- Adds "hello" and "world" as arguments
-DEPRECATED.MIGHT BE REMOVED IF FUNCTION IN TOKENIZE.C IS
-void	process_cmd_token(char *input, t_vars *vars)
-{
-    char	**parts;
-    t_node	*cmd_node;
-    int		i;
-    
-    parts = ft_splitstr(input, " \t\n");
-    if (!parts || !parts[0])
-    {
-        if (parts)
-            ft_free_2d(parts, ft_arrlen(parts));
-        return ;
-    }
-    cmd_node = initnode(TYPE_CMD, parts[0]);
-    if (!cmd_node)
-    {
-        ft_free_2d(parts, ft_arrlen(parts));
-        return ;
-    }
-    i = 1;
-    while (parts[i])
-    {
-        append_arg(cmd_node, parts[i]);
-        i++;
-    }
-    build_token_linklist(vars, cmd_node);
-    ft_free_2d(parts, ft_arrlen(parts));
-}
-*/

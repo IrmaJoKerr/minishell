@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 07:06:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:41:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,17 +82,6 @@ Example: For '|' character
 - Returns TYPE_PIPE enum value
 - Allows consistent token type assignment
 Used with handle_single_operator().
-OLD VERSION
-t_tokentype	get_operator_type(char op)
-{
-	if (op == '|')
-		return (TYPE_PIPE);
-	else if (op == '>')
-		return (TYPE_OUT_REDIRECT);
-	else if (op == '<')
-		return (TYPE_IN_REDIRECT);
-	return (TYPE_STRING);
-}
 */
 t_tokentype	get_operator_type(char op)
 {

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 11:50:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:37:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,68 +129,6 @@ Returns:
   0 - No syntax errors
   1 - Syntax error detected
 OLD VERSION
-int	chk_syntax_errors(t_vars *vars)
-{
-	t_ast	*ast;
-	int		result;
-	
-	ast = init_ast_struct(vars);
-	if (!ast)
-		return (1);
-	// Check for pipe at beginning
-	if (chk_pipe_before_cmd(vars, ast))
-	{
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-		vars->pipeline->last_cmdcode = 258;
-		cleanup_ast_struct(ast);
-		return (1);
-	}
-	// Check for consecutive pipes
-	if (chk_serial_pipes(vars, ast))
-	{
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-		vars->pipeline->last_cmdcode = 258;
-		cleanup_ast_struct(ast);
-		return (1);
-	}
-	cleanup_ast_struct(ast);
-	return (0);
-}
-NEWER OLD VERSION
-int chk_syntax_errors(t_vars *vars)
-{
-    t_ast *ast;
-    
-	fprintf(stderr, "DEBUG: [chk_syntax_errors] Starting syntax check\n");
-    ast = init_ast_struct();
-    if (!ast)
-        return (1);
-    // Check for pipe at beginning
-    if (chk_pipe_before_cmd(vars, ast))
-    {
-		fprintf(stderr, "DEBUG: in chk_syntax_errors - run chk_pipe_bf_cmd\n");
-        fprintf(stderr, "DEBUG: [chk_syntax_errors] Pipeline state: %p\n", (void*)vars->pipeline);
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-        if (vars->pipeline)
-            vars->pipeline->last_cmdcode = 258;
-        cleanup_ast_struct(ast);
-        return (1);
-    }
-    // Check for consecutive pipes
-    if (chk_serial_pipes(vars, ast))
-    {
-		fprintf(stderr, "DEBUG: in chk_syntax_errors - run chk_serial_pipes\n");
-        fprintf(stderr, "DEBUG: [chk_syntax_errors] Found error: Adjacent pipes\n");
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-        if (vars->pipeline)
-            vars->pipeline->last_cmdcode = 258;
-        cleanup_ast_struct(ast);
-        return (1);
-    }
-    cleanup_ast_struct(ast);
-	fprintf(stderr, "DEBUG: [chk_syntax_errors] Exiting with status %d\n", 1);
-    return (0);
-}
 */
 int chk_syntax_errors(t_vars *vars)
 {
@@ -261,86 +199,6 @@ Handles token list cleanup, input verification, and syntax checking.
 Returns:
 - 0 if preparation was successful
 - 1 if an error occurred
-OLD VERSION
-int	prepare_input(char *input, t_vars *vars, char **processed_cmd)
-{
-	// Clean up previous token list and AST
-	cleanup_token_list(vars);
-	// Reset pipeline cmd_count
-	if (vars->pipeline)
-		vars->pipeline->cmd_count = 0;
-	// Verify the input is complete
-	*processed_cmd = verify_input(input, vars);
-	if (!*processed_cmd)
-		return (1);
-	print_error("Processing input", NULL, 0);
-	// Tokenize the verified input
-	tokenize(*processed_cmd, vars);
-	lexerlist(*processed_cmd, vars);
-	// Check for syntax errors
-	if (chk_syntax_errors(vars))
-	{
-		ft_safefree((void **)processed_cmd);
-		return (1);
-	}
-	print_error("Tokens processed successfully", NULL, 0);
-	return (0);
-}
-*/
-/*NEWER OLD VERSION
-int prepare_input(char *input, t_vars *vars, char **processed_cmd)
-{
-    // Clean up previous token list and AST
-    fprintf(stderr, "DEBUG: [prepare_input] Starting cleanup before processing\n");
-    cleanup_token_list(vars);
-    fprintf(stderr, "DEBUG: [prepare_input] Initial cleanup complete\n");
-    
-    // Reset pipeline cmd_count
-    if (vars->pipeline)
-        vars->pipeline->cmd_count = 0;
-        
-    // Verify the input is complete
-    *processed_cmd = verify_input(input, vars);
-    if (!*processed_cmd)
-    {
-        fprintf(stderr, "DEBUG: [prepare_input] Failed to verify input\n");
-        return (1);
-    }
-    
-    print_error("Processing input", NULL, 0);
-    
-    // Tokenize the verified input
-    tokenize(*processed_cmd, vars);
-    lexerlist(*processed_cmd, vars);
-    
-    // Check for syntax errors
-    fprintf(stderr, "DEBUG: [prepare_input] Before syntax check, token count: %d\n",
-            count_tokens(vars->head));
-            
-    if (chk_syntax_errors(vars))
-    {
-        fprintf(stderr, "DEBUG: [prepare_input] Syntax error detected, cleaning up processed_cmd %p\n",
-                (void*)*processed_cmd);
-                
-        // Check token list state before freeing processed_cmd
-        fprintf(stderr, "DEBUG: [prepare_input] Token list state after syntax error: head=%p, count=%d\n",
-                (void*)vars->head, count_tokens(vars->head));
-                
-        ft_safefree((void **)processed_cmd);
-        
-        // Verify token list isn't freed again
-        fprintf(stderr, "DEBUG: [prepare_input] After processed_cmd cleanup, token list: head=%p\n",
-                (void*)vars->head);
-                
-        return (1);
-    }
-    
-    fprintf(stderr, "DEBUG: [prepare_input] Syntax check passed, token count: %d\n",
-            count_tokens(vars->head));
-    
-    print_error("Tokens processed successfully", NULL, 0);
-    return (0);
-}
 */
 int prepare_input(char *input, t_vars *vars, char **processed_cmd)
 {
@@ -495,32 +353,6 @@ char	*join_with_newline(char *first, char *second)
 Helper function to append input with newline.
 Takes ownership of first string and frees it after joining.
 Returns a newly allocated string with combined content.
-OLD VERSION
-char	*append_new_input(char *first, char *second)
-{
-	char	*result;
-	
-	fprintf(stderr, "DEBUG: Appending new input\n");
-	// Handle NULL first string
-	if (!first)
-	{
-		fprintf(stderr, "DEBUG: First string is NULL, duplicating second\n");
-		if (!second)
-			return (NULL);
-		result = ft_strdup(second);
-		if (!result)
-			fprintf(stderr, "DEBUG: Failed to duplicate second string\n");
-		return (result);
-	}
-	// Handle NULL second string
-	if (!second)
-	{
-		fprintf(stderr, "DEBUG: Second string is NULL, returning first\n");
-		return (first);
-	}
-	// Join strings with newline
-	return (join_with_newline(first, second));
-}
 */
 char *append_new_input(char *first, char *second)
 {
@@ -538,61 +370,3 @@ char *append_new_input(char *first, char *second)
     fprintf(stderr, "DEBUG: [append_new_input] Result=%p\n", (void*)result);
     return result;
 }
-
-/*
-Tokenize input for verification.
-Cleans up any previous token list first.
-Returns:
-- 0 if tokenization was successful
-- -1 if an error occurred
-OLD VERSION
-int tokenize_to_test(char *input, t_vars *vars)
-{
-	// Clean up previous token list
-	cleanup_token_list(vars);
-	// Reset quote context
-	vars->quote_depth = 0;
-	// Tokenize the input
-	tokenize(input, vars);
-	lexerlist(input, vars);
-	return (0);
-}
-*/
-
-/*
-Helper function to append input with newline.
-Takes ownership of first string and frees it after joining.
-Returns a newly allocated string with combined content.
-OLD VERSION
-char	*append_new_input(char *first, char *second)
-{
-	char	*with_newline;
-	char	*result;
-	
-	fprintf(stderr, "DEBUG: Appending new input\n");
-	if (!first)
-	{
-		fprintf(stderr, "DEBUG: First string is NULL, duplicating second\n");
-		return (ft_strdup(second));
-	}
-	if (!second)
-	{
-		fprintf(stderr, "DEBUG: Second string is NULL, returning first\n");
-		return (first);
-	}
-	with_newline = ft_strjoin(first, "\n");
-	ft_safefree((void **)&first);
-	if (!with_newline)
-	{
-		fprintf(stderr, "DEBUG: Failed to join with newline\n");
-		return (NULL);
-	}
-	result = ft_strjoin(with_newline, second);
-	ft_safefree((void **)&with_newline);
-	if (!result)
-		fprintf(stderr, "DEBUG: Failed to join with second string\n");
-	else
-		fprintf(stderr, "DEBUG: Successfully appended new input\n");
-	return (result);
-}
-*/

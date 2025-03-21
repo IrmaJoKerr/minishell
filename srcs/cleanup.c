@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:09:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 09:45:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:32:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,9 +125,7 @@ void	cleanup_exit(t_vars *vars)
 {
     if (!vars)
         return ;
-    // REMOVED: save_history() call - it's already called in builtin_exit()
     cleanup_token_list(vars); 
     cleanup_vars(vars);
-    // REMOVED: rl_clear_history() - also already called in builtin_exit()
     ft_safefree((void **)&vars->error_msg);
 }

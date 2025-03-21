@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 05:06:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:41:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,19 +383,6 @@ Example: For "ls -l | grep txt"
 - Sets up pipeline processes
 - Waits for both commands to complete
 - Returns final execution status
-OLD VERSION
-int	execute_pipeline(t_node *pipe_node, t_vars *vars)
-{
-pid_t	left_pid;
-pid_t	right_pid;
-int		status;
-
-if (setup_pipeline_procs(pipe_node, vars, &left_pid, &right_pid))
-	return (1);
-waitpid(left_pid, NULL, 0);
-waitpid(right_pid, &status, 0);
-return (handle_cmd_status(status, vars));
-}
 */
 int execute_pipeline(t_node *pipe_node, t_vars *vars)
 {

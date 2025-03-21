@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 17:44:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 06:37:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:29:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,23 +115,6 @@ This is a sub-control function for the AST building process by:
 Returns:
 - The root node of the completed AST, ready for execution
 - NULL if AST creation fails
-OLD VERSION
-t_node	*process_token_list(t_vars *vars)
-{
-	t_ast	ast;
-	t_node	*root;
-	
-	ft_memset(&ast, 0, sizeof(t_ast));
-	// Collect command nodes from token list
-	find_cmd_nodes(vars);
-	// Process pipe nodes
-	ast.pipe_root = process_pipe_nodes(vars, &ast);
-	// Process redirection nodes
-	process_redirections(vars, &ast);
-	// Determine root node
-	root = set_ast_root(ast.pipe_root, vars);
-	return (root);
-}
 */
 t_node	*process_token_list(t_vars *vars)
 {

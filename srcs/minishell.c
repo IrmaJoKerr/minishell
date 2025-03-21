@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 12:06:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:40:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,28 +70,6 @@ void	setup_env(t_vars *vars, char **envp)
         ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
 }
 
-/*
-Initializes the shell environment and settings.
-- Zeroes all fields in vars structure.
-- Sets up environment variables.
-- Loads command history from history file.
-- Configures signal handlers for interactive use.
-Works with main() at program startup.
-
-Example: At shell startup
-- Initializes all shell state variables to default values
-- Loads environment and history
-- Sets up signal handling for terminal interaction
-OLD VERSION
-void	init_shell(t_vars *vars, char **envp)
-{	
-    ft_memset(vars, 0, sizeof(t_vars));
-    setup_env(vars, envp);
-    vars->quote_depth = 0;
-    load_history();
-    load_signals();
-}
-*/
 /*
 Initializes the shell environment and variables.
 - Sets up signal handlers.
@@ -299,33 +277,6 @@ Example: For input "ls |"
 - Detects unfinished pipe
 - Prompts for continuation
 - Returns completed command with pipe and continuation
-OLD VERSION
-char	*process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
-{
-    int		syntax_chk;
-    char	*processed_cmd;
-    
-    processed_cmd = command;
-    syntax_chk = chk_pipe_syntax_err(vars);
-    
-    if (syntax_chk == 1)
-    {
-        if (processed_cmd != orig_cmd)
-            ft_safefree((void **)&processed_cmd);
-        ft_safefree((void **)&orig_cmd);
-        return (NULL);
-    }
-    processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
-    return (processed_cmd);
-}
-*/
-/*
-Handles pipe syntax validation and completion.
-- Checks for pipe syntax errors.
-- Handles unfinished pipes by prompting for continuation.
-Returns:
-- Updated command string after pipe processing.
-- NULL on memory allocation failure or other error.
 */
 char *process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
 {
@@ -411,38 +362,6 @@ int	process_command(char *command, t_vars *vars)
     return (1);
 }
 
-/*
-Main entry point for the minishell program.
-- Initializes shell environment and variables.
-- Enters command processing loop.
-- Handles cleanup on exit.
-Returns:
-0 on normal program exit.
-Works as program entry point.
-OLD VERSION
-int	main(int ac, char **av, char **envp)
-{
-    t_vars	vars;
-    char	*command;
-
-    (void)ac;
-    (void)av;
-    init_shell(&vars, envp);
-    while (1)
-    {
-        command = reader(&vars);
-        if (!process_command(command, &vars))
-            break ;
-    }
-    if (vars.env)
-    {
-        ft_free_2d(vars.env, ft_arrlen(vars.env));
-        vars.env = NULL;
-    }
-    cleanup_exit(&vars);
-    return (0);
-}
-*/
 /*
 Main shell loop that processes user commands and manages execution flow.
 - Reads input through reader() function.

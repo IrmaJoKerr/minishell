@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:39:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 21:08:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:42:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,67 +60,6 @@ Returns: Exit status of the rightmost command in the pipeline,
 or 1 on error (pipe creation failure, NULL parameters).
 Works with execute_cmd() in a recursive manner for multiple pipelines.
 Example: ls | grep txt.c | wc -l
-OLD VERSION
-int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
-{
-	int     pipefd[2];
-	pid_t   left_pid, right_pid;
-	int     status;
-
-	fprintf(stderr, "DEBUG: Setting up pipeline\n");
-	if (!pipe_node || pipe_node->type != TYPE_PIPE || !pipe_node->left || !pipe_node->right)
-	{
-		fprintf(stderr, "DEBUG: Invalid pipe node\n");
-		return 1;
-	}
-	if (pipe(pipefd) == -1)
-	{
-		perror("pipe");
-		return 1;
-	}
-	// Fork process for left command
-	left_pid = fork();
-	if (left_pid == 0)
-	{
-		// Child process (left command)
-		close(pipefd[0]);  // Close read end
-		dup2(pipefd[1], STDOUT_FILENO);  // Redirect stdout to pipe write end
-		close(pipefd[1]);  // Close original pipe write end
-		
-		exit(execute_cmd(pipe_node->left, envp, vars));
-	}
-	else if (left_pid < 0)
-	{
-		perror("fork");
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return 1;
-	}
-	// Fork process for right command
-	right_pid = fork();
-	if (right_pid == 0)
-	{
-		// Child process (right command)
-		close(pipefd[1]);  // Close write end
-		dup2(pipefd[0], STDIN_FILENO);  // Redirect stdin to pipe read end
-		close(pipefd[0]);  // Close original pipe read end
-		exit(execute_cmd(pipe_node->right, envp, vars));
-	}
-	else if (right_pid < 0)
-	{
-		perror("fork");
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return 1;
-	}
-	// Parent process
-	close(pipefd[0]);
-	close(pipefd[1]);
-	// Wait for both processes to complete
-	waitpid(left_pid, &status, 0);
-	waitpid(right_pid, &status, 0);
-	return handle_cmd_status(status, vars);
-}
 */
 int execute_pipeline(t_node *pipe_node, char **envp, t_vars *vars)
 {

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/20 18:49:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:34:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,33 +192,6 @@ Example: When shell exits with 1500 history entries and HISTORY_FILE_MAX=1000
 - Skips oldest 500 entries
 - Writes newest 1000 entries to history file
 - Logs success with number of entries saved
-OLD VERSION
-void	save_history(void)
-{
-    int			fd;
-    HIST_ENTRY	**hist_list;
-    int			i;
-    int			history_count;
-    int			excess_lines;
-
-    fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd == -1)
-    {
-        perror("bleshell: error opening history file");
-        return ;
-    }
-    hist_list = history_list();
-    if (!hist_list)
-    {
-        close(fd);
-        return ;
-    }
-    history_count = history_length;
-    excess_lines = history_count - HISTORY_FILE_MAX;
-    i = (excess_lines > 0) ? excess_lines : 0;
-    save_history_entries(fd, hist_list, i, history_count);
-    close(fd);
-}
 */
 void	save_history(void)
 {

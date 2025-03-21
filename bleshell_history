@@ -1,0 +1,10 @@
+echo $HOME
+echo $?
+echo $HOME
+echo $?
+clear
+echo $HOME
+echo $HOME
+clear
+echo $HOME
+echo $?

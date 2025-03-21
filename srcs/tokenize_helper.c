@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 07:54:40 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/15 08:10:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 00:43:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,39 +75,7 @@ void build_token_linklist(t_vars *vars, t_node *node)
 		fprintf(stderr, "DEBUG: Added token to list: type=%d\n", node->type);
 	}
 }
- 
-/*
-Process command tokens by splitting input string
-with whitespace as delimiter. Uses ft_splitstr()
-to handle quotes during splitting.
-OLD VERSION
-void process_cmd_token(char *input, t_vars *vars)
-{
-	char    **args;
-	t_node  *node;
-	int     i;
- 
-	args = ft_splitstr(input, " \t\n\v\f\r");
-	if (!args)
-		return ;
-	// Process quotes in arguments
-	i = 0;
-	while (args[i])
-	{
-		process_quotes_in_arg(&args[i]);
-		i++;
-	}
-	debug_cmd_tokens(args);
-	// Create command node
-	if (args[0])
-	{
-		node = build_cmdarg_node(args);
-		if (node)
-			build_token_linklist(vars, node);
-	}
-	ft_free_2d(args, ft_arrlen(args));
-}
-*/
+
 /*
 Process command tokens by splitting input string
 with whitespace as delimiter. Uses ft_splitstr()
