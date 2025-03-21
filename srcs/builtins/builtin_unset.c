@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:06 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 00:48:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,15 @@ int	builtin_unset(char **args, t_vars *vars)
     int cmdcode;
 
     cmdcode = 0;
-    if ((!vars || !vars->env) && (vars && vars->pipeline != NULL))
+    if ((!vars || !vars->env) && (vars != NULL))
     {
         cmdcode = 1;
-            vars->pipeline->last_cmdcode = cmdcode;
+        vars->error_code = cmdcode;
         return (cmdcode);
     }
-    if ((!args || !args[1]) && (vars->pipeline != NULL))
+    if (!args || !args[1])
 	{
-        vars->pipeline->last_cmdcode = cmdcode;
+        vars->error_code = cmdcode;
         return (cmdcode);
     }
     i = 1;
@@ -56,8 +56,7 @@ int	builtin_unset(char **args, t_vars *vars)
             modify_env(&vars->env, -1, args[i]);
         i++;
     }
-    if (vars->pipeline != NULL)
-        vars->pipeline->last_cmdcode = cmdcode;
+    vars->error_code = cmdcode;
     return (cmdcode);
 }
 

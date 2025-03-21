@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/21 04:14:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,7 @@ int	builtin_cd(char **args, t_vars *vars)
 		return (1);
 	}
 	ft_safefree((void **)&oldpwd);
-	if (vars->pipeline != NULL)
-		vars->pipeline->last_cmdcode = cmdcode;
+	vars->error_code = cmdcode;
 	return (cmdcode);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/20 04:07:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:50:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,7 +280,7 @@ Example: For input "ls -l | grep foo > output.txt":
 - First executes the pipeline with ls and grep
 - Handles the redirection to output.txt
 - Returns final exit status
-*/
+OLD VERSION
 int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
     if (!node)
@@ -302,3 +302,56 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
     }
     return (exec_std_cmd(node, envp, vars));
 }
+*/
+int	execute_cmd(t_node *node, char **envp, t_vars *vars)
+{
+    int     i;
+    char    *exit_code;
+    
+    if (!node || !node->args || !node->args[0])
+        return (1);
+        
+    fprintf(stderr, "DEBUG: Executing CMD node: 0x%p\n", (void*)node);
+    fprintf(stderr, "DEBUG: Command: '%s' with %zu arguments\n", 
+            node->args[0], ft_arrlen(node->args) - 1);
+    
+    /* Skip $? expansion for echo command to allow special handling */
+    if (!(is_builtin(node->args[0]) && ft_strcmp(node->args[0], "echo") == 0))
+    {
+        /* Special handling for $? in arguments */
+        i = 0;
+        while (node->args && node->args[i])
+        {
+            if (ft_strcmp(node->args[i], "$?") == 0)
+            {
+                /* Convert vars->error_code to string and replace the $? */
+                exit_code = ft_itoa(vars->error_code);
+                if (exit_code)
+                {
+                    ft_safefree((void **)&node->args[i]);
+                    node->args[i] = exit_code;
+                    fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", exit_code);
+                }
+            }
+            i++;
+        }
+    }
+    else
+    {
+        fprintf(stderr, "DEBUG: Skipping $? expansion for echo command\n");
+    }
+    fprintf(stderr, "DEBUG: Executing %s node: %p\n",
+        get_token_str(node->type), (void *)node);
+    if (node->type == TYPE_PIPE)
+    {
+        fprintf(stderr, "DEBUG: Executing pipe command\n");
+        return (execute_pipeline(node, vars));
+    }
+    if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT
+        || node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+    {
+        return (exec_redirect_cmd(node, envp, vars));
+    }
+    return (exec_std_cmd(node, envp, vars));
+}
+

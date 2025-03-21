@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:28:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 00:01:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@ Handles exit status token. Returns the exit status. Works with classify.
 */
 char	*handle_exit_status(t_vars *vars)
 {
-	if (vars && vars->pipeline)
-		return (ft_itoa(vars->pipeline->last_cmdcode));
+	if (vars)
+		return (ft_itoa(vars->error_code));
 	return (ft_strdup("0"));
 }
 

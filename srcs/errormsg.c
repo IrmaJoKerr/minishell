@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 18:12:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,7 @@ int	redirect_error(char *filename, t_vars *vars, int use_errno)
         use_errno_error(filename, &error_code);
     else
         file_access_error(filename);
-    if (vars && vars->pipeline)
-        vars->pipeline->last_cmdcode = error_code;
+    vars->error_code = error_code;
     return (error_code);
 }
 
@@ -89,8 +88,7 @@ int	print_error(const char *msg, t_vars *vars, int error_code)
         error_code = 1;
     ft_putstr_fd("bleshell: ", 2);
     ft_putendl_fd((char *)msg, 2);
-    if (vars && vars->pipeline)
-        vars->pipeline->last_cmdcode = error_code;
+	vars->error_code = error_code;
     return (error_code);
 }
 

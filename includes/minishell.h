@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:49:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:35:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,6 @@ typedef struct s_pipe
 	t_node      *root_node;     // Root node of the pipe structure
 	int         append_mode;    // Append flag for redirections
 	t_node      *current_redirect; // Current redirection node
-	int         last_cmdcode;    // Status of the last command (for return value)
 } t_pipe;
 
 /*
@@ -231,6 +230,7 @@ In builtin_echo.c
 */
 int			builtin_echo(char **args, t_vars *vars);
 int			process_echo_args(char **args, int start, int nl_flag);
+int			print_exit_status(char **args, t_vars *vars, int *i, int *newline);
 
 /*
 Builtin "env" command. Outputs the environment variables.
@@ -312,7 +312,6 @@ t_node		*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd);
 void		proc_pipes_pt2(t_vars *vars, t_node *pipe_root, t_node **last_pipe, t_node **last_cmd);
 void		setup_redir_ast(t_node *redir, t_node *cmd, t_node *target);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
-int			is_redir_token(t_tokentype type);
 int			is_valid_redir_node(t_node *current);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 t_node		*proc_redir_pt1(t_vars *vars, t_node *pipe_root);

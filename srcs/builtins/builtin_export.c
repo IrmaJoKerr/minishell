@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/18 11:39:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,7 @@ int builtin_export(char **args, t_vars *vars)
 	if (!vars || !vars->env)
 	{
 		cmdcode = 1;
-		if (vars && vars->pipeline)
-			vars->pipeline->last_cmdcode = cmdcode;
+		vars->error_code = cmdcode;
 		return (cmdcode);
 	}
 	if (!args[1])
@@ -49,8 +48,7 @@ int	export_without_args(t_vars *vars)
 	while (vars->env[count])
 		count++;
 	cmdcode = sort_env(count, vars);
-	if (vars->pipeline != NULL)
-		vars->pipeline->last_cmdcode = cmdcode;
+	vars->error_code = cmdcode;
 	return (cmdcode);
 }
 
@@ -78,8 +76,7 @@ int	export_with_args(char **args, t_vars *vars)
 		}
 		i++;
 	}
-	if (vars->pipeline != NULL)
-		vars->pipeline->last_cmdcode = cmdcode;
+	vars->error_code = cmdcode;
 	return (cmdcode);
 }
 

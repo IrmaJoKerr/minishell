@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 17:44:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:29:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:16:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,7 @@ int	check_initial_pipe(t_vars *vars, t_ast *ast)
 	if (vars->head->type == TYPE_PIPE)
 	{
 		fprintf(stderr, "DEBUG: Syntax error: pipe at beginning\n");
-		if (vars->pipeline)
-			vars->pipeline->last_cmdcode = 258;
+		vars->error_code = 258;
 		ast->pipe_at_front = 1;
 		ast->syntax_error = 1;
 		return (1);
@@ -58,8 +57,7 @@ int	check_serial_pipes(t_vars *vars, t_ast *ast)
 			if (ast->serial_pipes > 0)
 			{
 				fprintf(stderr, "DEBUG: Syntax error: consecutive pipes\n");
-				if (vars->pipeline)
-					vars->pipeline->last_cmdcode = 258;
+					vars->error_code = 258;
 				ast->syntax_error = 1;
 				return (1);
 			}

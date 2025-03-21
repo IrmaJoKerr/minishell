@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:33:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 03:31:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ Works with handle_special_var().
 */
 char	*chk_exitstatus(t_vars *vars)
 {
-    if (vars && vars->pipeline)
-        return (ft_itoa(vars->pipeline->last_cmdcode));
+    if (vars)
+        return (ft_itoa(vars->error_code));
     else
         return (ft_strdup("0"));
 }
@@ -234,7 +234,7 @@ Example: For command node with args ["ls", "$HOME", "-l"]:
 - Expands "$HOME" to "/Users/username"
 - Results in args ["ls", "/Users/username", "-l"]
 Works with process_cmd_token().
-*/
+OLD VERSION
 void	expand_cmd_args(t_node *node, t_vars *vars)
 {
     int		i;
@@ -270,4 +270,86 @@ void	expand_cmd_args(t_node *node, t_vars *vars)
         node->args[i] = result;
         i++;
     }
+}
+*/
+/*
+Expands environment variables in command arguments.
+- Preserves $? argument for special handling
+- Processes each argument in a command node.
+- Searches for $ characters and expands variables.
+- Updates arguments with expanded values.
+- Handles quotes properly during expansion.
+Returns:
+Nothing (void function).
+
+Example: For command node with args ["ls", "$HOME", "-l"]:
+- Preserves "$?" as is
+- Expands "$HOME" to "/Users/username"
+- Results in args ["ls", "/Users/username", "-l"]
+Works with process_cmd_token().
+*/
+void	expand_cmd_args(t_node *node, t_vars *vars)
+{
+    int		i;
+    int		j;
+    char	*expanded;
+    char	*result;
+    
+    if (!node || !node->args)
+        return ;
+        
+    /* Skip processing entirely for echo $? case */
+    if (node->args[0] && ft_strcmp(node->args[0], "echo") == 0 &&
+        node->args[1] && ft_strcmp(node->args[1], "$?") == 0 &&
+        !node->args[2])
+    {
+        fprintf(stderr, "DEBUG: Preserving raw $? for echo\n");
+        return;
+    }
+    
+    i = 0;
+    while (node->args[i])
+    {
+        /* Preserve standalone $? arguments for special handling */
+        if (ft_strcmp(node->args[i], "$?") == 0)
+        {
+            fprintf(stderr, "DEBUG: Preserving $? argument at position %d\n", i);
+            i++;
+            continue;
+        }
+        j = 0;
+        result = ft_strdup("");
+        while (node->args[i][j])
+        {
+            if (node->args[i][j] == '$')
+            {
+                /* Preserve $? within strings if it's the entire variable */
+                if (node->args[i][j+1] == '?' && 
+                   (j == 0 && node->args[i][j+2] == '\0'))
+                {
+                    result = append_char(result, node->args[i][j]);
+                    result = append_char(result, node->args[i][j+1]);
+                    j += 2;
+                }
+                else
+                {
+                    expanded = handle_expansion(node->args[i], &j, vars);
+                    if (expanded)
+                    {
+                        result = merge_and_free(result, expanded);
+                        ft_safefree((void **)&expanded);
+                    }
+                }
+            }
+            else
+            {
+                result = append_char(result, node->args[i][j]);
+                j++;
+            }
+        }
+        ft_safefree((void **)&node->args[i]);
+        node->args[i] = result;
+        i++;
+    }
+    fprintf(stderr, "DEBUG: Expanded args complete\n");
 }

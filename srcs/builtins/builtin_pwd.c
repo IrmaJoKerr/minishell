@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:01 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/20 05:32:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,7 @@ int	builtin_pwd(t_vars *vars)
     if (!vars || !vars->env)
     {
         cmdcode = 1;
-        if (vars && vars->pipeline != NULL)
-            vars->pipeline->last_cmdcode = cmdcode;
+        vars->error_code = cmdcode;
         return (cmdcode);
     }
     cwd = get_env_val("PWD", vars->env);
@@ -38,13 +37,11 @@ int	builtin_pwd(t_vars *vars)
     {
         ft_safefree((void **)&cwd);
         cmdcode = 1;
-        if (vars->pipeline != NULL)
-            vars->pipeline->last_cmdcode = cmdcode;
+        vars->error_code = cmdcode;
         return (cmdcode);
     }
     printf("%s\n", cwd);
     ft_safefree((void **)&cwd);
-    if (vars->pipeline != NULL)
-        vars->pipeline->last_cmdcode = cmdcode;
+    vars->error_code = cmdcode;
     return (cmdcode);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:37:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,7 @@ int	chk_serial_pipes(t_vars *vars, t_ast *ast)
 			{
 				fprintf(stderr, "DEBUG: [chk_serial_pipes] Found adjacent pipes, setting error code %d\n", 1);
 				fprintf(stderr, "DEBUG: Syntax error: consecutive pipes\n");
-				if (vars->pipeline)
-					vars->pipeline->last_cmdcode = 258;
+				vars->error_code = 258;
 				ast->syntax_error = 1;
 				return (1);
 			}
@@ -145,8 +144,7 @@ int chk_syntax_errors(t_vars *vars)
         fprintf(stderr, "DEBUG: in chk_syntax_errors - run chk_pipe_bf_cmd\n");
         fprintf(stderr, "DEBUG: [chk_syntax_errors] Pipeline state: %p\n", (void*)vars->pipeline);
         ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-        if (vars->pipeline)
-            vars->pipeline->last_cmdcode = 258;
+        vars->error_code = 258;
         cleanup_ast_struct(ast);
         
         // Clean up token list to prevent double free
@@ -160,8 +158,7 @@ int chk_syntax_errors(t_vars *vars)
         fprintf(stderr, "DEBUG: in chk_syntax_errors - run chk_serial_pipes\n");
         fprintf(stderr, "DEBUG: [chk_syntax_errors] Found error: Adjacent pipes\n");
         ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-        if (vars->pipeline)
-            vars->pipeline->last_cmdcode = 258;
+        vars->error_code = 258;
         cleanup_ast_struct(ast);
         
         // Clean up token list to prevent double free
@@ -209,7 +206,7 @@ int prepare_input(char *input, t_vars *vars, char **processed_cmd)
     
     /* Reset pipeline cmd_count */
     if (vars->pipeline)
-        vars->pipeline->cmd_count = 0;
+    	vars->pipeline->cmd_count = 0;
         
     /* Verify the input is complete */
     *processed_cmd = verify_input(input, vars);

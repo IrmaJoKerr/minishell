@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/21 04:17:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,7 @@ int	builtin_exit(t_vars *vars)
     int	cmdcode;
     
     cmdcode = 0;
-    if (vars && vars->pipeline)
-        cmdcode = vars->pipeline->last_cmdcode;
+    cmdcode = vars->error_code;
         
     fprintf(stderr, "DEBUG: [builtin_exit] Starting exit sequence with code %d\n", cmdcode);
     ft_putendl_fd("exit", STDOUT_FILENO);

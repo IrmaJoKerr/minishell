@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:32:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 03:51:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,22 +232,6 @@ void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
 }
 
 /*
-Checks if a token is a redirection operator.
-- Compares token type against all redirection types.
-Returns:
-- 1 if token is a redirection operator.
-- 0 otherwise.
-Works with is_valid_redir_node().
-*/
-int	is_redir_token(t_tokentype type)
-{
-    return (type == TYPE_OUT_REDIRECT
-        || type == TYPE_APPEND_REDIRECT
-        || type == TYPE_IN_REDIRECT
-        || type == TYPE_HEREDOC);
-}
-
-/*
 Determines if a redirection node has valid adjacent commands.
 - Checks if next node exists and is a command.
 Returns:
@@ -259,7 +243,7 @@ int	is_valid_redir_node(t_node *current)
 {
     if (!current)
         return (0);
-    if (!is_redir_token(current->type))
+    if (!is_redirection(current->type))
         return (0);
     if (!current->next || current->next->type != TYPE_CMD)
         return (0);
@@ -520,7 +504,8 @@ int is_special_token(t_node *token)
     if (token->type == TYPE_DOUBLE_QUOTE || 
         token->type == TYPE_SINGLE_QUOTE ||
         token->type == TYPE_EXPANSION ||
-        token->type == TYPE_EXIT_STATUS)
+        token->type == TYPE_EXIT_STATUS ||
+        token->type == TYPE_STRING)
     {
         return (1);
     }
@@ -590,10 +575,7 @@ void	link_strargs_to_cmds(t_vars *vars)
             cmd_node = current;
         // If this is a string, expansion, or quoted string and we have a
 		// command to attach it to
-        else if ((current->type == TYPE_STRING || 
-                 current->type == TYPE_EXPANSION ||
-                 current->type == TYPE_EXIT_STATUS ||
-                 is_special_token(current)) && cmd_node)
+        else if (is_special_token(current) && cmd_node)
         {
             append_arg(cmd_node, current->args[0]);
             fprintf(stderr, "DEBUG: Adding '%s' as argument to '%s'\n",
@@ -1199,8 +1181,7 @@ int	check_initial_pipe(t_vars *vars, t_ast *ast)
 	if (vars->head->type == TYPE_PIPE)
 	{
 		fprintf(stderr, "DEBUG: Syntax error: pipe at beginning\n");
-		if (vars->pipeline)
-			vars->pipeline->last_cmdcode = 258;
+		vars->error_code = 258;
 		ast->pipe_at_front = 1;
 		ast->syntax_error = 1;
 		return (1);

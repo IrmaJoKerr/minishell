@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:43 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/16 02:05:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ int	builtin_env(t_vars *vars)
 		printf("%s\n", vars->env[i]);
 		i++;
 	}
-	if (vars->pipeline != NULL)
-		vars->pipeline->last_cmdcode = cmdcode;
+	vars->error_code = cmdcode;
 	return (cmdcode);
 }

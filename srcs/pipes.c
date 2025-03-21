@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:41:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:31:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ Example: For "ls | grep txt"
 - Redirects input from pipe
 - Executes "grep" command
 - Exits with command status
-*/
+OLD VERSION
 void exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
 {
 	fprintf(stderr, "DEBUG: Right command details:\n");
@@ -195,7 +195,8 @@ void exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
     close(pipefd[1]); // Close write end
     
     fprintf(stderr, "DEBUG: Redirecting stdin (fd=0) to pipe read fd=%d\n", pipefd[0]);
-    if (dup2(pipefd[0], STDIN_FILENO) == -1) {
+    if (dup2(pipefd[0], STDIN_FILENO) == -1)
+	{
         fprintf(stderr, "DEBUG: Failed to redirect stdin: %s\n", strerror(errno));
         exit(1);
     }
@@ -204,6 +205,81 @@ void exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
     // Execute right command
     fprintf(stderr, "DEBUG: Executing right command: %s\n", 
             pipe_node->right ? (pipe_node->right->args ? pipe_node->right->args[0] : "NULL") : "NULL");
+    int exit_status = execute_cmd(pipe_node->right, vars->env, vars);
+    fprintf(stderr, "DEBUG: Right command exiting with status=%d\n", exit_status);
+    exit(exit_status);
+}
+*/
+void exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
+{
+    t_node *cmd;
+    t_node *redir_node;
+    int    saved_stdout;
+    int    append;
+    
+    fprintf(stderr, "DEBUG: Right command details:\n");
+    if (pipe_node && pipe_node->right)
+    {
+        fprintf(stderr, "  Type: %d\n", pipe_node->right->type);
+        fprintf(stderr, "  Args[0]: %s\n", pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+        fprintf(stderr, "  Args count: %ld\n", pipe_node->right->args ? ft_arrlen(pipe_node->right->args) : 0);
+    }
+    
+    /* Close write end of pipe */
+    fprintf(stderr, "DEBUG: Executing right command, closing write fd=%d\n", pipefd[1]);
+    close(pipefd[1]);
+    
+    /* Redirect stdin to pipe read end */
+    fprintf(stderr, "DEBUG: Redirecting stdin (fd=0) to pipe read fd=%d\n", pipefd[0]);
+    if (dup2(pipefd[0], STDIN_FILENO) == -1)
+    {
+        fprintf(stderr, "DEBUG: Failed to redirect stdin: %s\n", strerror(errno));
+        exit(1);
+    }
+    close(pipefd[0]);
+    
+    /* Check for redirection after command */
+    cmd = pipe_node->right;
+    redir_node = NULL;
+    
+    /* Check if command has a redirection attached to it */
+    if (cmd && cmd->right)
+    {
+        redir_node = cmd->right;
+        if (is_redirection(redir_node->type))
+        {
+            fprintf(stderr, "DEBUG: Found redirection attached to right command: type=%d\n",
+                    redir_node->type);
+            
+            /* Save original stdout */
+            saved_stdout = dup(STDOUT_FILENO);
+            if (saved_stdout == -1)
+            {
+                fprintf(stderr, "DEBUG: Failed to save stdout: %s\n", strerror(errno));
+                exit(1);
+            }
+            
+            /* Set up the redirection based on type */
+            append = 0;
+            if (redir_node->type == TYPE_APPEND_REDIRECT)
+            {
+                append = 1;
+            }
+            
+            /* Use output_redirect from redirect.c to set up redirection */
+            if (!output_redirect(redir_node, &saved_stdout, append, vars))
+            {
+                fprintf(stderr, "DEBUG: Failed to set up output redirection\n");
+                exit(1);
+            }
+            fprintf(stderr, "DEBUG: Output redirection set up successfully\n");
+        }
+    }
+    
+    /* Execute right command */
+    fprintf(stderr, "DEBUG: Executing right command: %s\n", 
+            pipe_node->right ? (pipe_node->right->args ? pipe_node->right->args[0] : "NULL") : "NULL");
+    /* Execute the command */
     int exit_status = execute_cmd(pipe_node->right, vars->env, vars);
     fprintf(stderr, "DEBUG: Right command exiting with status=%d\n", exit_status);
     exit(exit_status);

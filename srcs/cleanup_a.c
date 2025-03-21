@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/20 19:54:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,8 +206,7 @@ void	cleanup_vars(t_vars *vars)
     vars->head = NULL;
     vars->current = NULL;
     vars->quote_depth = 0;
-    if (vars->pipeline)
-        vars->pipeline->last_cmdcode = 0;
+	vars->error_code = 0;
 }
 */
 /*OLD VERSION PRE DEBUG
@@ -232,8 +231,7 @@ void	cleanup_vars(t_vars *vars)
     vars->head = NULL;
     vars->current = NULL;
     vars->quote_depth = 0;
-    if (vars->pipeline)
-        vars->pipeline->last_cmdcode = 0;
+    vars->error_code = 0;
 }
 */
 void	cleanup_vars(t_vars *vars)
@@ -286,7 +284,7 @@ void	cleanup_vars(t_vars *vars)
     if (vars->pipeline)
     {
         fprintf(stderr, "DEBUG: [cleanup_vars] Resetting pipeline command code\n");
-        vars->pipeline->last_cmdcode = 0;
+        vars->error_code = 0;
     }
     else
     {
