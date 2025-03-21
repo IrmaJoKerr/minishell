@@ -6,20 +6,26 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 10:31:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/19 21:55:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Creates and links a new node in a linked list of tokens.
-Uses the s_vars struct and token data.
-1) Initializes a new node with the current token type
-2) Links the new node to the existing list if there is one
-3) Updates vars->current to point to the new node
-Returns 1 on success, 0 on allocation failure.
-Works with lexerlist().
+Creates and links a new node in the token linked list.
+- Creates node with current token type and data.
+- Links node to existing list if available.
+- Updates vars->current to point to the new node.
+Returns:
+- 1 on success.
+- 0 on allocation failure.
+Works with lexerlist() during token list creation.
+
+Example: For token "echo"
+- Creates TYPE_CMD node with "echo" as data
+- Links to previous token if it exists
+- Updates current token pointer to this new node
 */
 int	makenode(t_vars *vars, char *data)
 {
@@ -39,12 +45,16 @@ int	makenode(t_vars *vars, char *data)
 
 /*
 Adds a child node to a parent node in the AST.
-Follows a left-to-right priority when adding children:
-1) If the left child position is empty, adds the child there
-2) Otherwise, if the right child position is empty, adds it there
-3) Does nothing if both positions are already filled
-Both arguments must be non-NULL for operation to proceed.
-Works with build_ast().
+- Follows left-to-right priority for child placement.
+- Places in left child position if available.
+- Otherwise places in right child position if available.
+- Does nothing if both positions are already filled.
+Works with build_ast() during AST construction.
+
+Example: Adding redirection to command node
+- First tries to place in left child slot
+- If left is occupied, places in right child slot
+- Updates child->prev to point to parent
 */
 void	add_child(t_node *parent, t_node *child)
 {
@@ -63,15 +73,16 @@ void	add_child(t_node *parent, t_node *child)
 }
 
 /*
-Handles pipe node insertion during AST construction.
-Creates a new pipe node and restructures the tree accordingly.
-Two cases:
-1) If root is NULL: Create new pipe node as root with
-   previous node as left child and next node as right child
-2) If root exists: Create new pipe node with current root as left child,
-   pipe_node->next as right child, and make this new node the root
-This implements the shell's pipe operator (cmd1 | cmd2).
-Works with build_ast().
+Handles pipe node insertion in AST construction.
+- Creates a new pipe node as a junction point.
+- Reorganizes tree to maintain pipeline order.
+- Handles both initial pipe and subsequent pipes.
+Works with build_ast() when processing pipe tokens.
+
+Example: For "cmd1 | cmd2 | cmd3"
+- First pipe creates root with cmd1 left, cmd2 right
+- Second pipe creates new root with old root left, cmd3 right
+- Maintains correct command execution order
 */
 void handle_pipe_node(t_node **root, t_node *pipe_node)
 {
@@ -79,8 +90,7 @@ void handle_pipe_node(t_node **root, t_node *pipe_node)
 
 	new_pipe = initnode(TYPE_PIPE, "|");
 	if (!new_pipe)
-		return;
-		
+		return ;
 	if (!*root)
 	{
 		*root = new_pipe;
@@ -96,14 +106,17 @@ void handle_pipe_node(t_node **root, t_node *pipe_node)
 }
 
 /*
-Handles redirection node insertion during AST construction.
-Finds the appropriate command node to attach the redirection to by:
-1) Starting from root and traversing right through pipe nodes
-2) When a non-pipe node is found, attach the redirection:
-   - If cmd_node->right is empty, put redirection there
-   - Otherwise, push existing right child down and insert redirection
-This ensures redirections are properly associated with their commands.
-Works with build_ast().
+Attaches redirection node to appropriate command node.
+- Finds relevant command by traversing right branch.
+- Skips pipe nodes to find actual command node.
+- Places redirection in command's right child.
+- Preserves existing redirections if present.
+Works with build_ast() when processing redirection tokens.
+
+Example: For "cmd > file > file2"
+- First redirection is attached directly to cmd's right
+- Second redirection is attached with first redirection pushed down
+- Creates a chain of redirections linked to the command
 */
 void	redirection_node(t_node *root, t_node *redir_node)
 {

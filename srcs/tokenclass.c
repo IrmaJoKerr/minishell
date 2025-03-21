@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:28:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:51:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/19 00:01:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,9 @@ Handles exit status token. Returns the exit status. Works with classify.
 */
 char	*handle_exit_status(t_vars *vars)
 {
-	return (ft_itoa(vars->error_code));
+	if (vars && vars->pipeline)
+		return (ft_itoa(vars->pipeline->last_cmdcode));
+	return (ft_strdup("0"));
 }
 
 /*
@@ -26,29 +28,26 @@ mode: 0 for type check, 1 for classification
 Returns: token type or boolean for type check.
 Works with classify.
 */
-t_tokentype	redirection_type(char *str, int mode)
+t_tokentype	redirection_type(char *str, int mode, t_tokentype type, int pos)
 {
-	t_tokentype	type;
-
-	if (mode == 0)
+	if (mode == 0 && type != TYPE_NULL)
 	{
-		type = classify(str);
-		return (type == TYPE_IN_REDIRECT
-			|| type == TYPE_OUT_REDIRECT
-			|| type == TYPE_APPEND_REDIRECT
-			|| type == TYPE_HEREDOC);
-	}
-	if (!str[1])
+		return (type == TYPE_IN_REDIRECT || type == TYPE_OUT_REDIRECT
+            || type == TYPE_APPEND_REDIRECT || type == TYPE_HEREDOC);
+    }
+	if (!str || !str[pos])
+        return (TYPE_STRING);
+	if (!str[pos+1])
 	{
-		if (str[0] == '<')
+		if (str[pos] == '<')
 			return (TYPE_IN_REDIRECT);
 		return (TYPE_OUT_REDIRECT);
 	}
-	if (str[0] == '<' && str[1] == '<')
+	if (str[pos] == '<' && str[pos+1] == '<')
 		return (TYPE_HEREDOC);
-	if (str[0] == '>' && str[1] == '>')
+	if (str[pos] == '>' && str[pos+1] == '>')
 		return (TYPE_APPEND_REDIRECT);
-	if (str[0] == '<')
+	if (str[pos] == '<')
 		return (TYPE_IN_REDIRECT);
 	return (TYPE_OUT_REDIRECT);
 }
@@ -56,25 +55,25 @@ t_tokentype	redirection_type(char *str, int mode)
 /*
 Classify token type. Main controller function for token classification.
 */
-t_tokentype	classify(char *str)
+t_tokentype classify(char *str, int pos)
 {
-	if (!str || !*str)
+	if (!str || !str[pos])
 		return (TYPE_STRING);
-	if (str[0] == '-' && str[1] && str[1] != '"' && str[1] != '\'')
+	if (str[pos] == '-' && str[pos+1] && str[pos+1] != '"' && str[pos+1] != '\'')
 		return (TYPE_ARGS);
-	if (str[0] == '|')
+	if (str[pos] == '|')
 		return (TYPE_PIPE);
-	if (str[0] == '<' || str[0] == '>')
-		return (redirection_type(str, 1));
-	if (str[0] == '$')
+	if (str[pos] == '<' || str[pos] == '>')
+		return (redirection_type(str, 1, TYPE_NULL, pos));
+	if (str[pos] == '$')
 	{
-		if (str[1] == '?')
+		if (str[pos+1] == '?')
 			return (TYPE_EXIT_STATUS);
 		return (TYPE_EXPANSION);
 	}
-	if (str[0] == '"')
+	if (str[pos] == '"')
 		return (TYPE_DOUBLE_QUOTE);
-	if (str[0] == '\'')
+	if (str[pos] == '\'')
 		return (TYPE_SINGLE_QUOTE);
 	return (TYPE_STRING);
 }

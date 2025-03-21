@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/03/14 16:39:31 by bleow            ###   ########.fr        #
+#    Updated: 2025/03/20 03:27:42 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,44 +26,46 @@ INCLUDE_DIRS = includes $(LIBFT_DIR)/includes
 INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 
 MINISHELL_SRCS = \
-			srcs/minishell.c \
 			srcs/arguments.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
-			srcs/cleanup.c \
-			srcs/error.c \
+			srcs/cleanup_a.c \
+			srcs/cleanup_b.c \
+			srcs/errormsg.c \
 			srcs/execute.c \
 			srcs/expansion.c \
 			srcs/heredoc.c \
-			srcs/heredoc_expand.c \
+			srcs/history_load.c \
+			srcs/history_save_utils.c \
+			srcs/history_save.c \
 			srcs/history.c \
-			srcs/historyload.c \
-			srcs/historysave_helper.c \
-			srcs/historysave.c \
 			srcs/initnode.c \
+			srcs/initshell.c \
+			srcs/input_completion.c \
+			srcs/input_verify.c \
 			srcs/lexer.c \
+			srcs/minishell.c \
 			srcs/nodes.c \
 			srcs/operators.c \
 			srcs/paths.c \
-			srcs/piping.c \
+			srcs/pipes.c \
 			srcs/quotes.c \
-			srcs/redirect_helper.c \
 			srcs/redirect.c \
 			srcs/shell_level.c \
 			srcs/signals.c \
 			srcs/tokenclass.c \
-			srcs/tokenize_helper.c \
 			srcs/tokenize.c \
-			srcs/tokens.c \
-			srcs/typeconvert.c
+			srcs/typeconvert.c \
 			 
 MINISHELL_BUILTIN_SRCS = \
 			srcs/builtins/builtin_cd.c \
 			srcs/builtins/builtin_echo.c \
 			srcs/builtins/builtin_env.c \
 			srcs/builtins/builtin_exit.c \
+			srcs/builtins/builtin_export_utils.c \
 			srcs/builtins/builtin_export.c \
 			srcs/builtins/builtin_pwd.c \
+			srcs/builtins/builtin_unset_utils.c \
 			srcs/builtins/builtin_unset.c
 
 MINISHELL_OBJS_DIR = objects

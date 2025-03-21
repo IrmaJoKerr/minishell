@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:50:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/18 23:34:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,3 +54,4 @@ t_node *initnode(t_tokentype type, char *token)
 	}
 	return (node);
 }
+

@@ -6,174 +6,111 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/14 08:37:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/18 11:39:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Checks if the argument is a valid environment variable.
+Built-in command: export. 
+- Sets or displays environment variables depending on arguments.
+Example with arguments: export VAR_NAME="VALUE"
+Example without arguments: export
+Returns 0 on success, 1 on failure.
 */
-char	*valid_export(char *args)
+int builtin_export(char **args, t_vars *vars)
 {
-    int	i;
-    int len;
-    char *equal_sign;
-    
-    i = 0;
-    if (!ft_isalpha(args[0]) && args[0] != '_')
-        return (NULL);
-        
-    equal_sign = ft_strchr(args, '=');
-    if (equal_sign)
-        len = equal_sign - args;
-    else
-        len = ft_strlen(args);
-        
-    while (i < len)
-    {
-        if (!(ft_isalnum(args[i]) || args[i] == '_'))
-            return (NULL);
-        i++;
-    }
-    return (args);
-}
-
-/*
-Ascending order for environment variables.
-*/
-char	**asc_order(char **sort_env, int count)
-{
-	int		i;
-	int		j;
-	char	*temp;
-
-	i = 0;
-	j = 0;
-	while (i < count - 1)
-	{
-		j = i + 1;
-		while (j < count)
-		{
-			if (ft_strcmp(sort_env[i], sort_env[j]) > 0)
-			{
-				temp = sort_env[i];
-				sort_env[i] = sort_env[j];
-				sort_env[j] = temp;
-			}
-			j++;
-		}
-		i++;
-	}
-	return (sort_env);
-}
-
-/*
-Creates a sorted copy of environment variables.
-Returns NULL on allocation failure.
-*/
-char	**make_sorted_env(int count, t_vars *vars)
-{
-	int		i;
-	char	**sort_env;
-
-	sort_env = (char **)malloc((count + 1) * sizeof(char *));
-	if (!sort_env)
-		return (NULL);
-	i = 0;
-	while (i < count)
-	{
-		sort_env[i] = ft_strdup(vars->env[i]);
-		if (!sort_env[i])
-		{
-			cleanup_env_error(sort_env, i);
-			return (NULL);
-		}
-		i++;
-	}
-	sort_env[i] = NULL;
-	return (asc_order(sort_env, count));
-}
-
-/*
-Sorts the environment variables in ascending order.
-*/
-int	sort_env(int count, t_vars *vars)
-{
-    int		i;
-    char	**sort_env;
-    char    *equal_pos;
-    char    *value;
-    
-    i = 0;
-    sort_env = make_sorted_env(count, vars);
-    if (!sort_env)
-        return (1);
-    while (sort_env[i])
-    {
-        equal_pos = ft_strchr(sort_env[i], '=');
-        if (equal_pos)
-        {
-            *equal_pos = '\0';
-            value = equal_pos + 1;
-            // Display the variable name and equals sign
-            ft_putstr_fd("declare -x ", STDOUT_FILENO);
-            ft_putstr_fd(sort_env[i], STDOUT_FILENO);
-            ft_putstr_fd("=", STDOUT_FILENO);
-            // Add quotes around the value
-            ft_putstr_fd("\"", STDOUT_FILENO);
-            // Print the value, properly handling any existing quotes
-            while (*value)
-            {
-                // Escape double quotes within the value
-                if (*value == '"')
-                    ft_putstr_fd("\\", STDOUT_FILENO);
-                ft_putchar_fd(*value, STDOUT_FILENO);
-                value++;
-            }
-            ft_putstr_fd("\"", STDOUT_FILENO);
-            *equal_pos = '=';
-        }
-        else
-        {
-            ft_putstr_fd("declare -x ", STDOUT_FILENO);
-            ft_putstr_fd(sort_env[i], STDOUT_FILENO);
-        }
-        ft_safefree((void **)&sort_env[i++]);
-        ft_putstr_fd("\n", STDOUT_FILENO);
-    }
-    ft_safefree((void **)&sort_env);
-    return (0);
-}
-
-/*
-Built-in command: export. Sets or displays environment variables.
-*/
-int	builtin_export(char **args, t_vars *vars)
-{
-	int i;
-	int	count;
-
+	int cmdcode;
+	
 	if (!vars || !vars->env)
-		return (1);
-	printf("this is export\n");
+	{
+		cmdcode = 1;
+		if (vars && vars->pipeline)
+			vars->pipeline->last_cmdcode = cmdcode;
+		return (cmdcode);
+	}
+	if (!args[1])
+		return (export_without_args(vars));
+	return (export_with_args(args, vars));
+}
+
+/*
+Handle export WITH NO ARGUMENTS.
+- Prints all environment variables.
+Returns 0 on success, 1 on failure.
+*/
+int	export_without_args(t_vars *vars)
+{
+	int	count;
+	int	cmdcode;
+	
 	count = 0;
 	while (vars->env[count])
 		count++;
-	if (!args[1])
-		return (sort_env(count, vars), 0);
-	else
+	cmdcode = sort_env(count, vars);
+	if (vars->pipeline != NULL)
+		vars->pipeline->last_cmdcode = cmdcode;
+	return (cmdcode);
+}
+
+/*
+Handle export WITH ARGUMENTS.
+- Checks if arguments are valid.
+- Sets environment variables.
+Returns 0 on success, 1 on failure.
+*/
+int	export_with_args(char **args, t_vars *vars)
+{
+	int i;
+	int cmdcode;
+	
+	i = 1;
+	cmdcode = 0;
+	while (args[i])
 	{
-		i = 1;
-		while (args[i])
+		if (valid_export(args[i]))
+			modify_env(&vars->env, 1, args[i]);
+		else
 		{
-			if (valid_export(args[i]))
-				modify_env(&vars->env, 1, args[i]);
-			else
-				printf("export: '%s': not a valid identifier\n", args[i]);
-			i++;
+			printf("export: '%s': not a valid identifier\n", args[i]);
+			cmdcode = 1;
 		}
+		i++;
 	}
-	return (0);
+	if (vars->pipeline != NULL)
+		vars->pipeline->last_cmdcode = cmdcode;
+	return (cmdcode);
+}
+
+/*
+Master control function that sorts and prints environment variables.
+- Processes each environment variable and prints them in export format.
+- Frees all allocated memory.
+Returns 0 on success, 1 on failure.
+*/
+int sort_env(int count, t_vars *vars)
+{
+	int		i;
+	int		cmdcode;
+	char	**sort_env;
+	
+	sort_env = make_sorted_env(count, vars);
+	if (!sort_env)
+		return (1);
+	i = 0;
+	cmdcode = 0;
+	while (sort_env[i])
+	{
+		cmdcode = process_export_var(sort_env[i]);
+		i++;
+	}
+	i = 0;
+	while (i < count)
+	{
+		ft_safefree((void **)&sort_env[i]);
+		i++;
+	}
+	ft_safefree((void **)&sort_env);
+	return (cmdcode);
 }
