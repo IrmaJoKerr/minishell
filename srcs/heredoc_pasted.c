@@ -3,12 +3,11 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_pasted.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:42:58 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 18:28:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:53:41 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 21:55:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:37:02 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,9 +84,9 @@ Example: For "cmd1 | cmd2 | cmd3"
 - Second pipe creates new root with old root left, cmd3 right
 - Maintains correct command execution order
 */
-void handle_pipe_node(t_node **root, t_node *pipe_node)
+void	handle_pipe_node(t_node **root, t_node *pipe_node)
 {
-	t_node *new_pipe;
+	t_node	*new_pipe;
 
 	new_pipe = initnode(TYPE_PIPE, "|");
 	if (!new_pipe)

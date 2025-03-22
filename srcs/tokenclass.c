@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenclass.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:28:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:27:51 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,24 +28,24 @@ mode: 0 for type check, 1 for classification
 Returns: token type or boolean for type check.
 Works with classify.
 */
-t_tokentype	redirection_type(char *str, int mode, t_tokentype type, int pos)
+t_tokentype	redirection_type(char	*str, int mode, t_tokentype	type, int pos)
 {
 	if (mode == 0 && type != TYPE_NULL)
 	{
 		return (type == TYPE_IN_REDIRECT || type == TYPE_OUT_REDIRECT
-            || type == TYPE_APPEND_REDIRECT || type == TYPE_HEREDOC);
-    }
+			|| type == TYPE_APPEND_REDIRECT || type == TYPE_HEREDOC);
+	}
 	if (!str || !str[pos])
-        return (TYPE_STRING);
-	if (!str[pos+1])
+		return (TYPE_STRING);
+	if (!str[pos + 1])
 	{
 		if (str[pos] == '<')
 			return (TYPE_IN_REDIRECT);
 		return (TYPE_OUT_REDIRECT);
 	}
-	if (str[pos] == '<' && str[pos+1] == '<')
+	if (str[pos] == '<' && str[pos + 1] == '<')
 		return (TYPE_HEREDOC);
-	if (str[pos] == '>' && str[pos+1] == '>')
+	if (str[pos] == '>' && str[pos + 1] == '>')
 		return (TYPE_APPEND_REDIRECT);
 	if (str[pos] == '<')
 		return (TYPE_IN_REDIRECT);
@@ -55,11 +55,12 @@ t_tokentype	redirection_type(char *str, int mode, t_tokentype type, int pos)
 /*
 Classify token type. Main controller function for token classification.
 */
-t_tokentype classify(char *str, int pos)
+t_tokentype	classify(char *str, int pos)
 {
 	if (!str || !str[pos])
 		return (TYPE_STRING);
-	if (str[pos] == '-' && str[pos+1] && str[pos+1] != '"' && str[pos+1] != '\'')
+	if (str[pos] == '-' && str[pos + 1] && str[pos + 1
+		] != '"' && str[pos + 1] != '\'')
 		return (TYPE_ARGS);
 	if (str[pos] == '|')
 		return (TYPE_PIPE);
@@ -67,7 +68,7 @@ t_tokentype classify(char *str, int pos)
 		return (redirection_type(str, 1, TYPE_NULL, pos));
 	if (str[pos] == '$')
 	{
-		if (str[pos+1] == '?')
+		if (str[pos + 1] == '?')
 			return (TYPE_EXIT_STATUS);
 		return (TYPE_EXPANSION);
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   shell_level.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 14:19:12 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/20 06:06:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:12:35 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,12 @@ Return:
 - 0 on success.
 - 1 on failure.
 */
-int get_shell_level(t_vars *vars)
+int	get_shell_level(t_vars *vars)
 {
-	int     i;
-	char    *shlvl_str;
-	char    *new_shlvl_str;
-	 
+	int		i;
+	char	*shlvl_str;
+	char	*new_shlvl_str;
+
 	if (!vars || !vars->env)
 		return (1);
 	i = 0;
@@ -43,22 +43,22 @@ int get_shell_level(t_vars *vars)
 	if (!new_shlvl_str)
 		return (1);
 	vars->env[i] = new_shlvl_str;
-	vars->env[i+1] = NULL;
+	vars->env[i + 1] = NULL;
 	vars->shell_level = 1;
 	return (0);
 }
- 
+
 /*
 Updates the SHLVL environment variable with the new value.
 Return:
 - 0 on success.
 - 1 on failure.
 */
-int update_shlvl_env(char **env, int position, int new_level)
+int	update_shlvl_env(char **env, int position, int new_level)
 {
-	char *new_shlvl;
-	char *new_env_entry;
-	
+	char	*new_shlvl;
+	char	*new_env_entry;
+
 	new_shlvl = ft_itoa(new_level);
 	if (!new_shlvl)
 		return (1);
@@ -85,40 +85,25 @@ Return:
 - 0 on success.
 - 1 on failure.
 */
-int incr_shell_level(t_vars *vars)
+int	incr_shell_level(t_vars *vars)
 {
-    int i;
-    int result;
- 
-    fprintf(stderr, "DEBUG: Entering incr_shell_level with vars=%p\n", (void*)vars);
-    if (!vars || !vars->env)
-    {
-        fprintf(stderr, "DEBUG: vars or vars->env is NULL\n");
-        return (1);
-    }
-    
-    vars->shell_level++;
-    fprintf(stderr, "DEBUG: Incremented shell_level to %d\n", vars->shell_level);
-    
-    i = 0;
-    while (vars->env[i])
-    {
-        fprintf(stderr, "DEBUG: Checking env entry %d: %s\n", i, vars->env[i]);
-        if (ft_strncmp(vars->env[i], "SHLVL=", 6) == 0)
-        {
-            fprintf(stderr, "DEBUG: Found SHLVL at position %d\n", i);
-            result = update_shlvl_env(vars->env, i, vars->shell_level);
-            if (result != 0)
-            {
-                fprintf(stderr, "DEBUG: Failed to update SHLVL, error code: %d\n", result);
-                return (1);
-            }
-            fprintf(stderr, "DEBUG: Successfully updated SHLVL. New value: %s\n", vars->env[i]);
-            return (0);
-        }
-        i++;
-    }
-    
-    fprintf(stderr, "DEBUG: SHLVL not found in environment, total env entries: %d\n", i);
-    return (1);
+	int	i;
+	int	result;
+
+	if (!vars || !vars->env)
+		return (1);
+	vars->shell_level++;
+	i = 0;
+	while (vars->env[i])
+	{
+		if (ft_strncmp(vars->env[i], "SHLVL=", 6) == 0)
+		{
+			result = update_shlvl_env(vars->env, i, vars->shell_level);
+			if (result != 0)
+				return (1);
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }

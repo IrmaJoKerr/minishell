@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:47:09 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 01:49:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 13:37:06 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,13 @@ void	ft_error(t_vars *vars)
 	}
 	vars->error_code = 1;
 	cleanup_vars(vars);
-	fprintf(stderr, "%s\n", vars->error_msg);
 	exit(vars->error_code);
 }
 
 /*
 Handle error messages for redirection
 Display error message for file redirection permission issues.
-Prints error message to stderr (fd 2) that includes the 
+Prints error message to stderr (fd 2) that includes the
 filename that caused the error.
 Does not exit the program.
 */

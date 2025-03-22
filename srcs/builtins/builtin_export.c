@@ -3,26 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:15:12 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Built-in command: export. 
+Built-in command: export.
 - Sets or displays environment variables depending on arguments.
 Example with arguments: export VAR_NAME="VALUE"
 Example without arguments: export
 Returns 0 on success, 1 on failure.
 */
-int builtin_export(char **args, t_vars *vars)
+int	builtin_export(char **args, t_vars *vars)
 {
-	int cmdcode;
-	
+	int	cmdcode;
+
 	if (!vars || !vars->env)
 	{
 		cmdcode = 1;
@@ -43,7 +43,7 @@ int	export_without_args(t_vars *vars)
 {
 	int	count;
 	int	cmdcode;
-	
+
 	count = 0;
 	while (vars->env[count])
 		count++;
@@ -60,9 +60,9 @@ Returns 0 on success, 1 on failure.
 */
 int	export_with_args(char **args, t_vars *vars)
 {
-	int i;
-	int cmdcode;
-	
+	int	i;
+	int	cmdcode;
+
 	i = 1;
 	cmdcode = 0;
 	while (args[i])
@@ -86,12 +86,12 @@ Master control function that sorts and prints environment variables.
 - Frees all allocated memory.
 Returns 0 on success, 1 on failure.
 */
-int sort_env(int count, t_vars *vars)
+int	sort_env(int count, t_vars *vars)
 {
 	int		i;
 	int		cmdcode;
 	char	**sort_env;
-	
+
 	sort_env = make_sorted_env(count, vars);
 	if (!sort_env)
 		return (1);

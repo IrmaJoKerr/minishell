@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history_load.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 18:51:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:32:45 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,16 @@ Example: If history file has 1000 entries but HIST_MEM_MAX is 500
 */
 void	skip_history_lines(int fd, int skip_count)
 {
-    char	*line;
+	char	*line;
 
-    while (skip_count > 0)
-    {
-        line = get_next_line(fd);
-        if (!line)
-            break ;
-        ft_safefree((void **)&line);
-        skip_count--;
-    }
+	while (skip_count > 0)
+	{
+		line = get_next_line(fd);
+		if (!line)
+			break ;
+		ft_safefree((void **)&line);
+		skip_count--;
+	}
 }
 
 /*
@@ -56,24 +56,22 @@ Example: After skipping excess lines
 */
 void	read_history_lines(int fd)
 {
-    char	*line;
-    size_t	len;
+	char	*line;
+	size_t	len;
 
-    line = get_next_line(fd);
-    while (line)
-    {
-        if (*line)
-        {
-            // Remove trailing newline if present
-            len = ft_strlen(line);
-            if (len > 0 && line[len - 1] == '\n')
-                line[len - 1] = '\0';
-                
-            add_history(line);
-        }
-        ft_safefree((void **)&line);
-        line = get_next_line(fd);
-    }
+	line = get_next_line(fd);
+	while (line)
+	{
+		if (*line)
+		{
+			len = ft_strlen(line);
+			if (len > 0 && line[len - 1] == '\n')
+				line[len - 1] = '\0';
+			add_history(line);
+		}
+		ft_safefree((void **)&line);
+		line = get_next_line(fd);
+	}
 }
 
 /*
@@ -94,21 +92,20 @@ Example: For a shell with HIST_MEM_MAX=1000
 */
 void	load_history(void)
 {
-    int		fd;
-    int		count;
-    int		skip;
+	int		fd;
+	int		count;
+	int		skip;
 
-    count = get_history_count();
-    if (count == 0)
-        return ;
-    fd = init_history_fd(O_RDONLY);
-    if (fd == -1)
-        return ;
-    skip = 0;
-    if (count > HIST_MEM_MAX)
-        skip = count - HIST_MEM_MAX;
-    skip_history_lines(fd, skip);
-    read_history_lines(fd);
-    close(fd);
+	count = get_history_count();
+	if (count == 0)
+		return ;
+	fd = init_history_fd(O_RDONLY);
+	if (fd == -1)
+		return ;
+	skip = 0;
+	if (count > HIST_MEM_MAX)
+		skip = count - HIST_MEM_MAX;
+	skip_history_lines(fd, skip);
+	read_history_lines(fd);
+	close(fd);
 }
-

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   typeconvert.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 16:51:38 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 04:47:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:54:13 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,25 +17,25 @@
 Returns string representation of basic token types.
 Handles the first part of token types.
 */
-const char *get_token_str_basic(t_tokentype type)
+const char	*get_token_str_basic(t_tokentype type)
 {
-    if (type == TYPE_STRING)
-        return (TOKEN_TYPE_STRING);
-    else if (type == TYPE_CMD)
-        return (TOKEN_TYPE_CMD);
-    else if (type == TYPE_ARGS)
-        return (TOKEN_TYPE_ARGS);
-    else if (type == TYPE_DOUBLE_QUOTE)
-        return (TOKEN_TYPE_DOUBLE_QUOTE);
-    else if (type == TYPE_SINGLE_QUOTE)
-        return (TOKEN_TYPE_SINGLE_QUOTE);
-    else if (type == TYPE_HEREDOC)
-        return (TOKEN_TYPE_HEREDOC);
-    else if (type == TYPE_PIPE)
-        return (TOKEN_TYPE_PIPE);
+	if (type == TYPE_STRING)
+		return (TOKEN_TYPE_STRING);
+	else if (type == TYPE_CMD)
+		return (TOKEN_TYPE_CMD);
+	else if (type == TYPE_ARGS)
+		return (TOKEN_TYPE_ARGS);
+	else if (type == TYPE_DOUBLE_QUOTE)
+		return (TOKEN_TYPE_DOUBLE_QUOTE);
+	else if (type == TYPE_SINGLE_QUOTE)
+		return (TOKEN_TYPE_SINGLE_QUOTE);
+	else if (type == TYPE_HEREDOC)
+		return (TOKEN_TYPE_HEREDOC);
+	else if (type == TYPE_PIPE)
+		return (TOKEN_TYPE_PIPE);
 	else if (type == TYPE_EXPANSION)
 		return (TOKEN_TYPE_EXPANSION);
-    return (TOKEN_TYPE_NULL);
+	return (TOKEN_TYPE_NULL);
 }
 
 /*
@@ -47,7 +47,7 @@ Main control function for getting token strings.
 const char	*get_token_str(t_tokentype type)
 {
 	const char	*basic_token;
-	
+
 	basic_token = NULL;
 	basic_token = get_token_str_basic(type);
 	if (basic_token != NULL)
@@ -70,7 +70,7 @@ Converts string to basic token type.
 Handles the first part of token conversions.
 Returns TYPE_NULL if no match is found.
 */
-t_tokentype get_token_type_basic(const char *str)
+t_tokentype	get_token_type_basic(const char *str)
 {
 	if ((!str || !*str) || (ft_strcmp(str, TOKEN_TYPE_STRING) == 0))
 		return (TYPE_STRING);
@@ -85,8 +85,8 @@ t_tokentype get_token_type_basic(const char *str)
 	else if (ft_strcmp(str, TOKEN_TYPE_HEREDOC) == 0)
 		return (TYPE_HEREDOC);
 	else if (ft_strcmp(str, TOKEN_TYPE_PIPE) == 0)
-        return (TYPE_PIPE);
-    return (TYPE_NULL);
+		return (TYPE_PIPE);
+	return (TYPE_NULL);
 }
 
 /*
@@ -97,10 +97,10 @@ Returns an enum value for the token type.
 Example: "STRING" -> TYPE_STRING (Value defined as 1)
 Returns TYPE_STRING if no match is found.
 */
-t_tokentype get_token_type(const char *str)
+t_tokentype	get_token_type(const char *str)
 {
-	t_tokentype basic_result;
-	
+	t_tokentype	basic_result;
+
 	basic_result = get_token_type_basic(str);
 	if (basic_result != TYPE_NULL)
 		return (basic_result);

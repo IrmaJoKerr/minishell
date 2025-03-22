@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 09:47:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 15:58:40 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,14 @@ Example: When user types "ls -la"
 */
 char	*reader(t_vars *vars)
 {
-    char	*line;
+	char	*line;
 
-    line = readline(PROMPT);
-    if (!line)
-        builtin_exit(vars);
-    if (*line)
-        add_history(line);
-    return (line);
+	line = readline(PROMPT);
+	if (!line)
+		builtin_exit(vars);
+	if (*line)
+		add_history(line);
+	return (line);
 }
 
 /*
@@ -53,21 +53,21 @@ Example: When shell starts
 */
 void	setup_env(t_vars *vars, char **envp)
 {
-    vars->env = dup_env(envp);
-    if (!vars->env)
-    {
-        ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
-        exit(1);
-    }
-    vars->shell_level = get_shell_level(vars);
-    if (vars->shell_level == -1)
-    {
-        ft_putstr_fd("bleshell: error: Failed to get shell level\n", 2);
-        exit(1);
-    }
-    vars->shell_level = incr_shell_level(vars);
-    if (!vars->shell_level)
-        ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
+	vars->env = dup_env(envp);
+	if (!vars->env)
+	{
+		ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
+		exit(1);
+	}
+	vars->shell_level = get_shell_level(vars);
+	if (vars->shell_level == -1)
+	{
+		ft_putstr_fd("bleshell: error: Failed to get shell level\n", 2);
+		exit(1);
+	}
+	vars->shell_level = incr_shell_level(vars);
+	if (!vars->shell_level)
+		ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
 }
 
 /*
@@ -86,38 +86,15 @@ Initializes the shell environment and variables.
 - Prepares the command prompt.
 Works with main() as program entry point.
 */
-void init_shell(t_vars *vars, char **envp)
+void	init_shell(t_vars *vars, char **envp)
 {
-    int result;
-    
-    vars->env = dup_env(envp);
-    if (!vars->env)
-    {
-        fprintf(stderr, "ERROR: Failed to duplicate environment variables\n");
-        exit(1);
-    }
-    
-    get_shell_level(vars);
-    
-    fprintf(stderr, "DEBUG: About to increment shell level\n");
-    result = incr_shell_level(vars);
-    fprintf(stderr, "DEBUG: incr_shell_level returned %d\n", result);
-    
-    if (result != 0)
-    {
-        fprintf(stderr, "DEBUG: Showing warning about SHLVL\n");
-        fprintf(stderr, "bleshell: warning: Failed to increment SHLVL\n");
-    }
-    else
-    {
-        fprintf(stderr, "DEBUG: Shell level successfully incremented to %d\n", vars->shell_level);
-    }
-    
-    // Use load_signals instead of setup_signals
-    load_signals();
-    
-    // Load history instead of calling init_history
-    load_history();
+	vars->env = dup_env(envp);
+	if (!vars->env)
+		exit(1);
+	get_shell_level(vars);
+	incr_shell_level(vars);
+	load_signals();
+	load_history();
 }
 
 /*
@@ -137,21 +114,21 @@ Example: When user types "echo "hello
 */
 char	*handle_quote_completion(char *cmd, t_vars *vars)
 {
-    char	*new_cmd;
+	char	*new_cmd;
 
-    new_cmd = fix_open_quotes(cmd, vars);
-    if (!new_cmd)
-        return (NULL);
-    if (new_cmd != cmd)
-    {
-        if (cmd != vars->error_msg)
-            ft_safefree((void **)&cmd);
-        cmd = new_cmd;
-    }
-    cleanup_token_list(vars);
-    tokenize(cmd, vars);
-    lexerlist(cmd, vars);
-    return (cmd);
+	new_cmd = fix_open_quotes(cmd, vars);
+	if (!new_cmd)
+		return (NULL);
+	if (new_cmd != cmd)
+	{
+		if (cmd != vars->error_msg)
+			ft_safefree((void **)&cmd);
+		cmd = new_cmd;
+	}
+	cleanup_token_list(vars);
+	tokenize(cmd, vars);
+	lexerlist(cmd, vars);
+	return (cmd);
 }
 
 /*
@@ -171,27 +148,25 @@ Example: When user types "ls |"
 */
 char	*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk)
 {
-    char	*new_cmd;
+	char	*new_cmd;
 	char	*pipe_cmd;
 
-    if (syntax_chk != 2)
-	{
-        return (cmd);
-	}
+	if (syntax_chk != 2)
+		return (cmd);
 	pipe_cmd = ft_strdup(cmd);
 	if (handle_unfinished_pipes(&pipe_cmd, vars, NULL) >= 0)
-    	new_cmd = pipe_cmd;
+		new_cmd = pipe_cmd;
 	else
-    	new_cmd = NULL;
-    if (!new_cmd)
-        return (NULL);
-    if (new_cmd != cmd)
-    {
-        if (cmd != vars->error_msg)
-            ft_safefree((void **)&cmd);
-        cmd = new_cmd;
-    }
-    return (cmd);
+		new_cmd = NULL;
+	if (!new_cmd)
+		return (NULL);
+	if (new_cmd != cmd)
+	{
+		if (cmd != vars->error_msg)
+			ft_safefree((void **)&cmd);
+		cmd = new_cmd;
+	}
+	return (cmd);
 }
 
 /*
@@ -210,17 +185,9 @@ Example: For "echo hello | grep h"
 */
 void	build_and_execute(t_vars *vars)
 {
-    vars->astroot = build_ast(vars);
-    if (vars->astroot)
-    {
-        fprintf(stderr, "DEBUG: Built AST successfully\n");
-        if (vars->astroot->args && vars->astroot->args[0])
-            fprintf(stderr, "DEBUG: Root command: %s\n", 
-                vars->astroot->args[0]);
-        execute_cmd(vars->astroot, vars->env, vars);
-    }
-    else
-        fprintf(stderr, "DEBUG: Failed to build AST\n");
+	vars->astroot = build_ast(vars);
+	if (vars->astroot)
+		execute_cmd(vars->astroot, vars->env, vars);
 }
 
 /*
@@ -234,37 +201,24 @@ Returns:
 Works with process_command() as first processing stage.
 
 Example: For input "echo "hello
-- Tokenizes the initial content 
+- Tokenizes the initial content
 - Detects unclosed quotes and prompts for completion
 - Returns completed command string with proper quotes
 */
 char	*process_input_tokens(char *command, t_vars *vars)
 {
-    char	*processed_cmd;
+	char	*processed_cmd;
 
-	fprintf(stderr, "DEBUG: Running process_input_tokens with command=%p\n", (void*)command);
-    processed_cmd = command;
-    if (vars->head)
-    {
-        fprintf(stderr, "DEBUG: Cleaning up previous tokens\n");
-        cleanup_token_list(vars);
-    }
-    if (!processed_cmd)
-        return (NULL);
-        
-    fprintf(stderr, "DEBUG: Processing: '%s'\n", processed_cmd);
-    tokenize(processed_cmd, vars);
-	debug_print_token_list(vars->head, "TOKENS AFTER TOKENIZE()");
-	debug_print_quote_types(vars->head);
-    lexerlist(processed_cmd, vars);
-    debug_print_token_list(vars->head, "TOKENS AFTER LEXERLIST()");
-	debug_print_quote_types(vars->head);
-    if (vars->quote_depth > 0)
-    {
-        processed_cmd = handle_quote_completion(processed_cmd, vars);
-    }
-    
-    return (processed_cmd);
+	processed_cmd = command;
+	if (vars->head)
+		cleanup_token_list(vars);
+	if (!processed_cmd)
+		return (NULL);
+	tokenize(processed_cmd, vars);
+	lexerlist(processed_cmd, vars);
+	if (vars->quote_depth > 0)
+		processed_cmd = handle_quote_completion(processed_cmd, vars);
+	return (processed_cmd);
 }
 
 /*
@@ -282,54 +236,23 @@ Example: For input "ls |"
 - Prompts for continuation
 - Returns completed command with pipe and continuation
 */
-char *process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
+char	*process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
 {
-    int     syntax_chk;
-    char    *processed_cmd;
-    
-    fprintf(stderr, "DEBUG: [process_pipe_syntax] Starting with command=%p, orig_cmd=%p\n", 
-            (void*)command, (void*)orig_cmd);
-    processed_cmd = command;
-    syntax_chk = chk_pipe_syntax_err(vars);
-    fprintf(stderr, "DEBUG: [process_pipe_syntax] Syntax check result: %d\n", syntax_chk);
-    
-    if (syntax_chk == 1)
-    {
-        fprintf(stderr, "DEBUG: [process_pipe_syntax] Syntax error detected\n");
-        
-        // CRITICAL FIX: Only free memory if it's not shared
-        // Only free processed_cmd if it's different from both orig_cmd and command
-        if (processed_cmd != orig_cmd && processed_cmd != command)
-        {
-            fprintf(stderr, "DEBUG: [process_pipe_syntax] Freeing processed_cmd=%p\n", 
-                   (void*)processed_cmd);
-            ft_safefree((void **)&processed_cmd);
-            fprintf(stderr, "DEBUG: [process_pipe_syntax] After free: processed_cmd=%p\n", 
-                   (void*)processed_cmd);
-        }
-        
-        // Only free orig_cmd if it exists and isn't the same as command
-        // This prevents the double free
-        if (orig_cmd && orig_cmd != command) 
-        {
-            fprintf(stderr, "DEBUG: [process_pipe_syntax] Freeing orig_cmd=%p\n", 
-                (void*)orig_cmd);
-            ft_safefree((void **)&orig_cmd);
-            fprintf(stderr, "DEBUG: [process_pipe_syntax] After free: orig_cmd=%p\n", 
-                (void*)orig_cmd);
-        } else {
-            fprintf(stderr, "DEBUG: [process_pipe_syntax] Not freeing orig_cmd (shared memory)\n");
-        }
-        return (NULL);
-    }
-    
-    fprintf(stderr, "DEBUG: [process_pipe_syntax] Before handle_pipe_completion: processed_cmd=%p\n", 
-           (void*)processed_cmd);
-    processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
-    fprintf(stderr, "DEBUG: [process_pipe_syntax] After handle_pipe_completion: processed_cmd=%p\n", 
-           (void*)processed_cmd);
-    
-    return (processed_cmd);
+	int		syntax_chk;
+	char	*processed_cmd;
+
+	processed_cmd = command;
+	syntax_chk = chk_pipe_syntax_err(vars);
+	if (syntax_chk == 1)
+	{
+		if (processed_cmd != orig_cmd && processed_cmd != command)
+			ft_safefree((void **)&processed_cmd);
+		if (orig_cmd && orig_cmd != command)
+			ft_safefree((void **)&orig_cmd);
+		return (NULL);
+	}
+	processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
+	return (processed_cmd);
 }
 
 /*
@@ -350,22 +273,18 @@ Example: When user types a complex command
 */
 int	process_command(char *command, t_vars *vars)
 {
-    char	*processed_cmd;
-    
-    processed_cmd = process_input_tokens(command, vars);
-    if (!processed_cmd)
-        return (1);
-    processed_cmd = process_pipe_syntax(processed_cmd, command, vars);
-    if (!processed_cmd)
-        return (1);
-    // Fix: Pass the head node and a label to debug_print_token_list
-    debug_print_token_list(vars->head, "TOKEN LIST IN PROCESS_COMMAND");
-    debug_print_quote_types(vars->head);
-    build_and_execute(vars);
-    if (processed_cmd != command)
-        ft_safefree((void **)&processed_cmd);
-    // ft_safefree((void **)&command);
-    return (1);
+	char	*processed_cmd;
+
+	processed_cmd = process_input_tokens(command, vars);
+	if (!processed_cmd)
+		return (1);
+	processed_cmd = process_pipe_syntax(processed_cmd, command, vars);
+	if (!processed_cmd)
+		return (1);
+	build_and_execute(vars);
+	if (processed_cmd != command)
+		ft_safefree((void **)&processed_cmd);
+	return (1);
 }
 
 /*
@@ -378,32 +297,29 @@ Works as the central execution point of the shell.
 */
 int	main(int argc, char **argv, char **envp)
 {
-    t_vars	vars;
-    char	*input;
-    
-    (void)argc;
-    (void)argv;
+	t_vars	vars;
+	char	*input;
+
+	(void)argc;
+	(void)argv;
 	ft_memset(&vars, 0, sizeof(t_vars));
-    init_shell(&vars, envp);
-    while (1)
-    {
-        input = reader(&vars);
-        if (input == NULL)
-        {
-            fprintf(stderr, "DEBUG: EOF detected, performing cleanup\n");
-            cleanup_exit(&vars);
-            ft_putstr_fd("exit\n", STDOUT_FILENO);
-			printf("test\n");
-            exit(vars.error_code);
-        }
-        if (input[0] == '\0')
-        {
-            ft_safefree((void **)&input);
-			printf("test\n");
-            continue ;
-        }
-        process_command(input, &vars);
-        ft_safefree((void **)&input);
-    }
-    return (0);
+	init_shell(&vars, envp);
+	while (1)
+	{
+		input = reader(&vars);
+		if (input == NULL)
+		{
+			cleanup_exit(&vars);
+			ft_putstr_fd("exit\n", STDOUT_FILENO);
+			exit(vars.error_code);
+		}
+		if (input[0] == '\0')
+		{
+			ft_safefree((void **)&input);
+			continue ;
+		}
+		process_command(input, &vars);
+		ft_safefree((void **)&input);
+	}
+	return (0);
 }

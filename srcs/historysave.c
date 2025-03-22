@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   historysave.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/14 21:08:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:59:50 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	copy_to_temp(int fd_read)
 }
 
 /*
-Skip specified number of lines in file. 
+Skip specified number of lines in file.
 Uses get_next_line to skip to the target line.
 Works with trim_history.
 */
@@ -61,11 +61,11 @@ void	skip_lines(int fd, int count)
 
 /*
 Trim history file to maximum size by copying to temporary file
-then only the required lines back using 
+then only the required lines back using
 1) skip_lines to skip to required point in the history file
 2) copy_to_temp for temporary storage in case there is a simultaneous write
    that corrupts the data during the read process.
-3) copy_file back from temporary storage for final product. 
+3) copy_file back from temporary storage for final product.
 Works with save_history.
 */
 void	trim_history(int excess_lines)
@@ -97,7 +97,7 @@ It performs several steps:
 Save readline history to the HISTORY_FILE.
 Called when the shell is about to exit.
 */
-void save_history(void)
+void	save_history(void)
 {
 	int			fd;
 	HIST_ENTRY	**hist_list;
@@ -105,7 +105,7 @@ void save_history(void)
 	int			history_count;
 	int			excess_lines;
 	int			saved_count = 0;
-	  
+
 	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
 	{
@@ -123,21 +123,16 @@ void save_history(void)
 	if (excess_lines > 0)
 		i = excess_lines;
 	else
-		i = 0;         
-	// Print total entries to be saved at the beginning
-    fprintf(stderr, "DEBUG: Saving history with %d entries total\n", history_count - i);
+		i = 0;
 	while (i < history_count && hist_list[i])
-    {
-        if (hist_list[i]->line && *hist_list[i]->line)
-        {
-            saved_count++;
-            write(fd, hist_list[i]->line, strlen(hist_list[i]->line));
-            write(fd, "\n", 1);
-            fprintf(stderr, "DEBUG: Saved line #%d of %d: '%s'\n", 
-                saved_count, history_count - i, hist_list[i]->line);
-        }
-        i++;
-    }
-    fprintf(stderr, "DEBUG: Successfully saved %d history entries\n", saved_count);
-    close(fd);
+	{
+		if (hist_list[i]->line && *hist_list[i]->line)
+		{
+			saved_count++;
+			write(fd, hist_list[i]->line, strlen(hist_list[i]->line));
+			write(fd, "\n", 1);
+		}
+		i++;
+	}
+	close(fd);
 }

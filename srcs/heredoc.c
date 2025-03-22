@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 18:42:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:24:27 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,15 @@ Example: str = "Hello", chunk = " World"
 */
 char	*merge_and_free(char *str, char *chunk)
 {
-    char	*new_str;
+	char	*new_str;
 
-    if (!chunk)
-        return (str);
-    if (!str)
-        return (ft_strdup(chunk));
-    new_str = ft_strjoin(str, chunk);
-    ft_safefree((void **)&str);
-    return (new_str);
+	if (!chunk)
+		return (str);
+	if (!str)
+		return (ft_strdup(chunk));
+	new_str = ft_strjoin(str, chunk);
+	ft_safefree((void **)&str);
+	return (new_str);
 }
 
 /*
@@ -55,17 +55,17 @@ Example: At position of "$HOME" in a line
 */
 char	*expand_heredoc_var(char *line, int *pos, t_vars *vars)
 {
-    char	*expanded;
-    int		old_pos;
+	char	*expanded;
+	int		old_pos;
 
-    old_pos = *pos;
-    expanded = handle_expansion(line, pos, vars);
-    if (!expanded)
-    {
-        *pos = old_pos + 1;
-        return (ft_strdup("$"));
-    }
-    return (expanded);
+	old_pos = *pos;
+	expanded = handle_expansion(line, pos, vars);
+	if (!expanded)
+	{
+		*pos = old_pos + 1;
+		return (ft_strdup("$"));
+	}
+	return (expanded);
 }
 
 /*
@@ -83,14 +83,14 @@ Example: At start of "Hello $USER"
 */
 char	*read_heredoc_str(char *line, int *pos)
 {
-    int	start;
+	int	start;
 
-    start = *pos;
-    while (line[*pos] && line[*pos] != '$')
-        (*pos)++;
-    if (*pos > start)
-        return (ft_substr(line, start, *pos - start));
-    return (NULL);
+	start = *pos;
+	while (line[*pos] && line[*pos] != '$')
+		(*pos)++;
+	if (*pos > start)
+		return (ft_substr(line, start, *pos - start));
+	return (NULL);
 }
 
 /*
@@ -109,21 +109,21 @@ Example: For input "Hello $HOME"
 */
 char	*expand_one_line(char *line, int *pos, t_vars *vars, char *result)
 {
-    char	*segment;
+	char	*segment;
 
-    if (line[*pos] == '$')
-    {
-        segment = expand_heredoc_var(line, pos, vars);
-        result = merge_and_free(result, segment);
-        ft_safefree((void **)&segment);
-    }
-    else
-    {
-        segment = read_heredoc_str(line, pos);
-        result = merge_and_free(result, segment);
-        ft_safefree((void **)&segment);
-    }
-    return (result);
+	if (line[*pos] == '$')
+	{
+		segment = expand_heredoc_var(line, pos, vars);
+		result = merge_and_free(result, segment);
+		ft_safefree((void **)&segment);
+	}
+	else
+	{
+		segment = read_heredoc_str(line, pos);
+		result = merge_and_free(result, segment);
+		ft_safefree((void **)&segment);
+	}
+	return (result);
 }
 
 /*
@@ -142,18 +142,18 @@ Example: Input "Hello $USER world"
 */
 char	*expand_heredoc_line(char *line, t_vars *vars)
 {
-    int		pos;
-    char	*result;
+	int		pos;
+	char	*result;
 
-    if (!line || !vars)
-        return (ft_strdup(""));
-    result = NULL;
-    pos = 0;
-    while (line[pos])
-        result = expand_one_line(line, &pos, vars, result);
-    if (!result)
-        return (ft_strdup(""));
-    return (result);
+	if (!line || !vars)
+		return (ft_strdup(""));
+	result = NULL;
+	pos = 0;
+	while (line[pos])
+		result = expand_one_line(line, &pos, vars, result);
+	if (!result)
+		return (ft_strdup(""));
+	return (result);
 }
 
 /*
@@ -170,18 +170,18 @@ Example: "EOF" -> 1 (expand variables)
 */
 int	chk_expand_heredoc(char *delimiter)
 {
-    int	i;
+	int	i;
 
-    if (!delimiter)
-        return (0);
-    i = 0;
-    while (delimiter[i])
-    {
-        if (ft_isquote(delimiter[i]))
-            return (0);
-        i++;
-    }
-    return (1);
+	if (!delimiter)
+		return (0);
+	i = 0;
+	while (delimiter[i])
+	{
+		if (ft_isquote(delimiter[i]))
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
 /*
@@ -200,29 +200,29 @@ Example: Line "echo $HOME" with expand_vars=true
 */
 int	write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
 {
-    char	*expanded_line;
-    int		write_result;
-    int		newline_result;
+	char	*expanded_line;
+	int		write_result;
+	int		newline_result;
 
-    if (!line)
-        return (0);
-    if (expand_vars && vars)
-    {
-        expanded_line = expand_heredoc_line(line, vars);
-        if (!expanded_line)
-            return (0);
-        write_result = write(fd, expanded_line, ft_strlen(expanded_line));
-        newline_result = write(fd, "\n", 1);
-        ft_safefree((void **)&expanded_line);
-        if (write_result == -1 || newline_result == -1)
-            return (0);
-        return (1);
-    }
-    write_result = write(fd, line, ft_strlen(line));
-    newline_result = write(fd, "\n", 1);
-    if (write_result == -1 || newline_result == -1)
-        return (0);
-    return (1);
+	if (!line)
+		return (0);
+	if (expand_vars && vars)
+	{
+		expanded_line = expand_heredoc_line(line, vars);
+		if (!expanded_line)
+			return (0);
+		write_result = write(fd, expanded_line, ft_strlen(expanded_line));
+		newline_result = write(fd, "\n", 1);
+		ft_safefree((void **)&expanded_line);
+		if (write_result == -1 || newline_result == -1)
+			return (0);
+		return (1);
+	}
+	write_result = write(fd, line, ft_strlen(line));
+	newline_result = write(fd, "\n", 1);
+	if (write_result == -1 || newline_result == -1)
+		return (0);
+	return (1);
 }
 
 /*
@@ -242,25 +242,25 @@ Example: With delimiter "EOF"
 */
 int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 {
-    char	*line;
-    int		write_success;
+	char	*line;
+	int		write_success;
 
-    while (1)
-    {
-        line = readline("> ");
-        if (!line)
-            break ;
-        if (ft_strcmp(line, delimiter) == 0)
-        {
-            ft_safefree((void **)&line);
-            break ;
-        }
-        write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
-        ft_safefree((void **)&line);
-        if (!write_success)
-            return (0);
-    }
-    return (1);
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break ;
+		if (ft_strcmp(line, delimiter) == 0)
+		{
+			ft_safefree((void **)&line);
+			break ;
+		}
+		write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
+		ft_safefree((void **)&line);
+		if (!write_success)
+			return (0);
+	}
+	return (1);
 }
 
 /*
@@ -273,13 +273,13 @@ Works with handle_heredoc().
 */
 int	handle_heredoc_err(t_node *node, t_vars *vars)
 {
-    if (!node || !node->args || !node->args[0])
-    {
-        vars->error_code = 1;
-        return (-1);
-    }
-    vars->error_code = 1;
-    return (-1);
+	if (!node || !node->args || !node->args[0])
+	{
+		vars->error_code = 1;
+		return (-1);
+	}
+	vars->error_code = 1;
+	return (-1);
 }
 
 /*
@@ -292,10 +292,10 @@ Works with handle_heredoc().
 */
 int	cleanup_heredoc_fail(int *fd, t_vars *vars)
 {
-    close(fd[0]);
-    close(fd[1]);
-    vars->error_code = 1;
-    return (-1);
+	close(fd[0]);
+	close(fd[1]);
+	vars->error_code = 1;
+	return (-1);
 }
 
 /*
@@ -315,20 +315,20 @@ Example: Node with delimiter "EOF"
 */
 int	handle_heredoc(t_node *node, t_vars *vars)
 {
-    int	fd[2];
-    int	expand_vars;
-    int	read_success;
+	int	fd[2];
+	int	expand_vars;
+	int	read_success;
 
-    if (!node || !node->args || !node->args[0])
-        return (handle_heredoc_err(node, vars));
-    if (pipe(fd) == -1)
-        return (handle_heredoc_err(node, vars));
-    expand_vars = chk_expand_heredoc(node->args[0]);
-    read_success = read_heredoc(fd, node->args[0], vars, expand_vars);
-    if (!read_success)
-        return (cleanup_heredoc_fail(fd, vars));
-    close(fd[1]);
-    return (fd[0]);
+	if (!node || !node->args || !node->args[0])
+		return (handle_heredoc_err(node, vars));
+	if (pipe(fd) == -1)
+		return (handle_heredoc_err(node, vars));
+	expand_vars = chk_expand_heredoc(node->args[0]);
+	read_success = read_heredoc(fd, node->args[0], vars, expand_vars);
+	if (!read_success)
+		return (cleanup_heredoc_fail(fd, vars));
+	close(fd[1]);
+	return (fd[0]);
 }
 
 /*
@@ -342,7 +342,7 @@ Returns:
 Works with setup_redirection().
 
 Example: For shell command "cat << EOF"
-- Input: "cat << EOF" 
+- Input: "cat << EOF"
 - Shell prompts for input with "> "
 - User enters multiple lines: "Hello", "World", "EOF"
 - handle_heredoc() captures "Hello" and "World" into a pipe
@@ -354,17 +354,17 @@ that read from stdin.
 */
 int	proc_heredoc(t_node *node, t_vars *vars)
 {
-    int	fd;
+	int	fd;
 
-    fd = handle_heredoc(node, vars);
-    if (fd == -1)
-        return (0);
-    if (dup2(fd, STDIN_FILENO) == -1)
-    {
-        close(fd);
-        vars->error_code = 1;
-        return (0);
-    }
-    close(fd);
-    return (1);
+	fd = handle_heredoc(node, vars);
+	if (fd == -1)
+		return (0);
+	if (dup2(fd, STDIN_FILENO) == -1)
+	{
+		close(fd);
+		vars->error_code = 1;
+		return (0);
+	}
+	close(fd);
+	return (1);
 }

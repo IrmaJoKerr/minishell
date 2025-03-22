@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expansion.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 09:00:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:38:07 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ Works with handle_special_var().
 */
 char	*chk_exitstatus(t_vars *vars)
 {
-    if (vars)
-        return (ft_itoa(vars->error_code));
-    else
-        return (ft_strdup("0"));
+	if (vars)
+		return (ft_itoa(vars->error_code));
+	else
+		return (ft_strdup("0"));
 }
 
 /*
@@ -45,13 +45,13 @@ $0 -> "bleshell"
 */
 char	*handle_special_var(const char *var_name, t_vars *vars)
 {
-    if (!var_name || !*var_name)
-        return (ft_strdup(""));
-    if (!ft_strcmp(var_name, "?"))
-        return (chk_exitstatus(vars));
-    if (!ft_strcmp(var_name, "0"))
-        return (ft_strdup("bleshell"));
-    return (NULL);
+	if (!var_name || !*var_name)
+		return (ft_strdup(""));
+	if (!ft_strcmp(var_name, "?"))
+		return (chk_exitstatus(vars));
+	if (!ft_strcmp(var_name, "0"))
+		return (ft_strdup("bleshell"));
+	return (NULL);
 }
 
 /*
@@ -70,21 +70,21 @@ get_env_val("NONEXISTENT", env) -> ""
 */
 char	*get_env_val(const char *var_name, char **env)
 {
-    int		i;
-    size_t	var_len;
+	int		i;
+	size_t	var_len;
 
-    if (!var_name || !*var_name || !env)
-        return (ft_strdup(""));
-    var_len = ft_strlen(var_name);
-    i = 0;
-    while (env[i])
-    {
-        if (!ft_strncmp(env[i], var_name, var_len)
-            && env[i][var_len] == '=')
-            return (ft_strdup(env[i] + var_len + 1));
-        i++;
-    }
-    return (ft_strdup(""));
+	if (!var_name || !*var_name || !env)
+		return (ft_strdup(""));
+	var_len = ft_strlen(var_name);
+	i = 0;
+	while (env[i])
+	{
+		if (!ft_strncmp(env[i], var_name, var_len)
+			&& env[i][var_len] == '=')
+			return (ft_strdup(env[i] + var_len + 1));
+		i++;
+	}
+	return (ft_strdup(""));
 }
 
 /*
@@ -99,14 +99,14 @@ Works with handle_expansion().
 */
 char	*get_var_name(char *input, int *pos)
 {
-    int		start;
-    char	*var_name;
+	int		start;
+	char	*var_name;
 
-    start = *pos;
-    while (input[*pos] && (ft_isalnum(input[*pos]) || input[*pos] == '_'))
-        (*pos)++;
-    var_name = ft_substr(input, start, *pos - start);
-    return (var_name);
+	start = *pos;
+	while (input[*pos] && (ft_isalnum(input[*pos]) || input[*pos] == '_'))
+		(*pos)++;
+	var_name = ft_substr(input, start, *pos - start);
+	return (var_name);
 }
 
 /*
@@ -121,31 +121,21 @@ Works with expand_cmd_args() during variable expansion.
 */
 char	*append_char(char *str, char c)
 {
-    char	*result;
-    int		i;
-    
-    // Calculate length of original string
-    i = 0;
-    if (str)
-        i = ft_strlen(str);
-    
-    // Allocate new string with space for original + new char + null terminator
-    result = malloc(i + 2);
-    if (!result)
-        return (NULL);
-    
-    // Copy original string if it exists
-    if (str)
-        ft_strlcpy(result, str, i + 1);
-    
-    // Append the new character and null terminator
-    result[i] = c;
-    result[i + 1] = '\0';
-    
-    // Free the original string
-    ft_safefree((void **)&str);
-    
-    return (result);
+	char	*result;
+	int		i;
+
+	i = 0;
+	if (str)
+		i = ft_strlen(str);
+	result = malloc(i + 2);
+	if (!result)
+		return (NULL);
+	if (str)
+		ft_strlcpy(result, str, i + 1);
+	result[i] = c;
+	result[i + 1] = '\0';
+	ft_safefree((void **)&str);
+	return (result);
 }
 
 /*
@@ -164,116 +154,28 @@ Example: Input: "$HOME/file" at position 0
 - Extracts "HOME" as variable name
 - Returns value (e.g., "/Users/username")
 */
-char *handle_expansion(char *input, int *pos, t_vars *vars)
+char	*handle_expansion(char *input, int *pos, t_vars *vars)
 {
-    char *var_name;
-    char *var_value;
-    
-    // Skip the $ character
-    (*pos)++;
-    
-    // Get variable name
-    var_name = get_var_name(input, pos);
-    if (!var_name)
-        return (ft_strdup("$"));
-    
-    // Check for special variables
-    var_value = handle_special_var(var_name, vars);
-    if (var_value)
-    {
-        ft_safefree((void **)&var_name);
-        return (var_value);
-    }
-    
-    // Get value from environment
-    var_value = get_env_val(var_name, vars->env);
-    ft_safefree((void **)&var_name);
-    
-    // Return expanded value or empty string if not found
-    if (var_value)
-        return (var_value);
-    return (ft_strdup(""));
+	char	*var_name;
+	char	*var_value;
+
+	(*pos)++;
+	var_name = get_var_name(input, pos);
+	if (!var_name)
+		return (ft_strdup("$"));
+	var_value = handle_special_var(var_name, vars);
+	if (var_value)
+	{
+		ft_safefree((void **)&var_name);
+		return (var_value);
+	}
+	var_value = get_env_val(var_name, vars->env);
+	ft_safefree((void **)&var_name);
+	if (var_value)
+		return (var_value);
+	return (ft_strdup(""));
 }
 
-/*
-Processes a single argument for expansion.
-- Checks if argument starts with $.
-- Handles expansion of the variable.
-- Replaces original argument with expanded value.
-Returns:
-1 if argument was expanded.
-0 if no expansion occurred.
-Works with expand_cmd_args().
-REMOVE THIS FUNCTION
-
-int	expand_one_arg(char **arg, t_vars *vars)
-{
-    int		pos;
-    char	*expanded;
-
-    if (!arg || !*arg || (*arg)[0] != '$')
-        return (0);
-    pos = 0;
-    expanded = handle_expansion(*arg, &pos, vars);
-    if (!expanded)
-        return (0);
-    ft_safefree((void **)&(*arg));
-    *arg = expanded;
-    return (1);
-}
-*/
-
-/*
-Expands environment variables in command arguments.
-- Processes each argument in a command node.
-- Searches for $ characters and expands variables.
-- Updates arguments with expanded values.
-- Handles quotes properly during expansion.
-Returns:
-Nothing (void function).
-
-Example: For command node with args ["ls", "$HOME", "-l"]:
-- Expands "$HOME" to "/Users/username"
-- Results in args ["ls", "/Users/username", "-l"]
-Works with process_cmd_token().
-OLD VERSION
-void	expand_cmd_args(t_node *node, t_vars *vars)
-{
-    int		i;
-    int		j;
-    char	*expanded;
-    char	*result;
-    
-    if (!node || !node->args)
-        return ;
-    i = 0;
-    while (node->args[i])
-    {
-        j = 0;
-        result = ft_strdup("");
-        while (node->args[i][j])
-        {
-            if (node->args[i][j] == '$')
-            {
-                expanded = handle_expansion(node->args[i], &j, vars);
-                if (expanded)
-                {
-                    result = merge_and_free(result, expanded);
-                    ft_safefree((void **)&expanded);
-                }
-            }
-            else
-            {
-                result = append_char(result, node->args[i][j]);
-                j++;
-            }
-        }
-        ft_safefree((void **)&node->args[i]);
-        node->args[i] = result;
-        i++;
-    }
-}
-*/
 /*
 Expands environment variables in command arguments.
 - Preserves single-quoted arguments from expansion
@@ -289,78 +191,63 @@ Example: For command node with args ["ls", "'$HOME'", "$USER"]:
 - Expands "$USER" to "bleow"
 - Results in args ["ls", "$HOME", "bleow"]
 */
-void expand_cmd_args(t_node *node, t_vars *vars)
+void	expand_cmd_args(t_node *node, t_vars *vars)
 {
-    int     i;
-    int     j;
-    char    *expanded;
-    char    *result;
-    
-    if (!node || !node->args)
-        return;
-        
-    /* Skip processing entirely for echo $? case */
-    if (node->args[0] && ft_strcmp(node->args[0], "echo") == 0 &&
-        node->args[1] && ft_strcmp(node->args[1], "$?") == 0 &&
-        !node->args[2])
-    {
-        fprintf(stderr, "DEBUG: Preserving raw $? for echo\n");
-        return;
-    }
-    
-    i = 0;
-    while (node->args[i])
-    {
-        /* Skip expansion for single-quoted arguments */
-        if (node->arg_quote_type && node->arg_quote_type[i] == 1)
-        {
-            fprintf(stderr, "DEBUG: Skipping expansion for single-quoted arg: '%s'\n", 
-                  node->args[i]);
-            i++;
-            continue;
-        }
-        
-        /* Preserve standalone $? arguments for special handling */
-        if (ft_strcmp(node->args[i], "$?") == 0)
-        {
-            fprintf(stderr, "DEBUG: Preserving $? argument at position %d\n", i);
-            i++;
-            continue;
-        }
-        
-        j = 0;
-        result = ft_strdup("");
-        while (node->args[i][j])
-        {
-            if (node->args[i][j] == '$')
-            {
-                /* Preserve $? within strings if it's the entire variable */
-                if (node->args[i][j+1] == '?' && 
-                   (j == 0 && node->args[i][j+2] == '\0'))
-                {
-                    result = append_char(result, node->args[i][j]);
-                    result = append_char(result, node->args[i][j+1]);
-                    j += 2;
-                }
-                else
-                {
-                    expanded = handle_expansion(node->args[i], &j, vars);
-                    if (expanded)
-                    {
-                        result = merge_and_free(result, expanded);
-                        ft_safefree((void **)&expanded);
-                    }
-                }
-            }
-            else
-            {
-                result = append_char(result, node->args[i][j]);
-                j++;
-            }
-        }
-        ft_safefree((void **)&node->args[i]);
-        node->args[i] = result;
-        i++;
-    }
-    fprintf(stderr, "DEBUG: Expanded args complete\n");
+	int		i;
+	int		j;
+	char	*expanded;
+	char	*result;
+
+	if (!node || !node->args)
+		return ;
+	if (node->args[0] && ft_strcmp(node->args[0], "echo") == 0
+		&& node->args[1] && ft_strcmp(node->args[1], "$?") == 0
+		&& !node->args[2])
+		return ;
+	i = 0;
+	while (node->args[i])
+	{
+		if (node->arg_quote_type && node->arg_quote_type[i] == 1)
+		{
+			i++;
+			continue ;
+		}
+		if (ft_strcmp(node->args[i], "$?") == 0)
+		{
+			i++;
+			continue ;
+		}
+		j = 0;
+		result = ft_strdup("");
+		while (node->args[i][j])
+		{
+			if (node->args[i][j] == '$')
+			{
+				if (node->args[i][j + 1] == '?' &&
+					(j == 0 && node->args[i][j + 2] == '\0'))
+				{
+					result = append_char(result, node->args[i][j]);
+					result = append_char(result, node->args[i][j + 1]);
+					j += 2;
+				}
+				else
+				{
+					expanded = handle_expansion(node->args[i], &j, vars);
+					if (expanded)
+					{
+						result = merge_and_free(result, expanded);
+						ft_safefree((void **)&expanded);
+					}
+				}
+			}
+			else
+			{
+				result = append_char(result, node->args[i][j]);
+				j++;
+			}
+		}
+		ft_safefree((void **)&node->args[i]);
+		node->args[i] = result;
+		i++;
+	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:29:30 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int	handle_cd_special(char **args, t_vars *vars)
 {
 	char	*path_value;
 	int		cmdcode;
-	
+
 	if ((!args[1]) || ((args[1][0] == '~') && (args[1][1] == '\0')))
 	{
 		path_value = get_env_val("HOME", vars->env);
@@ -92,7 +92,7 @@ Returns 0 on success, 1 on failure.
 int	handle_cd_path(char **args, t_vars *vars)
 {
 	int	cmdcode;
-	
+
 	if ((!args[1]) || ((args[1][0] == '~') && (args[1][1] == '\0')) ||
 		(args[1][0] == '-' && args[1][1] == '\0'))
 	{
@@ -114,29 +114,27 @@ Updates PWD and OLDPWD environment variables after directory change.
 - Updates the PWD environment variable with the new path.
 Returns 0 on success, 1 on failure.
 */
-int update_env_pwd(t_vars *vars, char *oldpwd)
+int	update_env_pwd(t_vars *vars, char *oldpwd)
 {
-    char    cwd[1024];
-    char    *tmp;
-    char    *result;
-    
-    tmp = ft_strjoin("OLDPWD=", oldpwd);
-    if (!tmp)
-        return (1);
-    modify_env(&vars->env, 1, tmp);
-    ft_safefree((void **)&tmp);
-    // Fix: getcwd returns a char* on success, NULL on failure
-    result = getcwd(cwd, sizeof(cwd));
-    if (result == NULL)
-    {
-        ft_putstr_fd("cd: error retrieving current directory\n", 2);
-        return (1);
-    }
-    
-    tmp = ft_strjoin("PWD=", cwd);
-    if (!tmp)
-        return (1);
-    modify_env(&vars->env, 1, tmp);
-    ft_safefree((void **)&tmp);
-    return (0);
+	char	cwd[1024];
+	char	*tmp;
+	char	*result;
+
+	tmp = ft_strjoin("OLDPWD=", oldpwd);
+	if (!tmp)
+		return (1);
+	modify_env(&vars->env, 1, tmp);
+	ft_safefree((void **)&tmp);
+	result = getcwd(cwd, sizeof(cwd));
+	if (result == NULL)
+	{
+		ft_putstr_fd("cd: error retrieving current directory\n", 2);
+		return (1);
+	}
+	tmp = ft_strjoin("PWD=", cwd);
+	if (!tmp)
+		return (1);
+	modify_env(&vars->env, 1, tmp);
+	ft_safefree((void **)&tmp);
+	return (0);
 }

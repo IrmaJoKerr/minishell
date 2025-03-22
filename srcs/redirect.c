@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 22:45:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/23 02:09:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,61 @@ Works with open_redirect_file() for permission validation.
 Example: When redirecting output to file
 - Checks if file exists and can be written to
 - Returns 1 if accessible, 0 if permission denied
+OLD VERSION
+int	chk_permissions(char *filename, int mode, t_vars *vars)
+{
+	if (!filename)
+		return (0);
+	if (mode == O_RDONLY && access(filename, R_OK) == -1)
+		return (redirect_error(filename, vars, 1));
+	if ((mode & O_WRONLY) && access(filename, W_OK) == -1)
+	{
+		if (access(filename, F_OK) == -1)
+			return (1);
+		return (redirect_error(filename, vars, 1));
+	}
+	return (1);
+}
+*/
+/*
+Checks file permissions before redirection starts.
+- For read mode: Verifies file exists and is readable.
+- For write mode: Checks if file exists and is writable.
+- For new files: Returns 1 to allow creation.
+Returns:
+- 1 if file can be accessed with requested mode.
+- 0 if not.
+Works with open_redirect_file() for permission validation.
 */
 int	chk_permissions(char *filename, int mode, t_vars *vars)
 {
     if (!filename)
         return (0);
-    if (mode == O_RDONLY && access(filename, R_OK) == -1)
-        return (redirect_error(filename, vars, 1));
+    
+    /* Read mode - check if file exists first */
+    if (mode == O_RDONLY)
+    {
+        if (access(filename, F_OK) == -1)
+        {
+            ft_putstr_fd("bleshell: ", 2);
+            ft_putstr_fd(filename, 2);
+            ft_putendl_fd(": No such file or directory", 2);
+            vars->error_code = 1;
+            return (0);
+        }
+        if (access(filename, R_OK) == -1)
+            return (redirect_error(filename, vars, 1));
+        return (1);
+    }
+    
+    /* Write mode - check permissions if file exists */
     if ((mode & O_WRONLY) && access(filename, W_OK) == -1)
     {
         if (access(filename, F_OK) == -1)
-            return (1);
+            return (1);  /* File doesn't exist, will be created */
         return (redirect_error(filename, vars, 1));
     }
+    
     return (1);
 }
 
@@ -56,14 +98,14 @@ Example: For append redirection ">>"
 */
 int	set_output_flags(int append)
 {
-    int	flags;
+	int	flags;
 
-    flags = O_WRONLY | O_CREAT;
-    if (append)
-        flags |= O_APPEND;
-    else
-        flags |= O_TRUNC;
-    return (flags);
+	flags = O_WRONLY | O_CREAT;
+	if (append)
+		flags |= O_APPEND;
+	else
+		flags |= O_TRUNC;
+	return (flags);
 }
 
 /*
@@ -82,19 +124,19 @@ Example: For different redirection types
 */
 int	set_redirect_flags(int mode)
 {
-    int	flags;
+	int	flags;
 
-    if (mode == 0)
-        flags = O_RDONLY;
-    else
-    {
-        flags = O_WRONLY | O_CREAT;
-        if (mode == 2)
-            flags |= O_APPEND;
-        else
-            flags |= O_TRUNC;
-    }
-    return (flags);
+	if (mode == 0)
+		flags = O_RDONLY;
+	else
+	{
+		flags = O_WRONLY | O_CREAT;
+		if (mode == 2)
+			flags |= O_APPEND;
+		else
+			flags |= O_TRUNC;
+	}
+	return (flags);
 }
 
 /*
@@ -112,10 +154,11 @@ Example: When processing token list
 */
 int	is_redirection(t_tokentype type)
 {
-    return (type == TYPE_HEREDOC
-        || type == TYPE_IN_REDIRECT
-        || type == TYPE_OUT_REDIRECT
-        || type == TYPE_APPEND_REDIRECT);
+	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIRECT
+		|| type == TYPE_OUT_REDIRECT || type == TYPE_APPEND_REDIRECT)
+		return (1);
+	else
+		return (0);
 }
 
 /*
@@ -132,25 +175,25 @@ Example: After command execution
 */
 void	reset_redirect_fds(t_vars *vars)
 {
-    if (!vars || !vars->pipeline)
-        return ;
-    if (vars->pipeline->saved_stdin > 2)
-    {
-        dup2(vars->pipeline->saved_stdin, STDIN_FILENO);
-        close(vars->pipeline->saved_stdin);
-        vars->pipeline->saved_stdin = -1;
-    }
-    if (vars->pipeline->saved_stdout > 2)
-    {
-        dup2(vars->pipeline->saved_stdout, STDOUT_FILENO);
-        close(vars->pipeline->saved_stdout);
-        vars->pipeline->saved_stdout = -1;
-    }
-    if (vars->pipeline->heredoc_fd > 2)
-    {
-        close(vars->pipeline->heredoc_fd);
-        vars->pipeline->heredoc_fd = -1;
-    }
+	if (!vars || !vars->pipeline)
+		return ;
+	if (vars->pipeline->saved_stdin > 2)
+	{
+		dup2(vars->pipeline->saved_stdin, STDIN_FILENO);
+		close(vars->pipeline->saved_stdin);
+		vars->pipeline->saved_stdin = -1;
+	}
+	if (vars->pipeline->saved_stdout > 2)
+	{
+		dup2(vars->pipeline->saved_stdout, STDOUT_FILENO);
+		close(vars->pipeline->saved_stdout);
+		vars->pipeline->saved_stdout = -1;
+	}
+	if (vars->pipeline->heredoc_fd > 2)
+	{
+		close(vars->pipeline->heredoc_fd);
+		vars->pipeline->heredoc_fd = -1;
+	}
 }
 
 /*
@@ -171,14 +214,14 @@ Example: For "cmd < input.txt"
 */
 int	input_redirect(t_node *node, int *fd_in, t_vars *vars)
 {
-    if (!node || !node->args || !node->args[0] || !fd_in)
-        return (0);
-    if (!chk_permissions(node->args[0], O_RDONLY, vars))
-        return (0);
-    *fd_in = open(node->args[0], O_RDONLY);
-    if (*fd_in == -1)
-        return (redirect_error(node->args[0], vars, 1));
-    return (1);
+	if (!node || !node->args || !node->args[0] || !fd_in)
+		return (0);
+	if (!chk_permissions(node->args[0], O_RDONLY, vars))
+		return (0);
+	*fd_in = open(node->args[0], O_RDONLY);
+	if (*fd_in == -1)
+		return (redirect_error(node->args[0], vars, 1));
+	return (1);
 }
 
 /*
@@ -199,17 +242,17 @@ Example: For "cmd > output.txt"
 */
 int	output_redirect(t_node *node, int *fd_out, int append, t_vars *vars)
 {
-    int	flags;
+	int	flags;
 
-    if (!node || !node->args || !node->args[0] || !fd_out)
-        return (0);
-    flags = set_output_flags(append);
-    if (!chk_permissions(node->args[0], flags, vars))
-        return (0);
-    *fd_out = open(node->args[0], flags, 0644);
-    if (*fd_out == -1)
-        return (redirect_error(node->args[0], vars, 1));
-    return (1);
+	if (!node || !node->args || !node->args[0] || !fd_out)
+		return (0);
+	flags = set_output_flags(append);
+	if (!chk_permissions(node->args[0], flags, vars))
+		return (0);
+	*fd_out = open(node->args[0], flags, 0644);
+	if (*fd_out == -1)
+		return (redirect_error(node->args[0], vars, 1));
+	return (1);
 }
 
 /*
@@ -231,20 +274,20 @@ Example: Opening a file for redirection
 */
 int	open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars)
 {
-    int	flags;
+	int	flags;
 
-    if (!node || !node->args || !node->args[0] || !fd)
-        return (0);
-    flags = set_redirect_flags(mode);
-    if (!chk_permissions(node->args[0], flags, vars))
-        return (0);
-    if (mode == 0)
-        *fd = open(node->args[0], flags);
-    else
-        *fd = open(node->args[0], flags, 0644);
-    if (*fd == -1)
-        return (redirect_error(node->args[0], vars, 1));
-    return (1);
+	if (!node || !node->args || !node->args[0] || !fd)
+		return (0);
+	flags = set_redirect_flags(mode);
+	if (!chk_permissions(node->args[0], flags, vars))
+		return (0);
+	if (mode == 0)
+		*fd = open(node->args[0], flags);
+	else
+		*fd = open(node->args[0], flags, 0644);
+	if (*fd == -1)
+		return (redirect_error(node->args[0], vars, 1));
+	return (1);
 }
 
 /*
@@ -266,23 +309,23 @@ Example: For "cmd > output.txt"
 */
 int	handle_redirect(t_node *node, int *fd, int mode, t_vars *vars)
 {
-    int	std_fd;
-    int	result;
-    int	success;
+	int	std_fd;
+	int	result;
+	int	success;
 
-    success = open_redirect_file(node, fd, mode, vars);
-    if (!success)
-        return (0);
-    if (mode == 0)
-        std_fd = STDIN_FILENO;
-    else
-        std_fd = STDOUT_FILENO;
-    result = dup2(*fd, std_fd);
-    if (result == -1)
-    {
-        close(*fd);
-        return (0);
-    }
-    close(*fd);
-    return (1);
+	success = open_redirect_file(node, fd, mode, vars);
+	if (!success)
+		return (0);
+	if (mode == 0)
+		std_fd = STDIN_FILENO;
+	else
+		std_fd = STDOUT_FILENO;
+	result = dup2(*fd, std_fd);
+	if (result == -1)
+	{
+		close(*fd);
+		return (0);
+	}
+	close(*fd);
+	return (1);
 }

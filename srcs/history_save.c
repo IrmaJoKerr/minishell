@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history_save.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:34:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:35:09 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,17 @@ Example: For a 10KB history file
 */
 int	copy_file_content(int fd_src, int fd_dst)
 {
-    char	buffer[4096];
-    ssize_t	bytes;
+	char	buffer[4096];
+	ssize_t	bytes;
 
-    bytes = read(fd_src, buffer, 4096);
-    while (bytes > 0)
-    {
-        if (write(fd_dst, buffer, bytes) == -1)
-            return (0);
-        bytes = read(fd_src, buffer, 4096);
-    }
-    return (bytes >= 0);
+	bytes = read(fd_src, buffer, 4096);
+	while (bytes > 0)
+	{
+		if (write(fd_dst, buffer, bytes) == -1)
+			return (0);
+		bytes = read(fd_src, buffer, 4096);
+	}
+	return (bytes >= 0);
 }
 
 /*
@@ -58,23 +58,23 @@ Example: copy_file(HISTORY_FILE_TMP, HISTORY_FILE)
 */
 int	copy_file(const char *src, const char *dst)
 {
-    int		fd_src;
-    int		fd_dst;
-    int		result;
+	int	fd_src;
+	int	fd_dst;
+	int	result;
 
-    fd_src = open(src, O_RDONLY);
-    if (fd_src == -1)
-        return (0);
-    fd_dst = open(dst, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd_dst == -1)
-    {
-        close(fd_src);
-        return (0);
-    }
-    result = copy_file_content(fd_src, fd_dst);
-    close(fd_src);
-    close(fd_dst);
-    return (result);
+	fd_src = open(src, O_RDONLY);
+	if (fd_src == -1)
+		return (0);
+	fd_dst = open(dst, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd_dst == -1)
+	{
+		close(fd_src);
+		return (0);
+	}
+	result = copy_file_content(fd_src, fd_dst);
+	close(fd_src);
+	close(fd_dst);
+	return (result);
 }
 
 /*
@@ -93,21 +93,21 @@ Example: During history trimming
 */
 int	copy_to_temp(int fd_read)
 {
-    int		fd_write;
-    char	*line;
+	int		fd_write;
+	char	*line;
 
-    fd_write = open(HISTORY_FILE_TMP, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd_write == -1)
-        return (0);
-    line = get_next_line(fd_read);
-    while (line)
-    {
-        write(fd_write, line, ft_strlen(line));
-        ft_safefree((void **)&line);
-        line = get_next_line(fd_read);
-    }
-    close(fd_write);
-    return (1);
+	fd_write = open(HISTORY_FILE_TMP, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd_write == -1)
+		return (0);
+	line = get_next_line(fd_read);
+	while (line)
+	{
+		write(fd_write, line, ft_strlen(line));
+		ft_safefree((void **)&line);
+		line = get_next_line(fd_read);
+	}
+	close(fd_write);
+	return (1);
 }
 
 /*
@@ -126,18 +126,18 @@ Example: For a history with 1000 lines
 */
 void	skip_lines(int fd, int count)
 {
-    char	*line;
-    int		i;
+	char	*line;
+	int		i;
 
-    i = 0;
-    while (i < count)
-    {
-        line = get_next_line(fd);
-        if (!line)
-            break ;
-        ft_safefree((void **)&line);
-        i++;
-    }
+	i = 0;
+	while (i < count)
+	{
+		line = get_next_line(fd);
+		if (!line)
+			break ;
+		ft_safefree((void **)&line);
+		i++;
+	}
 }
 
 /*
@@ -159,20 +159,20 @@ Example: If HISTORY_FILE_MAX=1000 and file has 1200 entries
 */
 void	trim_history(int excess_lines)
 {
-    int	fd;
+	int	fd;
 
-    fd = init_history_fd(O_RDONLY);
-    if (fd == -1)
-        return ;
-    skip_lines(fd, excess_lines);
-    if (!copy_to_temp(fd))
-    {
-        close(fd);
-        return ;
-    }
-    close(fd);
-    if (copy_file(HISTORY_FILE_TMP, HISTORY_FILE))
-        unlink(HISTORY_FILE_TMP);
+	fd = init_history_fd(O_RDONLY);
+	if (fd == -1)
+		return ;
+	skip_lines(fd, excess_lines);
+	if (!copy_to_temp(fd))
+	{
+		close(fd);
+		return ;
+	}
+	close(fd);
+	if (copy_file(HISTORY_FILE_TMP, HISTORY_FILE))
+		unlink(HISTORY_FILE_TMP);
 }
 
 /*
@@ -195,32 +195,28 @@ Example: When shell exits with 1500 history entries and HISTORY_FILE_MAX=1000
 */
 void	save_history(void)
 {
-    int			fd;
-    HIST_ENTRY	**hist_list;
-    int			history_count;
-    int			excess_lines;
-    int			start_idx;
-    
-    fprintf(stderr, "DEBUG: Starting history save\n");
-    fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd == -1)
-    {
-        perror("bleshell: error opening history file");
-        return;
-    }
-    hist_list = history_list();
-    if (!hist_list)
-    {
-        close(fd);
-        return;
-    }
-    history_count = history_length;
-    excess_lines = history_count - HISTORY_FILE_MAX;
-    start_idx = 0;
-    if (excess_lines > 0)
-        start_idx = excess_lines;
-    save_history_entries(fd, hist_list, start_idx, history_count);
-    close(fd);
+	int			fd;
+	HIST_ENTRY	**hist_list;
+	int			history_count;
+	int			excess_lines;
+	int			start_idx;
+
+	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+		return ;
+	hist_list = history_list();
+	if (!hist_list)
+	{
+		close(fd);
+		return ;
+	}
+	history_count = history_length;
+	excess_lines = history_count - HISTORY_FILE_MAX;
+	start_idx = 0;
+	if (excess_lines > 0)
+		start_idx = excess_lines;
+	save_history_entries(fd, hist_list, start_idx, history_count);
+	close(fd);
 }
 
 /*
@@ -241,26 +237,20 @@ Example: For 1000 history entries after skipping 200
 */
 int	save_history_entries(int fd, HIST_ENTRY **hist_list, int start, int total)
 {
-    int	i;
-    int	saved_count;
+	int	i;
+	int	saved_count;
 
-    saved_count = 0;
-    fprintf(stderr, "DEBUG: Saving history with %d entries total\n", 
-        total - start);
-    i = start;
-    while (i < total && hist_list[i])
-    {
-        if (hist_list[i]->line && *(hist_list[i]->line))
-        {
-            saved_count++;
-            write(fd, hist_list[i]->line, strlen(hist_list[i]->line));
-            write(fd, "\n", 1);
-            fprintf(stderr, "DEBUG: Saved line #%d of %d: '%s'\n",
-                saved_count, total - start, hist_list[i]->line);
-        }
-        i++;
-    }
-    fprintf(stderr, "DEBUG: Successfully saved %d history entries\n", 
-        saved_count);
-    return (saved_count);
+	saved_count = 0;
+	i = start;
+	while (i < total && hist_list[i])
+	{
+		if (hist_list[i]->line && *(hist_list[i]->line))
+		{
+			saved_count++;
+			write(fd, hist_list[i]->line, strlen(hist_list[i]->line));
+			write(fd, "\n", 1);
+		}
+		i++;
+	}
+	return (saved_count);
 }

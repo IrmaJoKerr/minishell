@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   initnode.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 10:01:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:21:02 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,73 +19,42 @@ Has special case for head nodes.
 Sets a default token if token is NULL.
 Returns 1 on success, 0 on failure.
 */
-int make_nodeframe(t_node *node, t_tokentype type, char *token)
+int	make_nodeframe(t_node *node, t_tokentype type, char *token)
 {
-    node->type = type;
-    node->next = NULL;
-    node->prev = NULL;
-    node->left = NULL;
-    node->right = NULL;
-    node->arg_quote_type = NULL; // Initialize quote type array
-    
-    if (!token)
-        token = (char *)get_token_str(type);
-    create_args_array(node, token);
-    if (!node->args)
-        return (0);
-    return (1);
+	node->type = type;
+	node->next = NULL;
+	node->prev = NULL;
+	node->left = NULL;
+	node->right = NULL;
+	node->arg_quote_type = NULL;
+	if (!token)
+		token = (char *)get_token_str(type);
+	create_args_array(node, token);
+	if (!node->args)
+		return (0);
+	return (1);
 }
 
-/*
-Creates a new node with specified type and token.
-If token is NULL, uses appropriate defaults based on type.
-Returns the initialized node or NULL on failure.
-OLD VERSION
-t_node *initnode(t_tokentype type, char *token)
+t_node	*initnode(t_tokentype type, char *token)
 {
-	t_node *node;
-	
+	t_node	*node;
+	int		quote_type;
+
+	quote_type = 0;
 	node = malloc(sizeof(t_node));
 	if (!node)
 		return (NULL);
+	if (type == TYPE_SINGLE_QUOTE || type == 5)
+		quote_type = 1;
+	else if (type == TYPE_DOUBLE_QUOTE || type == 4)
+		quote_type = 2;
 	if (!make_nodeframe(node, type, token))
 	{
 		ft_safefree((void **)&node);
 		return (NULL);
 	}
+	if (node->arg_quote_type && (type == TYPE_SINGLE_QUOTE
+			|| type == TYPE_DOUBLE_QUOTE || type == 5 || type == 4))
+		node->arg_quote_type[0] = quote_type;
 	return (node);
 }
-*/
-t_node *initnode(t_tokentype type, char *token)
-{
-    t_node *node;
-    int quote_type = 0;  // Default for normal tokens
-    
-    node = malloc(sizeof(t_node));
-    if (!node)
-        return (NULL);
-    
-    // Set quote type based on token type
-    if (type == TYPE_SINGLE_QUOTE || type == 5)
-        quote_type = 1;  // Single quotes
-    else if (type == TYPE_DOUBLE_QUOTE || type == 4)
-        quote_type = 2;  // Double quotes
-    
-    if (!make_nodeframe(node, type, token))
-    {
-        ft_safefree((void **)&node);
-        return (NULL);
-    }
-    
-    // Set appropriate quote type for the first argument if it's a quoted token
-    if (node->arg_quote_type && (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE || 
-                               type == 5 || type == 4))
-    {
-        node->arg_quote_type[0] = quote_type;
-        fprintf(stderr, "DEBUG: [initnode] Set quote_type=%d for token type %d\n", 
-                quote_type, type);
-    }
-    
-    return (node);
-}
-

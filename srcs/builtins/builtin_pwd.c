@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_pwd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:01 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:07:44 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,26 +22,26 @@ Returns 0 on success, 1 on failure.
 */
 int	builtin_pwd(t_vars *vars)
 {
-    char	*cwd;
-    int		cmdcode;
+	char	*cwd;
+	int		cmdcode;
 
-    cmdcode = 0;
-    if (!vars || !vars->env)
-    {
-        cmdcode = 1;
-        vars->error_code = cmdcode;
-        return (cmdcode);
-    }
-    cwd = get_env_val("PWD", vars->env);
-    if (!cwd || !*cwd)
-    {
-        ft_safefree((void **)&cwd);
-        cmdcode = 1;
-        vars->error_code = cmdcode;
-        return (cmdcode);
-    }
-    printf("%s\n", cwd);
-    ft_safefree((void **)&cwd);
-    vars->error_code = cmdcode;
-    return (cmdcode);
+	cmdcode = 0;
+	if (!vars || !vars->env)
+	{
+		cmdcode = 1;
+		vars->error_code = cmdcode;
+		return (cmdcode);
+	}
+	cwd = get_env_val("PWD", vars->env);
+	if (!cwd || !*cwd)
+	{
+		ft_safefree((void **)&cwd);
+		cmdcode = 1;
+		vars->error_code = cmdcode;
+		return (cmdcode);
+	}
+	printf("%s\n", cwd);
+	ft_safefree((void **)&cwd);
+	vars->error_code = cmdcode;
+	return (cmdcode);
 }

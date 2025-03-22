@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   paths.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/19 23:39:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 18:08:49 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,16 @@ Example: When PATH=/usr/bin:/bin:/usr/local/bin
 */
 char	**get_path_env(char **envp)
 {
-    int	i;
+	int	i;
 
-    i = 0;
-    if (!envp)
-        return (NULL);
-    while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
-        i++;
-    if (!envp[i])
-        return (NULL);
-    return (ft_split(envp[i] + 5, ':'));
+	i = 0;
+	if (!envp)
+		return (NULL);
+	while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
+		i++;
+	if (!envp[i])
+		return (NULL);
+	return (ft_split(envp[i] + 5, ':'));
 }
 
 /*
@@ -57,23 +57,23 @@ Example: try_path("/usr/bin", "ls")
 */
 char	*try_path(char *path, char *cmd)
 {
-    char	*part_path;
-    char	*full_path;
+	char	*part_path;
+	char	*full_path;
 
-    part_path = ft_strjoin(path, "/");
-    full_path = ft_strjoin(part_path, cmd);
-    ft_safefree((void **)&part_path);
-    if (access(full_path, F_OK) == 0)
-        return (full_path);
-    ft_safefree((void **)&full_path);
-    return (NULL);
+	part_path = ft_strjoin(path, "/");
+	full_path = ft_strjoin(part_path, cmd);
+	ft_safefree((void **)&part_path);
+	if (access(full_path, F_OK) == 0)
+		return (full_path);
+	ft_safefree((void **)&full_path);
+	return (NULL);
 }
 
 /*
 Searches for a command in PATH environment directories.
 - Gets list of directories from PATH environment variable.
 - Tries each directory to find the command.
-- Reports detailed search progress for debugging.
+- Reports detailed search progress for ddebugging.
 Returns:
 -Full path to command if found, NULL otherwise.
 Works with get_cmd_path() for command resolution.
@@ -85,31 +85,31 @@ Example: For command "grep" with PATH=/usr/bin:/bin
 */
 char	*search_in_env(char *cmd, char **envp)
 {
-    char	**paths;
-    char	*path;
-    int		i;
+	char	**paths;
+	char	*path;
+	int		i;
 
-    paths = get_path_env(envp);
-    if (!paths)
-    {
-        ft_putendl_fd("No PATH found in environment", 2);
-        return (NULL);
-    }
-    i = 0;
-    while (paths[i])
-    {
-        path = try_path(paths[i], cmd);
-        if (path)
-        {
-            ft_free_2d(paths, ft_arrlen(paths));
-            return (path);
-        }
-        i++;
-    }
-    ft_putstr_fd("Command not found in any PATH directory: ", 2);
-    ft_putendl_fd(cmd, 2);
-    ft_free_2d(paths, ft_arrlen(paths));
-    return (NULL);
+	paths = get_path_env(envp);
+	if (!paths)
+	{
+		ft_putendl_fd("No PATH found in environment", 2);
+		return (NULL);
+	}
+	i = 0;
+	while (paths[i])
+	{
+		path = try_path(paths[i], cmd);
+		if (path)
+		{
+			ft_free_2d(paths, ft_arrlen(paths));
+			return (path);
+		}
+		i++;
+	}
+	ft_putstr_fd("Command not found in any PATH directory: ", 2);
+	ft_putendl_fd(cmd, 2);
+	ft_free_2d(paths, ft_arrlen(paths));
+	return (NULL);
 }
 
 /*
@@ -129,16 +129,16 @@ Example: For "ls" command
 */
 char	*get_cmd_path(char *cmd, char **envp)
 {
-    if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-        || (cmd[1] == '.' && cmd[2] == '/'))))
-    {
-        if (access(cmd, X_OK) == 0)
-            return (ft_strdup(cmd));
-        ft_putstr_fd("Direct path access denied: ", 2);
-        ft_putendl_fd(cmd, 2);
-        return (NULL);
-    }
-    return (search_in_env(cmd, envp));
+	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
+				|| (cmd[1] == '.' && cmd[2] == '/'))))
+	{
+		if (access(cmd, X_OK) == 0)
+			return (ft_strdup(cmd));
+		ft_putstr_fd("Direct path access denied: ", 2);
+		ft_putendl_fd(cmd, 2);
+		return (NULL);
+	}
+	return (search_in_env(cmd, envp));
 }
 
 /*
@@ -157,25 +157,25 @@ Example: When executing a command with custom environment
 */
 char	**dup_env(char **envp)
 {
-    char	**env;
-    size_t	env_size;
-    size_t	i;
+	char	**env;
+	size_t	env_size;
+	size_t	i;
 
-    env_size = ft_arrlen(envp);
-    env = (char **)malloc(sizeof(char *) * (env_size + 1));
-    if (!env)
-        return (NULL);
-    i = 0;
-    while (i < env_size)
-    {
-        env[i] = ft_strdup(envp[i]);
-        if (!env[i])
-        {
-            ft_free_2d(env, i);
-            return (NULL);
-        }
-        i++;
-    }
-    env[env_size] = NULL;
-    return (env);
+	env_size = ft_arrlen(envp);
+	env = (char **)malloc(sizeof(char *) * (env_size + 1));
+	if (!env)
+		return (NULL);
+	i = 0;
+	while (i < env_size)
+	{
+		env[i] = ft_strdup(envp[i]);
+		if (!env[i])
+		{
+			ft_free_2d(env, i);
+			return (NULL);
+		}
+		i++;
+	}
+	env[env_size] = NULL;
+	return (env);
 }

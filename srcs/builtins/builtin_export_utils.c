@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export_utils.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 19:03:11 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/16 11:13:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 17:14:43 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ char	*valid_export(char *args)
 	int		i;
 	int		len;
 	char	*equal_sign;
-	
+
 	i = 0;
 	if (!ft_isalpha(args[0]) && args[0] != '_')
 		return (NULL);
@@ -79,7 +79,7 @@ Creates a sorted copy of environment variables.
 - Sorts the array in ascending order.
 Returns the sorted array on success, NULL on failure.
 */
-char **make_sorted_env(int count, t_vars *vars)
+char	**make_sorted_env(int count, t_vars *vars)
 {
 	int		i;
 	char	**sort_env;
@@ -111,20 +111,20 @@ Returns 0 on success.
 */
 int	process_export_var(char *env_var)
 {
-    char	*equal_pos;
-    
-    equal_pos = ft_strchr(env_var, '=');
-    if (equal_pos)
-    {
-        *equal_pos = '\0';
-        process_var_with_val(env_var, equal_pos + 1);
-        *equal_pos = '=';
-    }
-    else
-    {
-        printf("declare -x %s\n", env_var);
-    }
-    return (0);
+	char	*equal_pos;
+
+	equal_pos = ft_strchr(env_var, '=');
+	if (equal_pos)
+	{
+		*equal_pos = '\0';
+		process_var_with_val(env_var, equal_pos + 1);
+		*equal_pos = '=';
+	}
+	else
+	{
+		printf("declare -x %s\n", env_var);
+	}
+	return (0);
 }
 
 /*
@@ -133,7 +133,7 @@ Process and print a variable with a value (has equals sign).
 Example: "declare -x VAR_NAME="VALUE"
 Returns 0 on success.
 */
-int process_var_with_val(char *name, char *value)
+int	process_var_with_val(char *name, char *value)
 {
 	printf("declare -x %s=\"", name);
 	while (*value)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cleanup.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:09:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:32:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:33:30 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,8 @@ void	cleanup_token_list(t_vars *vars)
 {
 	t_node *current;
 	t_node *next;
-	
+	int	i;
+
 	if (!vars || !vars->head)
 		return ;
 	current = vars->head;
@@ -75,7 +76,7 @@ void	cleanup_token_list(t_vars *vars)
 		next = current->next;
 		if (current->args)
 		{
-			int i = 0;
+			i = 0;
 			while (current->args[i])
 			{
 				ft_safefree((void **)&current->args[i]);
@@ -109,23 +110,11 @@ Perform complete cleanup before program exit.
 Frees all allocated resources in vars struct.
 Should be called before any exit() call.
 */
-/*
 void	cleanup_exit(t_vars *vars)
 {
 	if (!vars)
 		return ;
-	save_history(); 
-	cleanup_token_list(vars); 
+	cleanup_token_list(vars);
 	cleanup_vars(vars);
-	rl_clear_history();
 	ft_safefree((void **)&vars->error_msg);
-}
-*/
-void	cleanup_exit(t_vars *vars)
-{
-    if (!vars)
-        return ;
-    cleanup_token_list(vars); 
-    cleanup_vars(vars);
-    ft_safefree((void **)&vars->error_msg);
 }

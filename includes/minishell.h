@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 10:50:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/23 03:03:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,10 @@
 # include <signal.h>
 # include <string.h>
 # include <termios.h>
-# include <fcntl.h> 
+# include <fcntl.h>
 # include <readline/readline.h>
 # include <readline/history.h>
+# include <sys/types.h>
 # include <sys/wait.h>
 
 extern volatile sig_atomic_t	g_signal_received;
@@ -120,12 +121,12 @@ Has variables tracking current execution state.
 */
 typedef struct s_exec
 {
-	char    *cmd_path;     // Path to the command being executed
-	pid_t   pid;           // Process ID of the command
-	int     status;        // Exit status of the command
-	int     result;        // Result of the execution
-	t_node  *cmd;          // Command node being executed
-	int     append;        // Append mode flag for redirections
+	char	*cmd_path;     // Path to the command being executed
+	pid_t	pid;           // Process ID of the command
+	int		status;        // Exit status of the command
+	int		result;        // Result of the execution
+	t_node	*cmd;          // Command node being executed
+	int		append;        // Append mode flag for redirections
 } t_exec;
 
 /*
@@ -143,19 +144,19 @@ the AST is fully constructed.
 */
 typedef struct s_ast
 {
-	t_node  *current;        // Current node being processed in the token list
-	t_node  *last_cmd;       // Last command node encountered during parsing
-	t_node  *last_heredoc;   // Last heredoc node encountered during parsing
-	t_node  *cmd_redir;      // Command node being targeted for redirection
-	t_node  *pipe_root;      // Root node of pipe structure (ADDED)
-	t_node  *root;           // Root node of the AST (ADDED)
-	int     cmd_idx;         // Current index in the cmd_nodes array being processed
-	int     syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
-	int     serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
-	int     pipe_at_front;   // Flag indicating pipe at beginning (syntax error)  
-	int     pipe_at_end;     // Flag indicating pipe at end (requires more input)
-	int     fd_write;        // File descriptor for writing (ADDED for heredoc)
-	int     expand_vars;     // Flag for expanding variables (ADDED for heredoc)
+	t_node	*current;        // Current node being processed in the token list
+	t_node	*last_cmd;       // Last command node encountered during parsing
+	t_node	*last_heredoc;   // Last heredoc node encountered during parsing
+	t_node	*cmd_redir;      // Command node being targeted for redirection
+	t_node	*pipe_root;      // Root node of pipe structure (ADDED)
+	t_node	*root;           // Root node of the AST (ADDED)
+	int		cmd_idx;         // Current index in the cmd_nodes array being processed
+	int		syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
+	int		serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
+	int		pipe_at_front;   // Flag indicating pipe at beginning (syntax error)
+	int		pipe_at_end;     // Flag indicating pipe at end (requires more input)
+	int		fd_write;        // File descriptor for writing (ADDED for heredoc)
+	int		expand_vars;     // Flag for expanding variables (ADDED for heredoc)
 } t_ast;
 
 /*
@@ -169,26 +170,26 @@ Has variables tracking:
 */
 typedef struct s_pipe
 {
-	/* Pipe structure */
-	int         pipe_count;     // Number of pipes in the chain
-	t_node      **exec_cmds;     // Array of command nodes for execution
-	t_node      *cmd_nodes[100]; // Command nodes from parsing phase
-	int         cmd_count;      // Count of command nodes 
-	int         *pipe_fds;      // Array of pipe file descriptors
-	pid_t       *pids;          // Array of process IDs
-	int         *status;        // Status for each process
-	int         saved_stdin;    // Saved standard input
-	int         saved_stdout;   // Saved standard output
-	int         heredoc_fd;     // File descriptor for heredoc if present
-	t_node      *root_node;     // Root node of the pipe structure
-	int         append_mode;    // Append flag for redirections
-	t_node      *current_redirect; // Current redirection node
+	int			pipe_count;     // Number of pipes in the chain
+	t_node		**exec_cmds;     // Array of command nodes for execution
+	t_node		*cmd_nodes[100]; // Command nodes from parsing phase
+	int			cmd_count;      // Count of command nodes
+	int			*pipe_fds;      // Array of pipe file descriptors
+	pid_t		*pids;          // Array of process IDs
+	int			*status;        // Status for each process
+	int			saved_stdin;    // Saved standard input
+	int			saved_stdout;   // Saved standard output
+	int			heredoc_fd;     // File descriptor for heredoc if present
+	int			redirection_fd; // Current redirection file descriptor
+	t_node		*root_node;     // Root node of the pipe structure
+	int			append_mode;    // Append flag for redirections
+	t_node		*current_redirect; // Current redirection node
 } t_pipe;
 
 /*
 Main structure for storing variables and context.
 Makes it easier to access and pass around.
-Has variables tracking: 
+Has variables tracking:
 - Tokenization state
 - AST structure
 - Shell state
@@ -196,7 +197,7 @@ Has variables tracking:
 */
 typedef struct s_vars
 {
-	t_node      	*cmd_nodes[100];
+	t_node			*cmd_nodes[100];
 	int				cmd_count;
 	t_node			*astroot;
 	t_node			*head;
@@ -211,7 +212,7 @@ typedef struct s_vars
 	int				shell_level;
 	int				error_code;
 	char			*error_msg;
-	t_pipe          *pipeline;     // Current pipeline being executed
+	t_pipe			*pipeline;
 } t_vars;
 
 /* Builtin commands functions. In srcs/builtins directory. */
@@ -307,10 +308,14 @@ In buildast.c
 */
 void		get_cmd_nodes(t_vars *vars);
 t_node		*find_next_cmd(t_node *start);
-void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd, t_node *next_cmd);
-void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe, t_node *last_cmd, t_node *next_cmd);
-t_node		*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd);
-void		proc_pipes_pt2(t_vars *vars, t_node *pipe_root, t_node **last_pipe, t_node **last_cmd);
+void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd,
+				t_node *next_cmd);
+void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
+				t_node *last_cmd, t_node *next_cmd);
+t_node		*proc_pipes_pt1(t_vars *vars, t_node **last_pipe,
+				t_node **last_cmd);
+void		proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
+				t_node **last_pipe, t_node **last_cmd);
 void		setup_redir_ast(t_node *redir, t_node *cmd, t_node *target);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 int			is_valid_redir_node(t_node *current);
@@ -327,14 +332,15 @@ int			is_special_token(t_node *token);
 void		handle_quoted_arg(t_node *cmd_node, t_node *quote_token);
 int			is_operator_token(t_node *token);
 void		link_strargs_to_cmds(t_vars *vars);
-void		debug_print_pipe_info(t_node *pipe_node, char *position_msg);
-void		link_addon_pipe(t_node *last_pipe, t_node *new_pipe, t_node *right_cmd);
+// void		debug_print_pipe_info(t_node *pipe_node, char *position_msg);
+void		link_addon_pipe(t_node *last_pipe,
+				t_node *new_pipe, t_node *right_cmd);
 void		build_pipe_ast(t_vars *vars);
 void		process_token_list(t_vars *vars);
 t_node		*set_ast_root(t_node *pipe_node, t_vars *vars);
 int			chk_start_pipe(t_vars *vars);
-int			detect_multi_pipes(t_vars *vars, int pipes_count);
-int			detect_adj_pipes(t_vars *vars, t_node *current);
+int			chk_multi_pipes(t_vars *vars, int pipes_count);
+int			chk_adj_pipes(t_vars *vars, t_node *current);
 int			chk_next_pipes(t_vars *vars);
 int			chk_end_pipe(t_vars *vars);
 int			chk_pipe_syntax_err(t_vars *vars);
@@ -343,9 +349,8 @@ char		*handle_trailing_pipe_pt1(char *input, t_vars *vars);
 char		*handle_trailing_pipe_pt2(char *new_input, t_vars *vars);
 char		*handle_incomplete_pipe(char *input, t_vars *vars);
 t_node		*build_ast(t_vars *vars);
-void		debug_print_token_attrib(t_node *current, int i);
-void		debug_print_token_list(t_node *head, const char *label);
-void		debug_print_quote_types(t_node *head);	
+// void		debug_print_token_list(t_node *head, const char *label);
+// void		debug_print_quote_types(t_node *head);
 int			check_initial_pipe(t_vars *vars, t_ast *ast);
 int			check_bad_pipe_series(t_vars *vars);
 
@@ -392,13 +397,15 @@ In execute.c
 */
 int			handle_cmd_status(int status, t_vars *vars);
 int			setup_out_redir(t_node *node, int *fd, int append);
-int			setup_in_redir(t_node *node, int *fd);
+int			setup_in_redir(t_node *node, int *fd, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars, int *fd);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
-int			exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path);
-void		print_cmd_args(t_node *node);
+int			exec_child_cmd(t_node *node, char **envp,
+				t_vars *vars, char *cmd_path);
+// void		debug_print_cmd_args(t_node *node);
 int			exec_std_cmd(t_node *node, char **envp, t_vars *vars);
 int			execute_cmd(t_node *node, char **envp, t_vars *vars);
+int			exec_external_cmd(t_node *node, char **envp, t_vars *vars);
 
 /*
 Expansion handling.
@@ -443,8 +450,10 @@ char		*read_heredoc_str(char *line, int *pos);
 char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
 char		*expand_heredoc_line(char *line, t_vars *vars);
 int			chk_expand_heredoc(char *delimiter);
-int			write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars);
-int			read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars);
+int			write_to_heredoc(int fd, char *line,
+				t_vars *vars, int expand_vars);
+int			read_heredoc(int *fd, char *delimiter,
+				t_vars *vars, int expand_vars);
 int			handle_heredoc_err(t_node *node, t_vars *vars);
 int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
@@ -458,7 +467,7 @@ void		skip_history_lines(int fd, int skip_count);
 void		read_history_lines(int fd);
 void		load_history(void);
 
-/* 
+/*
 History saving utility functions.
 In history_save_utils.c
 */
@@ -473,7 +482,8 @@ int			copy_to_temp(int fd_read);
 void		skip_lines(int fd, int count);
 void		trim_history(int excess_lines);
 void		save_history(void);
-int			save_history_entries(int fd, HIST_ENTRY **hist_list, int start, int total);
+int			save_history_entries(int fd, HIST_ENTRY **hist_list,
+				int start, int total);
 
 /*
 History main functions.
@@ -499,6 +509,7 @@ t_exec		*init_exec_context(t_vars *vars);
 t_ast		*init_verify(char *input, char **cmd_ptr);
 void		init_lexer(t_vars *vars);
 void		init_quote_context(t_vars *vars);
+t_pipe		*init_pipeline(void);
 
 /*
 Input completion functions.
@@ -507,20 +518,20 @@ In input_completion.c
 int			is_input_complete(t_vars *vars);
 int			check_unfinished_pipe(t_vars *vars, t_ast *ast);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars,
-							t_ast *ast);
+				t_ast *ast);
 char		*get_quote_input(t_vars *vars);
 int			chk_quotes_closed(char **processed_cmd, t_vars *vars);
 int			quotes_are_closed(const char *str);
 int			handle_unclosed_quotes(char **processed_cmd, t_vars *vars);
 char		*append_input(const char *first, const char *second);
 
-
 /*
 Input verification functions.
 In input_verify.c
 */
 int			tokenize_to_test(char *input, t_vars *vars);
-int			process_input_addons(char **processed_cmd, t_vars *vars, t_ast *ast);
+int			process_input_addons(char **processed_cmd,
+				t_vars *vars, t_ast *ast);
 int			chk_pipe_before_cmd(t_vars *vars, t_ast *ast);
 int			chk_serial_pipes(t_vars *vars, t_ast *ast);
 int			chk_syntax_errors(t_vars *vars);
@@ -543,7 +554,8 @@ In lexer.c
 void		skip_whitespace(char *str, t_vars *vars);
 char		*read_added_input(char *prompt);
 void		handle_text_chunk(char *str, t_vars *vars);
-void		process_text(char *str, t_vars *vars, int *first_token, t_tokentype override_type);	
+void		process_text(char *str, t_vars *vars, int *first_token,
+				t_tokentype override_type);
 void		handle_quote_content(char *str, t_vars *vars, int *first_token);
 char		*lexing_unclosed_quo(char *input, t_vars *vars);
 void		handle_expansion_token(char *str, t_vars *vars, int *first_token);
@@ -621,21 +633,27 @@ In pipes_syntax.c
 Pipes main functions.
 In pipes.c
 */
+void		reset_std_fd(t_pipe *pipeline);
 void		init_pipe(t_node *cmd, int *pipe_fd);
 int			validate_pipe_node(t_node *pipe_node);
 int			setup_pipe(int *pipefd);
 void		exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
 void		exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
 pid_t		make_child_proc(t_node *pipe_node, int *pipefd, t_vars *vars,
-					int is_left);
+				int is_left);
 void		reset_done_pipes(t_ast *ast, char **pipe_cmd, char **result,
-						int free_flags);
+				int free_flags);
 int			prep_pipe_complete(char *cmd, char **result, char **pipe_cmd,
-						t_ast **ast);
+				t_ast **ast);
 char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
 int			setup_pipeline_procs(t_node *pipe_node, t_vars *vars,
 				pid_t *left_pid, pid_t *right_pid);
 int			execute_pipeline(t_node *pipe_node, t_vars *vars);
+int			setup_cmd_redirects(t_node *cmd_node, t_vars *vars);
+int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars);
+int 		setup_multi_redirects(t_node *cmd_node, t_vars *vars);
+void		process_quotes_in_redirect(t_node *redir_node);
+t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
 
 /*
 Quote handling.
@@ -674,7 +692,8 @@ int			set_redirect_flags(int mode);
 int			is_redirection(t_tokentype type);
 void		reset_redirect_fds(t_vars *vars);
 int			input_redirect(t_node *node, int *fd_in, t_vars *vars);
-int			output_redirect(t_node *node, int *fd_out, int append, t_vars *vars);
+int			output_redirect(t_node *node, int *fd_out,
+				int append, t_vars *vars);
 int			open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars);
 int			handle_redirect(t_node *node, int *fd, int mode, t_vars *vars);
 

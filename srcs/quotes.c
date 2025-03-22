@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 11:36:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 19:35:47 by lechan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,136 +25,44 @@ Example: Input "echo 'hello "world"'"
 - Tracks nested double quotes
 - Ensures proper quote pairing
 Handles quote tokens in the input string.
-OLD VERSION
-void handle_quotes(char *str, int *pos, t_vars *vars)
-{
-    char quote_char;
-    int start;
-    
-    // Remember the quote character we're looking for
-    quote_char = str[*pos];
-    start = *pos;
-    
-    // Move past opening quote
-    (*pos)++;
-    
-    // Find closing quote
-    while (str[*pos] && str[*pos] != quote_char)
-        (*pos)++;
-    
-    // If we found a closing quote
-    if (str[*pos] == quote_char)
-    {
-        // Move past closing quote
-        (*pos)++;
-        
-        // We have a complete quoted token
-        vars->start = start;
-        
-        fprintf(stderr, "DEBUG: Found matched quote: '%.*s'\n", 
-                *pos - start, str + start);
-        printf("DEBUG: Show quote char: %c\n" , quote_char);
-        // CRITICAL FIX: Check if we have a command node to attach this to
-        if (vars->current && vars->current->type == TYPE_CMD)
-        {
-            // Process as a string argument to the command
-            fprintf(stderr, "DEBUG: Adding quoted string as argument to command\n");
-            vars->curr_type = TYPE_STRING;
-        }
-        else
-        {
-            // Process as a standalone quoted token
-            if (quote_char == '"')
-                vars->curr_type = TYPE_DOUBLE_QUOTE;
-            else if (quote_char == '\'')
-                vars->curr_type = TYPE_SINGLE_QUOTE;
-        }
-            
-        // Reset quote depth when quotes are balanced
-        vars->quote_depth = 0;
-        
-        // Process the quoted token
-        maketoken(ft_substr(str, start, *pos - start), vars);
-        vars->start = *pos;
-    }
-    else
-    {
-        // Quote is unclosed
-        vars->quote_depth++;
-        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
-        fprintf(stderr, "DEBUG: Unclosed %s quote detected (depth: %d)\n",
-                (quote_char == '"' ? "double" : "single"), vars->quote_depth);
-    }
-}
 */
-void handle_quotes(char *str, int *pos, t_vars *vars)
+void	handle_quotes(char *str, int *pos, t_vars *vars)
 {
-    char quote_char;
-    int start;
-    int quote_type;
-    
-    // Remember the quote character we're looking for
-    quote_char = str[*pos];
-    start = *pos;
-    
-    // Determine quote type based on quote character
-    if (quote_char == '\'')
-        quote_type = TYPE_SINGLE_QUOTE;
-    else
-        quote_type = TYPE_DOUBLE_QUOTE;
-    
-    // Move past opening quote
-    (*pos)++;
-    
-    // Find closing quote
-    while (str[*pos] && str[*pos] != quote_char)
-        (*pos)++;
-    
-    // If we found a closing quote
-    if (str[*pos] == quote_char)
-    {
-        // Move past closing quote
-        (*pos)++;
-        
-        // We have a complete quoted token
-        vars->start = start;
-        
-        fprintf(stderr, "DEBUG: Found matched quote: '%.*s'\n", 
-                *pos - start, str + start);
-        printf("DEBUG: Show quote char: %c\n", quote_char);
-        
-        // CRITICAL FIX: Always preserve quote type, even for command arguments
-        if (vars->current && vars->current->type == TYPE_CMD)
-        {
-            // Process as a quoted argument to the command
-            fprintf(stderr, "DEBUG: Adding quoted string as argument to command\n");
-            // Use the actual quote type, not TYPE_STRING
-            vars->curr_type = quote_type;
-        }
-        else
-        {
-            // Process as a standalone quoted token
-            if (quote_char == '"')
-                vars->curr_type = TYPE_DOUBLE_QUOTE;
-            else if (quote_char == '\'')
-                vars->curr_type = TYPE_SINGLE_QUOTE;
-        }
-            
-        // Reset quote depth when quotes are balanced
-        vars->quote_depth = 0;
-        
-        // Process the quoted token
-        maketoken(ft_substr(str, start, *pos - start), vars);
-        vars->start = *pos;
-    }
-    else
-    {
-        // Quote is unclosed
-        vars->quote_depth++;
-        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
-        fprintf(stderr, "DEBUG: Unclosed %s quote detected (depth: %d)\n",
-                (quote_char == '"' ? "double" : "single"), vars->quote_depth);
-    }
+	char	quote_char;
+	int		start;
+	int		quote_type;
+
+	quote_char = str[*pos];
+	start = *pos;
+	if (quote_char == '\'')
+		quote_type = TYPE_SINGLE_QUOTE;
+	else
+		quote_type = TYPE_DOUBLE_QUOTE;
+	(*pos)++;
+	while (str[*pos] && str[*pos] != quote_char)
+		(*pos)++;
+	if (str[*pos] == quote_char)
+	{
+		(*pos)++;
+		vars->start = start;
+		if (vars->current && vars->current->type == TYPE_CMD)
+			vars->curr_type = quote_type;
+		else
+		{
+			if (quote_char == '"')
+				vars->curr_type = TYPE_DOUBLE_QUOTE;
+			else if (quote_char == '\'')
+				vars->curr_type = TYPE_SINGLE_QUOTE;
+		}
+		vars->quote_depth = 0;
+		maketoken(ft_substr(str, start, *pos - start), vars);
+		vars->start = *pos;
+	}
+	else
+	{
+		vars->quote_depth++;
+		vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
+	}
 }
 
 /*
@@ -175,27 +83,27 @@ Example: When user enters command with unclosed quote
 */
 char	*fix_open_quotes(char *input, t_vars *vars)
 {
-    char	*line;
-    char	*result;
-    char	*prompt;
+	char	*line;
+	char	*result;
+	char	*prompt;
 
-    prompt = "DQUOTE> ";
-    if (vars->quote_depth > 0
-        && vars->quote_ctx[vars->quote_depth - 1].type == '\'')
-        prompt = "SQUOTE> ";
-    while (vars->quote_depth > 0)
-    {
-        line = readline(prompt);
-        if (!line)
-            return (NULL);
-        result = append_input(input, line);
-        if (!result)
-            return (NULL);
-        ft_safefree((void **)&line);
-        input = result;
-        tokenize(input, vars);
-    }
-    return (input);
+	prompt = "DQUOTE> ";
+	if (vars->quote_depth > 0
+		&& vars->quote_ctx[vars->quote_depth - 1].type == '\'')
+		prompt = "SQUOTE> ";
+	while (vars->quote_depth > 0)
+	{
+		line = readline(prompt);
+		if (!line)
+			return (NULL);
+		result = append_input(input, line);
+		if (!result)
+			return (NULL);
+		ft_safefree((void **)&line);
+		input = result;
+		tokenize(input, vars);
+	}
+	return (input);
 }
 
 /*
@@ -212,60 +120,31 @@ Works with handle_quote_token() during tokenization.
 Example: For input "Hello 'world'" at position of first quote
 - Returns "world" as extracted content
 - Updates position to character after closing quote
-OLD VERSION
+*/
 char	*read_quoted_content(char *input, int *pos, char quote)
 {
-    int		start;
-    char	*content;
+	int		start;
+	char	*content;
+	int		input_len;
 
-    start = *pos + 1;
-    *pos = start;
-    while (input[*pos] && input[*pos] != quote)
-        (*pos)++;
-    if (!input[*pos])
-        return (NULL);
-    content = ft_substr(input, start, *pos - start);
-    (*pos)++;
-    return (content);
-}
-*/
-char *read_quoted_content(char *input, int *pos, char quote)
-{
-    int start;
-    char *content;
-    int input_len;
-    
-    if (!input || !pos)
-        return (NULL);
-    
-    input_len = ft_strlen(input);
-    
-    // CRITICAL FIX: Check if *pos is within bounds
-    if (*pos >= input_len)
-        return (NULL);
-        
-    start = *pos;
-    
-    // Look for matching quote
-    while (input[*pos] && input[*pos] != quote) {
-        // CRITICAL FIX: Check if we're going out of bounds
-        if (*pos >= input_len)
-            break;
-        (*pos)++;
-    }
-    
-    // CRITICAL FIX: Make sure we don't read past the end of the string
-    if (*pos > input_len)
-        *pos = input_len;
-    
-    // Extract content between quotes
-    content = ft_substr(input, start, *pos - start);
-    
-    // Move past closing quote if present
-    if (input[*pos] == quote)
-        (*pos)++;
-        
-    return content;
+	if (!input || !pos)
+		return (NULL);
+	input_len = ft_strlen(input);
+	if (*pos >= input_len)
+		return (NULL);
+	start = *pos;
+	while (input[*pos] && input[*pos] != quote)
+	{
+		if (*pos >= input_len)
+			break ;
+		(*pos)++;
+	}
+	if (*pos > input_len)
+		*pos = input_len;
+	content = ft_substr(input, start, *pos - start);
+	if (input[*pos] == quote)
+		(*pos)++;
+	return (content);
 }
 
 /*
@@ -282,25 +161,25 @@ Example: For string "\"hello\""
 */
 void	strip_quotes(char **str_ptr, char quote_char)
 {
-    char	*str;
-    char	*new_str;
-    size_t	len;
+	char	*str;
+	char	*new_str;
+	size_t	len;
 
-    str = *str_ptr;
-    if (!str)
-        return ;
-    len = ft_strlen(str);
-    if (len < 2)
-        return ;
-    if (str[0] == quote_char && str[len - 1] == quote_char)
-    {
-        new_str = ft_substr(str, 1, len - 2);
-        if (new_str)
-        {
-            ft_safefree((void **)&str);
-            *str_ptr = new_str;
-        }
-    }
+	str = *str_ptr;
+	if (!str)
+		return ;
+	len = ft_strlen(str);
+	if (len < 2)
+		return ;
+	if (str[0] == quote_char && str[len - 1] == quote_char)
+	{
+		new_str = ft_substr(str, 1, len - 2);
+		if (new_str)
+		{
+			ft_safefree((void **)&str);
+			*str_ptr = new_str;
+		}
+	}
 }
 
 /*
@@ -317,30 +196,26 @@ Example: For argument "'hello'"
 */
 void	process_quotes_in_arg(char **arg)
 {
-    char	*str;
-    char	*new_str;
-    size_t	len;
-    
-    str = *arg;
-    if (!str)
-        return ;
-    len = ft_strlen(str);
-    if (len < 2)
-        return ;
-        
-    // Check for matching quotes at beginning and end
-    if ((str[0] == '"' && str[len-1] == '"') ||
-        (str[0] == '\'' && str[len-1] == '\''))
-    {
-        fprintf(stderr, "DEBUG: Removing quotes from argument: '%s'\n", str);
-        new_str = ft_substr(str, 1, len-2);
-        if (new_str)
-        {
-            free(str); // Use free directly since we're handling str, not *arg
-            *arg = new_str;
-            fprintf(stderr, "DEBUG: Quotes removed, new arg: '%s'\n", *arg);
-        }
-    }
+	char	*str;
+	char	*new_str;
+	size_t	len;
+
+	str = *arg;
+	if (!str)
+		return ;
+	len = ft_strlen(str);
+	if (len < 2)
+		return ;
+	if ((str[0] == '"' && str[len - 1] == '"')
+		|| (str[0] == '\'' && str[len - 1] == '\''))
+	{
+		new_str = ft_substr(str, 1, len - 2);
+		if (new_str)
+		{
+			free(str);
+			*arg = new_str;
+		}
+	}
 }
 
 /*
@@ -360,17 +235,17 @@ Example: For input "echo 'hello world'"
 */
 int	scan_for_endquote(char *str, int *pos, char quote_char)
 {
-    int	i;
+	int	i;
 
-    i = *pos + 1;
-    while (str[i] && str[i] != quote_char)
-        i++;
-    if (str[i] == quote_char)
-    {
-        *pos = i;
-        return (1);
-    }
-    return (0);
+	i = *pos + 1;
+	while (str[i] && str[i] != quote_char)
+		i++;
+	if (str[i] == quote_char)
+	{
+		*pos = i;
+		return (1);
+	}
+	return (0);
 }
 
 /*
@@ -387,22 +262,22 @@ Example: For "echo 'hello'"
 */
 void	valid_quote_token(char *str, t_vars *vars, int *pos, int start)
 {
-    char	quote_char;
-    char	*token;
-    int		end_pos;
+	char	quote_char;
+	char	*token;
+	int		end_pos;
 
-    quote_char = str[start];
-    end_pos = *pos;
-    if (scan_for_endquote(str, &end_pos, quote_char))
-    {
-        token = ft_substr(str, start + 1, end_pos - start - 1);
-        if (token)
-        {
-            vars->curr_type = (quote_char == '"') 
-                ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
-            maketoken(token, vars);
-            ft_safefree((void **)&token);
-            *pos = end_pos + 1;
-        }
-    }
+	quote_char = str[start];
+	end_pos = *pos;
+	if (scan_for_endquote(str, &end_pos, quote_char))
+	{
+		token = ft_substr(str, start + 1, end_pos - start - 1);
+		if (token)
+		{
+			vars->curr_type = (quote_char == '"')
+				? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
+			maketoken(token, vars);
+			ft_safefree((void **)&token);
+			*pos = end_pos + 1;
+		}
+	}
 }
