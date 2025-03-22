@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 03:31:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 09:00:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,8 @@ Returns:
 1 if argument was expanded.
 0 if no expansion occurred.
 Works with expand_cmd_args().
-*/
+REMOVE THIS FUNCTION
+
 int	expand_one_arg(char **arg, t_vars *vars)
 {
     int		pos;
@@ -220,6 +221,7 @@ int	expand_one_arg(char **arg, t_vars *vars)
     *arg = expanded;
     return (1);
 }
+*/
 
 /*
 Expands environment variables in command arguments.
@@ -274,29 +276,28 @@ void	expand_cmd_args(t_node *node, t_vars *vars)
 */
 /*
 Expands environment variables in command arguments.
+- Preserves single-quoted arguments from expansion
 - Preserves $? argument for special handling
 - Processes each argument in a command node.
 - Searches for $ characters and expands variables.
 - Updates arguments with expanded values.
-- Handles quotes properly during expansion.
 Returns:
 Nothing (void function).
 
-Example: For command node with args ["ls", "$HOME", "-l"]:
-- Preserves "$?" as is
-- Expands "$HOME" to "/Users/username"
-- Results in args ["ls", "/Users/username", "-l"]
-Works with process_cmd_token().
+Example: For command node with args ["ls", "'$HOME'", "$USER"]:
+- Preserves "'$HOME'" as "$HOME" (no expansion in single quotes)
+- Expands "$USER" to "bleow"
+- Results in args ["ls", "$HOME", "bleow"]
 */
-void	expand_cmd_args(t_node *node, t_vars *vars)
+void expand_cmd_args(t_node *node, t_vars *vars)
 {
-    int		i;
-    int		j;
-    char	*expanded;
-    char	*result;
+    int     i;
+    int     j;
+    char    *expanded;
+    char    *result;
     
     if (!node || !node->args)
-        return ;
+        return;
         
     /* Skip processing entirely for echo $? case */
     if (node->args[0] && ft_strcmp(node->args[0], "echo") == 0 &&
@@ -310,6 +311,15 @@ void	expand_cmd_args(t_node *node, t_vars *vars)
     i = 0;
     while (node->args[i])
     {
+        /* Skip expansion for single-quoted arguments */
+        if (node->arg_quote_type && node->arg_quote_type[i] == 1)
+        {
+            fprintf(stderr, "DEBUG: Skipping expansion for single-quoted arg: '%s'\n", 
+                  node->args[i]);
+            i++;
+            continue;
+        }
+        
         /* Preserve standalone $? arguments for special handling */
         if (ft_strcmp(node->args[i], "$?") == 0)
         {
@@ -317,6 +327,7 @@ void	expand_cmd_args(t_node *node, t_vars *vars)
             i++;
             continue;
         }
+        
         j = 0;
         result = ft_strdup("");
         while (node->args[i][j])

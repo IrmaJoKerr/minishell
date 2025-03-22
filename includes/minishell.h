@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 02:35:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 10:50:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ typedef struct s_node
 {
 	t_tokentype		type;
 	char			**args;
+	int				*arg_quote_type;
 	struct s_node	*next;
 	struct s_node	*prev;
 	struct s_node	*left;
@@ -293,7 +294,7 @@ Argument handling.
 In arguments.c
 */
 void		create_args_array(t_node *node, char *token);
-void		append_arg(t_node *node, char *new_arg);
+void		append_arg(t_node *node, char *new_arg, int quote_type);
 
 /*
 AST token processing and AST tree building utility functions.
@@ -343,7 +344,8 @@ char		*handle_trailing_pipe_pt2(char *new_input, t_vars *vars);
 char		*handle_incomplete_pipe(char *input, t_vars *vars);
 t_node		*build_ast(t_vars *vars);
 void		debug_print_token_attrib(t_node *current, int i);
-void		debug_print_token_list(t_vars *vars);
+void		debug_print_token_list(t_node *head, const char *label);
+void		debug_print_quote_types(t_node *head);	
 int			check_initial_pipe(t_vars *vars, t_ast *ast);
 int			check_bad_pipe_series(t_vars *vars);
 
@@ -408,7 +410,7 @@ char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*append_char(char *str, char c);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
-int			expand_one_arg(char **arg, t_vars *vars);
+// int			expand_one_arg(char **arg, t_vars *vars);
 void		expand_cmd_args(t_node *node, t_vars *vars);
 
 /*
@@ -496,6 +498,7 @@ t_ast		*init_ast_struct(void);
 t_exec		*init_exec_context(t_vars *vars);
 t_ast		*init_verify(char *input, char **cmd_ptr);
 void		init_lexer(t_vars *vars);
+void		init_quote_context(t_vars *vars);
 
 /*
 Input completion functions.

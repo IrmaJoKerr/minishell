@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 11:45:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 10:37:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,18 +22,7 @@ Works with cleanup_vars() and cleanup_exit().
 Example: For "ls -la | grep .c > output.txt":
 - Recursively frees all nodes including command, pipe, and redirection
 - Frees all argument arrays like ["ls", "-la"] and ["grep", ".c"]
-OLD VERSION PRE DEBUG
-void	cleanup_ast(t_node *node)
-{
-    if (!node)
-        return ;
-    cleanup_ast(node->left);
-    cleanup_ast(node->right);
-    if (node->args)
-        ft_free_2d(node->args, ft_arrlen(node->args));
-    ft_safefree((void **)&node);
-}
-*/
+OLD VERSION
 void	cleanup_ast(t_node *node)
 {
     static int depth = 0;
@@ -60,6 +49,41 @@ void	cleanup_ast(t_node *node)
     fprintf(stderr, "DEBUG: [cleanup_ast] Node at depth %d freed\n", my_depth);
     depth--;
 }
+*/
+void cleanup_ast(t_node *node)
+{
+    static int depth = 0;
+    int my_depth;
+    
+    if (!node)
+        return;
+    
+    depth++;
+    my_depth = depth;
+    fprintf(stderr, "DEBUG: [cleanup_ast] Cleaning node at depth %d, type %d\n", 
+            my_depth, node->type);
+    
+    cleanup_ast(node->left);
+    cleanup_ast(node->right);
+    
+    if (node->args)
+    {
+        fprintf(stderr, "DEBUG: [cleanup_ast] Freeing args for node at depth %d\n", my_depth);
+        ft_free_2d(node->args, ft_arrlen(node->args));
+    }
+    
+    // Free quote types array
+    if (node->arg_quote_type)
+    {
+        fprintf(stderr, "DEBUG: [cleanup_ast] Freeing quote types for node at depth %d\n", 
+               my_depth);
+        ft_safefree((void **)&node->arg_quote_type);
+    }
+    
+    ft_safefree((void **)&node);
+    fprintf(stderr, "DEBUG: [cleanup_ast] Node at depth %d freed\n", my_depth);
+    depth--;
+}
 
 /*
 Free a single token node and its arguments.
@@ -67,26 +91,7 @@ Free a single token node and its arguments.
 - Then frees the node itself.
 - Used for individual node cleanup without recursion.
 Works with cleanup_token_list().
-OLD VERSION PRE DEBUG
-void	free_token_node(t_node *node)
-{
-    int	i;
-    
-    if (!node)
-        return ;
-    if (node->args)
-    {
-        i = 0;
-        while (node->args[i])
-        {
-            ft_safefree((void **)&node->args[i]);
-            i++;
-        }
-        ft_safefree((void **)&node->args);
-    }
-    ft_safefree((void **)&node);
-}
-*/
+OLD VERSION 
 void	free_token_node(t_node *node)
 {
     int	i;
@@ -113,6 +118,83 @@ void	free_token_node(t_node *node)
         }
         ft_safefree((void **)&node->args);
         fprintf(stderr, "DEBUG: [free_token_node] Freed %d args\n", i);
+    }
+    
+    ft_safefree((void **)&node);
+    fprintf(stderr, "DEBUG: [free_token_node] Node freed\n");
+}
+*/
+/*NEWER OLD VERSION
+void free_token_node(t_node *node)
+{
+    int i;
+    
+    fprintf(stderr, "DEBUG: [free_token_node] Starting to free node %p\n", 
+        (void*)node);
+    if (!node)
+    {
+        fprintf(stderr, "DEBUG: [free_token_node] Node is NULL\n");
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG: [free_token_node] Freeing node type %d\n", node->type);
+    
+    // Free argument array
+    if (node->args)
+    {
+        i = 0;
+        while (node->args[i])
+        {
+            fprintf(stderr, "DEBUG: [free_token_node] Freeing arg[%d]: '%s'\n", 
+                    i, node->args[i]);
+            ft_safefree((void **)&node->args[i]);
+            i++;
+        }
+        ft_safefree((void **)&node->args);
+        fprintf(stderr, "DEBUG: [free_token_node] Freed %d args\n", i);
+    }
+    
+    // Free quote types array
+    if (node->arg_quote_type)
+    {
+        fprintf(stderr, "DEBUG: [free_token_node] Freeing quote type array\n");
+        ft_safefree((void **)&node->arg_quote_type);
+        fprintf(stderr, "DEBUG: [free_token_node] Quote type array freed\n");
+    }
+    
+    // Free node itself
+    ft_safefree((void **)&node);
+    fprintf(stderr, "DEBUG: [free_token_node] Node freed\n");
+}
+*/
+void free_token_node(t_node *node)
+{
+    int i = 0;
+    
+    if (!node)
+        return;
+        
+    fprintf(stderr, "DEBUG: [free_token_node] Starting to free node %p\n", (void*)node);
+    fprintf(stderr, "DEBUG: [free_token_node] Freeing node type %d\n", node->type);
+    
+    if (node->args)
+    {
+        while (node->args[i])
+        {
+            fprintf(stderr, "DEBUG: [free_token_node] Freeing arg[%d]: '%s'\n", 
+                    i, node->args[i]);
+            ft_safefree((void **)&node->args[i]);
+            i++;
+        }
+        fprintf(stderr, "DEBUG: [free_token_node] Freed %d args\n", i);
+        ft_safefree((void **)&node->args);
+    }
+    
+    if (node->arg_quote_type)
+    {
+        fprintf(stderr, "DEBUG: [free_token_node] Freeing quote type array\n");
+        ft_safefree((void **)&node->arg_quote_type);
+        fprintf(stderr, "DEBUG: [free_token_node] Quote type array freed\n");
     }
     
     ft_safefree((void **)&node);
@@ -178,22 +260,16 @@ void cleanup_token_list(t_vars *vars)
 {
     t_node *current;
     t_node *next;
-    int count;
-
-    fprintf(stderr, "DEBUG: [cleanup_token_list] Starting token list cleanup\n");
+    int count = 0;
     
     if (!vars || !vars->head)
-    {
-        fprintf(stderr, "DEBUG: [cleanup_token_list] Nothing to clean up (head=%p)\n", 
-                vars ? (void*)vars->head : NULL);
         return;
-    }
-
-    fprintf(stderr, "DEBUG: [cleanup_token_list] Starting cleanup with head=%p\n",
+        
+    fprintf(stderr, "DEBUG: [cleanup_token_list] Starting token list cleanup\n");
+    fprintf(stderr, "DEBUG: [cleanup_token_list] Starting cleanup with head=%p\n", 
             (void*)vars->head);
-
+            
     current = vars->head;
-    count = 0;
     while (current)
     {
         next = current->next;
@@ -202,12 +278,13 @@ void cleanup_token_list(t_vars *vars)
         current = next;
         count++;
     }
-
-    vars->head = NULL;
-    vars->current = NULL;
+    
     fprintf(stderr, "DEBUG: [cleanup_token_list] %d tokens cleaned up\n", count);
     fprintf(stderr, "DEBUG: [cleanup_token_list] Completed cleanup, head now=%p\n", 
-            (void*)vars->head);
+            (void*)NULL);
+            
+    vars->head = NULL;
+    vars->current = NULL;
 }
 
 /*

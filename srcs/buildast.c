@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 03:51:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 09:45:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -408,10 +408,10 @@ void convert_str_to_cmds(t_vars *vars)
                 if (current->next->next && current->next->next->type == TYPE_STRING)
                 {
                     // Add string as arg to command
-                    append_arg(current->next, current->next->next->args[0]);
-                    fprintf(stderr, "DEBUG: Adding '%s' as argument to '%s'\n",
-                            current->next->next->args[0], current->next->args[0]);
-                            
+					// Assume unquoted since it's a basic string token
+					append_arg(current->next, current->next->next->args[0], 0);
+					fprintf(stderr, "DEBUG: Adding '%s' as argument to '%s' (unquoted)\n",
+    							current->next->next->args[0], current->next->args[0]);
                     // Remove the arg token from list
                     to_remove = current->next->next;
                     current->next->next = to_remove->next;
@@ -522,14 +522,22 @@ Works with link_strargs_to_cmds.
 void handle_quoted_arg(t_node *cmd_node, t_node *quote_token)
 {
     char *arg_content;
+    int quote_type;
+    
+	quote_type = 0;
+    // Determine quote type based on token type
+    if (quote_token->type == TYPE_SINGLE_QUOTE)
+        quote_type = 1;  // Single quotes
+    else if (quote_token->type == TYPE_DOUBLE_QUOTE)
+        quote_type = 2;  // Double quotes
     
     // Extract quoted content from token
     arg_content = quote_token->args[0];
     
-    // Add quoted content as argument to command
-    append_arg(cmd_node, arg_content);
-    fprintf(stderr, "DEBUG: Adding quoted argument '%s' to '%s'\n",
-            arg_content, cmd_node->args[0]);
+    // Add quoted content as argument to command with quote type
+    append_arg(cmd_node, arg_content, quote_type);
+    fprintf(stderr, "DEBUG: Adding quoted argument '%s' to '%s' with quote_type=%d\n",
+            arg_content, cmd_node->args[0], quote_type);
 }
 
 /*
@@ -562,8 +570,10 @@ void	link_strargs_to_cmds(t_vars *vars)
     t_node	*current;
     t_node	*cmd_node;
     t_node	*next;
+	int		quote_type;
     
     // Initialize tracking variables
+	quote_type = 0;
     cmd_node = NULL;
     current = vars->head;
     while (current)
@@ -576,13 +586,18 @@ void	link_strargs_to_cmds(t_vars *vars)
         // If this is a string, expansion, or quoted string and we have a
 		// command to attach it to
         else if (is_special_token(current) && cmd_node)
-        {
-            append_arg(cmd_node, current->args[0]);
-            fprintf(stderr, "DEBUG: Adding '%s' as argument to '%s'\n",
-                    current->args[0], cmd_node->args[0]);
-            del_list_node(current);
-            free_token_node(current);
-        }
+		{  
+    		// Determine quote type based on token type
+    		if (current->type == TYPE_SINGLE_QUOTE)
+        		quote_type = 1;
+    		else if (current->type == TYPE_DOUBLE_QUOTE) 
+        	quote_type = 2;
+			append_arg(cmd_node, current->args[0], quote_type);
+    		fprintf(stderr, "DEBUG: Adding '%s' as argument to '%s' with quote_type=%d\n",
+            			current->args[0], cmd_node->args[0], quote_type);
+    		del_list_node(current);
+    		free_token_node(current);
+		}
         else if (is_redirection(current->type) || current->type == TYPE_PIPE)
             cmd_node = NULL;
         current = next;
@@ -1109,7 +1124,8 @@ t_node *build_ast(t_vars *vars)
             root->args ? root->args[0] : "NULL");
         vars->astroot = root;
     }
-    debug_print_token_list(vars);
+    debug_print_token_list(vars->head, "AFTER BUILD_AST");
+    debug_print_quote_types(vars->head);
     return root;
 }
 
@@ -1147,23 +1163,92 @@ Prints complete token list for debugging purposes.
 - Formats output with clear start and end markers.
 Works with build_ast() for debugging.
 */
-void	debug_print_token_list(t_vars *vars)
+void debug_print_token_list(t_node *head, const char *label)
 {
-    t_node	*current;
-    int		i;
-
-    if (!vars || !vars->head)
-        return ;
-    fprintf(stderr, "\n=== TOKEN LIST ===\n");
-    current = vars->head;
-    i = 0;
+    t_node *current = head;
+    int token_index = 0;
+    
+    fprintf(stderr, "\n=== %s ===\n", label ? label : "TOKEN LIST");
     while (current)
     {
-        debug_print_token_attrib(current, i);
-        i++;
+        fprintf(stderr, "Token %d: Type=%d (%s), Value='%s', Args=[", 
+               token_index, current->type, get_token_str(current->type),
+               current->args ? current->args[0] : "NULL");
+        
+        if (current->args)
+        {
+            int i = 0;
+            while (current->args[i])
+            {
+                if (i > 0)
+                    fprintf(stderr, ", ");
+                fprintf(stderr, "'%s'", current->args[i]);
+                i++;
+            }
+        }
+        fprintf(stderr, "]");
+        
+        // Print quote types if available
+        if (current->arg_quote_type)
+        {
+            fprintf(stderr, ", QuoteTypes=[");
+            int i = 0;
+            while (current->args && current->args[i])
+            {
+                if (i > 0)
+                    fprintf(stderr, ", ");
+                fprintf(stderr, "%d", current->arg_quote_type[i]);
+                i++;
+            }
+            fprintf(stderr, "]");
+        }
+        else
+        {
+            fprintf(stderr, ", QuoteTypes=NULL");
+        }
+        
+        fprintf(stderr, "\n");
         current = current->next;
+        token_index++;
     }
-    fprintf(stderr, "=== END TOKEN LIST ===\n\n");
+    fprintf(stderr, "=== END %s ===\n\n", label ? label : "TOKEN LIST");
+}
+
+
+void debug_print_quote_types(t_node *head)
+{
+    t_node *current = head;
+    int token_index = 0;
+    
+    fprintf(stderr, "\n=== QUOTE TYPES ===\n");
+    while (current)
+    {
+        fprintf(stderr, "Token %d (%s): ", token_index, 
+                current->args ? current->args[0] : "NULL");
+        
+        if (current->arg_quote_type && current->args)
+        {
+            fprintf(stderr, "QuoteTypes=[");
+            int i = 0;
+            while (current->args[i])
+            {
+                if (i > 0)
+                    fprintf(stderr, ", ");
+                fprintf(stderr, "%d", current->arg_quote_type[i]);
+                i++;
+            }
+            fprintf(stderr, "]");
+        }
+        else
+        {
+            fprintf(stderr, "QuoteTypes=NULL");
+        }
+        
+        fprintf(stderr, "\n");
+        current = current->next;
+        token_index++;
+    }
+    fprintf(stderr, "=== END QUOTE TYPES ===\n\n");
 }
 
 /*

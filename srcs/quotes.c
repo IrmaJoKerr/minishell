@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 03:04:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 10:29:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,61 +25,131 @@ Example: Input "echo 'hello "world"'"
 - Tracks nested double quotes
 - Ensures proper quote pairing
 Handles quote tokens in the input string.
-*/
+OLD VERSION
 void handle_quotes(char *str, int *pos, t_vars *vars)
 {
     char quote_char;
     int start;
     
-    /* Remember the quote character we're looking for */
+    // Remember the quote character we're looking for
     quote_char = str[*pos];
     start = *pos;
     
-    /* Move past opening quote */
+    // Move past opening quote
     (*pos)++;
     
-    /* Find closing quote */
+    // Find closing quote
     while (str[*pos] && str[*pos] != quote_char)
         (*pos)++;
     
-    /* If we found a closing quote */
+    // If we found a closing quote
     if (str[*pos] == quote_char)
     {
-        /* Move past closing quote */
+        // Move past closing quote
         (*pos)++;
         
-        /* We have a complete quoted token */
+        // We have a complete quoted token
         vars->start = start;
         
         fprintf(stderr, "DEBUG: Found matched quote: '%.*s'\n", 
                 *pos - start, str + start);
-                
-        /* CRITICAL FIX: Check if we have a command node to attach this to */
+        printf("DEBUG: Show quote char: %c\n" , quote_char);
+        // CRITICAL FIX: Check if we have a command node to attach this to
         if (vars->current && vars->current->type == TYPE_CMD)
         {
-            /* Process as a string argument to the command */
+            // Process as a string argument to the command
             fprintf(stderr, "DEBUG: Adding quoted string as argument to command\n");
             vars->curr_type = TYPE_STRING;
         }
         else
         {
-            /* Process as a standalone quoted token */
+            // Process as a standalone quoted token
             if (quote_char == '"')
                 vars->curr_type = TYPE_DOUBLE_QUOTE;
-            else
+            else if (quote_char == '\'')
                 vars->curr_type = TYPE_SINGLE_QUOTE;
         }
             
-        /* Reset quote depth when quotes are balanced */
+        // Reset quote depth when quotes are balanced
         vars->quote_depth = 0;
         
-        /* Process the quoted token */
+        // Process the quoted token
         maketoken(ft_substr(str, start, *pos - start), vars);
         vars->start = *pos;
     }
     else
     {
-        /* Quote is unclosed */
+        // Quote is unclosed
+        vars->quote_depth++;
+        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
+        fprintf(stderr, "DEBUG: Unclosed %s quote detected (depth: %d)\n",
+                (quote_char == '"' ? "double" : "single"), vars->quote_depth);
+    }
+}
+*/
+void handle_quotes(char *str, int *pos, t_vars *vars)
+{
+    char quote_char;
+    int start;
+    int quote_type;
+    
+    // Remember the quote character we're looking for
+    quote_char = str[*pos];
+    start = *pos;
+    
+    // Determine quote type based on quote character
+    if (quote_char == '\'')
+        quote_type = TYPE_SINGLE_QUOTE;
+    else
+        quote_type = TYPE_DOUBLE_QUOTE;
+    
+    // Move past opening quote
+    (*pos)++;
+    
+    // Find closing quote
+    while (str[*pos] && str[*pos] != quote_char)
+        (*pos)++;
+    
+    // If we found a closing quote
+    if (str[*pos] == quote_char)
+    {
+        // Move past closing quote
+        (*pos)++;
+        
+        // We have a complete quoted token
+        vars->start = start;
+        
+        fprintf(stderr, "DEBUG: Found matched quote: '%.*s'\n", 
+                *pos - start, str + start);
+        printf("DEBUG: Show quote char: %c\n", quote_char);
+        
+        // CRITICAL FIX: Always preserve quote type, even for command arguments
+        if (vars->current && vars->current->type == TYPE_CMD)
+        {
+            // Process as a quoted argument to the command
+            fprintf(stderr, "DEBUG: Adding quoted string as argument to command\n");
+            // Use the actual quote type, not TYPE_STRING
+            vars->curr_type = quote_type;
+        }
+        else
+        {
+            // Process as a standalone quoted token
+            if (quote_char == '"')
+                vars->curr_type = TYPE_DOUBLE_QUOTE;
+            else if (quote_char == '\'')
+                vars->curr_type = TYPE_SINGLE_QUOTE;
+        }
+            
+        // Reset quote depth when quotes are balanced
+        vars->quote_depth = 0;
+        
+        // Process the quoted token
+        maketoken(ft_substr(str, start, *pos - start), vars);
+        vars->start = *pos;
+    }
+    else
+    {
+        // Quote is unclosed
         vars->quote_depth++;
         vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
         fprintf(stderr, "DEBUG: Unclosed %s quote detected (depth: %d)\n",

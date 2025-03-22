@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:40:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 09:47:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,6 +242,7 @@ char	*process_input_tokens(char *command, t_vars *vars)
 {
     char	*processed_cmd;
 
+	fprintf(stderr, "DEBUG: Running process_input_tokens with command=%p\n", (void*)command);
     processed_cmd = command;
     if (vars->head)
     {
@@ -253,8 +254,11 @@ char	*process_input_tokens(char *command, t_vars *vars)
         
     fprintf(stderr, "DEBUG: Processing: '%s'\n", processed_cmd);
     tokenize(processed_cmd, vars);
+	debug_print_token_list(vars->head, "TOKENS AFTER TOKENIZE()");
+	debug_print_quote_types(vars->head);
     lexerlist(processed_cmd, vars);
-    
+    debug_print_token_list(vars->head, "TOKENS AFTER LEXERLIST()");
+	debug_print_quote_types(vars->head);
     if (vars->quote_depth > 0)
     {
         processed_cmd = handle_quote_completion(processed_cmd, vars);
@@ -354,7 +358,9 @@ int	process_command(char *command, t_vars *vars)
     processed_cmd = process_pipe_syntax(processed_cmd, command, vars);
     if (!processed_cmd)
         return (1);
-    debug_print_token_list(vars);
+    // Fix: Pass the head node and a label to debug_print_token_list
+    debug_print_token_list(vars->head, "TOKEN LIST IN PROCESS_COMMAND");
+    debug_print_quote_types(vars->head);
     build_and_execute(vars);
     if (processed_cmd != command)
         ft_safefree((void **)&processed_cmd);
@@ -387,11 +393,13 @@ int	main(int argc, char **argv, char **envp)
             fprintf(stderr, "DEBUG: EOF detected, performing cleanup\n");
             cleanup_exit(&vars);
             ft_putstr_fd("exit\n", STDOUT_FILENO);
+			printf("test\n");
             exit(vars.error_code);
         }
         if (input[0] == '\0')
         {
             ft_safefree((void **)&input);
+			printf("test\n");
             continue ;
         }
         process_command(input, &vars);

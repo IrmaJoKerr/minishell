@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:36:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:01:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,87 @@ Returns:
 - 1 if quotes were handled and modifications were made
 - 0 if no unclosed quotes found
 - -1 if an error occurred
+OLD VERSION
+int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
+{
+    char *addon;
+    char *new_cmd;
+    int quote_handled;
+    
+    // Check if quotes are already balanced
+    if (quotes_are_closed(*processed_cmd))
+    {
+        fprintf(stderr, "DEBUG: Quotes are balanced in command, no addon needed\n");
+        vars->quote_depth = 0;
+        return (0);
+    }
+    
+    fprintf(stderr, "DEBUG: Unbalanced quotes detected, prompting for more input\n");
+    
+    // Initialize quote handling flag
+    quote_handled = 0;
+    
+    // Continue handling quotes until all are closed
+    while (vars->quote_depth > 0)
+    {
+        // Get additional input for the quote
+        addon = get_quote_input(vars);
+        fprintf(stderr, "DEBUG: get_quo_put fr hdle_uncl_quo\n");
+        
+        // Handle EOF or error
+        if (!addon)
+        {
+            fprintf(stderr, "DEBUG: Failed to get quote input\n");
+            ft_safefree((void **)processed_cmd);
+            return (-1);
+        }
+        
+        fprintf(stderr, "DEBUG: addon input for quote: '%s'\n", addon);
+        
+        // Create combined command
+        new_cmd = append_input(*processed_cmd, addon);
+        
+        // Free addon to prevent double free
+        ft_safefree((void **)&addon);
+        
+        // Handle append failure
+        if (!new_cmd)
+        {
+            fprintf(stderr, "DEBUG: Failed to append addon input\n");
+            return (-1);
+        }
+        
+        // Update command with new combined version
+        ft_safefree((void **)processed_cmd);
+        *processed_cmd = new_cmd;
+        
+        // Re-tokenize to check if quotes are now closed
+        if (tokenize_to_test(*processed_cmd, vars) < 0)
+        {
+            fprintf(stderr, "DEBUG: Tokenization failed after adding quote input\n");
+            return (-1);
+        }
+        
+        // Mark that we handled quotes
+        quote_handled = 1;
+        
+        // Exit if no more quotes to process
+        if (vars->quote_depth == 0)
+        {
+            break;
+        }
+    }
+    
+    // Return result based on whether quotes were handled
+    if (quote_handled)
+    {
+        fprintf(stderr, "DEBUG: All quotes handled, input modified\n");
+        return (1);
+    }
+    
+    fprintf(stderr, "DEBUG: No unclosed quotes detected\n");
+    return (0);
+}
 */
 int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
 {
@@ -291,6 +372,15 @@ int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
     }
     
     fprintf(stderr, "DEBUG: Unbalanced quotes detected, prompting for more input\n");
+    
+    /* CRITICAL FIX: Clean up any partially built token list before prompting */
+    fprintf(stderr, "DEBUG: Cleaning up partial tokens before quote handling\n");
+    cleanup_token_list(vars);  /* Clear any partially built token list */
+    vars->head = NULL;         /* Ensure head is NULL after cleanup */
+    vars->current = NULL;      /* Ensure current is NULL after cleanup */
+    
+    /* Display error message for unclosed quotes */
+    ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
     
     /* Initialize quote handling flag */
     quote_handled = 0;
@@ -314,7 +404,7 @@ int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
         
         /* Create combined command */
         new_cmd = append_input(*processed_cmd, addon);
-        
+        fprintf(stderr, "DEBUG: Safefree after append_input\n");
         /* Free addon to prevent double free */
         ft_safefree((void **)&addon);
         
@@ -324,10 +414,15 @@ int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
             fprintf(stderr, "DEBUG: Failed to append addon input\n");
             return (-1);
         }
-        
+        fprintf(stderr, "DEBUG: Safefree after !new_cmd\n");
         /* Update command with new combined version */
         ft_safefree((void **)processed_cmd);
         *processed_cmd = new_cmd;
+        fprintf(stderr, "DEBUG: Before running cleanup_token_list\n");
+        /* CRITICAL FIX: Reset token list before re-tokenizing */
+        cleanup_token_list(vars);
+        vars->head = NULL;
+        vars->current = NULL;
         
         /* Re-tokenize to check if quotes are now closed */
         if (tokenize_to_test(*processed_cmd, vars) < 0)

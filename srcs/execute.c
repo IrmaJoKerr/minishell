@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 02:50:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 09:19:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,7 @@ Handles standard command execution.
 Returns:
 Exit code from the command execution.
 Works with execute_cmd().
-*/
+OLD VERSION
 int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
 {
     char	*cmd_path;
@@ -249,6 +249,53 @@ int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
     }
     expand_cmd_args(node, vars);
     print_cmd_args(node);
+    if (is_builtin(node->args[0]))
+    {
+        fprintf(stderr, "DEBUG: Executing builtin command: %s\n", 
+            node->args[0]);
+        return (execute_builtin(node->args[0], node->args, vars));
+    }
+    cmd_path = get_cmd_path(node->args[0], envp);
+    if (!cmd_path)
+    {
+        ft_putstr_fd("bleshell: command not found: ", 2);
+        ft_putendl_fd(node->args[0], 2);
+        vars->error_code = 127;
+        return (vars->error_code);
+    }
+    fprintf(stderr, "DEBUG: Found command path: %s\n", cmd_path);
+    return (exec_child_cmd(node, envp, vars, cmd_path));
+}
+*/
+int exec_std_cmd(t_node *node, char **envp, t_vars *vars)
+{
+    char    *cmd_path;
+    int     i;
+
+    if (!node->args || !node->args[0])
+    {
+        fprintf(stderr, "DEBUG: Invalid command node or missing arguments\n");
+        return (1);
+    }
+    
+    /* Debug output to check quote types before expansion */
+    fprintf(stderr, "DEBUG: Before expansion:\n");
+    i = 0;
+    while (node->args[i])
+    {
+        fprintf(stderr, "DEBUG: Arg[%d]='%s', quote_type=%d\n", 
+                i, node->args[i], 
+                node->arg_quote_type ? node->arg_quote_type[i] : -1);
+        i++;
+    }
+    
+    /* Expand variables in arguments based on quote context */
+    expand_cmd_args(node, vars);
+    
+    /* Debug output after expansion */
+    fprintf(stderr, "DEBUG: After expansion:\n");
+    print_cmd_args(node);
+    
     if (is_builtin(node->args[0]))
     {
         fprintf(stderr, "DEBUG: Executing builtin command: %s\n", 
@@ -303,17 +350,29 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
     return (exec_std_cmd(node, envp, vars));
 }
 */
-int	execute_cmd(t_node *node, char **envp, t_vars *vars)
+int execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
     int     i;
     char    *exit_code;
     
     if (!node || !node->args || !node->args[0])
         return (1);
-        
+    
+    fprintf(stderr, "DEBUG: Printing quote context: '%c'\n", 
+            vars->quote_depth > 0 ? vars->quote_ctx[vars->quote_depth - 1].type : ' ');
     fprintf(stderr, "DEBUG: Executing CMD node: 0x%p\n", (void*)node);
     fprintf(stderr, "DEBUG: Command: '%s' with %zu arguments\n", 
             node->args[0], ft_arrlen(node->args) - 1);
+    
+    /* Debug output to check arg_quote_type information */
+    i = 0;
+    while (node->args[i])
+    {
+        fprintf(stderr, "DEBUG: Arg[%d]='%s', quote_type=%d\n", 
+                i, node->args[i], 
+                node->arg_quote_type ? node->arg_quote_type[i] : -1);
+        i++;
+    }
     
     /* Skip $? expansion for echo command to allow special handling */
     if (!(is_builtin(node->args[0]) && ft_strcmp(node->args[0], "echo") == 0))
@@ -322,6 +381,15 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
         i = 0;
         while (node->args && node->args[i])
         {
+            /* Skip expansion for single-quoted arguments */
+            if (node->arg_quote_type && node->arg_quote_type[i] == 1)
+            {
+                fprintf(stderr, "DEBUG: Skipping $? expansion for single-quoted arg: '%s'\n", 
+                      node->args[i]);
+                i++;
+                continue;
+            }
+            
             if (ft_strcmp(node->args[i], "$?") == 0)
             {
                 /* Convert vars->error_code to string and replace the $? */
@@ -340,8 +408,10 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
     {
         fprintf(stderr, "DEBUG: Skipping $? expansion for echo command\n");
     }
+    
     fprintf(stderr, "DEBUG: Executing %s node: %p\n",
         get_token_str(node->type), (void *)node);
+        
     if (node->type == TYPE_PIPE)
     {
         fprintf(stderr, "DEBUG: Executing pipe command\n");
@@ -354,4 +424,3 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
     }
     return (exec_std_cmd(node, envp, vars));
 }
-

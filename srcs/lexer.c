@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 01:20:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 08:43:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,7 +298,8 @@ void handle_expansion_token(char *str, t_vars *vars, int *first_token)
                 // Append $? as an argument to the command
                 fprintf(stderr, "DEBUG: Adding $? as argument to command '%s'\n", 
                        cmd_node->args[0]);
-                append_arg(cmd_node, "$?");
+                // $? is a special token, not quoted
+				append_arg(cmd_node, "$?", 0);
             }
             else
             {
@@ -336,7 +337,8 @@ void handle_expansion_token(char *str, t_vars *vars, int *first_token)
                 {
                     fprintf(stderr, "DEBUG: Adding expanded value '%s' as argument to command '%s'\n", 
                            expanded, cmd_node->args[0]);
-                    append_arg(cmd_node, expanded);
+                    // Expanded variables are unquoted by default
+					append_arg(cmd_node, expanded, 0);
                 }
                 else
                 {

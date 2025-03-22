@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/21 04:31:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 10:55:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,4 +120,24 @@ void	init_lexer(t_vars *vars)
 	vars->pos = 0;
 	vars->start = 0;
 	vars->quote_depth = 0;
+}
+
+
+
+/*
+Initialise the quote context depth. simple version.
+*/
+void init_quote_context(t_vars *vars)
+{
+    if (!vars)
+    {
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG: [init_quote_context] Resetting quote depth\n");
+    
+    // Reset quote depth only - simplest solution
+    vars->quote_depth = 0;
+    
+    fprintf(stderr, "DEBUG: [init_quote_context] Quote depth reset complete\n");
 }

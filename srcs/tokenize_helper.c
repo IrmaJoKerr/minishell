@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 07:54:40 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 00:43:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 08:36:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,9 @@ t_node	*build_cmdarg_node(char **args)
 	i = 1;
 	while (args[i])
 	{
-		append_arg(node, args[i]);
-		i++;
+    	// Regular arguments should be unquoted (0)
+    	append_arg(node, args[i], 0);  // 0 indicates unquoted
+    	i++;
 	}
 	return (node);
 }
