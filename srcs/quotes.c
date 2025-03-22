@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 10:29:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:36:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ Works with handle_quote_token() during tokenization.
 Example: For input "Hello 'world'" at position of first quote
 - Returns "world" as extracted content
 - Updates position to character after closing quote
-*/
+OLD VERSION
 char	*read_quoted_content(char *input, int *pos, char quote)
 {
     int		start;
@@ -227,6 +227,45 @@ char	*read_quoted_content(char *input, int *pos, char quote)
     content = ft_substr(input, start, *pos - start);
     (*pos)++;
     return (content);
+}
+*/
+char *read_quoted_content(char *input, int *pos, char quote)
+{
+    int start;
+    char *content;
+    int input_len;
+    
+    if (!input || !pos)
+        return (NULL);
+    
+    input_len = ft_strlen(input);
+    
+    // CRITICAL FIX: Check if *pos is within bounds
+    if (*pos >= input_len)
+        return (NULL);
+        
+    start = *pos;
+    
+    // Look for matching quote
+    while (input[*pos] && input[*pos] != quote) {
+        // CRITICAL FIX: Check if we're going out of bounds
+        if (*pos >= input_len)
+            break;
+        (*pos)++;
+    }
+    
+    // CRITICAL FIX: Make sure we don't read past the end of the string
+    if (*pos > input_len)
+        *pos = input_len;
+    
+    // Extract content between quotes
+    content = ft_substr(input, start, *pos - start);
+    
+    // Move past closing quote if present
+    if (input[*pos] == quote)
+        (*pos)++;
+        
+    return content;
 }
 
 /*

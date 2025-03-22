@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 10:55:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:15:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ void	init_lexer(t_vars *vars)
 
 /*
 Initialise the quote context depth. simple version.
-*/
+OLD VERSION
 void init_quote_context(t_vars *vars)
 {
     if (!vars)
@@ -140,4 +140,24 @@ void init_quote_context(t_vars *vars)
     vars->quote_depth = 0;
     
     fprintf(stderr, "DEBUG: [init_quote_context] Quote depth reset complete\n");
+}
+*/
+void init_quote_context(t_vars *vars)
+{
+    fprintf(stderr, "DEBUG: [init_quote_context] ENTRY with vars=%p\n", (void*)vars);
+    
+    if (!vars) {
+        fprintf(stderr, "DEBUG: [init_quote_context] vars is NULL\n");
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG: [init_quote_context] Setting quote_depth=0\n");
+    vars->quote_depth = 0;
+    
+    fprintf(stderr, "DEBUG: [init_quote_context] Resetting quote_ctx\n");
+    for (int i = 0; i < 32; i++) {
+        vars->quote_ctx[i].type = 0;
+    }
+    
+    fprintf(stderr, "DEBUG: [init_quote_context] EXIT\n");
 }

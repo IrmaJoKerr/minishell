@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 11:01:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:30:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ Gets additional input for unclosed quotes with appropriate prompt.
 Returns:
 - The input string.
 - NULL on EOF/error.
-*/
+OLD VERSION
 char	*get_quote_input(t_vars *vars)
 {
 	char	*addon;
@@ -189,6 +189,74 @@ char	*get_quote_input(t_vars *vars)
 	}
 	fprintf(stderr, "DEBUG: addon input for quote by get_quo_iput: '%s'\n", addon);
 	return (addon);
+}
+*/
+char *get_quote_input(t_vars *vars)
+{
+    char *addon;
+    char *prompt;
+    
+    fprintf(stderr, "DEBUG: [get_quote_input] ENTRY point\n");
+    
+    if (!vars) {
+        fprintf(stderr, "DEBUG: [get_quote_input] vars is NULL\n");
+        ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
+        return NULL;
+    }
+    
+    if (vars->quote_depth <= 0) {
+        fprintf(stderr, "DEBUG: [get_quote_input] Invalid quote depth: %d\n", vars->quote_depth);
+        ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
+        return NULL;
+    }
+    
+    // CRITICAL FIX: Add explicit bounds check before accessing quote_ctx array
+    if (vars->quote_depth > 32 || vars->quote_depth < 1) {
+        fprintf(stderr, "DEBUG: [get_quote_input] Quote depth %d out of bounds\n", vars->quote_depth);
+        vars->quote_depth = 0; // Reset to prevent future issues
+        ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
+        return NULL;
+    }
+    
+    // Set default prompt in case we fail to determine the quote type
+    prompt = "QUOTE> ";
+    
+    // Safely determine quote char and type for proper prompt
+    char quote_char = vars->quote_ctx[vars->quote_depth - 1].type;
+    fprintf(stderr, "DEBUG: [get_quote_input] Quote char: '%c', depth: %d\n", 
+            quote_char, vars->quote_depth);
+    
+    // Output debug information directly
+    if (quote_char == '\'')
+        fprintf(stderr, "DEBUG: [get_quote_input] Unclosed single quote detected\n");
+    else if (quote_char == '"')
+        fprintf(stderr, "DEBUG: [get_quote_input] Unclosed double quote detected\n");
+    else
+        fprintf(stderr, "DEBUG: [get_quote_input] Unclosed unknown quote type detected\n");
+    
+    // CRITICAL FIX: Use direct error message instead of print_error function
+    ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
+    
+    // Set up proper bash-style prompt
+    if (quote_char == '\'')
+        prompt = "SQUOTE> ";
+    else if (quote_char == '"')
+        prompt = "DQUOTE> ";
+    
+    fprintf(stderr, "DEBUG: [get_quote_input] About to call readline with prompt: '%s'\n", prompt);
+    
+    // Read additional input
+    addon = readline(prompt);
+    
+    fprintf(stderr, "DEBUG: [get_quote_input] readline returned: %p\n", (void*)addon);
+    
+    if (!addon) {
+        fprintf(stderr, "DEBUG: [get_quote_input] Received EOF during quote completion\n");
+        return NULL;
+    }
+    
+    fprintf(stderr, "DEBUG: [get_quote_input] addon input: '%s'\n", addon);
+    return addon;
 }
 
 /*
@@ -363,117 +431,139 @@ int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
     char *new_cmd;
     int quote_handled;
     
-    /* Check if quotes are already balanced */
-    if (quotes_are_closed(*processed_cmd))
-    {
-        fprintf(stderr, "DEBUG: Quotes are balanced in command, no addon needed\n");
-        vars->quote_depth = 0;
-        return (0);
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] ENTRY with processed_cmd=%p, vars=%p\n", 
+            (void*)*processed_cmd, (void*)vars);
+    
+    if (!processed_cmd || !*processed_cmd) {
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] NULL processed_cmd\n");
+        return -1;
     }
     
-    fprintf(stderr, "DEBUG: Unbalanced quotes detected, prompting for more input\n");
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Input: '%s'\n", *processed_cmd);
+    
+    /* Check if quotes are already balanced */
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Checking if quotes are closed\n");
+    if (quotes_are_closed(*processed_cmd)) {
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Quotes are balanced\n");
+        vars->quote_depth = 0;
+        return 0;
+    }
+    
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Unbalanced quotes detected, depth=%d\n", 
+            vars->quote_depth);
     
     /* CRITICAL FIX: Clean up any partially built token list before prompting */
-    fprintf(stderr, "DEBUG: Cleaning up partial tokens before quote handling\n");
-    cleanup_token_list(vars);  /* Clear any partially built token list */
-    vars->head = NULL;         /* Ensure head is NULL after cleanup */
-    vars->current = NULL;      /* Ensure current is NULL after cleanup */
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Cleaning up token list\n");
+    cleanup_token_list(vars);
+    
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Setting head and current to NULL\n");
+    vars->head = NULL;
+    vars->current = NULL;
     
     /* Display error message for unclosed quotes */
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Displaying error message\n");
     ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
     
     /* Initialize quote handling flag */
     quote_handled = 0;
     
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Entering while loop, quote_depth=%d\n", 
+            vars->quote_depth);
+    
     /* Continue handling quotes until all are closed */
-    while (vars->quote_depth > 0)
-    {
+    while (vars->quote_depth > 0) {
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Top of while loop, quote_depth=%d\n", 
+                vars->quote_depth);
+        
         /* Get additional input for the quote */
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Calling get_quote_input()\n");
         addon = get_quote_input(vars);
-        fprintf(stderr, "DEBUG: get_quo_put fr hdle_uncl_quo\n");
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] get_quote_input() returned %p\n", 
+                (void*)addon);
         
         /* Handle EOF or error */
-        if (!addon)
-        {
-            fprintf(stderr, "DEBUG: Failed to get quote input\n");
+        if (!addon) {
+            fprintf(stderr, "DEBUG: [handle_unclosed_quotes] addon is NULL, freeing processed_cmd\n");
             ft_safefree((void **)processed_cmd);
-            return (-1);
+            return -1;
         }
         
-        fprintf(stderr, "DEBUG: addon input for quote: '%s'\n", addon);
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Got addon: '%s'\n", addon);
         
         /* Create combined command */
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Calling append_input()\n");
         new_cmd = append_input(*processed_cmd, addon);
-        fprintf(stderr, "DEBUG: Safefree after append_input\n");
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] append_input() returned %p\n", 
+                (void*)new_cmd);
+        
         /* Free addon to prevent double free */
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Freeing addon\n");
         ft_safefree((void **)&addon);
         
         /* Handle append failure */
-        if (!new_cmd)
-        {
-            fprintf(stderr, "DEBUG: Failed to append addon input\n");
-            return (-1);
+        if (!new_cmd) {
+            fprintf(stderr, "DEBUG: [handle_unclosed_quotes] new_cmd is NULL\n");
+            return -1;
         }
-        fprintf(stderr, "DEBUG: Safefree after !new_cmd\n");
+        
         /* Update command with new combined version */
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Freeing old processed_cmd\n");
         ft_safefree((void **)processed_cmd);
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Setting processed_cmd to new_cmd\n");
         *processed_cmd = new_cmd;
-        fprintf(stderr, "DEBUG: Before running cleanup_token_list\n");
+        
         /* CRITICAL FIX: Reset token list before re-tokenizing */
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Cleaning up token list again\n");
         cleanup_token_list(vars);
         vars->head = NULL;
         vars->current = NULL;
         
         /* Re-tokenize to check if quotes are now closed */
-        if (tokenize_to_test(*processed_cmd, vars) < 0)
-        {
-            fprintf(stderr, "DEBUG: Tokenization failed after adding quote input\n");
-            return (-1);
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Calling tokenize_to_test()\n");
+        if (tokenize_to_test(*processed_cmd, vars) < 0) {
+            fprintf(stderr, "DEBUG: [handle_unclosed_quotes] tokenize_to_test() failed\n");
+            return -1;
         }
+        fprintf(stderr, "DEBUG: [handle_unclosed_quotes] After tokenize_to_test(), quote_depth=%d\n", 
+                vars->quote_depth);
         
         /* Mark that we handled quotes */
         quote_handled = 1;
         
         /* Exit if no more quotes to process */
-        if (vars->quote_depth == 0)
-        {
+        if (vars->quote_depth == 0) {
+            fprintf(stderr, "DEBUG: [handle_unclosed_quotes] All quotes closed, breaking loop\n");
             break;
         }
     }
     
     /* Return result based on whether quotes were handled */
-    if (quote_handled)
-    {
-        fprintf(stderr, "DEBUG: All quotes handled, input modified\n");
-        return (1);
-    }
-    
-    fprintf(stderr, "DEBUG: No unclosed quotes detected\n");
-    return (0);
+    fprintf(stderr, "DEBUG: [handle_unclosed_quotes] Returning %d\n", quote_handled ? 1 : 0);
+    return quote_handled ? 1 : 0;
 }
 
 /*
 Append new input to existing input with a newline.
 Returns the combined string or NULL on error.
 Simple string append function that joins two strings with a newline in between.
-*/
+OLD VERSION
 char *append_input(const char *first, const char *second)
 {
     size_t	len1;
     size_t	len2;
     char	*result;
     
-    /* Handle NULL inputs */
+    // Handle NULL inputs
     if (!first)
         return (ft_strdup(second));
     if (!second)
         return (ft_strdup(first));
         
-    /* Calculate string lengths */
+    // Calculate string lengths
     len1 = ft_strlen(first);
     len2 = ft_strlen(second);
     
-    /* Allocate space for both strings plus newline and null terminator */
+    // Allocate space for both strings plus newline and null terminator
     result = malloc(len1 + len2 + 2);
     if (!result)
         return (NULL);
@@ -483,4 +573,50 @@ char *append_input(const char *first, const char *second)
     result[len1 + len2 + 1] = '\0';
     fprintf(stderr, "DEBUG: append_input created: '%s'\n", result);
     return (result);
+}
+*/
+char *append_input(const char *first, const char *second)
+{
+    size_t len1;
+    size_t len2;
+    char *result;
+    
+    fprintf(stderr, "DEBUG: [append_input] ENTRY with first=%p, second=%p\n", 
+            (void*)first, (void*)second);
+    
+    /* Handle NULL inputs */
+    if (!first) {
+        fprintf(stderr, "DEBUG: [append_input] first is NULL, duplicating second\n");
+        return ft_strdup(second);
+    }
+    if (!second) {
+        fprintf(stderr, "DEBUG: [append_input] second is NULL, duplicating first\n");
+        return ft_strdup(first);
+    }
+    
+    fprintf(stderr, "DEBUG: [append_input] first='%s', second='%s'\n", first, second);
+    
+    /* Calculate string lengths */
+    len1 = ft_strlen(first);
+    len2 = ft_strlen(second);
+    
+    fprintf(stderr, "DEBUG: [append_input] Allocating %zu + %zu + 2 bytes\n", len1, len2);
+    
+    /* Allocate space for both strings plus newline and null terminator */
+    result = malloc(len1 + len2 + 2);
+    if (!result) {
+        fprintf(stderr, "DEBUG: [append_input] malloc failed\n");
+        return NULL;
+    }
+    
+    fprintf(stderr, "DEBUG: [append_input] Copying first string\n");
+    ft_memcpy(result, first, len1);
+    result[len1] = '\n';
+    
+    fprintf(stderr, "DEBUG: [append_input] Copying second string\n");
+    ft_memcpy(result + len1 + 1, second, len2);
+    result[len1 + len2 + 1] = '\0';
+    
+    fprintf(stderr, "DEBUG: [append_input] Result: '%s'\n", result);
+    return result;
 }

@@ -1,4 +1,2 @@
-echo '$HOME'
-echo '$HOME'
-echo "$HOME"
-echo $HOME
+echo "123
+echo 'test

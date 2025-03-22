@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 10:57:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:15:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,26 +35,30 @@ int tokenize_to_test(char *input, t_vars *vars)
 */
 int tokenize_to_test(char *input, t_vars *vars)
 {
-    fprintf(stderr, "DEBUG: [tokenize_to_test] Starting with input='%s'\n", input);
-    if (!input || !vars)
-    {
+    fprintf(stderr, "DEBUG: [tokenize_to_test] ENTRY with input='%s', vars=%p\n", 
+            input ? input : "NULL", (void*)vars);
+    
+    if (!input || !vars) {
         fprintf(stderr, "DEBUG: [tokenize_to_test] Invalid parameters\n");
-        return (-1);
+        return -1;
     }
-    // Ensure previous tokens are cleaned up
+    
+    fprintf(stderr, "DEBUG: [tokenize_to_test] Cleaning up token list\n");
     cleanup_token_list(vars);
+    
+    fprintf(stderr, "DEBUG: [tokenize_to_test] Setting head and current to NULL\n");
     vars->head = NULL;
     vars->current = NULL;
     
-    // Reset quote context
+    fprintf(stderr, "DEBUG: [tokenize_to_test] Initializing quote context\n");
     init_quote_context(vars);
     
-    // Process the input - tokenize() returns void, so don't check return value
+    fprintf(stderr, "DEBUG: [tokenize_to_test] Calling tokenize()\n");
     tokenize(input, vars);
     
     fprintf(stderr, "DEBUG: [tokenize_to_test] After tokenize, quote_depth=%d\n", 
             vars->quote_depth);
-    return (0);
+    return 0;
 }
 
 /*

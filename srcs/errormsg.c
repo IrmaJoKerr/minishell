@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 02:28:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/22 11:35:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ Works with various command functions.
 Example: For "cd /nonexistent":
 - print_error("No such file or directory", vars, 1)
 - Returns 1 for consistent error reporting
-*/
+OLD VERSION
 int	print_error(const char *msg, t_vars *vars, int error_code)
 {
     if (!error_code)
@@ -89,6 +89,23 @@ int	print_error(const char *msg, t_vars *vars, int error_code)
     ft_putstr_fd("bleshell: ", 2);
     ft_putendl_fd((char *)msg, 2);
 	vars->error_code = error_code;
+    return (error_code);
+}
+*/
+int print_error(const char *msg, t_vars *vars, int error_code)
+{
+    // First, display the error message consistently
+    ft_putstr_fd("bleshell: ", 2);
+    if (msg)
+		ft_putendl_fd((char *)msg, 2);
+    
+    // CRITICAL FIX: Check if vars is NULL before trying to access it
+    if (vars) 
+    {
+        // Update error code in vars structure
+        vars->error_code = error_code;
+    }
+    
     return (error_code);
 }
 
