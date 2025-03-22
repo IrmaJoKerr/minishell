@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 03:03:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/03/23 04:10:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +244,7 @@ int			builtin_env(t_vars *vars);
 Builtin "exit" command. Exits the shell.
 In builtin_exit.c
 */
-int			builtin_exit(t_vars *vars);
+int			builtin_exit(char **args, t_vars *vars);
 
 /*
 Builtin "export" command utility functions.
@@ -569,7 +569,7 @@ void		lexerlist(char *str, t_vars *vars);
 Minishell program entry point functions.
 In minishell.c
 */
-char		*reader(t_vars *vars);
+char		*reader(void);
 void		setup_env(t_vars *vars, char **envp);
 void		init_shell(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 15:58:40 by lechan           ###   ########.fr       */
+/*   Updated: 2025/03/23 04:09:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Example: When user types "ls -la"
 - Displays prompt "bleshell$> "
 - Returns "ls -la" as an allocated string
 - Adds command to history for up-arrow recall
-*/
+OLD VERSION
 char	*reader(t_vars *vars)
 {
 	char	*line;
@@ -34,6 +34,18 @@ char	*reader(t_vars *vars)
 	line = readline(PROMPT);
 	if (!line)
 		builtin_exit(vars);
+	if (*line)
+		add_history(line);
+	return (line);
+}
+*/
+char	*reader(void)
+{
+	char	*line;
+
+	line = readline(PROMPT);
+	if (!line)
+        return (NULL);
 	if (*line)
 		add_history(line);
 	return (line);
@@ -294,7 +306,7 @@ Main shell loop that processes user commands and manages execution flow.
 - Processes commands through tokenizing and execution.
 - Manages exit status tracking through pipeline.
 Works as the central execution point of the shell.
-*/
+OLD VERSION
 int	main(int argc, char **argv, char **envp)
 {
 	t_vars	vars;
@@ -322,4 +334,38 @@ int	main(int argc, char **argv, char **envp)
 		ft_safefree((void **)&input);
 	}
 	return (0);
+}
+*/
+/*
+Main shell loop that processes user commands and manages execution flow.
+- Reads input through reader() function.
+- Handles Ctrl+D and empty input cases.
+- Processes commands through tokenizing and execution.
+- Manages exit status tracking through pipeline.
+Works as the central execution point of the shell.
+*/
+int	main(int argc, char **argv, char **envp)
+{
+    t_vars	vars;
+    char	*input;
+    char	*exit_args[2] = {NULL, NULL};
+
+    (void)argc;
+    (void)argv;
+    ft_memset(&vars, 0, sizeof(t_vars));
+    init_shell(&vars, envp);
+    while (1)
+    {
+        input = reader();
+        if (input == NULL)
+            builtin_exit(exit_args, &vars);
+        if (input[0] == '\0')
+        {
+            ft_safefree((void **)&input);
+            continue ;
+        }
+        process_command(input, &vars);
+        ft_safefree((void **)&input);
+    }
+    return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:33:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:45:57 by lechan           ###   ########.fr       */
+/*   Updated: 2025/03/23 03:30:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	execute_builtin(char *cmd, char **args, t_vars *vars)
 	if (!ft_strcmp(cmd, "env"))
 		return (builtin_env(vars));
 	if (!ft_strcmp(cmd, "exit"))
-		return (builtin_exit(vars));
+		return (builtin_exit(args, vars));
 	if (!ft_strcmp(cmd, "export"))
 		return (builtin_export(args, vars));
 	if (!ft_strcmp(cmd, "pwd"))
