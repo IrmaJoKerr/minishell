@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:57:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 05:33:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -815,76 +815,6 @@ int improved_tokenize(char *input, t_vars *vars)
 }
 
 /*
-Creates a new command node from a token.
-- Allocates node with command type.
-- Sets up args array with initial token.
-- Handles memory errors properly.
-Returns:
-Pointer to new command node or NULL on failure.
-Works with process_cmd_token() for command creation.
-
-Example: For command "echo"
-- Creates node with TYPE_CMD type
-- Sets args[0] to "echo"
-- Returns node pointer
-*/
-t_node	*make_cmdnode(char *token)
-{
-	t_node	*node;
-
-	node = initnode(TYPE_CMD, token);
-	if (!node)
-		return (NULL);
-	if (node->args)
-	{
-		if (node->args[0])
-			free(node->args[0]);
-		free(node->args);
-	}
-	node->args = malloc(sizeof(char *) * 2);
-	if (!node->args)
-	{
-		free(node);
-		return (NULL);
-	}
-	node->args[0] = ft_strdup(token);
-	if (!node->args[0])
-	{
-		free(node->args);
-		free(node);
-		return (NULL);
-	}
-	node->args[1] = NULL;
-	return (node);
-}
-
-/*
-Creates a new command node with proper setup.
-- Wraps make_cmdnode with error handling.
-- Ensures memory cleanup on failure.
-Returns:
-- Pointer to new command node or NULL on failure.
-- Works with process_cmd_token() for command creation.
-
-Example: For command token "grep"
-- Creates new command node
-- Handles memory errors
-- Returns node or NULL on failure
-*/
-t_node	*new_cmd_node(char *token)
-{
-	t_node	*node;
-
-	node = make_cmdnode(token);
-	if (!node)
-	{
-		free(token);
-		return (NULL);
-	}
-	return (node);
-}
-
-/*
 Creates a non-command token node.
 - Allocates node with specified token type.
 - Handles memory errors properly.
@@ -1026,39 +956,6 @@ void	join_flag_args(char **args, int i)
 		}
 		args[j] = NULL;
 	}
-}
-
-/*
-Creates command node from parsed arguments.
-- Uses first arg as command name.
-- Adds remaining args to node's args array.
-- Handles memory allocation properly.
-Returns:
-- New command node or NULL on failure.
-Works with process_cmd_token() during command creation.
-
-Example: For arguments ["grep", "pattern", "file"]
-- Creates command node with "grep"
-- Adds "pattern" and "file" as arguments
-- Returns the complete command node
-*/
-t_node	*build_cmdarg_node(char **args)
-{
-	t_node	*node;
-	int		i;
-
-	if (!args || !args[0])
-		return (NULL);
-	node = new_cmd_node(args[0]);
-	if (!node)
-		return (NULL);
-	i = 1;
-	while (args[i])
-	{
-		append_arg(node, args[i], 0);
-		i++;
-	}
-	return (node);
 }
 
 /*

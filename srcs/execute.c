@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 03:50:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:39:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ Handles command execution status and updates error code.
 - For signals, adds 128 to the signal number (POSIX standard).
 Returns:
 The final error code stored in vars->error_code.
-Works with exec_child_cmd() and execute_pipeline().
+Works with exec_child_cmd() and execute_pipes().
 */
 int handle_cmd_status(int status, t_vars *vars)
 {
@@ -181,7 +181,7 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
             vars->error_code = 1;
             return (0);
         }
-        vars->pipeline->heredoc_fd = *fd;
+        vars->pipes->heredoc_fd = *fd;
     }
     
     return (1);
@@ -300,7 +300,7 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
 		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", node->type, node->args[0]);
     // Handle different node types
     if (node->type == TYPE_PIPE)
-        result = execute_pipeline(node, vars);
+        result = execute_pipes(node, vars);
     else if (is_redirection(node->type))
         result = exec_redirect_cmd(node, envp, vars);
     else if (node->type == TYPE_CMD)

@@ -6,15 +6,15 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 03:58:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:50:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Retrieves the exit status from the pipeline or vars.
-- Checks if pipeline exists in vars structure.
+Retrieves the exit status from the pipes or vars.
+- Checks if pipes exists in vars structure.
 - Returns the last command code as a string.
 - Falls back to "0" if information not available.
 Returns:

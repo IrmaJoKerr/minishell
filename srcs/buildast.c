@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 02:22:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:31:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ t_node	*find_next_cmd(t_node *start)
 }
 
 /*
-Initializes the first pipe node in a pipeline structure.
+Initializes the first pipe node in a pipes structure.
 - Sets left child to previous command node.
 - Sets right child to next command node.
 - Both commands must be valid for pipe to be properly configured.
@@ -81,11 +81,11 @@ void	setup_first_pipe(t_node *pipe_node, t_node *prev_cmd, t_node *next_cmd)
 }
 
 /*
-Connects additional pipe nodes in a pipeline chain.
+Connects additional pipe nodes in a pipes chain.
 - Sets pipe_node's left child to last_cmd.
 - Sets pipe_node's right child to next_cmd.
 - Links the current pipe to the previous pipe chain.
-- Updates the pipeline structure for continued processing.
+- Updates the pipes structure for continued processing.
 Works with proc_pipes_pt2().
 */
 void	setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
@@ -144,9 +144,9 @@ t_node	*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd)
 /*
 Processes additional pipe nodes after the first one.
 - Traverses token list to find remaining pipe tokens.
-- Connects each pipe to the growing pipeline structure.
+- Connects each pipe to the growing pipes structure.
 - Updates tracking pointers for each new pipe addition.
-- Maintains the pipeline chain for AST construction.
+- Maintains the pipes chain for AST construction.
 Works with proc_token_list().
 */
 void	proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
@@ -332,7 +332,7 @@ void	proc_redir_pt2(t_vars *vars, t_node *pipe_root)
 /*
 Processes the entire token list to build the AST structure.
 - Identifies command nodes for reference.
-- Processes pipe tokens to build pipeline structure.
+- Processes pipe tokens to build pipes structure.
 - Processes redirection tokens and integrates with pipe structure.
 - Determines appropriate root node for the final AST.
 Returns:
@@ -614,7 +614,6 @@ Returns:
 - 0 if pipe syntax is valid.
 - 1 if syntax error detected.
 - 2 if more input needed (pipe at end).
-Works with handle_incomplete_pipe().
 
 Example: For input "| ls":
 - Returns 1 (error: pipe at beginning)
@@ -636,206 +635,5 @@ int	chk_pipe_syntax_err(t_vars *vars)
 	result = chk_end_pipe(vars);
 	if (result != 0)
 		return (result);
-	return (0);
-}
-
-/*
-Combines original input with new input line.
-- Joins strings with a space separator.
-- Properly handles memory for both inputs.
-Returns:
-- Newly allocated string containing joined input.
-- NULL on memory allocation failure.
-Works with handle_trailing_pipe_pt2().
-*/
-char	*merge_input(char *input, char *line)
-{
-	char	*temp;
-	char	*new_input;
-
-	temp = ft_strjoin(input, " ");
-	if (!temp)
-	{
-		free(line);
-		return (NULL);
-	}
-	new_input = ft_strjoin(temp, line);
-	free(temp);
-	free(line);
-	if (!new_input)
-		return (NULL);
-	return (new_input);
-}
-
-/*
-Prepares for handling an incomplete command ending with pipe.
-- Cleans up existing token list.
-- Creates a copy of current input for subsequent processing.
-Returns:
-- Copy of the input string for further processing.
-- NULL on memory allocation failure.
-Works with handle_incomplete_pipe().
-*/
-char	*handle_trailing_pipe_pt1(char *input, t_vars *vars)
-{
-	char	*new_input;
-
-	cleanup_token_list(vars);
-	new_input = ft_strdup(input);
-	if (!new_input)
-		return (NULL);
-	return (new_input);
-}
-
-/*
-Gets additional input for command with trailing pipe.
-- Prompts user for more input.
-- Adds input to history if not empty.
-- Joins with previous input and builds new token list.
-Returns:
-- Updated input string with new content.
-- NULL on failure or EOF.
-Works with handle_incomplete_pipe().
-*/
-char	*handle_trailing_pipe_pt2(char *new_input, t_vars *vars)
-{
-	char	*line;
-	char	*joined_input;
-
-	line = readline("COMMAND> ");
-	if (!line)
-	{
-		free(new_input);
-		return (NULL);
-	}
-	if (*line)
-		add_history(line);
-	joined_input = merge_input(new_input, line);
-	free(new_input);
-	if (!joined_input)
-		return (NULL);
-	cleanup_token_list(vars);
-	improved_tokenize(joined_input, vars);
-	return (joined_input);
-}
-
-/*
-Handles commands with trailing pipes by prompting for more input.
-- Continues prompting until command is syntactically complete.
-- Repeatedly tokenizes and checks syntax of expanded input.
-Returns:
-- Complete command string with all input parts joined.
-- NULL on memory allocation failure or EOF.
-Works with build_ast().
-
-Example: For input "ls |":
-- Prompts user with "COMMAND>"
-- User types "grep hello"
-- Returns "ls | grep hello"
-*/
-char	*handle_incomplete_pipe(char *input, t_vars *vars)
-{
-	char	*new_input;
-	int		continue_prompting;
-	int		check_result;
-
-	new_input = handle_trailing_pipe_pt1(input, vars);
-	if (!new_input)
-		return (NULL);
-	continue_prompting = 1;
-	while (continue_prompting)
-	{
-		new_input = handle_trailing_pipe_pt2(new_input, vars);
-		if (!new_input)
-			return (NULL);
-		check_result = chk_pipe_syntax_err(vars);
-		if (check_result != 2)
-			continue_prompting = 0;
-	}
-	return (new_input);
-}
-
-/*
-Constructs Abstract Syntax Tree from token list.
-- Processes tokens to identify commands, pipes, redirections.
-- Creates hierarchical structure for command execution.
-- Sets vars->astroot for later reference.
-Returns:
-- Pointer to root node of constructed AST.
-- NULL if no valid syntax or tokens found.
-Works with process_command() in main execution loop.
-
-Example: For input "ls -l | grep foo > output.txt":
-- Builds tree with pipe as root
-- Left child is "ls -l" command
-- Right child is redirection node
-- Redirection's left child is "grep foo"
-- Redirection's right child is "output.txt"
-*/
-t_node	*build_ast(t_vars *vars)
-{
-	t_node	*root;
-
-	if (!vars || !vars->head)
-		return (NULL);
-	get_cmd_nodes(vars);
-	process_token_list(vars);
-	root = vars->astroot;
-	if (!root && vars->cmd_count > 0)
-	{
-		root = vars->cmd_nodes[0];
-		vars->astroot = root;
-	}
-	return (root);
-}
-/*
-Check if the first token in the list is a pipe (syntax error).
-Code 258 is the standard code used for syntax errors.
-Returns:
-0 - no pipe at beginning
-1 - pipe at beginning (sets error code)
-*/
-
-int	check_initial_pipe(t_vars *vars, t_ast *ast)
-{
-	if (!vars || !vars->head || !ast)
-		return (0);
-	if (vars->head->type == TYPE_PIPE)
-	{
-		vars->error_code = 258;
-		ast->pipe_at_front = 1;
-		ast->syntax_error = 1;
-		return (1);
-	}
-	return (0);
-}
-
-/*
-Check for initial/consecutive pipe syntax errors.
-Returns:
-0 - no initial/consecutive pipe errors
-1 - found syntax error (sets error code)
-*/
-int	check_bad_pipe_series(t_vars *vars)
-{
-	int		result;
-	t_ast	*ast;
-
-	ast = init_ast_struct();
-	if (!ast)
-		return (0);
-	result = check_initial_pipe(vars, ast);
-	if (result != 0)
-	{
-		cleanup_ast_struct(ast);
-		return (result);
-	}
-	result = chk_serial_pipes(vars, ast);
-	if (result != 0)
-	{
-		cleanup_ast_struct(ast);
-		return (result);
-	}
-	cleanup_ast_struct(ast);
 	return (0);
 }

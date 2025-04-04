@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:41:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:45:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,34 +136,34 @@ int	is_redirection(t_tokentype type)
 Resets saved standard file descriptors.
 - Restores original stdin and stdout if they were changed.
 - Closes any open heredoc file descriptor.
-- Updates the pipeline state in vars.
+- Updates the pipes state in vars.
 Works with execute_cmd() to clean up after command execution.
 
 Example: After command execution
 - Restores original stdin/stdout
 - Cleans up any open file descriptors
-- Resets pipeline state for next command
+- Resets pipes state for next command
 */
 void	reset_redirect_fds(t_vars *vars)
 {
-	if (!vars || !vars->pipeline)
+	if (!vars || !vars->pipes)
 		return ;
-	if (vars->pipeline->saved_stdin > 2)
+	if (vars->pipes->saved_stdin > 2)
 	{
-		dup2(vars->pipeline->saved_stdin, STDIN_FILENO);
-		close(vars->pipeline->saved_stdin);
-		vars->pipeline->saved_stdin = -1;
+		dup2(vars->pipes->saved_stdin, STDIN_FILENO);
+		close(vars->pipes->saved_stdin);
+		vars->pipes->saved_stdin = -1;
 	}
-	if (vars->pipeline->saved_stdout > 2)
+	if (vars->pipes->saved_stdout > 2)
 	{
-		dup2(vars->pipeline->saved_stdout, STDOUT_FILENO);
-		close(vars->pipeline->saved_stdout);
-		vars->pipeline->saved_stdout = -1;
+		dup2(vars->pipes->saved_stdout, STDOUT_FILENO);
+		close(vars->pipes->saved_stdout);
+		vars->pipes->saved_stdout = -1;
 	}
-	if (vars->pipeline->heredoc_fd > 2)
+	if (vars->pipes->heredoc_fd > 2)
 	{
-		close(vars->pipeline->heredoc_fd);
-		vars->pipeline->heredoc_fd = -1;
+		close(vars->pipes->heredoc_fd);
+		vars->pipes->heredoc_fd = -1;
 	}
 }
 

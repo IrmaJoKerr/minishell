@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 03:52:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:30:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,8 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
     
     // Re-tokenize with the completed command
     cleanup_token_list(vars);
+	// For handle_quote_completion()
+	DBG_PRINTF(DEBUG_TOKENIZE, "handle_quote_completion: about to tokenize '%s'\n", cmd);
     improved_tokenize(cmd, vars);
     
     return (cmd);
@@ -223,11 +225,39 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
-void	build_and_execute(t_vars *vars)
+// void	build_and_execute(t_vars *vars)
+// {
+// 	vars->astroot = build_ast(vars);
+// 	if (vars->astroot)
+// 		execute_cmd(vars->astroot, vars->env, vars);
+// }
+void build_and_execute(t_vars *vars)
 {
-	vars->astroot = build_ast(vars);
-	if (vars->astroot)
-		execute_cmd(vars->astroot, vars->env, vars);
+    t_node *root = NULL;
+    
+    // Return early if no token list or vars
+    if (!vars || !vars->head)
+        return;
+    
+    // Build AST from token list
+    DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+    get_cmd_nodes(vars);
+    process_token_list(vars);
+    
+    // Get the root node
+    root = vars->astroot;
+    if (!root && vars->cmd_count > 0)
+    {
+        root = vars->cmd_nodes[0];
+        vars->astroot = root;
+    }
+    
+    // Execute the command if AST built successfully
+    if (vars->astroot)
+    {
+        DBG_PRINTF(DEBUG_EXEC, "Executing command tree\n");
+        execute_cmd(vars->astroot, vars->env, vars);
+    }
 }
 
 /*
@@ -249,6 +279,8 @@ int process_input_tokens(char *command, t_vars *vars)
     cleanup_token_list(vars);
     
     /* Tokenize the input with improved quote handling */
+	// For process_input_tokens()
+	DBG_PRINTF(DEBUG_TOKENIZE, "process_input_tokens: about to tokenize '%s'\n", command);
     if (!improved_tokenize(command, vars))
 	{
         return (0);

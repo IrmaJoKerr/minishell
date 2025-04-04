@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:24:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:39:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,24 +44,24 @@ void	cleanup_ast_struct(t_ast *ast)
 }
 
 /*
-Cleanup pipeline struct variables.
-- Takes a pointer to a pipeline structure.
+Cleanup pipes struct variables.
+- Takes a pointer to a pipes structure.
 - Safely frees the structure itself.
 - Prevents memory leaks after pipeline processing.
 */
-void	cleanup_pipeline(t_pipe *pipeline)
+void	cleanup_pipes(t_pipe *pipes)
 {
-	if (!pipeline)
+	if (!pipes)
 		return ;
-	free(pipeline->exec_cmds);
-	free(pipeline->pipe_fds);
-	free(pipeline->pids);
-	free(pipeline->status);
-	if (pipeline->heredoc_fd > 2)
-		close(pipeline->heredoc_fd);
-	if (pipeline->redirection_fd > 2)
-        close(pipeline->redirection_fd);
-	free(pipeline);
+	free(pipes->exec_cmds);
+	free(pipes->pipe_fds);
+	free(pipes->pids);
+	free(pipes->status);
+	if (pipes->heredoc_fd > 2)
+		close(pipes->heredoc_fd);
+	if (pipes->redirection_fd > 2)
+        close(pipes->redirection_fd);
+	free(pipes);
 }
 
 void	cleanup_vars(t_vars *vars)
@@ -96,8 +96,8 @@ void	cleanup_exit(t_vars *vars)
 	save_history();
 	cleanup_token_list(vars);
 	cleanup_vars(vars);
-	if (vars->pipeline)
-		cleanup_pipeline(vars->pipeline);
-	vars->pipeline = NULL;
+	if (vars->pipes)
+		cleanup_pipes(vars->pipes);
+	vars->pipes = NULL;
 	rl_clear_history();
 }

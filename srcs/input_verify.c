@@ -6,84 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:14:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:17:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Tokenize input for verification.
-Cleans up any previous token list first.
-Returns:
-- 0 if tokenization was successful
-- -1 if an error occurred
-*/
-int	tokenize_to_test(char *input, t_vars *vars)
-{
-	if (!input || !vars)
-		return (-1);
-	cleanup_token_list(vars);
-	vars->head = NULL;
-	vars->current = NULL;
-	init_quote_context(vars);
-	improved_tokenize(input, vars);
-	return (0);
-}
-
-/*
-Check if input starts with a pipe token (syntax error).
-Returns:
-- 1 if pipe found at beginning of input
-- 0 if no pipe at beginning or no tokens
-Works with chk_syntax_errors().
-*/
-int	chk_pipe_before_cmd(t_vars *vars, t_ast *ast)
-{
-	if (!vars || !vars->head)
-		return (0);
-	if (vars->head->type == TYPE_PIPE)
-	{
-		if (ast)
-			ast->pipe_at_front = 1;
-		return (1);
-	}
-	return (0);
-}
-
-/*
-Check for consecutive pipes in token list (syntax error).
-Code 258 is the standard code used for syntax errors.
-Returns:
-0 - no consecutive pipes found
-1 - consecutive pipes found (sets error code)
-*/
-int	chk_serial_pipes(t_vars *vars, t_ast *ast)
-{
-	t_node	*current;
-
-	if (!vars || !vars->head || !ast)
-		return (0);
-	ast->serial_pipes = 0;
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_PIPE)
-		{
-			if (ast->serial_pipes > 0)
-			{
-				vars->error_code = 258;
-				ast->syntax_error = 1;
-				return (1);
-			}
-			ast->serial_pipes++;
-		}
-		else
-			ast->serial_pipes = 0;
-		current = current->next;
-	}
-	return (0);
-}
 
 /*
  * Processes expansion tokens in the token list
@@ -172,71 +99,6 @@ t_node	*find_preceding_cmd(t_node *head, t_node *exp_node)
 		current = current->next;
 	} 
 	return last_cmd;
-}
-
-int	chk_input_valid(t_vars *vars, char **input)
-{
-	int		modified;
-	char	*result;
-	t_ast *ast;
-
-	modified = 0;
-	if (vars->quote_depth > 0)
-	{
-		result = fix_open_quotes(*input, vars);
-		if (!result)
-			return (0);
-		if (result != *input)
-		{
-			*input = result;
-			modified = 1;
-		}
-	}
-	ast = init_ast_struct();
-	if (ast && !is_input_complete(vars))
-	{
-		result = handle_pipe_valid(*input, vars, 0);
-		if (result && result != *input)
-		{
-			free(*input);  // Free the memory pointed to by *input
-			*input = result;  // Now update the pointer
-			modified = 1;
-		}
-	}
-	cleanup_ast_struct(ast);
-	return (modified);
-}
-
-/*
-Process the input to ensure it represents a complete command.
-Prompts for additional input when needed.
-Returns the complete input string or NULL on error.
-*/
-char	*verify_input(char *input, t_vars *vars)
-{
-	char	*complete_input;
-	int		modified;
-
-	complete_input = ft_strdup(input);
-	if (!complete_input)
-		return (NULL);
-	modified = 0;
-	cleanup_token_list(vars);
-	improved_tokenize(complete_input, vars);
-	while (vars->quote_depth > 0 || !is_input_complete(vars))
-	{
-		modified = chk_input_valid(vars, &complete_input);
-		if (!complete_input)
-			return (NULL);
-		cleanup_token_list(vars);
-		improved_tokenize(complete_input, vars);
-	}
-	if (!modified)
-	{
-		free(complete_input);
-		return (input);
-	}
-	return (complete_input);
 }
 
 /*

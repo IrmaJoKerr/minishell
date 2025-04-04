@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/02 08:03:02 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/05 05:36:59 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,7 +44,6 @@ MINISHELL_SRCS = \
 			srcs/input_verify.c \
 			srcs/lexer.c \
 			srcs/minishell.c \
-			srcs/nodes.c \
 			srcs/operators.c \
 			srcs/paths.c \
 			srcs/pipes.c \

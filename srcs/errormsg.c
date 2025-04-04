@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:39:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,8 +113,8 @@ void	crit_error(t_vars *vars)
 	}
 	if (vars->env)
 		free(vars->env);
-	if (vars->pipeline)
-		cleanup_pipeline(vars->pipeline);
+	if (vars->pipes)
+		cleanup_pipes(vars->pipes);
 	if (vars->error_msg)
 		free(vars->error_msg);
 	exit(1);

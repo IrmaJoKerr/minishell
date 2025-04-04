@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 03:54:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 05:12:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,22 +91,6 @@ void	cleanup_token_list(t_vars *vars)
 	}
 	vars->head = NULL;
 	vars->current = NULL;
-}
-
-/*
-Clean up execution context.
-- Frees command path string.
-- Frees the exec structure itself.
-- Prevents memory leaks after command execution.
-Works with init_exec_context().
-*/
-void	cleanup_exec_context(t_exec *exec)
-{
-	if (!exec)
-		return ;
-	if (exec->cmd_path)
-		free(exec->cmd_path);
-	free(exec);
 }
 
 /*

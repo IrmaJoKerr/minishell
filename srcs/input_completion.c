@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:46:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:07:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,74 +120,10 @@ int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
 	free(*processed_cmd);
 	*processed_cmd = combined;
 	cleanup_token_list(vars);
+	// For handle_unfinished_pipes()
+	DBG_PRINTF(DEBUG_TOKENIZE, "handle_unfinished_pipes: about to tokenize '%s'\n", *processed_cmd);
 	improved_tokenize(*processed_cmd, vars);
 	return (1);
-}
-
-char	*get_quote_input(t_vars *vars)
-{
-	char	*addon;
-	char	*prompt;
-	char	quote_char;
-
-	if (!vars)
-	{
-		ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
-		return (NULL);
-	}
-	if (vars->quote_depth <= 0)
-	{
-		ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
-		return (NULL);
-	}
-	if (vars->quote_depth > 32 || vars->quote_depth < 1)
-	{
-		vars->quote_depth = 0;
-		ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
-		return (NULL);
-	}
-	prompt = "QUOTE> ";
-	quote_char = vars->quote_ctx[vars->quote_depth - 1].type;
-	ft_putendl_fd("bleshell: Unclosed quotes detected", 2);
-	if (quote_char == '\'')
-		prompt = "SQUOTE> ";
-	else if (quote_char == '"')
-		prompt = "DQUOTE> ";
-	addon = readline(prompt);
-	if (!addon)
-		return (NULL);
-	return (addon);
-}
-
-/*
-Process a single quote completion cycle.
-Returns:
-- 1 if succeeded and more processing needed
-- 0 if succeeded and no more processing needed
-- -1 if an error occurred
-*/
-int	chk_quotes_closed(char **processed_cmd, t_vars *vars)
-{
-	char	*addon;
-	int		result;
-
-	addon = get_quote_input(vars);
-	if (!addon)
-	{
-		free(processed_cmd);
-		return (-1);
-	}
-	*processed_cmd = append_new_input(*processed_cmd, addon);
-	free(addon);
-	if (!*processed_cmd)
-		return (-1);
-	if (tokenize_to_test(*processed_cmd, vars) < 0)
-		return (-1);
-	if (vars->quote_depth > 0)
-		result = 1;
-	else
-		result = 0;
-	return (result);
 }
 
 /*
@@ -217,6 +153,8 @@ int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
 	free(temp);  // Free the old memory
 	// Re-tokenize with the completed command
 	cleanup_token_list(vars);
+	// For handle_unclosed_quotes()
+	DBG_PRINTF(DEBUG_TOKENIZE, "handle_unclosed_quotes: about to tokenize '%s'\n", *processed_cmd);
 	improved_tokenize(*processed_cmd, vars); 
 	return (1);
 }

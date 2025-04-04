@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:00:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:44:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,37 +14,37 @@
 
 
 // Helper function to restore standard file descriptors
-void reset_std_fd(t_pipe *pipeline)
+void reset_std_fd(t_pipe *pipes)
 {
-    if (!pipeline)
+    if (!pipes)
         return ;
         
-    if (pipeline->saved_stdin != -1)
+    if (pipes->saved_stdin != -1)
     {
-        dup2(pipeline->saved_stdin, STDIN_FILENO);
-        close(pipeline->saved_stdin);
-        pipeline->saved_stdin = -1;
+        dup2(pipes->saved_stdin, STDIN_FILENO);
+        close(pipes->saved_stdin);
+        pipes->saved_stdin = -1;
     }
     
-    if (pipeline->saved_stdout != -1)
+    if (pipes->saved_stdout != -1)
     {
-        dup2(pipeline->saved_stdout, STDOUT_FILENO);
-        close(pipeline->saved_stdout);
-        pipeline->saved_stdout = -1;
+        dup2(pipes->saved_stdout, STDOUT_FILENO);
+        close(pipes->saved_stdout);
+        pipes->saved_stdout = -1;
     }
     
     // Close heredoc fd if it was opened
-    if (pipeline->heredoc_fd > 2)
+    if (pipes->heredoc_fd > 2)
     {
-        close(pipeline->heredoc_fd);
-        pipeline->heredoc_fd = -1;
+        close(pipes->heredoc_fd);
+        pipes->heredoc_fd = -1;
     }
     
     // Close redirection fd if it was opened
-    if (pipeline->redirection_fd > 2)
+    if (pipes->redirection_fd > 2)
     {
-        close(pipeline->redirection_fd);
-        pipeline->redirection_fd = -1;
+        close(pipes->redirection_fd);
+        pipes->redirection_fd = -1;
     }
 }
 
@@ -80,7 +80,7 @@ Validates pipe node structure before execution.
 - Verifies node has proper type.
 Returns:
 1 if valid, 0 if invalid.
-Works with execute_pipeline() for error checking.
+Works with execute_pipes() for error checking.
 
 Example: Before executing "cmd1 | cmd2"
 - Checks that pipe node has TYPE_PIPE
@@ -106,7 +106,7 @@ Creates and sets up pipe for command communication.
 - Handles pipe creation errors.
 Returns:
 1 on success, 0 on failure.
-Works with execute_pipeline() for pipe setup.
+Works with execute_pipes() for pipe setup.
 
 Example: Before forking processes
 - Creates pipe with read and write ends
@@ -130,7 +130,7 @@ Executes left side of pipe in child process.
 - Executes left command or sub-pipeline.
 Returns:
 Never returns (calls exit).
-Works with execute_pipeline() for left command.
+Works with execute_pipes() for left command.
 
 Example: For "ls | grep txt"
 - Creates child process for "ls"
@@ -157,7 +157,7 @@ Executes right side of pipe in child process.
 - Executes right command or sub-pipeline.
 Returns:
 Never returns (calls exit).
-Works with execute_pipeline() for right command.
+Works with execute_pipes() for right command.
 
 Example: For "ls | grep txt"
 - Creates child process for "grep txt"
@@ -203,7 +203,7 @@ Creates child process for a pipeline command.
 - Executes specified command in child.
 Returns:
 Process ID on success, -1 on failure.
-Works with execute_pipeline() for process creation.
+Works with execute_pipes() for process creation.
 
 Example: Creating process for command in pipeline
 - Forks new process
@@ -320,14 +320,14 @@ Sets up and launches child processes for a pipeline.
 - Handles fork and pipe errors appropriately.
 Returns:
 0 on success with pids set, 1 on error.
-Works with run_pipeline() during pipeline execution.
+Works with run_pipes() during pipeline execution.
 
 Example: For "ls | grep txt" pipeline
 - Creates pipe between processes
 - Launches child processes for both commands
 - Sets process IDs in left_pid and right_pid
 */
-int	setup_pipeline_procs(t_node *pipe_node, t_vars *vars,
+int	setup_pipes_procs(t_node *pipe_node, t_vars *vars,
 	pid_t *left_pid, pid_t *right_pid)
 {
 	int	pipefd[2];
@@ -371,7 +371,7 @@ Example: For "ls -l | grep txt"
 - Waits for both commands to complete
 - Returns final execution status
 */
-int execute_pipeline(t_node *pipe_node, t_vars *vars)
+int execute_pipes(t_node *pipe_node, t_vars *vars)
 {
     int     pipefd[2];
     pid_t   left_pid;
@@ -469,18 +469,18 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
     int     result;
     char    *delimiter;
     
-    // Initialize pipeline structure if it doesn't exist
-    if (!vars->pipeline)
+    // Initialize pipes structure if it doesn't exist
+    if (!vars->pipes)
     {
-        vars->pipeline = init_pipeline();
-        if (!vars->pipeline)
+        vars->pipes = init_pipes();
+        if (!vars->pipes)
             return (vars->error_code = 1);
     }
     
-    // Save original stdin/stdout for restoration in pipeline struct
-    vars->pipeline->saved_stdin = dup(STDIN_FILENO);
-    vars->pipeline->saved_stdout = dup(STDOUT_FILENO);
-    if (vars->pipeline->saved_stdin == -1 || vars->pipeline->saved_stdout == -1)
+    // Save original stdin/stdout for restoration in pipes struct
+    vars->pipes->saved_stdin = dup(STDIN_FILENO);
+    vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+    if (vars->pipes->saved_stdin == -1 || vars->pipes->saved_stdout == -1)
         return (vars->error_code = 1);
         
     // Find and process input redirections
@@ -495,10 +495,10 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
             // Set up the input redirection
             if (current->type == TYPE_IN_REDIRECT)
             {
-                if (!setup_in_redir(current, &(vars->pipeline->redirection_fd), vars))
+                if (!setup_in_redir(current, &(vars->pipes->redirection_fd), vars))
                 {
                     // Restore file descriptors
-                    reset_std_fd(vars->pipeline);
+                    reset_std_fd(vars->pipes);
                     return (vars->error_code = 1);
                 }
             }
@@ -511,19 +511,19 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
                 else
                 {
                     // Restore file descriptors
-                    reset_std_fd(vars->pipeline);
+                    reset_std_fd(vars->pipes);
                     return (vars->error_code = 1);
                 }
                 
                 // Call read_heredoc with proper arguments
-                if (!read_heredoc(&(vars->pipeline->redirection_fd), delimiter, vars, 1))
+                if (!read_heredoc(&(vars->pipes->redirection_fd), delimiter, vars, 1))
                 {
                     // Restore file descriptors
-                    reset_std_fd(vars->pipeline);
+                    reset_std_fd(vars->pipes);
                     return (vars->error_code = 1);
                 }
                     
-                vars->pipeline->heredoc_fd = vars->pipeline->redirection_fd;
+                vars->pipes->heredoc_fd = vars->pipes->redirection_fd;
             }
         }
         current = current->next;
@@ -538,15 +538,15 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
             // Process quotes in the redirection filename
             process_quotes_in_redirect(current);
             
-            // Store append mode in the pipeline structure
-            vars->pipeline->append_mode = (current->type == TYPE_APPEND_REDIRECT);
-            vars->pipeline->current_redirect = current;
+            // Store append mode in the pipes structure
+            vars->pipes->append_mode = (current->type == TYPE_APPEND_REDIRECT);
+            vars->pipes->current_redirect = current;
             
             // Set up output redirection
-            if (!setup_out_redir(current, &(vars->pipeline->redirection_fd), vars->pipeline->append_mode))
+            if (!setup_out_redir(current, &(vars->pipes->redirection_fd), vars->pipes->append_mode))
             {
                 // Restore file descriptors
-                reset_std_fd(vars->pipeline);
+                reset_std_fd(vars->pipes);
                 return (vars->error_code = 1);
             }
         }
@@ -560,7 +560,7 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
     vars->error_code = result;
     
     // Restore original stdin/stdout
-    reset_std_fd(vars->pipeline);
+    reset_std_fd(vars->pipes);
     
     return vars->error_code;
 }
