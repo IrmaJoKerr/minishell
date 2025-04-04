@@ -1,0 +1,8 @@
+ls
+ls -l
+cd 123123
+clear
+cat << EOF
+This is a test
+for heredoc
+EOF

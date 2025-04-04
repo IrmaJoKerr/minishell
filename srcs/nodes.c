@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 08:13:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 17:37:02 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/03 09:43:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ Creates and links a new node in the token linked list.
 Returns:
 - 1 on success.
 - 0 on allocation failure.
-Works with lexerlist() during token list creation.
 
 Example: For token "echo"
 - Creates TYPE_CMD node with "echo" as data

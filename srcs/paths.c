@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   paths.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:08:49 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,10 @@ char	*try_path(char *path, char *cmd)
 
 	part_path = ft_strjoin(path, "/");
 	full_path = ft_strjoin(part_path, cmd);
-	ft_safefree((void **)&part_path);
+	free(part_path);
 	if (access(full_path, F_OK) == 0)
 		return (full_path);
-	ft_safefree((void **)&full_path);
+	free(full_path);
 	return (NULL);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 02:34:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 03:50:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,6 @@ Handles command execution status and updates error code.
 Returns:
 The final error code stored in vars->error_code.
 Works with exec_child_cmd() and execute_pipeline().
-
-Example: Child process terminated by SIGINT (signal 2)
-- Sets vars->error_code to 130 (128+2)
-- Returns 130
-OLD VERSION
-int	handle_cmd_status(int status, t_vars *vars)
-{
-	if (WIFEXITED(status))
-		vars->error_code = WEXITSTATUS(status);
-	else if (WIFSIGNALED(status))
-		vars->error_code = WTERMSIG(status) + 128;
-	return (vars->error_code);
-}
 */
 int handle_cmd_status(int status, t_vars *vars)
 {
@@ -62,76 +49,6 @@ Handles redirection setup for output files.
 Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
-OLD VERSION
-int	setup_out_redir(t_node *node, int *fd, int append)
-{
-	int	flags;
-
-	flags = O_WRONLY | O_CREAT;
-	if (append)
-		flags |= O_APPEND;
-	else
-		flags |= O_TRUNC;
-	*fd = open(node->right->args[0], flags, 0644);
-	if (*fd == -1)
-	{
-		perror("open");
-		return (0);
-	}
-	if (dup2(*fd, STDOUT_FILENO) == -1)
-	{
-		perror("dup2");
-		return (0);
-	}
-	return (1);
-}
-*/
-/*NEWER OLD VERSION
-int	setup_out_redir(t_node *node, int *fd, int append)
-{
-    char	*file;
-    char	*processed_file;
-    int		flags;
-    
-    // Handle possible NULL checks
-    if (!node || !node->right || !node->right->args || !node->right->args[0])
-        return (0);
-    // Get the filename from the node
-    file = node->right->args[0];
-    // Make a copy of the filename to process quotes
-    processed_file = ft_strdup(file);
-    if (!processed_file)
-        return (0);
-    // Process quotes in filename if present
-    process_quotes_in_arg(&processed_file);
-    // Set flags based on append mode
-    flags = O_WRONLY | O_CREAT;
-    if (append)
-        flags |= O_APPEND;
-    else
-        flags |= O_TRUNC;
-    // Open the file
-    *fd = open(processed_file, flags, 0644);
-    // Handle open errors
-    if (*fd == -1)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(processed_file, 2);
-        ft_putendl_fd(": Permission denied", 2);
-        ft_safefree((void **)&processed_file);
-        return (0);
-    }
-    // Redirect stdout to the file
-    if (dup2(*fd, STDOUT_FILENO) == -1)
-    {
-        close(*fd);
-        ft_safefree((void **)&processed_file);
-        return (0);
-    }
-    // Free the processed filename
-    ft_safefree((void **)&processed_file);
-    return (1);
-}
 */
 int setup_out_redir(t_node *node, int *fd, int append)
 {
@@ -181,125 +98,6 @@ Handles redirection setup for input files.
 Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
-OLD VERSION
-int	setup_in_redir(t_node *node, int *fd)
-{
-	*fd = open(node->right->args[0], O_RDONLY);
-	if (*fd == -1)
-	{
-		perror("open");
-		return (0);
-	}
-	if (dup2(*fd, STDIN_FILENO) == -1)
-	{
-		perror("dup2");
-		return (0);
-	}
-	return (1);
-}
-*/
-/*NEWER OLD VERSION
-int setup_in_redir(t_node *node, int *fd)
-{
-    char	*filename;
-    char	*processed_file;
-    
-    // Handle possible NULL checks
-    if (!node || !node->right || !node->right->args || !node->right->args[0])
-        return (0);
-    // Get the filename from the node
-    filename = node->right->args[0];
-    // Make a copy to process quotes
-    processed_file = ft_strdup(filename);
-    if (!processed_file)
-        return (0);
-    // Process quotes in filename if present - use existing function
-    process_quotes_in_arg(&processed_file);
-    // Open the file
-    *fd = open(processed_file, O_RDONLY);
-    // Handle open errors
-    if (*fd == -1)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(processed_file, 2);
-        ft_putendl_fd(": No such file or directory", 2);
-        ft_safefree((void **)&processed_file);
-        return (0);
-    }
-    // Redirect stdin to the file
-    if (dup2(*fd, STDIN_FILENO) == -1)
-    {
-        close(*fd);
-        ft_safefree((void **)&processed_file);
-        return (0);
-    }
-    // Free the processed filename
-    ft_safefree((void **)&processed_file);
-    return (1);
-}
-*/
-/*NEWER OLD VERSION
-int setup_in_redir(t_node *node, int *fd)
-{
-    char *filename;
-    
-    if (!node || !node->args || !node->args[0])
-        return (0);
-    
-    filename = node->args[0];
-    
-    // Open file for reading
-    *fd = open(filename, O_RDONLY);
-    if (*fd == -1)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(filename, 2);
-        ft_putendl_fd(": No such file or directory", 2);
-        return (0);
-    }
-    
-    // Redirect stdin to the file
-    if (dup2(*fd, STDIN_FILENO) == -1)
-    {
-        close(*fd);
-        return (0);
-    }
-    
-    return (1);
-}
-*/
-/*LATEST OLD VERSION
-int setup_in_redir(t_node *node, int *fd)
-{
-    char *filename;
-    
-    if (!node || !node->args || !node->args[0])
-        return (0);
-    
-    // Process quotes in filename before accessing it
-    process_quotes_in_redirect(node);
-    
-    filename = node->args[0];
-    
-    // Open file for reading
-    *fd = open(filename, O_RDONLY);
-    if (*fd == -1)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(filename, 2);
-        ft_putendl_fd(": No such file or directory", 2);
-        return (0);
-    }
-    
-    // Redirect stdin to the file
-    if (dup2(*fd, STDIN_FILENO) == -1)
-    {
-        close(*fd);
-        return (0);
-    }
-    
-    return (1);
-}
 */
 int setup_in_redir(t_node *node, int *fd, t_vars *vars)
 {
@@ -339,19 +137,6 @@ Sets up appropriate redirection based on node type.
 Returns:
 1 on success, 0 on failure.
 Works with exec_redirect_cmd().
-OLD VERSION
-int	setup_redirection(t_node *node, t_vars *vars, int *fd)
-{
-	if (node->type == TYPE_OUT_REDIRECT)
-		return (setup_out_redir(node, fd, 0));
-	else if (node->type == TYPE_APPEND_REDIRECT)
-		return (setup_out_redir(node, fd, 1));
-	else if (node->type == TYPE_IN_REDIRECT)
-		return (setup_in_redir(node, fd));
-	else if (node->type == TYPE_HEREDOC)
-		return (proc_heredoc(node, vars));
-	return (0);
-}
 */
 int setup_redirection(t_node *node, t_vars *vars, int *fd)
 {
@@ -449,6 +234,7 @@ int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
 	pid_t	pid;
 	int		status;
 
+	DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Command path='%s'\n", cmd_path);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -470,6 +256,7 @@ int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
 		ft_safefree((void **)&cmd_path);
 		return (handle_cmd_status(status, vars));
 	}
+	DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Args[0]='%s', Args[1]='%s'\n", node->args[0], node->args[1]);
 	return (0);
 }
 
@@ -498,48 +285,6 @@ int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
 }
 
 /*
-Executes a command node.
-- Handles pipeline commands separately.
-- Handles redirection commands separately.
-OLDER VERSION
-int	execute_cmd(t_node *node, char **envp, t_vars *vars)
-{
-	int		i;
-	char	*exit_code;
-
-	if (!node || !node->args || !node->args[0])
-		return (1);
-	if (!(is_builtin(node->args[0]) && ft_strcmp(node->args[0], "echo") == 0))
-	{
-		i = 0;
-		while (node->args && node->args[i])
-		{
-			if (node->arg_quote_type && node->arg_quote_type[i] == 1)
-			{
-				i++;
-				continue ;
-			}
-			if (ft_strcmp(node->args[i], "$?") == 0)
-			{
-				exit_code = ft_itoa(vars->error_code);
-				if (exit_code)
-				{
-					ft_safefree((void **)&node->args[i]);
-					node->args[i] = exit_code;
-				}
-			}
-			i++;
-		}
-	}
-	if (node->type == TYPE_PIPE)
-		return (execute_pipeline(node, vars));
-	if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT
-		|| node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
-		return (exec_redirect_cmd(node, envp, vars));
-	return (exec_std_cmd(node, envp, vars));
-}
-*/
-/*
 Main command execution function.
 - Handles all command types (builtin, external, redirections, pipes).
 - Ensures consistent error code handling in vars->error_code.
@@ -552,7 +297,7 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
     
     if (!node)
         return (vars->error_code = 1);
-        
+		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", node->type, node->args[0]);
     // Handle different node types
     if (node->type == TYPE_PIPE)
         result = execute_pipeline(node, vars);
@@ -610,7 +355,7 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
     if (pid < 0)
     {
         ft_putstr_fd("bleshell: fork failed\n", 2);
-        ft_safefree((void **)&cmd_path);
+        free(cmd_path);
         return (vars->error_code = 1);
     }
     
@@ -620,12 +365,12 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
         execve(cmd_path, node->args, envp);
         // If execve returns, an error occurred
         perror("bleshell");
-        ft_safefree((void **)&cmd_path);
+        free(cmd_path);
         exit(127);
     }
     
     // Parent process
-    ft_safefree((void **)&cmd_path);
+    free(cmd_path);
     waitpid(pid, &status, 0);
     
     // Handle exit status and update vars->error_code

@@ -3,24 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   tokenclass.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:28:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:27:51 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/03 09:21:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-Handles exit status token. Returns the exit status. Works with classify.
-*/
-char	*handle_exit_status(t_vars *vars)
-{
-	if (vars)
-		return (ft_itoa(vars->error_code));
-	return (ft_strdup("0"));
-}
+
 
 /*
 Handles redirection token classification and checking.
@@ -36,7 +28,7 @@ t_tokentype	redirection_type(char	*str, int mode, t_tokentype	type, int pos)
 			|| type == TYPE_APPEND_REDIRECT || type == TYPE_HEREDOC);
 	}
 	if (!str || !str[pos])
-		return (TYPE_STRING);
+		return (TYPE_ARGS);
 	if (!str[pos + 1])
 	{
 		if (str[pos] == '<')
@@ -58,7 +50,7 @@ Classify token type. Main controller function for token classification.
 t_tokentype	classify(char *str, int pos)
 {
 	if (!str || !str[pos])
-		return (TYPE_STRING);
+		return (TYPE_ARGS);
 	if (str[pos] == '-' && str[pos + 1] && str[pos + 1
 		] != '"' && str[pos + 1] != '\'')
 		return (TYPE_ARGS);
@@ -76,5 +68,5 @@ t_tokentype	classify(char *str, int pos)
 		return (TYPE_DOUBLE_QUOTE);
 	if (str[pos] == '\'')
 		return (TYPE_SINGLE_QUOTE);
-	return (TYPE_STRING);
+	return (TYPE_ARGS);
 }

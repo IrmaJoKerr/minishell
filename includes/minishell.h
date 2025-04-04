@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 04:10:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/04 07:42:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,18 @@
 # include <sys/wait.h>
 
 extern volatile sig_atomic_t	g_signal_received;
+
+// Debugging flags - can be enabled/disabled as needed
+#define DEBUG_TOKENIZE 1
+#define DEBUG_QUOTES 1
+#define DEBUG_ARGS 1
+#define DEBUG_EXPAND 1
+#define DEBUG_EXEC 1
+
+// Debug print macro for cleaner code
+#define DBG_PRINTF(flag, fmt, ...) \
+    do { if (flag) fprintf(stderr, "[%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__); } while (0)
+// Debug print macro for cleaner code
 
 /*
 HISTORY_FILE - Stores the history from previous session
@@ -55,7 +67,6 @@ These constants match the enum e_tokentype values.
 This enables easy conversion between enum and string.
 */
 # define TOKEN_TYPE_NULL			 "NULL"
-# define TOKEN_TYPE_STRING           "STRING"
 # define TOKEN_TYPE_CMD              "CMD"
 # define TOKEN_TYPE_ARGS             "ARGS"
 # define TOKEN_TYPE_DOUBLE_QUOTE     "\""
@@ -69,6 +80,25 @@ This enables easy conversion between enum and string.
 # define TOKEN_TYPE_EXIT_STATUS      "$?"
 
 /*
+This enum stores the possible token types.
+*/
+typedef enum e_tokentype
+{
+	TYPE_NULL = 1,
+	TYPE_CMD = 2,
+	TYPE_ARGS = 3,
+	TYPE_SINGLE_QUOTE = 4,
+	TYPE_DOUBLE_QUOTE = 5,
+	TYPE_HEREDOC = 6,
+	TYPE_IN_REDIRECT = 7,
+	TYPE_OUT_REDIRECT = 8,
+	TYPE_APPEND_REDIRECT = 9,
+	TYPE_EXPANSION = 10,
+	TYPE_PIPE = 11,
+	TYPE_EXIT_STATUS = 12,
+}	t_tokentype;
+
+/*
 This structure is used to store the context of quotes.
 Example: "'Hello 'world'!'" has 2 quotes, one single and one double.
 */
@@ -78,26 +108,6 @@ typedef struct s_quote_context
 	int		start_pos;
 	int		depth;
 }	t_quote_context;
-
-/*
-This enum stores the possible token types.
-*/
-typedef enum e_tokentype
-{
-	TYPE_NULL = 0,
-	TYPE_STRING = 1,
-	TYPE_CMD = 2,
-	TYPE_ARGS = 3,
-	TYPE_DOUBLE_QUOTE = 4,
-	TYPE_SINGLE_QUOTE = 5,
-	TYPE_HEREDOC = 6,
-	TYPE_IN_REDIRECT = 7,
-	TYPE_OUT_REDIRECT = 8,
-	TYPE_APPEND_REDIRECT = 9,
-	TYPE_EXPANSION = 10,
-	TYPE_PIPE = 11,
-	TYPE_EXIT_STATUS = 12,
-}	t_tokentype;
 
 /*
 Node structure for linked list and AST.
@@ -207,6 +217,7 @@ typedef struct s_vars
 	char			**env;
 	t_quote_context	quote_ctx[32];
 	int				quote_depth;
+	char			*partial_input;
 	int				pos;
 	int				start;
 	int				shell_level;
@@ -232,7 +243,6 @@ In builtin_echo.c
 */
 int			builtin_echo(char **args, t_vars *vars);
 int			process_echo_args(char **args, int start, int nl_flag);
-int			print_exit_status(char **args, t_vars *vars, int *i, int *newline);
 
 /*
 Builtin "env" command. Outputs the environment variables.
@@ -330,7 +340,6 @@ void		convert_strs_to_cmds(t_vars *vars);
 void		del_list_node(t_node *node);
 int			is_special_token(t_node *token);
 void		handle_quoted_arg(t_node *cmd_node, t_node *quote_token);
-int			is_operator_token(t_node *token);
 void		link_strargs_to_cmds(t_vars *vars);
 // void		debug_print_pipe_info(t_node *pipe_node, char *position_msg);
 void		link_addon_pipe(t_node *last_pipe,
@@ -415,10 +424,10 @@ char		*chk_exitstatus(t_vars *vars);
 char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
-char		*append_char(char *str, char c);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
 // int			expand_one_arg(char **arg, t_vars *vars);
 void		expand_cmd_args(t_node *node, t_vars *vars);
+void 		debug_cmd_args(t_node *node);
 
 /*
 Heredoc checking and utility functions.
@@ -522,23 +531,20 @@ int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars,
 char		*get_quote_input(t_vars *vars);
 int			chk_quotes_closed(char **processed_cmd, t_vars *vars);
 int			quotes_are_closed(const char *str);
-int			handle_unclosed_quotes(char **processed_cmd, t_vars *vars);
-char		*append_input(const char *first, const char *second);
+int 		handle_unclosed_quotes(char **processed_cmd, t_vars *vars);
+char		*append_input(char *original, char *additional);
 
 /*
 Input verification functions.
 In input_verify.c
 */
 int			tokenize_to_test(char *input, t_vars *vars);
-int			process_input_addons(char **processed_cmd,
-				t_vars *vars, t_ast *ast);
 int			chk_pipe_before_cmd(t_vars *vars, t_ast *ast);
 int			chk_serial_pipes(t_vars *vars, t_ast *ast);
-int			chk_syntax_errors(t_vars *vars);
 int			chk_input_valid(t_vars *vars, char **input);
-char		*verify_input(char *input, t_vars *vars);
-int			count_tokens(t_node *head);
-int			prepare_input(char *input, t_vars *vars, char **processed_cmd);
+// char		*verify_input(char *input, t_vars *vars);
+void		process_expansions(t_vars *vars);
+t_node		*find_preceding_cmd(t_node *head, t_node *exp_node);
 char		*join_with_newline(char *first, char *second);
 char		*append_new_input(char *first, char *second);
 
@@ -560,23 +566,23 @@ void		handle_quote_content(char *str, t_vars *vars, int *first_token);
 char		*lexing_unclosed_quo(char *input, t_vars *vars);
 void		handle_expansion_token(char *str, t_vars *vars, int *first_token);
 void		handle_token_boundary(char *str, t_vars *vars, int *first_token);
-void		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
+void 		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
 void		handle_operator_token(char *str, t_vars *vars, int *first_token);
 void		handle_token(char *str, t_vars *vars);
-void		lexerlist(char *str, t_vars *vars);
 
 /*
 Minishell program entry point functions.
 In minishell.c
 */
+void		print_tokens(t_node *head);
 char		*reader(void);
 void		setup_env(t_vars *vars, char **envp);
 void		init_shell(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
 char		*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk);
 void		build_and_execute(t_vars *vars);
-char		*process_input_tokens(char *command, t_vars *vars);
-char		*process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars);
+int 		process_input_tokens(char *command, t_vars *vars);
+char		*process_pipe_syntax(char *command, t_vars *vars);
 int			process_command(char *command, t_vars *vars);
 int			main(int ac, char **av, char **envp);
 
@@ -593,11 +599,14 @@ void		redirection_node(t_node *root, t_node *redir_node);
 Operator handling.
 In operators.c
 */
-int			operators(char *input, int i, int token_start, t_vars *vars);
-int			handle_string(char *input, int i, int token_start, t_vars *vars);
-t_tokentype	get_operator_type(char op);
-int			handle_single_operator(char *input, int i, t_vars *vars);
-int			handle_double_operator(char *input, int i, t_vars *vars);
+int			operators(char *input, t_vars *vars);
+void		handle_string(char *input, t_vars *vars);
+int			is_operator_token(t_tokentype type);
+int			is_single_token(char *input, int pos, int *advance);
+int			is_double_token(char *input, int pos, int *advance);
+t_tokentype	get_token_at(char *input, int pos, int *advance);
+int			handle_single_operator(char *input, t_vars *vars);
+int			handle_double_operator(char *input, t_vars *vars);
 
 /*
 Path finding functions.
@@ -659,13 +668,18 @@ t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
 Quote handling.
 In quotes.c
 */
-void		handle_quotes(char *input, int *pos, t_vars *vars);
+int 		validate_quotes(char *input, t_vars *vars);
+char 		*complete_quoted_input(t_vars *vars, char *original_input);
+void		make_quote_token(char *input, t_vars *vars);
+void		handle_quotes(char *input, t_vars *vars);
 char		*fix_open_quotes(char *input, t_vars *vars);
 char		*read_quoted_content(char *input, int *pos, char quote);
 void		strip_quotes(char **str_ptr, char quote_char);
 void		process_quotes_in_arg(char **arg);
 int			scan_for_endquote(char *str, int *pos, char quote_char);
 void		valid_quote_token(char *str, t_vars *vars, int *pos, int start);
+int			skip_quoted_content(char *input, int *pos, char quote_char);
+void 		process_quotes_and_expansions(t_vars *vars);
 
 /*
 Rediretion AST node handling.
@@ -730,10 +744,15 @@ In tokenize_utils.c
 Tokenizing functions.
 In tokenize.c
 */
-void		maketoken(char *token, t_vars *vars);
+int			process_quoted_content(char *input, int *i, t_vars *vars);
+void 		set_token_type(t_vars *vars, char *input);
+void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 t_node		*find_last_command(t_node *head);
 int			handle_expand(t_vars *vars);
 int			process_special_char(char *input, int *i, t_vars *vars);
+// int 		is_adjacent_expansion(char *input, int pos);
+int 		is_adjacent_token(char *input, int pos);
+int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
 int			process_expand_char(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
@@ -741,14 +760,13 @@ void		process_char(char *input, int *i, t_vars *vars);
 int			scan_quote_position(char *str, int *pos, char quote_char);
 void		create_quote_token(char *str, t_vars *vars, int *pos, int start);
 void		handle_quote_token(char *str, t_vars *vars, int *pos);
-void		handle_redirection(char *input, int *i, t_vars *vars);
-void		tokenize(char *input, t_vars *vars);
+int			handle_redirection(char *input, int *pos, t_vars *vars);
+int		improved_tokenize(char *input, t_vars *vars);
 void		process_other_token(char *input, t_vars *vars);
 t_node		*make_cmdnode(char *token);
 t_node		*new_cmd_node(char *token);
 t_node		*new_other_node(char *token, t_tokentype type);
 void		build_token_linklist(t_vars *vars, t_node *node);
-void		process_cmd_token(char *input, t_vars *vars);
 int			is_flag_arg(char **args, int i);
 void		join_flag_args(char **args, int i);
 t_node		*build_cmdarg_node(char **args);
@@ -758,9 +776,7 @@ void		process_args_tokens(char **args);
 Type conversion functions.
 In typeconvert.c
 */
-const char	*get_token_str_basic(t_tokentype type);
-const char	*get_token_str(t_tokentype type);
-t_tokentype	get_token_type_basic(const char *str);
-t_tokentype	get_token_type(const char *str);
+char	*get_token_str_basic(t_tokentype type);
+char	*get_token_str(t_tokentype type);
 
 #endif

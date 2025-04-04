@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   shell_level.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 14:19:12 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:12:35 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:38:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,21 +63,14 @@ int	update_shlvl_env(char **env, int position, int new_level)
 	if (!new_shlvl)
 		return (1);
 	new_env_entry = ft_strjoin("SHLVL=", new_shlvl);
-	ft_safefree((void **)&new_shlvl);
+	free(new_shlvl);
 	if (!new_env_entry)
 		return (1);
-	ft_safefree((void **)&env[position]);
+	free(env[position]);
 	env[position] = new_env_entry;
 	return (0);
 }
 
-/*
-Increments the shell level environment variable (SHLVL) by 1.
-Updates the value in the environment and in vars->shell_level.
-Return:
-- 0 on success.
-- 1 on failure.
-*/
 /*
 Increments the shell level environment variable (SHLVL) by 1.
 Updates the value in the environment and in vars->shell_level.

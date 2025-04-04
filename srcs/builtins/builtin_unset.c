@@ -3,19 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:06 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 17:13:51 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 04:12:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Builtin unset command - removes variables from environment.
-Returns 0 on success, 1 on failure.
-*/
+ * Built-in command: unset. Removes variables from environment.
+ * Handles valid identifiers according to POSIX rules.
+ * Returns 0 on success, 1 on failure.
+ */
 int	builtin_unset(char **args, t_vars *vars)
 {
 	int	i;
@@ -55,7 +56,7 @@ int	set_next_pos(int changes, char **env, int pos)
 	if (changes == -1)
 	{
 		ptr = (void *)env[pos];
-		ft_safefree(&ptr);
+		free(ptr);
 		return (pos + 1);
 	}
 	else if (changes == 1)
@@ -131,6 +132,6 @@ void	modify_env(char ***env, int changes, char *var)
 		return ;
 	new_env = realloc_until_var(changes, *env, var, count);
 	ptr = (void *)*env;
-	ft_safefree(&ptr);
+	free(ptr);
 	*env = new_env;
 }

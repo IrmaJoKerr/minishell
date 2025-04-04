@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_verify.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:30:56 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 04:14:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,32 +27,7 @@ int	tokenize_to_test(char *input, t_vars *vars)
 	vars->head = NULL;
 	vars->current = NULL;
 	init_quote_context(vars);
-	tokenize(input, vars);
-	return (0);
-}
-
-/*
-Process input modifications for quotes and pipes.
-Handles unclosed quotes and pipes at the end.
-Returns:
-- 1 if input was modified and needs to be re-processed
-- 0 if no modifications were needed
-- -1 on error
-*/
-int	process_input_addons(char **processed_cmd, t_vars *vars, t_ast *ast)
-{
-	int	addon_result;
-
-	addon_result = handle_unclosed_quotes(processed_cmd, vars);
-	if (addon_result < 0)
-		return (-1);
-	if (addon_result > 0)
-		return (1);
-	addon_result = handle_unfinished_pipes(processed_cmd, vars, ast);
-	if (addon_result < 0)
-		return (-1);
-	if (addon_result > 0)
-		return (1);
+	improved_tokenize(input, vars);
 	return (0);
 }
 
@@ -111,84 +86,92 @@ int	chk_serial_pipes(t_vars *vars, t_ast *ast)
 }
 
 /*
-Check for syntax errors in the input.
-Returns:
-  0 - No syntax errors
-  1 - Syntax error detected
-*/
-int	chk_syntax_errors(t_vars *vars)
+ * Processes expansion tokens in the token list
+ * Finds the command each expansion belongs to
+ * Expands variables and adds them as arguments
+ * Removes the expansion tokens when done
+ */
+void	process_expansions(t_vars *vars)
 {
-	t_ast	*ast;
+    t_node *current = vars->head;
+    char *var_name;
+    char *expanded_value;
+    t_node *cmd_node;
 
-	ast = init_ast_struct();
-	if (!ast)
-		return (1);
-	if (chk_pipe_before_cmd(vars, ast))
-	{
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-		vars->error_code = 258;
-		cleanup_ast_struct(ast);
-		cleanup_token_list(vars);
-		return (1);
-	}
-	if (chk_serial_pipes(vars, ast))
-	{
-		ft_putstr_fd("bleshell: syntax error near unexpected token `|'\n", 2);
-		vars->error_code = 258;
-		cleanup_ast_struct(ast);
-		cleanup_token_list(vars);
-		return (1);
-	}
-	cleanup_ast_struct(ast);
-	return (0);
+    DBG_PRINTF(DEBUG_EXPAND, "Starting process_expansions\n");
+    while (current)
+    {
+        DBG_PRINTF(DEBUG_EXPAND, "process_expansions: Node type=%d, content='%s'\n", current->type, current->args[0]);
+        if (current->type == TYPE_EXPANSION || current->type == TYPE_EXIT_STATUS)
+        {
+            DBG_PRINTF(DEBUG_EXPAND, "Found expansion token\n");
+            // Extract variable name from token (skip the $ prefix)
+            var_name = current->args[0] + 1;
+            DBG_PRINTF(DEBUG_EXPAND, "Variable name: %s\n", var_name);
+            // Special case for $?
+            if (ft_strcmp(var_name, "?") == 0)
+            {
+                expanded_value = ft_itoa(vars->error_code);
+                DBG_PRINTF(DEBUG_EXPAND, "Expanding $? to value: %s\n", expanded_value);
+            }
+            else
+            {
+                expanded_value = get_env_val(var_name, vars->env);
+                DBG_PRINTF(DEBUG_EXPAND, "Expanding $%s to value: %s\n", var_name, expanded_value);
+            }
+            if (!expanded_value)
+            {
+                expanded_value = ft_strdup("");
+                DBG_PRINTF(DEBUG_EXPAND, "Variable not found, setting to empty string\n");
+            } 
+            DBG_PRINTF(DEBUG_EXPAND, "Replacing token content with expanded value: %s\n", expanded_value);
+            
+            // Find the preceding command node
+            cmd_node = find_preceding_cmd(vars->head, current);
+            if (cmd_node)
+            {
+                append_arg(cmd_node, expanded_value, 0); // Append to command node
+                DBG_PRINTF(DEBUG_EXPAND, "Appended '%s' to command '%s'\n", expanded_value, cmd_node->args[0]);
+            }
+            else
+            {
+                DBG_PRINTF(DEBUG_EXPAND, "No command node found for expansion\n");
+                free(expanded_value);
+            }
+            
+            // Clean up the expansion node
+            free(current->args[0]);
+            free(expanded_value);
+            current->type = TYPE_ARGS; // Change type to ARGS
+            DBG_PRINTF(DEBUG_EXPAND, "Token type changed to TYPE_ARGS\n");
+            
+        }
+        current = current->next;
+    }
+    DBG_PRINTF(DEBUG_EXPAND, "Ending process_expansions\n");
 }
 
 /*
-Counts the number of tokens in a token list.
-Used for debugging memory management.DEBUGGING REMOVE LATER
+Finds the command node that precedes a given expansion node
+Used to determine which command an expansion belongs to
+Returns the command node or NULL if none found
 */
-int	count_tokens(t_node *head)
+t_node	*find_preceding_cmd(t_node *head, t_node *exp_node)
 {
-	int		count;
-	t_node	*current;
-
-	count = 0;
-	current = head;
-	while (current)
+	t_node *current = head;
+	t_node *last_cmd = NULL;
+	 
+	// Loop through nodes until we reach the expansion node
+	while (current && current != exp_node)
 	{
-		count++;
+		if (current->type == TYPE_CMD)
+			last_cmd = current;
+		// If we find a pipe, reset the command context
+		if (current->type == TYPE_PIPE)
+			last_cmd = NULL;		 
 		current = current->next;
-	}
-	return (count);
-}
-
-/*
-Prepare input for execution by validating and building tokens.
-Handles token list cleanup, input verification, and syntax checking.
-Returns:
-- 0 if preparation was successful
-- 1 if an error occurred
-*/
-int	prepare_input(char *input, t_vars *vars, char **processed_cmd)
-{
-	cleanup_token_list(vars);
-	if (vars->pipeline)
-		vars->pipeline->cmd_count = 0;
-	*processed_cmd = verify_input(input, vars);
-	if (!*processed_cmd)
-		return (1);
-	print_error("Processing input", NULL, 0);
-	tokenize(*processed_cmd, vars);
-	lexerlist(*processed_cmd, vars);
-	if (chk_syntax_errors(vars))
-	{
-		ft_safefree((void **)processed_cmd);
-		vars->head = NULL;
-		vars->current = NULL;
-		return (1);
-	}
-	print_error("Tokens processed successfully", NULL, 0);
-	return (0);
+	} 
+	return last_cmd;
 }
 
 int	chk_input_valid(t_vars *vars, char **input)
@@ -215,8 +198,8 @@ int	chk_input_valid(t_vars *vars, char **input)
 		result = handle_pipe_valid(*input, vars, 0);
 		if (result && result != *input)
 		{
-			ft_safefree((void **)input);
-			*input = result;
+			free(*input);  // Free the memory pointed to by *input
+			*input = result;  // Now update the pointer
 			modified = 1;
 		}
 	}
@@ -239,20 +222,18 @@ char	*verify_input(char *input, t_vars *vars)
 		return (NULL);
 	modified = 0;
 	cleanup_token_list(vars);
-	tokenize(complete_input, vars);
-	lexerlist(complete_input, vars);
+	improved_tokenize(complete_input, vars);
 	while (vars->quote_depth > 0 || !is_input_complete(vars))
 	{
 		modified = chk_input_valid(vars, &complete_input);
 		if (!complete_input)
 			return (NULL);
 		cleanup_token_list(vars);
-		tokenize(complete_input, vars);
-		lexerlist(complete_input, vars);
+		improved_tokenize(complete_input, vars);
 	}
 	if (!modified)
 	{
-		ft_safefree((void **)&complete_input);
+		free(complete_input);
 		return (input);
 	}
 	return (complete_input);
@@ -269,11 +250,11 @@ char	*join_with_newline(char *first, char *second)
 	char	*result;
 
 	with_newline = ft_strjoin(first, "\n");
-	ft_safefree((void **)&first);
+	free(first);
 	if (!with_newline)
 		return (NULL);
 	result = ft_strjoin(with_newline, second);
-	ft_safefree((void **)&with_newline);
+	free(with_newline);
 	return (result);
 }
 

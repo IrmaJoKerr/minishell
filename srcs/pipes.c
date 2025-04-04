@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 03:09:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 04:00:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,15 +86,6 @@ Example: Before executing "cmd1 | cmd2"
 - Checks that pipe node has TYPE_PIPE
 - Verifies left branch (cmd1) exists
 - Verifies right branch (cmd2) exists
-OLD VERSION
-int	validate_pipe_node(t_node *pipe_node)
-{
-    if (!pipe_node || pipe_node->type != TYPE_PIPE)
-        return (0);
-    if (!pipe_node->left || !pipe_node->right)
-        return (0);
-    return (1);
-}
 */
 int	validate_pipe_node(t_node *pipe_node)
 {
@@ -252,9 +243,9 @@ void	reset_done_pipes(t_ast *ast, char **pipe_cmd, char **result,
 	if (ast)
 		cleanup_ast_struct(ast);
 	if ((free_flags & 1) && pipe_cmd && *pipe_cmd)
-		ft_safefree((void **)pipe_cmd);
+		free(*pipe_cmd);
 	if ((free_flags & 2) && result && *result)
-		ft_safefree((void **)result);
+		free(*result);
 }
 
 /*
@@ -276,14 +267,14 @@ int	prep_pipe_complete(char *cmd, char **result, char **pipe_cmd, t_ast **ast)
 	*pipe_cmd = ft_strdup(*result);
 	if (!*pipe_cmd)
 	{
-		ft_safefree((void **)result);
+		free(*result);
 		return (-1);
 	}
 	*ast = init_ast_struct();
 	if (!*ast)
 	{
-		ft_safefree((void **)result);
-		ft_safefree((void **)pipe_cmd);
+		free(*result);
+		free(*pipe_cmd);
 		return (-1);
 	}
 	return (1);
@@ -379,134 +370,16 @@ Example: For "ls -l | grep txt"
 - Sets up pipeline processes
 - Waits for both commands to complete
 - Returns final execution status
-OLDER WORKING VERSION
-int	execute_pipeline(t_node *pipe_node, t_vars *vars)
-{
-	int		pipefd[2];
-	pid_t	pid1;
-	pid_t	pid2;
-	int		status1;
-	int		status2;
-
-	if (!validate_pipe_node(pipe_node))
-		return (1);
-	if (!setup_pipe(pipefd))
-		return (1);
-	pid1 = fork();
-	if (pid1 < 0)
-	{
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return (1);
-	}
-	if (pid1 == 0)
-	{
-		exec_left_cmd(pipe_node, pipefd, vars);
-		exit(1);
-	}
-	pid2 = fork();
-	if (pid2 < 0)
-	{
-		close(pipefd[0]);
-		close(pipefd[1]);
-		return (1);
-	}
-	if (pid2 == 0)
-	{
-		exec_right_cmd(pipe_node, pipefd, vars);
-		exit(1);
-	}
-	close(pipefd[0]);
-	close(pipefd[1]);
-	waitpid(pid1, &status1, 0);
-	waitpid(pid2, &status2, 0);
-	return (WEXITSTATUS(status2));
-}
-*/
-/*NEWER OLD VERSION
-int execute_pipeline(t_node *pipe_node, t_vars *vars)
-{
-    int		pipefd[2];
-    pid_t	left_pid;
-    pid_t	right_pid;  // Fixed typo in pid_t declaration
-    int		status;
-    
-    status = 0;
-    if (!pipe_node || pipe_node->type != TYPE_PIPE)
-        return (1);
-    // Create the pipe
-    if (pipe(pipefd) == -1)
-    {
-        print_error("pipe creation failed", vars, 1);
-        return (1);
-    }
-    // Execute left side of pipe
-    left_pid = fork();
-    if (left_pid == 0)
-    {
-        // Child process for left command
-        close(pipefd[0]);  // Close read end
-        // Redirect stdout to pipe
-        if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-            exit(1);
-        close(pipefd[1]);  // Close original write end
-        // Handle any redirections in the left command
-        t_node *left_cmd = pipe_node->left;
-        setup_cmd_redirects(left_cmd, vars);
-        // Execute the left command
-        int result = execute_cmd(left_cmd, vars->env, vars);
-        exit(result);
-    }
-    else if (left_pid < 0)
-    {
-        print_error("fork failed", vars, 1);
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return (1);
-    }
-    // Execute right side of pipe
-    right_pid = fork();
-    if (right_pid == 0)
-    {
-        // Child process for right command
-        close(pipefd[1]);  // Close write end
-        // Redirect stdin to pipe
-        if (dup2(pipefd[0], STDIN_FILENO) == -1)
-            exit(1);
-        close(pipefd[0]);  // Close original read end
-        // Handle any redirections in the right command
-        t_node *right_cmd = pipe_node->right;
-        setup_cmd_redirects(right_cmd, vars);
-        // Execute the right command
-        int result = execute_cmd(right_cmd, vars->env, vars);
-        exit(result);
-    }
-    else if (right_pid < 0)
-    {
-        print_error("fork failed", vars, 1);
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return (1);
-    }
-    // Parent process
-    close(pipefd[0]);
-    close(pipefd[1]);
-    // Wait for both processes
-    waitpid(left_pid, &status, 0);
-    waitpid(right_pid, &status, 0);
-    
-    return (handle_cmd_status(status, vars));
-}
 */
 int execute_pipeline(t_node *pipe_node, t_vars *vars)
 {
     int     pipefd[2];
     pid_t   left_pid;
     pid_t   right_pid;
-	int		left_status;
-	int		right_status = 0;
+    int     left_status;
+    int     right_status;
     
-	left_status = 0;
+    left_status = 0;
 	right_status = 0;
     if (!pipe_node || pipe_node->type != TYPE_PIPE)
         return (1);
@@ -565,20 +438,6 @@ int execute_pipeline(t_node *pipe_node, t_vars *vars)
         close(pipefd[1]);
         return (1);
     }
-    
-    // // Parent process
-    // close(pipefd[0]);
-    // close(pipefd[1]);
-    
-    // // Wait for left process (but don't use its status)
-    // waitpid(left_pid, NULL, 0);
-    
-    // // Wait for right process and use its status
-    // waitpid(right_pid, &status, 0);
-    
-    // // Return the status of the right (last) command in the pipeline
-    // return (handle_cmd_status(status, vars));
-	// Parent process
     close(pipefd[0]);
     close(pipefd[1]);
     
@@ -596,344 +455,6 @@ int execute_pipeline(t_node *pipe_node, t_vars *vars)
     return (vars->error_code);
 }
 
-/*
-Sets up all redirections associated with a command node.
-- Traverses through command's redirection nodes.
-- Sets up each redirection (in, out, append, heredoc).
-- Handles error reporting for failed redirections.
-Returns:
-1 on success, 0 on failure.
-Works with execute_pipeline() to handle command redirections.
-
-Example: For "cmd < infile > outfile":
-- Sets up input redirection from "infile"
-- Sets up output redirection to "outfile"
-- Returns 1 if all redirections succeed
-*/
-/*
-Sets up all redirections for a command and executes it.
-- Processes all input redirections first.
-- Then processes all output redirections.
-- Finally executes the command with properly set up streams.
-Returns:
-Command execution status code.
-Works with execute_pipeline() for handling redirections in pipes.
-*/
-/*
-Sets up all redirections for a command and executes it.
-- Processes all input redirections first.
-- Then processes all output redirections.
-- Finally executes the command with properly set up streams.
-Returns:
-Command execution status code.
-Works with execute_pipeline() for handling redirections in pipes.
-*/
-/*OLD VERSION
-int	setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
-{
-    t_node	*current;
-    int		redirection_fd;
-    int		result;
-    char    *delimiter;
-    
-    // Initialize pipeline structure if it doesn't exist
-    if (!vars->pipeline)
-    {
-        vars->pipeline = (t_pipe *)malloc(sizeof(t_pipe));
-        if (!vars->pipeline)
-            return (1);
-        vars->pipeline->saved_stdin = -1;
-        vars->pipeline->saved_stdout = -1;
-        vars->pipeline->heredoc_fd = -1;
-    }
-    
-    // Save original stdin/stdout for restoration in pipeline struct
-    vars->pipeline->saved_stdin = dup(STDIN_FILENO);
-    vars->pipeline->saved_stdout = dup(STDOUT_FILENO);
-    if (vars->pipeline->saved_stdin == -1 || vars->pipeline->saved_stdout == -1)
-        return (1);
-        
-    // Find and process input redirections
-    current = find_linked_redirects(cmd_node, vars);
-    while (current)
-    {
-        if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
-        {
-            // Process quotes in the redirection filename
-            process_quotes_in_redirect(current);
-            
-            // Set up the input redirection
-            if (current->type == TYPE_IN_REDIRECT)
-            {
-                if (!setup_in_redir(current, &redirection_fd))
-                    return (1);
-            }
-            else if (current->type == TYPE_HEREDOC)
-            {
-                // Extract delimiter from the heredoc node
-                delimiter = NULL;
-                if (current->args && current->args[0])
-                    delimiter = current->args[0];
-                else
-                    return (1); // Error: missing delimiter
-                
-                // Call read_heredoc with proper arguments
-                if (!read_heredoc(&redirection_fd, delimiter, vars, 1))
-                    return (1);
-                    
-                vars->pipeline->heredoc_fd = redirection_fd;
-            }
-        }
-        current = current->next;
-    }
-    
-    // Find and process output redirections
-    current = find_linked_redirects(cmd_node, vars);
-    while (current)
-    {
-        if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
-        {
-            // Process quotes in the redirection filename
-            process_quotes_in_redirect(current);
-            
-            // Store append mode in the pipeline structure
-            vars->pipeline->append_mode = (current->type == TYPE_APPEND_REDIRECT);
-            vars->pipeline->current_redirect = current;
-            
-            // Set up output redirection
-            if (!setup_out_redir(current, &redirection_fd, vars->pipeline->append_mode))
-                return (1);
-        }
-        current = current->next;
-    }
-    
-    // Execute the command
-    result = execute_cmd(cmd_node, vars->env, vars);
-    
-    // Restore original stdin/stdout
-    if (vars->pipeline->saved_stdin != -1)
-    {
-        dup2(vars->pipeline->saved_stdin, STDIN_FILENO);
-        close(vars->pipeline->saved_stdin);
-        vars->pipeline->saved_stdin = -1;
-    }
-    
-    if (vars->pipeline->saved_stdout != -1)
-    {
-        dup2(vars->pipeline->saved_stdout, STDOUT_FILENO);
-        close(vars->pipeline->saved_stdout);
-        vars->pipeline->saved_stdout = -1;
-    }
-    
-    // Close heredoc fd if it was opened
-    if (vars->pipeline->heredoc_fd > 2)
-    {
-        close(vars->pipeline->heredoc_fd);
-        vars->pipeline->heredoc_fd = -1;
-    }
-    
-    return (result);
-}
-*/
-/*NEWER OLD VERSION
-int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
-{
-    t_node *current;
-    int saved_stdin, saved_stdout;
-    
-    // Save original stdin/stdout
-    saved_stdin = dup(STDIN_FILENO);
-    saved_stdout = dup(STDOUT_FILENO);
-    
-    if (saved_stdin == -1 || saved_stdout == -1)
-        return (1);
-        
-    // Find related redirection nodes
-    current = find_linked_redirects(cmd_node, vars);
-    
-    // First handle all input redirections (< and <<)
-    while (current)
-    {
-        if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
-        {
-            // Process quotes in filename
-            process_quotes_in_redirect(current);
-            
-            int fd;
-            if (current->type == TYPE_IN_REDIRECT)
-            {
-                if (!setup_in_redir(current, &fd))
-                {
-                    // Restore stdin/stdout and return error
-                    dup2(saved_stdin, STDIN_FILENO);
-                    dup2(saved_stdout, STDOUT_FILENO);
-                    close(saved_stdin);
-                    close(saved_stdout);
-                    return (1);
-                }
-            }
-            else // TYPE_HEREDOC
-            {
-                // Handle heredoc
-                if (!read_heredoc(&fd, current->args[0], vars, 1))
-                {
-                    // Restore stdin/stdout and return error
-                    dup2(saved_stdin, STDIN_FILENO);
-                    dup2(saved_stdout, STDOUT_FILENO);
-                    close(saved_stdin);
-                    close(saved_stdout);
-                    return (1);
-                }
-            }
-            close(fd); // Close fd after redirecting
-        }
-        current = current->next;
-    }
-    
-    // Then handle all output redirections (> and >>)
-    current = find_linked_redirects(cmd_node, vars);
-    while (current)
-    {
-        if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
-        {
-            // Process quotes in filename
-            process_quotes_in_redirect(current);
-            
-            int fd;
-            if (!setup_out_redir(current, &fd, 
-                                current->type == TYPE_APPEND_REDIRECT))
-            {
-                // Restore stdin/stdout and return error
-                dup2(saved_stdin, STDIN_FILENO);
-                dup2(saved_stdout, STDOUT_FILENO);
-                close(saved_stdin);
-                close(saved_stdout);
-                return (1);
-            }
-            close(fd); // Close fd after redirecting
-        }
-        current = current->next;
-    }
-    
-    // Execute command
-    int result = execute_cmd(cmd_node, vars->env, vars);
-    
-    // Restore stdin/stdout
-    dup2(saved_stdin, STDIN_FILENO);
-    dup2(saved_stdout, STDOUT_FILENO);
-    close(saved_stdin);
-    close(saved_stdout);
-    
-    return (result);
-}
-*/
-/*NEWEST OLD VERSION
-int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
-{
-    t_node  *current;
-    int     redirection_fd;
-    int     result;
-    char    *delimiter;
-    
-    // Initialize pipeline structure if it doesn't exist
-    if (!vars->pipeline)
-    {
-        vars->pipeline = (t_pipe *)malloc(sizeof(t_pipe));
-        if (!vars->pipeline)
-            return (1);
-        vars->pipeline->saved_stdin = -1;
-        vars->pipeline->saved_stdout = -1;
-        vars->pipeline->heredoc_fd = -1;
-    }
-    
-    // Save original stdin/stdout for restoration in pipeline struct
-    vars->pipeline->saved_stdin = dup(STDIN_FILENO);
-    vars->pipeline->saved_stdout = dup(STDOUT_FILENO);
-    if (vars->pipeline->saved_stdin == -1 || vars->pipeline->saved_stdout == -1)
-        return (1);
-        
-    // Find and process input redirections
-    current = find_linked_redirects(cmd_node, vars);
-    while (current)
-    {
-        if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
-        {
-            // Process quotes in the redirection filename
-            process_quotes_in_redirect(current);
-            
-            // Set up the input redirection
-            if (current->type == TYPE_IN_REDIRECT)
-            {
-                if (!setup_in_redir(current, &redirection_fd))
-                    return (1);
-            }
-            else if (current->type == TYPE_HEREDOC)
-            {
-                // Extract delimiter from the heredoc node
-                delimiter = NULL;
-                if (current->args && current->args[0])
-                    delimiter = current->args[0];
-                else
-                    return (1); // Error: missing delimiter
-                
-                // Call read_heredoc with proper arguments
-                if (!read_heredoc(&redirection_fd, delimiter, vars, 1))
-                    return (1);
-                    
-                vars->pipeline->heredoc_fd = redirection_fd;
-            }
-        }
-        current = current->next;
-    }
-    
-    // Find and process output redirections
-    current = find_linked_redirects(cmd_node, vars);
-    while (current)
-    {
-        if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
-        {
-            // Process quotes in the redirection filename
-            process_quotes_in_redirect(current);
-            
-            // Store append mode in the pipeline structure
-            vars->pipeline->append_mode = (current->type == TYPE_APPEND_REDIRECT);
-            vars->pipeline->current_redirect = current;
-            
-            // Set up output redirection
-            if (!setup_out_redir(current, &redirection_fd, vars->pipeline->append_mode))
-                return (1);
-        }
-        current = current->next;
-    }
-    
-    // Execute the command
-    result = execute_cmd(cmd_node, vars->env, vars);
-    
-    // Restore original stdin/stdout
-    if (vars->pipeline->saved_stdin != -1)
-    {
-        dup2(vars->pipeline->saved_stdin, STDIN_FILENO);
-        close(vars->pipeline->saved_stdin);
-        vars->pipeline->saved_stdin = -1;
-    }
-    
-    if (vars->pipeline->saved_stdout != -1)
-    {
-        dup2(vars->pipeline->saved_stdout, STDOUT_FILENO);
-        close(vars->pipeline->saved_stdout);
-        vars->pipeline->saved_stdout = -1;
-    }
-    
-    // Close heredoc fd if it was opened
-    if (vars->pipeline->heredoc_fd > 2)
-    {
-        close(vars->pipeline->heredoc_fd);
-        vars->pipeline->heredoc_fd = -1;
-    }
-    
-    return (result);
-}
-*/
 /*
 Sets up all redirections for a command and executes it.
 - Processes all input redirections first.
@@ -1128,133 +649,6 @@ int setup_multi_redirects(t_node *cmd_node, t_vars *vars)
 }
 
 /*
-Helper function to process quotes in redirection file names.
-- Handles both single and double quotes in filenames.
-- Allows filenames with spaces when quoted.
-- Preserves content between quotes.
-Works with setup_cmd_redirects().
-OLD VERSION
-void	process_quotes_in_redirect(t_node *redir_node)
-{
-    char	*file;
-    
-    if (!redir_node || !redir_node->args || !redir_node->args[0])
-        return ;
-        
-    file = redir_node->args[0];
-    
-    // Process quotes by removing surrounding quotes but keeping inner content
-    if ((file[0] == '"' && file[ft_strlen(file) - 1] == '"') ||
-        (file[0] == '\'' && file[ft_strlen(file) - 1] == '\''))
-    {
-        process_quotes_in_arg(&redir_node->args[0]);
-    }
-}
-*/
-/* NEWER OLDER VERSION
-void process_quotes_in_redirect(t_node *redir_node)
-{
-    char *file;
-	char *new_file;
-    int len;
-	
-	if (!node || !node->args || !node->args[0])
-        return ;
-    file = node->args[0];
-    len = ft_strlen(file);
-    // Simple quote check - remove surrounding quotes if present
-    if (len >= 2 && 
-        ((file[0] == '"' && file[len-1] == '"') ||
-         (file[0] == '\'' && file[len-1] == '\'')))
-    {
-        new_file = ft_substr(file, 1, len-2);
-        if (new_file)
-        {
-            free(file);
-            node->args[0] = new_file;
-        }
-    }
-}
-*/
-/*
-Processes quotes in a redirection node's filename.
-- Handles both single and double quotes in filenames.
-- Removes surrounding quotes while preserving content.
-- Updates the node's args[0] with processed filename.
-Returns:
-Nothing (void function).
-Works with setup_in_redir and setup_out_redir.
-NEWER OLD VERSION
-void process_quotes_in_redirect(t_node *node)
-{
-    char *str;
-    int len;
-    char *new_str;
-    
-    if (!node || !node->args || !node->args[0])
-        return;
-    
-    str = node->args[0];
-    len = ft_strlen(str);
-    
-    // Check if string has matching quotes at start and end
-    if (len >= 2 && 
-        ((str[0] == '"' && str[len-1] == '"') ||
-         (str[0] == '\'' && str[len-1] == '\'')))
-    {
-        // Create new string without quotes
-        new_str = ft_substr(str, 1, len-2);
-        if (new_str)
-        {
-            // Replace original string with new one
-            free(str);
-            node->args[0] = new_str;
-        }
-    }
-}
-*/
-/*
-Processes quotes in a redirection node's filename.
-- Handles both single and double quotes in filenames.
-- Removes surrounding quotes while preserving content.
-- Updates the node's args[0] with processed filename.
-HOPEFULLY LAST REFACTOR
-void	process_quotes_in_redirect(t_node *node)
-{
-    char	*str;
-    int		len;
-    char	*new_str;
-    int		is_quoted;
-
-    if (!node || !node->args || !node->args[0])
-        return ;
-    str = node->args[0];
-    len = ft_strlen(str);
-    is_quoted = 0;
-    
-    // Check if string has matching quotes at start and end
-    if (len >= 2)
-    {
-        if (str[0] == '"' && str[len - 1] == '"')
-            is_quoted = 1;
-        else if (str[0] == '\'' && str[len - 1] == '\'')
-            is_quoted = 1;
-    }
-    
-    if (is_quoted)
-    {
-        // Create new string without quotes
-        new_str = ft_substr(str, 1, len - 2);
-        if (new_str)
-        {
-            // Replace original string with new one
-            ft_safefree((void **)&node->args[0]);
-            node->args[0] = new_str;
-        }
-    }
-}
-*/
-/*
 Processes quotes in a redirection node's filename.
 - Handles both single and double quotes in filenames.
 - Removes surrounding quotes while preserving content.
@@ -1289,7 +683,7 @@ void	process_quotes_in_redirect(t_node *node)
         if (new_str)
         {
             // Replace original string with new one
-            ft_safefree((void **)&node->args[0]);
+            free(node->args[0]);
             node->args[0] = new_str;
         }
     }

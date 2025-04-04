@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   initnode.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:21:02 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ t_node	*initnode(t_tokentype type, char *token)
 		quote_type = 2;
 	if (!make_nodeframe(node, type, token))
 	{
-		ft_safefree((void **)&node);
+		free(node);
 		return (NULL);
 	}
 	if (node->arg_quote_type && (type == TYPE_SINGLE_QUOTE

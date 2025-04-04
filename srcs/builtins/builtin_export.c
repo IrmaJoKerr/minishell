@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 17:15:12 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 04:08:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,26 +88,26 @@ Returns 0 on success, 1 on failure.
 */
 int	sort_env(int count, t_vars *vars)
 {
-	int		i;
-	int		cmdcode;
-	char	**sort_env;
+    int		i;
+    int		cmdcode;
+    char	**sort_env;
 
-	sort_env = make_sorted_env(count, vars);
-	if (!sort_env)
-		return (1);
-	i = 0;
-	cmdcode = 0;
-	while (sort_env[i])
-	{
-		cmdcode = process_export_var(sort_env[i]);
-		i++;
-	}
-	i = 0;
-	while (i < count)
-	{
-		ft_safefree((void **)&sort_env[i]);
-		i++;
-	}
-	ft_safefree((void **)&sort_env);
-	return (cmdcode);
+    sort_env = make_sorted_env(count, vars);
+    if (!sort_env)
+        return (1);
+    i = 0;
+    cmdcode = 0;
+    while (sort_env[i])
+    {
+        cmdcode = process_export_var(sort_env[i]);
+        i++;
+    }
+    i = 0;
+    while (i < count)
+    {
+        free(sort_env[i]);
+        i++;
+    }
+    free(sort_env);
+    return (cmdcode);
 }

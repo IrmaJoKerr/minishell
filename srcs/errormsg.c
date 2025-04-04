@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errormsg.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:21:30 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,10 +112,10 @@ void	crit_error(t_vars *vars)
 		return ;
 	}
 	if (vars->env)
-		ft_safefree((void **)&vars->env);
+		free(vars->env);
 	if (vars->pipeline)
 		cleanup_pipeline(vars->pipeline);
 	if (vars->error_msg)
-		ft_safefree((void **)&vars->error_msg);
+		free(vars->error_msg);
 	exit(1);
 }

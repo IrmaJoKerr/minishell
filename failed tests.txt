@@ -1,0 +1,142 @@
+echo hello""world 
+mini output = (hello world)
+bash output = (helloworld)
+
+echo $ 
+mini output = ()
+bash output = ($)
+mini exit code =
+bash exit code = 0
+
+echo $?HELLO
+mini output = (0 HELLO)
+bash output = (0HELLO)
+
+export A- 
+mini output = (export: 'A-': not a valid identifier)
+bash output = ()
+
+export HELLO-=123 
+mini output = (export: 'HELLO-=123': not a valid identifier)
+bash output = ()
+
+export = 
+mini output = (export: '=': not a valid identifier)
+bash output = ()
+
+export 123 
+mini output = (export: '123': not a valid identifier)
+bash output = ()
+
+cd $PWD hi 
+mini exit code = 0
+bash exit code = 1
+
+cat minishell.h | grep ");"$ 
+mini exit code =
+bash exit code = 1
+
+grep hi <./test_files/infile 
+mini output = ()
+bash output = (hi)
+mini exit code =
+bash exit code = 0
+
+grep hi "<infile" <         ./test_files/infile 
+mini exit code =
+bash exit code = 2
+
+echo hi < ./test_files/infile bye bye 
+mini output = (hi)
+bash output = (hi bye bye)
+
+grep hi <./test_files/infile_big <./test_files/infile 
+mini output = ()
+bash output = (hi)
+mini exit code =
+bash exit code = 0
+
+echo <"./test_files/infile" "bonjour       42" 
+mini output = ()
+bash output = (bonjour 42)
+mini exit code = 127
+bash exit code = 0
+
+cat <"./test_files/file name with spaces" 
+mini output = ()
+bash output = (😈 😈 😈 This will break your minishell 😈 😈 😈)
+mini exit code = 127
+bash exit code = 0
+
+cat <./test_files/infile_big ./test_files/infile 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code =
+bash exit code = 0
+
+cat <"1""2""3""4""5" 
+mini exit code = 127
+bash exit code = 1
+
+echo <"./test_files/infile" <missing <"./test_files/infile" 
+mini exit code = 127
+bash exit code = 1
+
+echo <missing <"./test_files/infile" <missing 
+mini exit code = 127
+bash exit code = 1
+
+cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 127
+bash exit code = 0
+
+echo <"./test_files/infile_big" | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 127
+bash exit code = 0
+
+echo <"./test_files/infile_big" | echo <"./test_files/infile" 
+mini exit code = 127
+bash exit code = 0
+
+echo hi | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 127
+bash exit code = 0
+
+cat <"./test_files/infile" | grep hello 
+mini output = ()
+bash output = (hello)
+mini exit code = 1
+bash exit code = 0
+
+cat <missing 
+mini exit code =
+bash exit code = 1
+
+cat <missing | cat 
+mini exit code =
+bash exit code = 0
+
+cat <missing | echo oi 
+mini exit code = No exit code. Prints oi instead
+bash exit code = 0
+
+cat <missing | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code =
+bash exit code = 0
+
+echo hi >         ./outfiles/outfile01 bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi bye
+mini output = (hi)
+bash output = ()

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history_load.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:32:45 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:19:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	skip_history_lines(int fd, int skip_count)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
-		ft_safefree((void **)&line);
+		free(line);
 		skip_count--;
 	}
 }
@@ -69,7 +69,7 @@ void	read_history_lines(int fd)
 				line[len - 1] = '\0';
 			add_history(line);
 		}
-		ft_safefree((void **)&line);
+		free(line);
 		line = get_next_line(fd);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 20:29:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 01:46:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	is_input_complete(t_vars *vars)
 		{
 			expecting_command = 1;
 		}
-		else if (expecting_command && current->type != TYPE_STRING
+		else if (expecting_command && current->type != TYPE_ARGS
 			&& current->type != TYPE_CMD)
 		{
 			expecting_command = 1;
@@ -81,30 +81,6 @@ Returns:
 - 1 if pipes were handled and modifications were made
 - 0 if no unfinished pipes found
 - -1 if an error occurred
-OLD VERSION
-int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
-{
-	char *additional;
-
-	if (!check_unfinished_pipe(vars, ast))
-		return (0);
-
-	print_error("Pipe at end of input", NULL, 0);
-	additional = readline("pipe> ");
-
-	if (!additional)
-	{
-		// User pressed Ctrl+D during pipe input
-		ft_safefree((void **)processed_cmd);
-		return (-1);
-	}
-	*processed_cmd = append_new_input(*processed_cmd, additional);
-	ft_safefree((void **)&additional);
-
-	if (!*processed_cmd)
-		return (-1);
-	return (1);
-}
 */
 int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
 {
@@ -118,7 +94,10 @@ int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
 		return (0);
 	addon_input = readline("> ");
 	if (!addon_input)
-		return (-1);
+	{
+		free(addon_input);
+		return (handle_unfinished_pipes(processed_cmd, vars, ast));
+	}
 	tmp = ft_strtrim(addon_input, " \t\n");
 	free(addon_input);
 	addon_input = tmp;
@@ -141,8 +120,7 @@ int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
 	free(*processed_cmd);
 	*processed_cmd = combined;
 	cleanup_token_list(vars);
-	tokenize(*processed_cmd, vars);
-	lexerlist(*processed_cmd, vars);
+	improved_tokenize(*processed_cmd, vars);
 	return (1);
 }
 
@@ -196,11 +174,11 @@ int	chk_quotes_closed(char **processed_cmd, t_vars *vars)
 	addon = get_quote_input(vars);
 	if (!addon)
 	{
-		ft_safefree((void **)processed_cmd);
+		free(processed_cmd);
 		return (-1);
 	}
 	*processed_cmd = append_new_input(*processed_cmd, addon);
-	ft_safefree((void **)&addon);
+	free(addon);
 	if (!*processed_cmd)
 		return (-1);
 	if (tokenize_to_test(*processed_cmd, vars) < 0)
@@ -213,98 +191,53 @@ int	chk_quotes_closed(char **processed_cmd, t_vars *vars)
 }
 
 /*
-Checks if quotes in a string are properly balanced.
-- Handles both double and single quotes
-- Properly tracks quote context
-- Returns 1 if balanced, 0 if unbalanced
+Main handler for unclosed quotes in input
+Returns:
+  1 if quotes were handled and modifications were made
+  0 if no unclosed quotes found
+ -1 if an error occurred
 */
-int	quotes_are_closed(const char *str)
+int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
 {
-	int in_double_quote;
-	int in_single_quote;
-	int i;
-
-	in_double_quote = 0;
-	in_single_quote = 0;
-	i = 0;
-	if (!str)
-		return (1);
-	while (str[i])
-	{
-		if (in_single_quote && str[i] == '\'')
-			in_single_quote = 0;
-		else if (in_double_quote && str[i] == '"')
-			in_double_quote = 0;
-		else if (!in_single_quote && !in_double_quote)
-		{
-			if (str[i] == '\'')
-				in_single_quote = 1;
-			else if (str[i] == '"')
-				in_double_quote = 1;
-		}
-		i++;
-	}
-	return (!in_single_quote && !in_double_quote);
-}
-
-int	handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
-{
-	char	*addon;
-	char	*new_cmd;
-	int		quote_handled;
-
+	char *completed_input;
+	char *temp;
+	 
 	if (!processed_cmd || !*processed_cmd)
-		return (-1);
-	if (quotes_are_closed(*processed_cmd))
-	{
-		vars->quote_depth = 0;
-		return (0);
-	}
+		return (-1);	 
+	// First check if we have unclosed quotes
+	if (validate_quotes(*processed_cmd, vars))
+		return (0); // All quotes are closed, nothing to do	 
+	// We have unclosed quotes, get completion
+	completed_input = complete_quoted_input(vars, *processed_cmd);
+	if (!completed_input)
+		return (-1); 
+	// Replace the original command with the completed one
+	temp = *processed_cmd;  // Store the old pointer
+	*processed_cmd = completed_input;  // Update to the new pointer
+	free(temp);  // Free the old memory
+	// Re-tokenize with the completed command
 	cleanup_token_list(vars);
-	vars->head = NULL;
-	vars->current = NULL;
-	quote_handled = 0;
-	while (vars->quote_depth > 0)
-	{
-		addon = get_quote_input(vars);
-		if (!addon)
-			return (ft_safefree((void **)processed_cmd), -1);
-		new_cmd = append_input(*processed_cmd, addon);
-		ft_safefree((void **)&addon);
-		if (!new_cmd)
-			return (-1);
-		ft_safefree((void **)processed_cmd);
-		*processed_cmd = new_cmd;
-		cleanup_token_list(vars);
-		vars->head = NULL;
-		vars->current = NULL;
-		if (tokenize_to_test(*processed_cmd, vars) < 0)
-			return (-1);
-		quote_handled = 1;
-		if (vars->quote_depth == 0)
-			break ;
-	}
-	return quote_handled ? 1 : 0;
+	improved_tokenize(*processed_cmd, vars); 
+	return (1);
 }
 
-char	*append_input(const char *first, const char *second)
+/*
+Combines original input with continuation input
+Returns a newly allocated string with both inputs joined
+*/
+char *append_input(char *original, char *additional)
 {
-	size_t	len1;
-	size_t	len2;
-	char	*result;
-
-	if (!first)
-		return (ft_strdup(second));
-	if (!second)
-		return (ft_strdup(first));
-	len1 = ft_strlen(first);
-	len2 = ft_strlen(second);
-	result = malloc(len1 + len2 + 2);
-	if (!result)
-		return (NULL);
-	ft_memcpy(result, first, len1);
-	result[len1] = '\n';
-	ft_memcpy(result + len1 + 1, second, len2);
-	result[len1 + len2 + 1] = '\0';
-	return (result);
+    char *temp;
+    char *result;
+    
+    // First join with a newline
+    temp = ft_strjoin(original, "\n");
+    if (!temp)
+        return (NULL);
+    
+    // Then add the additional input
+    result = ft_strjoin(temp, additional);
+    free(temp);
+    
+    return (result);
 }

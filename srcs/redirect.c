@@ -6,41 +6,12 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 02:09:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 01:41:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-Checks file permissions before redirection starts.
-- For read mode: Verifies file exists and is readable.
-- For write mode: Checks if file exists and is writable.
-- For new files: Returns 1 to allow creation.
-Returns:
-- 1 if file can be accessed with requested mode.
-- 0 if not.
-Works with open_redirect_file() for permission validation.
-
-Example: When redirecting output to file
-- Checks if file exists and can be written to
-- Returns 1 if accessible, 0 if permission denied
-OLD VERSION
-int	chk_permissions(char *filename, int mode, t_vars *vars)
-{
-	if (!filename)
-		return (0);
-	if (mode == O_RDONLY && access(filename, R_OK) == -1)
-		return (redirect_error(filename, vars, 1));
-	if ((mode & O_WRONLY) && access(filename, W_OK) == -1)
-	{
-		if (access(filename, F_OK) == -1)
-			return (1);
-		return (redirect_error(filename, vars, 1));
-	}
-	return (1);
-}
-*/
 /*
 Checks file permissions before redirection starts.
 - For read mode: Verifies file exists and is readable.

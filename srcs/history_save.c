@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history_save.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:35:09 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ int	copy_to_temp(int fd_read)
 	while (line)
 	{
 		write(fd_write, line, ft_strlen(line));
-		ft_safefree((void **)&line);
+		free(line);
 		line = get_next_line(fd_read);
 	}
 	close(fd_write);
@@ -135,7 +135,7 @@ void	skip_lines(int fd, int count)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
-		ft_safefree((void **)&line);
+		free(line);
 		i++;
 	}
 }

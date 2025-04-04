@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/03/20 03:27:42 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/02 08:03:02 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,6 @@ MINISHELL_SRCS = \
 			srcs/expansion.c \
 			srcs/heredoc.c \
 			srcs/history_load.c \
-			srcs/history_save_utils.c \
 			srcs/history_save.c \
 			srcs/history.c \
 			srcs/initnode.c \

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   buildast.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:52:31 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 02:22:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void	get_cmd_nodes(t_vars *vars)
 	{
 		if (current->type == TYPE_CMD && vars->cmd_count < 100)
 		{
+			DBG_PRINTF(DEBUG_ARGS, "get_cmd_nodes: Found command node: content='%s'\n", current->args[0]);
 			vars->cmd_nodes[vars->cmd_count] = current;
 			vars->cmd_count++;
 		}
@@ -124,10 +125,14 @@ t_node	*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd)
 		else if (current->type == TYPE_PIPE && !pipe_root
 			&& current->prev && current->prev->type == TYPE_CMD)
 		{
+			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Found pipe: content='%s'\n", current->args[0]);
 			pipe_root = current;
 			next_cmd = find_next_cmd(current->next);
 			if (next_cmd)
+			{
+				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Next command: content='%s'\n", next_cmd->args[0]);
 				setup_first_pipe(pipe_root, current->prev, next_cmd);
+			}
 			*last_pipe = pipe_root;
 			*last_cmd = next_cmd;
 		}
@@ -156,9 +161,11 @@ void	proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
 		if (current->type == TYPE_PIPE && pipe_root
 			&& current != pipe_root)
 		{
+			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Found pipe: content='%s'\n", current->args[0]);
 			next_cmd = find_next_cmd(current->next);
 			if (*last_cmd && next_cmd)
 			{
+				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Next command: content='%s'\n", next_cmd->args[0]);
 				setup_next_pipes(current, *last_pipe,
 					*last_cmd, next_cmd);
 				*last_pipe = current;
@@ -277,9 +284,11 @@ t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 			last_cmd = current;
 		else if (is_valid_redir_node(current))
 		{
+			DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt1: Found redirection: type=%d, content='%s'\n", current->type, current->args[0]);
 			target_cmd = get_redir_target(current, last_cmd);
 			if (target_cmd)
 			{
+				DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt1: Target command: content='%s'\n", target_cmd->args[0]);
 				setup_redir_ast(current, target_cmd, current->next);
 				if (!pipe_root && !redir_root)
 					redir_root = current;
@@ -311,6 +320,7 @@ void	proc_redir_pt2(t_vars *vars, t_node *pipe_root)
 			last_cmd = current;
 		else if (is_valid_redir_node(current))
 		{
+			DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt2: Found redirection: type=%d, content='%s'\n", current->type, current->args[0]);
 			target_cmd = get_redir_target(current, last_cmd);
 			if (target_cmd && pipe_root)
 				upd_pipe_redir(pipe_root, target_cmd, current);
@@ -342,7 +352,8 @@ t_node	*proc_token_list(t_vars *vars)
 	t_node	*last_pipe;
 	t_node	*last_cmd;
 	t_node	*redir_root;
-
+	
+	DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Starting\n");
 	if (!vars || !vars->head)
 		return (NULL);
 	get_cmd_nodes(vars);
@@ -360,53 +371,6 @@ t_node	*proc_token_list(t_vars *vars)
 }
 
 /*
-Converts string tokens after pipe to command tokens.
-*/
-void	convert_str_to_cmds(t_vars *vars)
-{
-	t_node	*current;
-	t_node	*to_remove;
-
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_PIPE && current->next)
-		{
-			if (current->next->type == TYPE_STRING)
-			{
-				current->next->type = TYPE_CMD;
-				if (current->next->next && current
-					->next->next->type == TYPE_STRING)
-				{
-					append_arg(current->next, current->next->next->args[0], 0);
-					to_remove = current->next->next;
-					current->next->next = to_remove->next;
-					if (to_remove->next)
-						to_remove->next->prev = current->next;
-					free_token_node(to_remove);
-				}
-			}
-		}
-		current = current->next;
-	}
-}
-
-/*
-Sets up pipe node with left and right commands.
-*/
-void	setup_pipe_links(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
-{
-	if (left_cmd)
-	{
-		pipe_node->left = left_cmd;
-	}
-	if (right_cmd)
-	{
-		pipe_node->right = right_cmd;
-	}
-}
-
-/*
 Converts string tokens after pipes to command tokens.
 */
 void	convert_strs_to_cmds(t_vars *vars)
@@ -416,85 +380,10 @@ void	convert_strs_to_cmds(t_vars *vars)
 	current = vars->head;
 	while (current && current->next)
 	{
-		if (current->type == TYPE_PIPE && current->next->type == TYPE_STRING)
+		if (current->type == TYPE_PIPE && current->next->type == TYPE_ARGS)
 			current->next->type = TYPE_CMD;
 		current = current->next;
 	}
-}
-
-/*
-Removes a node from the token list.
-*/
-void	del_list_node(t_node *node)
-{
-	if (node->prev)
-		node->prev->next = node->next;
-	if (node->next)
-		node->next->prev = node->prev;
-}
-
-/*
-Determines if a token contains special quoting that needs special handling.
-- Checks for quote tokens (TYPE_DOUBLE_QUOTE, TYPE_SINGLE_QUOTE)
-- Checks for expansion tokens (TYPE_EXPANSION, TYPE_EXIT_STATUS)
-Returns:
-1 if the token is a special quoted token.
-0 otherwise.
-Works with link_strargs_to_cmds.
-*/
-int is_special_token(t_node *token)
-{
-	if (token->type == TYPE_DOUBLE_QUOTE
-		|| token->type == TYPE_SINGLE_QUOTE
-		|| token->type == TYPE_EXPANSION
-		|| token->type == TYPE_EXIT_STATUS
-		|| token->type == TYPE_STRING)
-	{
-		return (1);
-	}
-	return (0);
-}
-
-/*
-Handles quoted strings and appends them to command arguments.
-- Takes a command node and a quoted string token
-- Combines the quoted content with any previous string if appropriate
-- Preserves the quotes in the resulting argument
-Works with link_strargs_to_cmds.
-*/
-void	handle_quoted_arg(t_node *cmd_node, t_node *quote_token)
-{
-	char	*arg_content;
-	int		quote_type;
-
-	quote_type = 0;
-	if (quote_token->type == TYPE_SINGLE_QUOTE)
-		quote_type = 1;
-	else if (quote_token->type == TYPE_DOUBLE_QUOTE)
-		quote_type = 2;
-	arg_content = quote_token->args[0];
-	append_arg(cmd_node, arg_content, quote_type);
-}
-
-/*
-Determines if a token represents a redirect or other operator.
-- Identifies pipe, redirect input, redirect output, and other operators
-Returns:
-1 if token is an operator.
-0 otherwise.
-Works with link_strargs_to_cmds.
-*/
-int is_operator_token(t_node *token)
-{
-	if (token->type == TYPE_PIPE
-		|| token->type == TYPE_IN_REDIRECT
-		|| token->type == TYPE_OUT_REDIRECT
-		|| token->type == TYPE_APPEND_REDIRECT
-		|| token->type == TYPE_HEREDOC)
-	{
-		return (1);
-	}
-	return (0);
 }
 
 /*
@@ -502,33 +391,24 @@ Attaches string tokens as arguments to their commands.
 */
 void	link_strargs_to_cmds(t_vars *vars)
 {
-	t_node	*current;
-	t_node	*cmd_node;
-	t_node	*next;
-	int		quote_type;
+    t_node	*current;
+    t_node	*cmd_node;
 
-	quote_type = 0;
-	cmd_node = NULL;
-	current = vars->head;
-	while (current)
-	{
-		next = current->next;
-		if (current->type == TYPE_CMD)
-			cmd_node = current;
-		else if (is_special_token(current) && cmd_node)
-		{
-			if (current->type == TYPE_SINGLE_QUOTE)
-				quote_type = 1;
-			else if (current->type == TYPE_DOUBLE_QUOTE)
-				quote_type = 2;
-			append_arg(cmd_node, current->args[0], quote_type);
-			del_list_node(current);
-			free_token_node(current);
-		}
-		else if (is_redirection(current->type) || current->type == TYPE_PIPE)
-			cmd_node = NULL;
-		current = next;
-	}
+    current = vars->head;
+    while (current)
+    {
+        if (current->type == TYPE_CMD)
+            cmd_node = current;
+        else if (cmd_node && current->type == TYPE_ARGS)
+        {
+            // Append the argument to the command node
+            if (cmd_node->args && current->args && current->args[0])
+            {
+                cmd_node->args[0] = ft_strdup(current->args[0]);
+            }
+        }
+        current = current->next;
+    }
 }
 
 /*
@@ -602,24 +482,6 @@ void	process_token_list(t_vars *vars)
 	convert_strs_to_cmds(vars);
 	link_strargs_to_cmds(vars);
 	build_pipe_ast(vars);
-}
-
-/*
-Determines the appropriate root node for the AST.
-- Prioritizes pipe nodes as root if available.
-- Falls back to first command node if no pipes exist.
-Returns:
-- Pointer to the most suitable root node.
-- NULL if no valid nodes exist.
-Works with build_ast().
-*/
-t_node	*set_ast_root(t_node *pipe_node, t_vars *vars)
-{
-	if (pipe_node)
-		return (pipe_node);
-	if (vars->cmd_count > 0)
-		return (vars->cmd_nodes[0]);
-	return (NULL);
 }
 
 /*
@@ -794,12 +656,12 @@ char	*merge_input(char *input, char *line)
 	temp = ft_strjoin(input, " ");
 	if (!temp)
 	{
-		ft_safefree((void **)&line);
+		free(line);
 		return (NULL);
 	}
 	new_input = ft_strjoin(temp, line);
-	ft_safefree((void **)&temp);
-	ft_safefree((void **)&line);
+	free(temp);
+	free(line);
 	if (!new_input)
 		return (NULL);
 	return (new_input);
@@ -843,18 +705,17 @@ char	*handle_trailing_pipe_pt2(char *new_input, t_vars *vars)
 	line = readline("COMMAND> ");
 	if (!line)
 	{
-		ft_safefree((void **)&new_input);
+		free(new_input);
 		return (NULL);
 	}
 	if (*line)
 		add_history(line);
 	joined_input = merge_input(new_input, line);
-	ft_safefree((void **)&new_input);
+	free(new_input);
 	if (!joined_input)
 		return (NULL);
 	cleanup_token_list(vars);
-	tokenize(joined_input, vars);
-	lexerlist(joined_input, vars);
+	improved_tokenize(joined_input, vars);
 	return (joined_input);
 }
 

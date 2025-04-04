@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:24:27 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 02:22:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ char	*merge_and_free(char *str, char *chunk)
 	if (!str)
 		return (ft_strdup(chunk));
 	new_str = ft_strjoin(str, chunk);
-	ft_safefree((void **)&str);
+	free(str);
 	return (new_str);
 }
 
@@ -115,13 +115,13 @@ char	*expand_one_line(char *line, int *pos, t_vars *vars, char *result)
 	{
 		segment = expand_heredoc_var(line, pos, vars);
 		result = merge_and_free(result, segment);
-		ft_safefree((void **)&segment);
+		free(segment);
 	}
 	else
 	{
 		segment = read_heredoc_str(line, pos);
 		result = merge_and_free(result, segment);
-		ft_safefree((void **)&segment);
+		free(segment);
 	}
 	return (result);
 }
@@ -213,7 +213,7 @@ int	write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
 			return (0);
 		write_result = write(fd, expanded_line, ft_strlen(expanded_line));
 		newline_result = write(fd, "\n", 1);
-		ft_safefree((void **)&expanded_line);
+		free(expanded_line);
 		if (write_result == -1 || newline_result == -1)
 			return (0);
 		return (1);
@@ -252,11 +252,11 @@ int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 			break ;
 		if (ft_strcmp(line, delimiter) == 0)
 		{
-			ft_safefree((void **)&line);
+			free(line);
 			break ;
 		}
 		write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
-		ft_safefree((void **)&line);
+		free(line);
 		if (!write_success)
 			return (0);
 	}

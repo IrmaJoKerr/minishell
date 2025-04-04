@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 02:56:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 01:24:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ void	cleanup_env_error(char **env, int n)
 	while (n > 0)
 	{
 		n--;
-		ft_safefree((void **)&env[n]);
+		free(env[n]);
 	}
-	ft_safefree((void **)&env);
+	free(env);
 }
 
 /*
@@ -40,7 +40,7 @@ void	cleanup_ast_struct(t_ast *ast)
 {
 	if (!ast)
 		return ;
-	ft_safefree((void **)&ast);
+	free(ast);
 }
 
 /*
@@ -53,15 +53,15 @@ void	cleanup_pipeline(t_pipe *pipeline)
 {
 	if (!pipeline)
 		return ;
-	ft_safefree((void **)&pipeline->exec_cmds);
-	ft_safefree((void **)&pipeline->pipe_fds);
-	ft_safefree((void **)&pipeline->pids);
-	ft_safefree((void **)&pipeline->status);
+	free(pipeline->exec_cmds);
+	free(pipeline->pipe_fds);
+	free(pipeline->pids);
+	free(pipeline->status);
 	if (pipeline->heredoc_fd > 2)
 		close(pipeline->heredoc_fd);
 	if (pipeline->redirection_fd > 2)
         close(pipeline->redirection_fd);
-	ft_safefree((void **)&pipeline);
+	free(pipeline);
 }
 
 void	cleanup_vars(t_vars *vars)
@@ -77,7 +77,7 @@ void	cleanup_vars(t_vars *vars)
 		vars->env = NULL;
 	}
     if (vars->error_msg != NULL)
-		ft_safefree((void **)&vars->error_msg);
+		free(vars->error_msg);
 	if (vars->astroot)
 		cleanup_ast(vars->astroot);
 	if (vars->head && vars->head != vars->astroot)

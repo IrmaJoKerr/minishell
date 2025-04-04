@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   operators.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:08:39 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,30 +18,55 @@ Processes operators and surrounding text in command input.
 - Detects and processes both single and double operators.
 - Updates token start/end positions for proper tokenization.
 Returns:
--New position index after operator processing.
+- New position index after operator processing.
 Works with handle_token() during input tokenization.
-
-Example: For input "echo hello > file"
-- Processes "echo hello" as string/command when '>' is encountered
-- Then processes '>' as an output redirection operator
-- Returns position after '>' for continued processing
 */
-int	operators(char *input, int i, int token_start, t_vars *vars)
+int	operators(char *input, t_vars *vars)
 {
-	int	next_pos;
+    int			advance;
+    t_tokentype	token_type;
+    
+    // Handle text before operator
+    if (vars->pos > vars->start)
+        handle_string(input, vars);
+    
+    // Get token type and advance value
+    token_type = get_token_at(input, vars->pos, &advance);
+    
+    // Store previous type before updating current
+    vars->prev_type = vars->curr_type;
+    vars->curr_type = token_type;  // Update current type
+    
+    // Process token based on its type
+    if (token_type != 0)
+    {
+        if (advance == 2)
+            return handle_double_operator(input, vars);
+        else if (advance == 1)
+            return handle_single_operator(input, vars);
+    }
+    
+    return vars->pos;
+}
 
-	if (i > token_start)
-	{
-		vars->start = token_start;
-		vars->pos = i;
-		vars->curr_type = TYPE_STRING;
-		maketoken(input, vars);
-		vars->start = i;
-	}
-	next_pos = handle_double_operator(input, i, vars);
-	if (next_pos != i)
-		return (next_pos);
-	return (handle_single_operator(input, i, vars));
+/* 
+Checks if a token is an operator (pipe or redirection).
+Returns 1 if token is an operator, 0 otherwise.
+*/
+int is_operator_token(t_tokentype type)
+{
+    if (type == TYPE_PIPE)
+        return (1);
+    if (type == TYPE_IN_REDIRECT)
+        return (1);
+    if (type == TYPE_OUT_REDIRECT)
+        return (1);
+    if (type == TYPE_APPEND_REDIRECT)
+        return (1);
+    if (type == TYPE_HEREDOC)
+        return (1);
+    
+    return (0);
 }
 
 /*
@@ -52,142 +77,171 @@ Creates string token for text preceding an operator.
 Returns:
 - Current position (unchanged).
 Works with operators() for text segment tokenization.
-
-Example: For "echo | grep" at position of '|'
-- Creates string token "echo" before processing pipe
-- Sets up vars for next token processing
 */
-int	handle_string(char *input, int i, int token_start, t_vars *vars)
+void handle_string(char *input, t_vars *vars)
 {
-	if ((input[i] == '>' || input[i] == '<' || input[i] == '|')
-		&& i > token_start)
-	{
-		vars->start = token_start;
-		vars->pos = i;
-		vars->curr_type = TYPE_STRING;
-		maketoken(input, vars);
-	}
-	return (i);
+    char *token;
+    int advance;
+    t_tokentype token_type;
+    
+    if (vars->pos > vars->start)
+    {
+        token = ft_substr(input, vars->start, vars->pos - vars->start);
+        if (!token)
+            return;
+        
+        // Determine token type based on the input
+        token_type = get_token_at(token, 0, &advance);
+        if (token_type == 0)
+        {
+            // Pass the token content to help determine type
+            set_token_type(vars, token);
+        }
+        else
+        {
+            vars->curr_type = token_type;
+        }
+        
+        DBG_PRINTF(DEBUG_TOKENIZE, "Creating token from '%s', type=%d (%s)\n", 
+                token, vars->curr_type, get_token_str(vars->curr_type));
+        
+        maketoken_with_type(token, vars->curr_type, vars);
+        free(token);
+        
+        vars->start = vars->pos;
+    }
 }
 
-/*
-Maps operator characters to their token types.
-- '|' == TYPE_PIPE
-- '>' == TYPE_OUT_REDIRECT
-- '<' == TYPE_IN_REDIRECT
-Returns:
-- Token type corresponding to operator character.
-- TYPE_STRING as fallback for unrecognized characters.
-Works with handle_single_operator() for type determination.
-
-Example: For '|' character
-- Returns TYPE_PIPE enum value
-- Allows consistent token type assignment
-Used with handle_single_operator().
+/* 
+Checks if character at position is a single-character token
+Returns the token type enum value, 0 if not a special token
+Handles: ', ", <, >, $, |
 */
-t_tokentype	get_operator_type(char op)
+int	is_single_token(char *input, int pos, int *advance)
 {
-	if (op == '|')
-		return (TYPE_PIPE);
-	else if (op == '>')
-		return (TYPE_OUT_REDIRECT);
-	else if (op == '<')
-		return (TYPE_IN_REDIRECT);
-	else if (op == '$')
-		return (TYPE_EXPANSION);
-	return (TYPE_STRING);
+	t_tokentype	token_type;
+
+	token_type = 0;
+	*advance = 0;
+	if (!input || !input[pos])
+		return (token_type);
+	if (input[pos] == '\'')
+		token_type = TYPE_SINGLE_QUOTE;
+	else if (input[pos] == '\"')
+		token_type = TYPE_DOUBLE_QUOTE;
+	else if (input[pos] == '<')
+		token_type = TYPE_IN_REDIRECT;
+	else if (input[pos] == '>')
+		token_type = TYPE_OUT_REDIRECT;
+	else if (input[pos] == '$')
+		token_type = TYPE_EXPANSION;
+	else if (input[pos] == '|')
+		token_type = TYPE_PIPE;
+	if (token_type != 0)
+		*advance = 1;
+	return (token_type);
+}
+
+/* 
+Checks if characters at position form a double-character token
+Returns the token type enum value, 0 if not a double token
+Handles: >>, <<, $?
+*/
+int	is_double_token(char *input, int pos, int *advance)
+{
+	t_tokentype	token_type;
+
+	token_type = 0;
+	*advance = 0; 
+	if (!input || !input[pos] || !input[pos + 1])
+		return (token_type);
+	if (input[pos] == '>' && input[pos + 1] == '>')
+		token_type = TYPE_APPEND_REDIRECT;
+	else if (input[pos] == '<' && input[pos + 1] == '<')
+		token_type = TYPE_HEREDOC;
+	else if (input[pos] == '$' && input[pos + 1] == '?')
+		token_type = TYPE_EXIT_STATUS;
+	if (token_type != 0)
+		*advance = 2;
+	return (token_type);
+}
+
+/* 
+Master function to get token type at current position
+Checks double tokens first, then single tokens
+Returns token type and updates position via advance parameter
+*/
+t_tokentype	get_token_at(char *input, int pos, int *advance)
+{
+	t_tokentype	token_type;
+
+	token_type = 0;
+	*advance = 0;
+	 
+	// Try to match double-character tokens first
+	token_type = is_double_token(input, pos, advance);
+	if (token_type != 0)
+		return (token_type);
+	 
+	// Then try single-character tokens
+	token_type = is_single_token(input, pos, advance);
+	if (token_type != 0)
+		return (token_type);
+	 
+	// If not a special token, treat as part of a string/command
+	*advance = 1;
+	return (0); // Will be classified as word/command later
 }
 
 /*
 Processes single-character operators (|, >, <).
-- Creates text token for content before operator if needed.
-- Sets appropriate token type using get_operator_type().
-- Creates operator token and updates position tracking.
+Creates token with the provided token type.
+Updates position tracking.
 Returns:
 - Position after operator (i+1).
-- Unchanged position if no operator.
-Works with operators() during tokenization.
-
-Example: For '>' character in input
-- Creates TYPE_OUT_REDIRECT token
-- Updates position to character after '>'
-- Returns updated position
+- Unchanged position if token creation fails.
 */
-int	handle_single_operator(char *input, int i, t_vars *vars)
+int handle_single_operator(char *input, t_vars *vars)
 {
-	char	*token;
-
-	if (i > vars->start)
-		handle_string(input, i, vars->start, vars);
-	vars->curr_type = get_operator_type(input[i]);
-	token = ft_substr(input, i, 1);
-	if (!token)
-		return (i);
-	maketoken(token, vars);
-	vars->start = i + 1;
-	return (i + 1);
+    char *token;
+    
+    token = ft_substr(input, vars->pos, 1);
+    if (!token)
+        return vars->pos;
+    
+    maketoken_with_type(token, vars->curr_type, vars);
+    free(token);
+    
+    vars->pos++;
+    vars->start = vars->pos;
+    vars->prev_type = vars->curr_type;
+    return vars->pos;
 }
-
+ 
 /*
-Processes two-character operators (>>, <<).
-- Detects append redirect (>>) and heredoc (<<) operators.
-- Creates appropriate token with TYPE_APPEND_REDIRECT or TYPE_HEREDOC.
-- Updates token position tracking for continued processing.
+Processes double-character operators (>>, <<).
+Creates token with the provided token type.
+Updates position tracking.
 Returns:
-- Position after operator (i+2).
-- Unchanged position if no match.
-Works with operators() during tokenization.
-
-Example: For ">>" in input
-- Creates TYPE_APPEND_REDIRECT token
-- Updates position to skip both characters
-- Returns position after ">>"
+ - Position after operator (i+advance).
+ - Unchanged position if token creation fails.
 */
-int	handle_double_operator(char *input, int i, t_vars *vars)
+int	handle_double_operator(char *input, t_vars *vars)
 {
-	char	*token;
-
-	if (i > vars->start)
-	{
-		handle_string(input, i, vars->start, vars);
-		vars->start = i;
-	}
-	token = ft_substr(input, i, 2);
-	if (!token)
-		return (i);
-	if (input[i] == '>' && input[i + 1] == '>')
-		vars->curr_type = TYPE_APPEND_REDIRECT;
-	else if (input[i] == '<' && input[i + 1] == '<')
-		vars->curr_type = TYPE_HEREDOC;
-	else
-		vars->curr_type = TYPE_STRING;
-	maketoken(token, vars);
-	ft_safefree((void **)&token);
-	vars->start = i + 2;
-	return (i + 2);
-}
-
-/*
-Checks for double operators (>> or <<)
-Returns 1 if found, 0 otherwise.
-*/
-int	is_double_operator(char *input, int i)
-{
-	if (!input || !input[i] || !input[i + 1])
-		return (0);
-	if ((input[i] == '>' && input[i + 1] == '>')
-		|| (input[i] == '<' && input[i + 1] == '<'))
-		return (1);
-	return (0);
-}
-
-/*
-Checks if a character is an operator (|, >, <)
-Returns 1 if it is, 0 otherwise.
-*/
-int	is_operator(char c)
-{
-	if (c == '|' || c == '>' || c == '<')
-		return (1);
-	return (0);
+    char	*token;
+    int		advance;
+    
+    advance = 2;  // Double operators are always 2 characters
+    
+    token = ft_substr(input, vars->pos, advance);
+    if (!token)
+        return vars->pos;
+    
+    maketoken_with_type(token, vars->curr_type, vars);
+    free(token);
+    
+    vars->pos += advance;
+    vars->start = vars->pos;
+    vars->prev_type = vars->curr_type;
+    return vars->pos;
 }

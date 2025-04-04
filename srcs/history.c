@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   history.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:52:30 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:19:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ int	get_history_count(void)
 	while (line)
 	{
 		count++;
-		ft_safefree((void **)&line);
+		free(line);
 		line = get_next_line(fd);
 	}
 	close(fd);

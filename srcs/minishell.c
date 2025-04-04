@@ -6,11 +6,39 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 04:09:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 03:52:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+void print_tokens(t_node *head)
+{
+    t_node *curr = head;
+    int i;
+    
+    fprintf(stderr, "\n--- TOKEN LIST ---\n");
+    while (curr)
+    {
+        fprintf(stderr, "Token: type=%d (%s), content='%s'\n", 
+               curr->type, get_token_str(curr->type), 
+               curr->args ? curr->args[0] : "NULL");
+        
+        if (curr->args && curr->args[1])
+        {
+            fprintf(stderr, "  Arguments:");
+            i = 1;
+            while (curr->args[i])
+            {
+                fprintf(stderr, " '%s'", curr->args[i]);
+                i++;
+            }
+            fprintf(stderr, "\n");
+        }
+        curr = curr->next;
+    }
+    fprintf(stderr, "----------------\n\n");
+}
 
 /*
 Reads input line from the user with prompt display.
@@ -26,18 +54,6 @@ Example: When user types "ls -la"
 - Displays prompt "bleshell$> "
 - Returns "ls -la" as an allocated string
 - Adds command to history for up-arrow recall
-OLD VERSION
-char	*reader(t_vars *vars)
-{
-	char	*line;
-
-	line = readline(PROMPT);
-	if (!line)
-		builtin_exit(vars);
-	if (*line)
-		add_history(line);
-	return (line);
-}
 */
 char	*reader(void)
 {
@@ -124,23 +140,35 @@ Example: When user types "echo "hello
 - User types "world" and Enter
 - Returns combined string: echo "hello world"
 */
-char	*handle_quote_completion(char *cmd, t_vars *vars)
+char *handle_quote_completion(char *cmd, t_vars *vars)
 {
-	char	*new_cmd;
-
-	new_cmd = fix_open_quotes(cmd, vars);
-	if (!new_cmd)
-		return (NULL);
-	if (new_cmd != cmd)
-	{
-		if (cmd != vars->error_msg)
-			ft_safefree((void **)&cmd);
-		cmd = new_cmd;
-	}
-	cleanup_token_list(vars);
-	tokenize(cmd, vars);
-	lexerlist(cmd, vars);
-	return (cmd);
+    char *new_cmd;
+    
+    // Initialize quote context
+    vars->quote_depth = 0;
+    
+    // Check if we have unclosed quotes
+    if (validate_quotes(cmd, vars))
+        return cmd;  // No unclosed quotes
+    
+    // Need to get more input for unclosed quotes
+    new_cmd = fix_open_quotes(cmd, vars);
+    if (!new_cmd)
+        return (NULL);
+        
+    // If we got a new command string, free the old one
+    if (new_cmd != cmd)
+    {
+        if (cmd != vars->error_msg)
+            free(cmd);
+        cmd = new_cmd;
+    }
+    
+    // Re-tokenize with the completed command
+    cleanup_token_list(vars);
+    improved_tokenize(cmd, vars);
+    
+    return (cmd);
 }
 
 /*
@@ -175,7 +203,7 @@ char	*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk)
 	if (new_cmd != cmd)
 	{
 		if (cmd != vars->error_msg)
-			ft_safefree((void **)&cmd);
+			free(cmd);
 		cmd = new_cmd;
 	}
 	return (cmd);
@@ -203,34 +231,33 @@ void	build_and_execute(t_vars *vars)
 }
 
 /*
-Handles token creation and basic processing.
-- Cleans up previous token list if needed.
-- Tokenizes and creates lexical tree from input.
-- Handles any unclosed quotes by prompting for completion.
-Returns:
-- Updated command string after processing.
-- NULL on memory allocation failure or other error.
-Works with process_command() as first processing stage.
-
+Main entry point for tokenization and expansion. 
+Tokenizes input and processes expansions.
+Returns 1 on success, 0 on failure.
 Example: For input "echo "hello
 - Tokenizes the initial content
 - Detects unclosed quotes and prompts for completion
 - Returns completed command string with proper quotes
 */
-char	*process_input_tokens(char *command, t_vars *vars)
+int process_input_tokens(char *command, t_vars *vars)
 {
-	char	*processed_cmd;
-
-	processed_cmd = command;
-	if (vars->head)
-		cleanup_token_list(vars);
-	if (!processed_cmd)
-		return (NULL);
-	tokenize(processed_cmd, vars);
-	lexerlist(processed_cmd, vars);
-	if (vars->quote_depth > 0)
-		processed_cmd = handle_quote_completion(processed_cmd, vars);
-	return (processed_cmd);
+    /* Skip processing if command is NULL or empty */
+    if (!command || !*command)
+        return (0);
+    
+    /* Initialize the token list */
+    cleanup_token_list(vars);
+    
+    /* Tokenize the input with improved quote handling */
+    if (!improved_tokenize(command, vars))
+	{
+        return (0);
+	}
+	process_quotes_and_expansions(vars);
+    /* Process variable expansions in tokens */
+    process_expansions(vars);
+    
+    return (1);
 }
 
 /*
@@ -248,7 +275,7 @@ Example: For input "ls |"
 - Prompts for continuation
 - Returns completed command with pipe and continuation
 */
-char	*process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
+char	*process_pipe_syntax(char *command, t_vars *vars)
 {
 	int		syntax_chk;
 	char	*processed_cmd;
@@ -257,10 +284,10 @@ char	*process_pipe_syntax(char *command, char *orig_cmd, t_vars *vars)
 	syntax_chk = chk_pipe_syntax_err(vars);
 	if (syntax_chk == 1)
 	{
-		if (processed_cmd != orig_cmd && processed_cmd != command)
-			ft_safefree((void **)&processed_cmd);
-		if (orig_cmd && orig_cmd != command)
-			ft_safefree((void **)&orig_cmd);
+		if (processed_cmd != vars->partial_input && processed_cmd != command)
+			free(processed_cmd);
+		if (vars->partial_input && vars->partial_input != command)
+			free(vars->partial_input);
 		return (NULL);
 	}
 	processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
@@ -283,20 +310,44 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
-int	process_command(char *command, t_vars *vars)
+int process_command(char *command, t_vars *vars)
 {
-	char	*processed_cmd;
-
-	processed_cmd = process_input_tokens(command, vars);
-	if (!processed_cmd)
-		return (1);
-	processed_cmd = process_pipe_syntax(processed_cmd, command, vars);
-	if (!processed_cmd)
-		return (1);
-	build_and_execute(vars);
-	if (processed_cmd != command)
-		ft_safefree((void **)&processed_cmd);
-	return (1);
+    char *processed_cmd;
+    
+    // Make a copy to work with
+    processed_cmd = ft_strdup(command);
+    if (!processed_cmd)
+        return (1);
+    
+    // Handle unclosed quotes first
+    processed_cmd = handle_quote_completion(processed_cmd, vars);
+    if (!processed_cmd)
+        return (1);
+    
+    /* Tokenize and process input */
+    if (!process_input_tokens(processed_cmd, vars))
+    {
+        if (processed_cmd != command)
+            ft_safefree((void **)&processed_cmd);
+        return (1);
+    }
+    
+    /* Check pipe syntax and handle completion */
+    if (!process_pipe_syntax(processed_cmd, vars))
+    {
+        if (processed_cmd != command)
+            ft_safefree((void **)&processed_cmd);
+        return (1);
+    }
+    
+    /* Build and execute AST */
+    build_and_execute(vars);
+    
+    // Free the processed command if it's different from the original
+    if (processed_cmd != command)
+        ft_safefree((void **)&processed_cmd);
+        
+    return (1);
 }
 
 /*
@@ -305,44 +356,7 @@ Main shell loop that processes user commands and manages execution flow.
 - Handles Ctrl+D and empty input cases.
 - Processes commands through tokenizing and execution.
 - Manages exit status tracking through pipeline.
-Works as the central execution point of the shell.
-OLD VERSION
-int	main(int argc, char **argv, char **envp)
-{
-	t_vars	vars;
-	char	*input;
-
-	(void)argc;
-	(void)argv;
-	ft_memset(&vars, 0, sizeof(t_vars));
-	init_shell(&vars, envp);
-	while (1)
-	{
-		input = reader(&vars);
-		if (input == NULL)
-		{
-			cleanup_exit(&vars);
-			ft_putstr_fd("exit\n", STDOUT_FILENO);
-			exit(vars.error_code);
-		}
-		if (input[0] == '\0')
-		{
-			ft_safefree((void **)&input);
-			continue ;
-		}
-		process_command(input, &vars);
-		ft_safefree((void **)&input);
-	}
-	return (0);
-}
-*/
-/*
-Main shell loop that processes user commands and manages execution flow.
-- Reads input through reader() function.
-- Handles Ctrl+D and empty input cases.
-- Processes commands through tokenizing and execution.
-- Manages exit status tracking through pipeline.
-Works as the central execution point of the shell.
+Works as the start point of the shell.
 */
 int	main(int argc, char **argv, char **envp)
 {
@@ -361,11 +375,11 @@ int	main(int argc, char **argv, char **envp)
             builtin_exit(exit_args, &vars);
         if (input[0] == '\0')
         {
-            ft_safefree((void **)&input);
+            free(input);
             continue ;
         }
         process_command(input, &vars);
-        ft_safefree((void **)&input);
+        free(input);
     }
     return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/03/22 17:29:30 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 01:19:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,16 @@ int	builtin_cd(char **args, t_vars *vars)
 	cmdcode = handle_cd_path(args, vars);
 	if (cmdcode != 0)
 	{
-		ft_safefree((void **)&oldpwd);
+		free(oldpwd);
 		return (cmdcode);
 	}
 	cmdcode = update_env_pwd(vars, oldpwd);
 	if (cmdcode != 0)
 	{
-		ft_safefree((void **)&oldpwd);
+		free(oldpwd);
 		return (1);
 	}
-	ft_safefree((void **)&oldpwd);
+	free(oldpwd);
 	vars->error_code = cmdcode;
 	return (cmdcode);
 }
@@ -124,7 +124,7 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 	if (!tmp)
 		return (1);
 	modify_env(&vars->env, 1, tmp);
-	ft_safefree((void **)&tmp);
+	free(tmp);
 	result = getcwd(cwd, sizeof(cwd));
 	if (result == NULL)
 	{
@@ -135,6 +135,6 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 	if (!tmp)
 		return (1);
 	modify_env(&vars->env, 1, tmp);
-	ft_safefree((void **)&tmp);
+	free(tmp);
 	return (0);
 }

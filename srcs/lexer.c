@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 19:15:49 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 03:30:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,7 @@ void	handle_text_chunk(char *str, t_vars *vars)
 	if (!cmd_str)
 		return ;
 	vars->curr_type = TYPE_CMD;
-	process_cmd_token(cmd_str, vars);
-	ft_safefree((void **)&cmd_str);
+	free(cmd_str);
 }
 
 /*
@@ -110,8 +109,8 @@ void	process_text(char *str, t_vars *vars
 		*first_token = 0;
 	}
 	else
-		vars->curr_type = TYPE_STRING;
-	maketoken(token, vars);
+		vars->curr_type = TYPE_ARGS;
+	maketoken_with_type(token, vars->curr_type, vars);
 	vars->start = vars->pos;
 	vars->prev_type = vars->curr_type;
 	free(token);
@@ -133,58 +132,8 @@ void	handle_quote_content(char *str, t_vars *vars, int *first_token)
 {
 	if (vars->pos > vars->start)
 		process_text(str, vars, first_token, 0);
-	handle_quotes(str, &vars->pos, vars);
-}
-
-/*
-Handles incomplete quoted input by reading additional lines.
-- Provides continuation prompts with quote> prefix.
-- Appends new input to existing command string.
-- Re-tokenizes the combined input to check quote closure.
-Returns:
-- Modified string with complete quoted content
-- NULL on memory allocation failure or input error
-Works with lexerlist() for handling unclosed quotes.
-
-Example: For input with unclosed quote "echo "hello
-- Prompts user with "quote> "
-- User enters "world""
-- Function returns "echo "hello\nworld""
-- Quote depth is reset after processing
-*/
-char	*lexing_unclosed_quo(char *input, t_vars *vars)
-{
-	char	*processed_cmd;
-	char	*addon;
-	char	*temp;
-	int		attempts;
-
-	attempts = 0;
-	processed_cmd = input;
-	while (vars->quote_depth > 0 && attempts < 10)
-	{
-		attempts++;
-		addon = get_quote_input(vars);
-		if (!addon)
-			return (NULL);
-		temp = append_input(processed_cmd, addon);
-		ft_safefree((void **)&addon);
-		if (!temp)
-			return (NULL);
-		if (processed_cmd != input)
-			ft_safefree((void **)&processed_cmd);
-		processed_cmd = temp;
-		cleanup_token_list(vars);
-		vars->quote_depth = 0;
-		vars->head = NULL;
-		vars->current = NULL;
-		lexerlist(processed_cmd, vars);
-		if (vars->quote_depth == 0)
-			break ;
-	}
-	if (vars->quote_depth > 0 && attempts >= 10)
-		print_error("Too many unclosed quotes, aborting input", NULL, 0);
-	return (processed_cmd);
+	handle_quotes(str, vars);
+    vars->start = vars->pos;
 }
 
 /*
@@ -198,63 +147,42 @@ Works with handle_token().
 */
 void	handle_expansion_token(char *str, t_vars *vars, int *first_token)
 {
-	char	*expanded;
-	t_node	*cmd_node;
+    char	*expanded;
+    t_node	*cmd_node;
 
-	if (vars->pos > vars->start)
-		process_text(str, vars, first_token, 0);
-	if (str[vars->pos] == '$' && str[vars->pos + 1] == '?')
-	{
-		if (!(*first_token) && vars->head)
-		{
-			cmd_node = find_last_command(vars->head);
-			if (cmd_node && cmd_node->type == TYPE_CMD)
-				append_arg(cmd_node, "$?", 0);
-			else
-			{
-				vars->curr_type = TYPE_EXIT_STATUS;
-				maketoken("$?", vars);
-			}
-		}
-		else
-		{
-			vars->curr_type = *first_token ? TYPE_CMD : TYPE_EXIT_STATUS;
-			maketoken("$?", vars);
-			*first_token = 0;
-		}
-		vars->pos += 2;
-	}
-	else
-	{
-		expanded = handle_expansion(str, &vars->pos, vars);
-		if (expanded)
-		{
-			if (!(*first_token) && vars->head)
-			{
-				cmd_node = find_last_command(vars->head);
-				if (cmd_node && cmd_node->type == TYPE_CMD)
-					append_arg(cmd_node, expanded, 0);
-				else
-				{
-					vars->curr_type = TYPE_STRING;
-					maketoken(expanded, vars);
-				}
-			}
-			else
-			{
-				vars->curr_type = *first_token ? TYPE_CMD : TYPE_STRING;
-				maketoken(expanded, vars);
-				*first_token = 0;
-			}
-			ft_safefree((void **)&expanded);
-		}
-		else
-		{
-			vars->curr_type = TYPE_STRING;
-			maketoken("", vars);
-		}
-	}
-	vars->start = vars->pos;
+    if (vars->pos > vars->start)
+        process_text(str, vars, first_token, 0);
+    if (str[vars->pos] == '$' && str[vars->pos + 1] == '?')
+    {
+        cmd_node = find_last_command(vars->head);
+        if (cmd_node && cmd_node->type == TYPE_CMD)
+        {
+            // Pass the vars pointer here
+            append_arg(cmd_node, "$?", 0);
+        }
+        else
+        {
+            vars->curr_type = TYPE_EXIT_STATUS;
+            maketoken_with_type("$?", vars->curr_type, vars);
+        }
+        vars->pos += 2;
+    }
+    else
+    {
+        expanded = handle_expansion(str, &vars->pos, vars);
+        if (expanded)
+        {
+            vars->curr_type = TYPE_ARGS;
+            maketoken_with_type(expanded, vars->curr_type, vars);
+            free(expanded);
+        }
+        else
+        {
+            vars->curr_type = TYPE_ARGS;
+            maketoken_with_type("", vars->curr_type, vars);
+        }
+    }
+    vars->start = vars->pos;
 }
 
 /*
@@ -296,7 +224,7 @@ Example: For | operator
 - Creates TYPE_PIPE node
 - Adds to token linked list
 */
-void	create_operator_token(t_vars *vars, t_tokentype type, char *symbol)
+void create_operator_token(t_vars *vars, t_tokentype type, char *symbol)
 {
 	t_node	*operator_node;
 
@@ -321,87 +249,24 @@ Example: For input with ">" operator
 */
 void	handle_operator_token(char *str, t_vars *vars, int *first_token)
 {
-	if (vars->pos > vars->start)
-		process_text(str, vars, first_token, 0);
-	if (str[vars->pos] == '|')
-		create_operator_token(vars, TYPE_PIPE, "|");
-	else if (str[vars->pos] == '>' && str[vars->pos + 1] == '>')
-	{
-		create_operator_token(vars, TYPE_APPEND_REDIRECT, ">>");
-		vars->pos++;
-	}
-	else if (str[vars->pos] == '<' && str[vars->pos + 1] == '<')
-	{
-		create_operator_token(vars, TYPE_HEREDOC, "<<");
-		vars->pos++;
-	}
-	else if (str[vars->pos] == '>')
-		create_operator_token(vars, TYPE_OUT_REDIRECT, ">");
-	else if (str[vars->pos] == '<')
-		create_operator_token(vars, TYPE_IN_REDIRECT, "<");
-	vars->pos++;
-	vars->start = vars->pos;
-}
-
-/*
-Processes a single token in the input string.
-- Handles different token types: operators, quotes, expansions.
-- Updates position and token list as tokens are processed.
-Returns:
-Nothing (void function).
-Works with lexerlist().
-
-Example: For input "echo $HOME"
-- Processes "echo" as command token
-- Processes "$HOME" as expansion token
-*/
-void	handle_token(char *str, t_vars *vars)
-{
-	int	first_token;
-
-	first_token = 1;
-	while (str && str[vars->pos])
-	{
-		if (str[vars->pos] == ' ' || str[vars->pos] == '\t'
-			|| str[vars->pos] == '\n')
-			handle_token_boundary(str, vars, &first_token);
-		else if (vars->quote_depth == 0 && (str[vars->pos] == '|'
-				|| str[vars->pos] == '>' || str[vars->pos] == '<'))
-			handle_operator_token(str, vars, &first_token);
-		else if ((str[vars->pos] == '\'' || str[vars->pos] == '"')
-			&& vars->quote_depth == 0)
-			handle_quote_content(str, vars, &first_token);
-		else if (str[vars->pos] == '$' && vars->quote_depth == 0)
-			handle_expansion_token(str, vars, &first_token);
-		else
-			vars->pos++;
-	}
-	if (vars->pos > vars->start)
-		process_text(str, vars, &first_token, 0);
-}
-
-/*
-Main lexical analysis function.
-- Converts input string into linked list of tokens.
-- Initializes lexer state and processes all tokens.
-- Handles special cases like unclosed quotes.
-Returns:
-Nothing (void function).
-Works with verify_input() and other high-level functions.
-
-Example: Input "echo hello | grep world"
-- Creates tokens: TYPE_CMD(echo, hello), TYPE_PIPE, TYPE_CMD(grep, world)
-- Builds linked list in vars->head
-*/
-void	lexerlist(char *str, t_vars *vars)
-{
-	vars->pos = 0;
-	vars->start = 0;
-	vars->head = NULL;
-	vars->current = NULL;
-	if (!str || !*str)
-		return ;
-	handle_token(str, vars);
-	if (vars->quote_depth > 0 && str)
-		str = lexing_unclosed_quo(str, vars);
+    if (vars->pos > vars->start)
+        process_text(str, vars, first_token, 0);
+    if (str[vars->pos] == '|')
+        create_operator_token(vars, TYPE_PIPE, "|");
+    else if (str[vars->pos] == '>' && str[vars->pos + 1] == '>')
+    {
+        create_operator_token(vars, TYPE_APPEND_REDIRECT, ">>");
+        vars->pos++; // Move increment after create_operator_token
+    }
+    else if (str[vars->pos] == '<' && str[vars->pos + 1] == '<')
+    {
+        create_operator_token(vars, TYPE_HEREDOC, "<<");
+        vars->pos++; // Move increment after create_operator_token
+    }
+    else if (str[vars->pos] == '>')
+        create_operator_token(vars, TYPE_OUT_REDIRECT, ">");
+    else if (str[vars->pos] == '<')
+        create_operator_token(vars, TYPE_IN_REDIRECT, "<");
+    vars->pos++;
+    vars->start = vars->pos;
 }

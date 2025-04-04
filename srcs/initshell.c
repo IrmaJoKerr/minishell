@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/23 03:02:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ t_ast	*init_verify(char *input, char **cmd_ptr)
 	ast = init_ast_struct();
 	if (!ast)
 	{
-		ft_safefree((void **)cmd_ptr);
+		free(cmd_ptr);
 		return (NULL);
 	}
 	return (ast);

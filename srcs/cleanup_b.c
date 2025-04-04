@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cleanup_b.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lechan <lechan@student.42kl.edu.my>        +#+  +:+       +#+        */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/03/22 18:42:37 by lechan           ###   ########.fr       */
+/*   Updated: 2025/04/05 03:54:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,20 +25,15 @@ Example: For "ls -la | grep .c > output.txt":
 */
 void	cleanup_ast(t_node *node)
 {
-	static int	depth;
-
-	depth = 0;
 	if (!node)
 		return ;
-	depth++;
 	cleanup_ast(node->left);
 	cleanup_ast(node->right);
 	if (node->args)
 		ft_free_2d(node->args, ft_arrlen(node->args));
 	if (node->arg_quote_type)
-		ft_safefree((void **)&node->arg_quote_type);
-	ft_safefree((void **)&node);
-	depth--;
+		free(node->arg_quote_type);
+	free(node);
 }
 
 /*
@@ -58,14 +53,14 @@ void	free_token_node(t_node *node)
 	{
 		while (node->args[i])
 		{
-			ft_safefree((void **)&node->args[i]);
+			free(node->args[i]);
 			i++;
 		}
-		ft_safefree((void **)&node->args);
+		free(node->args);
 	}
 	if (node->arg_quote_type)
-		ft_safefree((void **)&node->arg_quote_type);
-	ft_safefree((void **)&node);
+		free(node->arg_quote_type);
+	free(node);
 }
 
 /*
@@ -110,8 +105,8 @@ void	cleanup_exec_context(t_exec *exec)
 	if (!exec)
 		return ;
 	if (exec->cmd_path)
-		ft_safefree((void **)&exec->cmd_path);
-	ft_safefree((void **)&exec);
+		free(exec->cmd_path);
+	free(exec);
 }
 
 /*
