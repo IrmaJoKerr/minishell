@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 11:10:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 18:36:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,8 @@ void	setup_redir_ast(t_node *redir, t_node *cmd, t_node *target)
 		return ;
 	redir->left = cmd;
 	redir->right = target;
+	DBG_PRINTF(DEBUG_ARGS, "setup_redir_ast: Linked command '%s' with redirect '%s' to '%s'\n",
+        cmd->args[0], redir->args[0], target->args[0]);
 }
 
 /*
@@ -225,6 +227,7 @@ t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 	current = vars->head;
 	last_cmd = NULL;
 	redir_root = NULL;
+	(void)pipe_root;
 	while (current)
 	{
 		if (current->type == TYPE_CMD)
@@ -237,8 +240,10 @@ t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 			{
 				DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt1: Target command: content='%s'\n", target_cmd->args[0]);
 				setup_redir_ast(current, target_cmd, current->next);
-				if (!pipe_root && !redir_root)
-					redir_root = current;
+				// if (!pipe_root && !redir_root)
+				// 	redir_root = current;
+				if (!redir_root)
+                    redir_root = current;
 			}
 		}
 		current = current->next;
@@ -293,33 +298,60 @@ Example: For input "ls -l | grep a > output.txt":
 - Processes redirection to output.txt
 - Returns pipe node as root, with redirection integrated
 */
-t_node	*proc_token_list(t_vars *vars)
+t_node *proc_token_list(t_vars *vars)
 {
-	t_node	*pipe_root;
-	t_node	*last_pipe;
-	t_node	*last_cmd;
-	t_node	*redir_root;
-	
-	DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Starting\n");
-	if (!vars || !vars->head)
-		return (NULL);
-	find_cmd(NULL, NULL, FIND_ALL, vars);
-	/* Fix: Only print debug if we have at least one command node */
-    if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
-        DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Found command node: content='%s'\n", 
-            vars->cmd_nodes[0]->args[0]);
-	}
-	pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
-	proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
-	redir_root = proc_redir_pt1(vars, pipe_root);
-	proc_redir_pt2(vars, pipe_root);
-	if (pipe_root)
-		return (pipe_root);
-	else if (redir_root)
-		return (redir_root);
-	else if (vars->cmd_count > 0)
-		return (vars->cmd_nodes[0]);
-	return (NULL);
+    t_node *pipe_root;
+    t_node *last_pipe;
+    t_node *last_cmd;
+    t_node *redir_root;
+    
+    DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Starting\n");
+    
+    // Base case validation
+    if (!vars || !vars->head)
+        return (NULL);
+        
+    // Find all command nodes
+    find_cmd(NULL, NULL, FIND_ALL, vars);
+    
+    // Safety check: make sure we have at least one valid command
+    if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args)
+        return (NULL);
+        
+    // Initialize for pipe processing
+    pipe_root = NULL;
+    last_pipe = NULL;
+    last_cmd = NULL;
+    redir_root = NULL;
+    
+    // Process pipes - first pass identifies the first pipe
+    pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
+    
+    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing pipes part 1 complete\n");
+    
+    // Process pipes - second pass handles remaining pipes
+    if (pipe_root)
+        proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
+    
+    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing pipes part 2 complete\n");
+    
+    // Process redirections - two phases
+    redir_root = proc_redir_pt1(vars, pipe_root);
+    
+    if (pipe_root)
+        proc_redir_pt2(vars, pipe_root);
+    
+    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing redirects complete\n");
+    
+    // Return the appropriate root node
+    if (pipe_root)
+        return (pipe_root);
+    else if (redir_root)
+        return (redir_root);
+    else if (vars->cmd_count > 0)
+        return (vars->cmd_nodes[0]);  // For simple commands with no pipes/redirects
+    
+    return (NULL);
 }
 
 /*

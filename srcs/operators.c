@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:58:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 15:10:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,9 @@ int	operators(char *input, t_vars *vars)
 {
     int			advance;
     t_tokentype	token_type;
-    
+    // At the beginning of operators()
+	DBG_PRINTF(DEBUG_TOKENIZE, "operators: Initial curr_type=%d, entering with pos=%d\n", 
+	vars->curr_type, vars->pos);
     // Handle text before operator
     if (vars->pos > vars->start)
         handle_string(input, vars);
@@ -35,7 +37,9 @@ int	operators(char *input, t_vars *vars)
     // Store previous type before updating current
     vars->prev_type = vars->curr_type;
     vars->curr_type = token_type;  // Update current type
-    
+    // After setting vars->curr_type
+	DBG_PRINTF(DEBUG_TOKENIZE, "operators: Updated curr_type from %d to %d\n", 
+	vars->prev_type, vars->curr_type);
     // Process token based on its type
     if (token_type != 0)
     {
@@ -122,6 +126,8 @@ int	is_single_token(char *input, int pos, int *advance)
 
 	token_type = 0;
 	*advance = 0;
+	DBG_PRINTF(DEBUG_TOKENIZE, "is_single_token: Checking char '%c' at pos %d\n", 
+		input[pos], pos);
 	if (!input || !input[pos])
 		return (token_type);
 	if (input[pos] == '\'')
@@ -137,7 +143,11 @@ int	is_single_token(char *input, int pos, int *advance)
 	else if (input[pos] == '|')
 		token_type = TYPE_PIPE;
 	if (token_type != 0)
+	{
 		*advance = 1;
+		DBG_PRINTF(DEBUG_TOKENIZE, "is_single_token: Found token type %d (%s) for '%c'\n", 
+			token_type, get_token_str(token_type), input[pos]);
+	}
 	return (token_type);
 }
 
@@ -151,7 +161,9 @@ int	is_double_token(char *input, int pos, int *advance)
 	t_tokentype	token_type;
 
 	token_type = 0;
-	*advance = 0; 
+	*advance = 0;
+	DBG_PRINTF(DEBUG_TOKENIZE, "is_double_token: Checking chars '%c%c' at pos %d\n", 
+		input[pos], input[pos+1], pos);
 	if (!input || !input[pos] || !input[pos + 1])
 		return (token_type);
 	if (input[pos] == '>' && input[pos + 1] == '>')
@@ -161,7 +173,11 @@ int	is_double_token(char *input, int pos, int *advance)
 	else if (input[pos] == '$' && input[pos + 1] == '?')
 		token_type = TYPE_EXIT_STATUS;
 	if (token_type != 0)
-		*advance = 2;
+	{
+        *advance = 2;
+        DBG_PRINTF(DEBUG_TOKENIZE, "is_double_token: Found token type %d (%s) for '%c%c'\n", 
+                  token_type, get_token_str(token_type), input[pos], input[pos+1]);
+    }
 	return (token_type);
 }
 
@@ -176,20 +192,29 @@ t_tokentype	get_token_at(char *input, int pos, int *advance)
 
 	token_type = 0;
 	*advance = 0;
-	 
+	
+	DBG_PRINTF(DEBUG_TOKENIZE, "get_token_at: Checking position %d: '%c'\n", 
+		pos, input[pos]);
 	// Try to match double-character tokens first
 	token_type = is_double_token(input, pos, advance);
 	if (token_type != 0)
-		return (token_type);
-	 
+	{
+        DBG_PRINTF(DEBUG_TOKENIZE, "get_token_at: Found double token type %d, advance %d\n", 
+            token_type, *advance);
+        return token_type;
+    }
 	// Then try single-character tokens
 	token_type = is_single_token(input, pos, advance);
 	if (token_type != 0)
-		return (token_type);
-	 
+	{
+        DBG_PRINTF(DEBUG_TOKENIZE, "get_token_at: Found single token type %d, advance %d\n", 
+            token_type, *advance);
+        return token_type;
+    }
 	// If not a special token, treat as part of a string/command
 	*advance = 1;
-	return (0); // Will be classified as word/command later
+	DBG_PRINTF(DEBUG_TOKENIZE, "get_token_at: No special token found, advance 1\n");
+    return (0); // Will be classified as word/command later
 }
 
 /*
@@ -203,7 +228,8 @@ Returns:
 int handle_single_operator(char *input, t_vars *vars)
 {
     char *token;
-    
+    DBG_PRINTF(DEBUG_TOKENIZE, "handle_single_operator: Creating token for '%c', type=%d\n", 
+		input[vars->pos], vars->curr_type);
     token = ft_substr(input, vars->pos, 1);
     if (!token)
         return vars->pos;

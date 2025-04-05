@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:10:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 13:52:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ t_pipe *init_pipes(void)
     pipes->heredoc_fd = -1;
     pipes->redirection_fd = -1;
     pipes->root_node = NULL;
-    pipes->append_mode = 0;
+    pipes->out_mode = 0;
     pipes->current_redirect = NULL;
     return (pipes);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 07:13:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 15:12:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,10 +105,15 @@ Example: For | operator
 void create_operator_token(t_vars *vars, t_tokentype type, char *symbol)
 {
 	t_node	*operator_node;
-
+	// In create_operator_token() at beginning
+	DBG_PRINTF(DEBUG_TOKENIZE, "create_operator_token: Creating token with type=%d (%s)\n", 
+		type, symbol);
 	operator_node = initnode(type, symbol);
 	if (!operator_node)
 		return ;
 	vars->curr_type = type;
+	// After setting vars->curr_type
+	DBG_PRINTF(DEBUG_TOKENIZE, "create_operator_token: Updated vars->curr_type to %d\n", 
+		vars->curr_type);
 	build_token_linklist(vars, operator_node);
 }

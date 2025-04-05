@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 11:08:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 17:03:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,10 @@ Example: For input "echo hello"
 void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
 {
 	t_node	*node;
- 
+	
+	// In maketoken_with_type() at the beginning
+	DBG_PRINTF(DEBUG_TOKENIZE, "maketoken_with_type: Creating token '%s' with type %d\n", 
+	token, type);
 	node = NULL;
 	if (!token || !*token)
 	{
@@ -382,22 +385,59 @@ Example: For input "cmd > file"
 Processes operator characters like pipes and redirections.
 Returns 1 if operator was processed, 0 otherwise.
 */
+// int process_operator_char(char *input, int *i, t_vars *vars)
+// {
+//     int advance;
+//     t_tokentype token_type;
+    
+//     token_type = get_token_at(input, *i, &advance);
+    
+//     if (!is_operator_token(token_type))
+//         return (0);
+// 	DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Found operator '%c' at pos %d\n", 
+// 		input[*i], *i);
+//     /* Create operator token */
+//     create_operator_token(vars, token_type, get_token_str(token_type));
+    
+//     /* Advance position */
+//     (*i) += advance;
+//     vars->start = *i;
+    
+//     return (1);
+// }
 int process_operator_char(char *input, int *i, t_vars *vars)
 {
     int advance;
     t_tokentype token_type;
     
     token_type = get_token_at(input, *i, &advance);
-    
-    if (!is_operator_token(token_type))
+    DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Got token type %d at pos %d, advance %d\n", 
+               token_type, *i, advance);
+               
+    if (token_type == 0)
+	{
         return (0);
+	}
+	vars->curr_type = token_type;   
+    // Handle double operators (>>, <<, etc.)
+    if (advance == 2) {
+        DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Processing double operator '%c%c'\n", 
+                   input[*i], input[*i+1]);
+        handle_double_operator(input, vars);
+		// In process_operator_char() after handling token
+		DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: After handling, curr_type=%d\n", 
+			vars->curr_type);
+    }
     
-    /* Create operator token */
-    create_operator_token(vars, token_type, get_token_str(token_type));
-    
-    /* Advance position */
-    (*i) += advance;
-    vars->start = *i;
+    // Handle single operators (>, <, |, etc.)
+    else {
+        DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Processing single operator '%c'\n", 
+                   input[*i]);
+        handle_single_operator(input, vars);
+		// In process_operator_char() after handling token
+		DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: After handling, curr_type=%d\n", 
+			vars->curr_type);
+    }
     
     return (1);
 }
@@ -416,7 +456,10 @@ Example: For input "cat > file.txt"
 int	handle_redirection(char *input, int *pos, t_vars *vars)
 {
     int	result;
-
+	t_tokentype token_type = 0; // Declare the variable. FOR DEBUG ONLY. 
+    
+	DBG_PRINTF(DEBUG_TOKENIZE, "handle_redirection: Processing '%c%c', type=%d\n", 
+		input[*pos], input[*pos+1] ? input[*pos+1] : ' ', token_type);
     if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
     {
         vars->pos = *pos;
@@ -426,6 +469,36 @@ int	handle_redirection(char *input, int *pos, t_vars *vars)
     }
     return (0);
 }
+
+// int handle_redirection(char *input, int *pos, t_vars *vars)
+// {
+//     int result;
+//     t_tokentype token_type = 0; // Declare the variable. FOR DEBUG ONLY. 
+    
+//     // Determine the token type before logging
+//     if (input[*pos] == '<' && input[*pos + 1] == '<')
+//         token_type = TYPE_HEREDOC;
+//     else if (input[*pos] == '>' && input[*pos + 1] == '>')
+//         token_type = TYPE_APPEND_REDIRECT;
+//     else if (input[*pos] == '<')
+//         token_type = TYPE_IN_REDIRECT;
+//     else if (input[*pos] == '>')
+//         token_type = TYPE_OUT_REDIRECT;
+//     else if (input[*pos] == '|')
+//         token_type = TYPE_PIPE;
+    
+//     DBG_PRINTF(DEBUG_TOKENIZE, "handle_redirection: Processing '%c%c', type=%d\n", 
+//         input[*pos], input[*pos+1] ? input[*pos+1] : ' ', token_type);
+    
+//     if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
+//     {
+//         vars->pos = *pos;
+//         result = operators(input, vars);
+//         *pos = vars->pos;
+//         return (result);
+//     }
+//     return (0);
+// }
 
 /* 
 Tokenizes input string with improved quote handling.
@@ -539,6 +612,8 @@ int improved_tokenize(char *input, t_vars *vars)
               vars->curr_type, (vars->current && vars->current->args) ? 
               vars->current->args[0] : "(null)");
     DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
+	// Call at end of improved_tokenize()
+	debug_token_list(vars);
 	return(1);
 }
 
@@ -555,6 +630,9 @@ Example: When adding command node
 */
 void build_token_linklist(t_vars *vars, t_node *node)
 {
+	// In build_token_linklist() before adding node to list
+	DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: type=%d (%s), content='%s'\n", 
+		node->type, get_token_str(node->type), node->args[0]);
     t_node *cmd_node;
     
     if (!vars || !node)
@@ -604,4 +682,21 @@ void build_token_linklist(t_vars *vars, t_node *node)
         vars->current = node;
         DBG_PRINTF(DEBUG_ARGS, "Added as new node in list\n");
     }
+}
+
+// Add at the end of improved_tokenize()
+void debug_token_list(t_vars *vars)
+{
+    t_node *current = vars->head;
+    int count = 0;
+    
+    DBG_PRINTF(DEBUG_TOKENIZE, "=== COMPLETE TOKEN LIST ===\n");
+    while (current)
+    {
+        DBG_PRINTF(DEBUG_TOKENIZE, "Token %d: type=%d (%s), content='%s'\n", 
+                  count++, current->type, get_token_str(current->type), 
+                  current->args ? current->args[0] : "NULL");
+        current = current->next;
+    }
+    DBG_PRINTF(DEBUG_TOKENIZE, "========================\n");
 }

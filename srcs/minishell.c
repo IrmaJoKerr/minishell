@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 11:03:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 18:35:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,12 +158,10 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
         
     // If we got a new command string, free the old one
     if (new_cmd != cmd)
-    {
-        if (cmd != vars->error_msg)
-            free(cmd);
-        cmd = new_cmd;
-    }
-    
+	{
+    	free(cmd);  // Remove the conditional check for error_msg
+    	cmd = new_cmd;
+	}
     // Re-tokenize with the completed command
     cleanup_token_list(vars);
 	// For handle_quote_completion()
@@ -204,9 +202,8 @@ char	*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk)
 		return (NULL);
 	if (new_cmd != cmd)
 	{
-		if (cmd != vars->error_msg)
-			free(cmd);
-		cmd = new_cmd;
+    	free(cmd);  // Remove the conditional check for error_msg
+    	cmd = new_cmd;
 	}
 	return (cmd);
 }
@@ -345,43 +342,69 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
+// int process_command(char *command, t_vars *vars)
+// {
+//     char *processed_cmd;
+    
+//     // Make a copy to work with
+//     processed_cmd = ft_strdup(command);
+//     if (!processed_cmd)
+//         return (1);
+    
+//     // Handle unclosed quotes first
+//     processed_cmd = handle_quote_completion(processed_cmd, vars);
+//     if (!processed_cmd)
+//         return (1);
+    
+//     /* Tokenize and process input */
+//     if (!process_input_tokens(processed_cmd, vars))
+//     {
+//         if (processed_cmd != command)
+//             ft_safefree((void **)&processed_cmd);
+//         return (1);
+//     }
+    
+//     /* Check pipe syntax and handle completion */
+//     if (!process_pipe_syntax(processed_cmd, vars))
+//     {
+//         if (processed_cmd != command)
+//             ft_safefree((void **)&processed_cmd);
+//         return (1);
+//     }
+    
+//     /* Build and execute AST */
+//     build_and_execute(vars);
+    
+//     // Free the processed command if it's different from the original
+//     if (processed_cmd != command)
+//         ft_safefree((void **)&processed_cmd);
+        
+//     return (1);
+// }
 int process_command(char *command, t_vars *vars)
 {
-    char *processed_cmd;
-    
-    // Make a copy to work with
-    processed_cmd = ft_strdup(command);
-    if (!processed_cmd)
+    // Store original command in vars->partial_input
+    vars->partial_input = ft_strdup(command);
+    if (!vars->partial_input)
         return (1);
-    
-    // Handle unclosed quotes first
-    processed_cmd = handle_quote_completion(processed_cmd, vars);
-    if (!processed_cmd)
+    vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+    if (!vars->partial_input)
         return (1);
-    
-    /* Tokenize and process input */
-    if (!process_input_tokens(processed_cmd, vars))
+    if (!process_input_tokens(vars->partial_input, vars))
     {
-        if (processed_cmd != command)
-            ft_safefree((void **)&processed_cmd);
+        free(vars->partial_input);
+        vars->partial_input = NULL;
         return (1);
     }
-    
-    /* Check pipe syntax and handle completion */
-    if (!process_pipe_syntax(processed_cmd, vars))
+    if (!process_pipe_syntax(vars->partial_input, vars))
     {
-        if (processed_cmd != command)
-            ft_safefree((void **)&processed_cmd);
+        free(vars->partial_input);
+        vars->partial_input = NULL;
         return (1);
     }
-    
-    /* Build and execute AST */
     build_and_execute(vars);
-    
-    // Free the processed command if it's different from the original
-    if (processed_cmd != command)
-        ft_safefree((void **)&processed_cmd);
-        
+    free(vars->partial_input);
+    vars->partial_input = NULL;
     return (1);
 }
 

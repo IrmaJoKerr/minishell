@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:39:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 13:51:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ void	cleanup_vars(t_vars *vars)
 		ft_free_2d(vars->env, env_count);
 		vars->env = NULL;
 	}
-    if (vars->error_msg != NULL)
-		free(vars->error_msg);
 	if (vars->astroot)
 		cleanup_ast(vars->astroot);
 	if (vars->head && vars->head != vars->astroot)

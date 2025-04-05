@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 16:51:38 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/03 12:56:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 17:21:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,8 @@ char	*get_token_str(t_tokentype type)
 
 	basic_token = NULL;
 	basic_token = get_token_str_basic(type);
-	if (basic_token != NULL)
-		return (basic_token);
+	if (ft_strcmp(basic_token, TOKEN_TYPE_NULL) != 0)
+        return (basic_token);
 	if (type == TYPE_IN_REDIRECT)
 		return (TOKEN_TYPE_IN_REDIRECT);
 	else if (type == TYPE_OUT_REDIRECT)

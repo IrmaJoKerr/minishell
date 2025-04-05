@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 11:10:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 15:15:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,13 @@ Mode settings for the find_cmd function.
 # define FIND_ALL 4
 
 /*
+Mode settings for the out_mode variable.
+*/
+#define OUT_MODE_NONE 0
+#define OUT_MODE_TRUNCATE 1
+#define OUT_MODE_APPEND 2
+
+/*
 This enum stores the possible token types.
 */
 typedef enum e_tokentype
@@ -132,20 +139,6 @@ typedef struct s_node
 	struct s_node	*left;
 	struct s_node	*right;
 }	t_node;
-
-/*
-Structure for storing execution context.
-Has variables tracking current execution state.
-*/
-typedef struct s_exec
-{
-	char	*cmd_path;     // Path to the command being executed
-	pid_t	pid;           // Process ID of the command
-	int		status;        // Exit status of the command
-	int		result;        // Result of the execution
-	t_node	*cmd;          // Command node being executed
-	int		append;        // Append mode flag for redirections
-} t_exec;
 
 /*
 Structure for storing AST (Abstract Syntax Tree) building state.
@@ -198,7 +191,7 @@ typedef struct s_pipe
 	int			heredoc_fd;     // File descriptor for heredoc if present
 	int			redirection_fd; // Current redirection file descriptor
 	t_node		*root_node;     // Root node of the pipe structure
-	int			append_mode;    // Append flag for redirections
+	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
 } t_pipe;
 
@@ -228,7 +221,6 @@ typedef struct s_vars
 	int				start;
 	int				shell_level;
 	int				error_code;
-	char			*error_msg;
 	t_pipe			*pipes;
 } t_vars;
 
@@ -403,8 +395,8 @@ Execution functions.
 In execute.c
 */
 int			handle_cmd_status(int status, t_vars *vars);
-int			setup_out_redir(t_node *node, int *fd, int append);
-int			setup_in_redir(t_node *node, int *fd, t_vars *vars);
+int			setup_out_redir(t_node *node, t_vars *vars);
+int			setup_in_redir(t_node *node, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars, int *fd);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_child_cmd(t_node *node, char **envp,
@@ -670,6 +662,7 @@ int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
 void		build_token_linklist(t_vars *vars, t_node *node);
+void 		debug_token_list(t_vars *vars);
 
 /*
 Type conversion functions.

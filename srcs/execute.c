@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:39:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 17:38:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,29 +50,67 @@ Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
 */
-int setup_out_redir(t_node *node, int *fd, int append)
+// int setup_out_redir(t_node *node, int *fd, int append)
+// {
+//     char *file;
+//     int flags;
+    
+//     if (!node || !node->args || !node->args[0])
+//         return (0);
+    
+//     // Process quotes in file before accessing it
+//     process_quotes_in_redirect(node);
+    
+//     file = node->args[0];
+    
+//     // Set flags based on append mode
+//     flags = O_WRONLY | O_CREAT;
+//     if (append)
+//         flags |= O_APPEND;
+//     else
+//         flags |= O_TRUNC;
+    
+//     // Open the file
+//     *fd = open(file, flags, 0644);
+//     if (*fd == -1)
+//     {
+//         ft_putstr_fd("bleshell: ", 2);
+//         ft_putstr_fd(file, 2);
+//         ft_putendl_fd(": Permission denied", 2);
+//         return (0);
+//     }
+    
+//     // Redirect stdout to the file
+//     if (dup2(*fd, STDOUT_FILENO) == -1)
+//     {
+//         close(*fd);
+//         return (0);
+//     }
+    
+//     return (1);
+// }
+// Updated setup_out_redir function
+int setup_out_redir(t_node *node, t_vars *vars)
 {
     char *file;
-    int flags;
+	
+    int flags = O_WRONLY | O_CREAT;
     
     if (!node || !node->args || !node->args[0])
         return (0);
     
-    // Process quotes in file before accessing it
-    process_quotes_in_redirect(node);
-    
     file = node->args[0];
     
-    // Set flags based on append mode
-    flags = O_WRONLY | O_CREAT;
-    if (append)
+    // Set flags based on out_mode
+    if (vars->pipes->out_mode == 2)
         flags |= O_APPEND;
     else
         flags |= O_TRUNC;
     
     // Open the file
-    *fd = open(file, flags, 0644);
-    if (*fd == -1)
+	
+    vars->pipes->redirection_fd = open(file, flags, 0644);
+    if (vars->pipes->redirection_fd == -1)
     {
         ft_putstr_fd("bleshell: ", 2);
         ft_putstr_fd(file, 2);
@@ -81,12 +119,13 @@ int setup_out_redir(t_node *node, int *fd, int append)
     }
     
     // Redirect stdout to the file
-    if (dup2(*fd, STDOUT_FILENO) == -1)
+    if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
     {
-        close(*fd);
+        close(vars->pipes->redirection_fd);
         return (0);
     }
     
+    vars->error_code = 1;
     return (1);
 }
 
@@ -99,7 +138,7 @@ Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
 */
-int setup_in_redir(t_node *node, int *fd, t_vars *vars)
+int setup_in_redir(t_node *node, t_vars *vars)
 {
     char *file;
     
@@ -109,8 +148,8 @@ int setup_in_redir(t_node *node, int *fd, t_vars *vars)
     file = node->args[0];
     
     // Open file for reading
-    *fd = open(file, O_RDONLY);
-    if (*fd == -1)
+    vars->pipes->redirection_fd = open(file, O_RDONLY);
+    if (vars->pipes->redirection_fd == -1)
     {
         ft_putstr_fd("bleshell: ", 2);
         ft_putstr_fd(file, 2);
@@ -120,12 +159,12 @@ int setup_in_redir(t_node *node, int *fd, t_vars *vars)
     }
     
     // Redirect stdin to the file
-    if (dup2(*fd, STDIN_FILENO) == -1)
+    if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
     {
-        close(*fd);
+        close(vars->pipes->redirection_fd);
         return (0);
     }
-    
+    vars->error_code = 1; // Set error code to 1
     return (1);
 }
 
@@ -138,15 +177,67 @@ Returns:
 1 on success, 0 on failure.
 Works with exec_redirect_cmd().
 */
+// int setup_redirection(t_node *node, t_vars *vars, int *fd)
+// {
+//     // Process quotes in redirection filename
+//     process_quotes_in_redirect(node);
+    
+//     // Handle different redirection types
+//     if (node->type == TYPE_IN_REDIRECT)
+//     {
+//         if (!setup_in_redir(node, fd, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_OUT_REDIRECT)
+//     {
+//         if (!setup_out_redir(node, fd, 0))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_APPEND_REDIRECT)
+//     {
+//         if (!setup_out_redir(node, fd, 1))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_HEREDOC)
+//     {
+//         char *delimiter = NULL;
+//         if (node->args && node->args[0])
+//             delimiter = node->args[0];
+//         else
+//             return (vars->error_code = 1);
+            
+//         if (!read_heredoc(fd, delimiter, vars, 1))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//         vars->pipes->heredoc_fd = *fd;
+//     }
+    
+//     return (1);
+// }
 int setup_redirection(t_node *node, t_vars *vars, int *fd)
 {
+    // Store current redirection node - common for all redirect types
+    vars->pipes->current_redirect = node;
+	vars->pipes->redirection_fd = *fd;
+    
     // Process quotes in redirection filename
     process_quotes_in_redirect(node);
     
     // Handle different redirection types
     if (node->type == TYPE_IN_REDIRECT)
     {
-        if (!setup_in_redir(node, fd, vars))
+        if (!setup_in_redir(node, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -154,22 +245,20 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_OUT_REDIRECT)
     {
-        if (!setup_out_redir(node, fd, 0))
-        {
-            vars->error_code = 1;
+        vars->pipes->out_mode = 1; // Truncate mode
+        if (!setup_out_redir(node, vars))
             return (0);
-        }
+
     }
     else if (node->type == TYPE_APPEND_REDIRECT)
     {
-        if (!setup_out_redir(node, fd, 1))
-        {
-            vars->error_code = 1;
+        vars->pipes->out_mode = 2; // Append mode
+        if (!setup_out_redir(node, vars))
             return (0);
-        }
     }
     else if (node->type == TYPE_HEREDOC)
     {
+        // Heredoc-specific handling
         char *delimiter = NULL;
         if (node->args && node->args[0])
             delimiter = node->args[0];
@@ -291,29 +380,51 @@ Main command execution function.
 Returns:
 Exit code which is also stored in vars->error_code.
 */
+// int execute_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+//     int result = 0;
+    
+//     if (!node)
+//         return (vars->error_code = 1);
+// 		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", node->type, node->args[0]);
+//     // Handle different node types
+//     if (node->type == TYPE_PIPE)
+//         result = execute_pipes(node, vars);
+//     else if (is_redirection(node->type))
+//         result = exec_redirect_cmd(node, envp, vars);
+//     else if (node->type == TYPE_CMD)
+//     {
+//         if (is_builtin(node->args[0]))
+//             result = execute_builtin(node->args[0], node->args, vars);
+//         else
+//             result = exec_external_cmd(node, envp, vars);
+//     }
+    
+//     // Ensure error code is set in vars
+//     vars->error_code = result;
+//     return (result);
+// }
 int execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
     int result = 0;
     
     if (!node)
-        return (vars->error_code = 1);
-		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", node->type, node->args[0]);
+        return 1;
+        
+    DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
+               node->type, node->args[0]);
+               
     // Handle different node types
     if (node->type == TYPE_PIPE)
         result = execute_pipes(node, vars);
     else if (is_redirection(node->type))
         result = exec_redirect_cmd(node, envp, vars);
     else if (node->type == TYPE_CMD)
-    {
-        if (is_builtin(node->args[0]))
-            result = execute_builtin(node->args[0], node->args, vars);
-        else
-            result = exec_external_cmd(node, envp, vars);
-    }
+        result = exec_std_cmd(node, envp, vars);
     
     // Ensure error code is set in vars
     vars->error_code = result;
-    return (result);
+    return result;
 }
 
 /*

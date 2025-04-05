@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:44:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 14:26:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -463,11 +463,112 @@ Sets up all redirections for a command and executes it.
 Returns:
 Command execution status code properly stored in vars->error_code.
 */
+// int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
+// {
+//     t_node  *current;
+//     int     result;
+//     char    *delimiter;
+    
+//     // Initialize pipes structure if it doesn't exist
+//     if (!vars->pipes)
+//     {
+//         vars->pipes = init_pipes();
+//         if (!vars->pipes)
+//             return (vars->error_code = 1);
+//     }
+    
+//     // Save original stdin/stdout for restoration in pipes struct
+//     vars->pipes->saved_stdin = dup(STDIN_FILENO);
+//     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+//     if (vars->pipes->saved_stdin == -1 || vars->pipes->saved_stdout == -1)
+//         return (vars->error_code = 1);
+        
+//     // Find and process input redirections
+//     current = find_linked_redirects(cmd_node, vars);
+//     while (current)
+//     {
+//         if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
+//         {
+//             // Process quotes in the redirection filename
+//             process_quotes_in_redirect(current);
+            
+//             // Set up the input redirection
+//             if (current->type == TYPE_IN_REDIRECT)
+//             {
+//                 if (!setup_in_redir(current, vars))
+//                 {
+//                     // Restore file descriptors
+//                     reset_std_fd(vars->pipes);
+//                     return (vars->error_code = 1);
+//                 }
+//             }
+//             else if (current->type == TYPE_HEREDOC)
+//             {
+//                 // Extract delimiter from the heredoc node
+//                 delimiter = NULL;
+//                 if (current->args && current->args[0])
+//                     delimiter = current->args[0];
+//                 else
+//                 {
+//                     // Restore file descriptors
+//                     reset_std_fd(vars->pipes);
+//                     return (vars->error_code = 1);
+//                 }
+                
+//                 // Call read_heredoc with proper arguments
+//                 if (!read_heredoc(&(vars->pipes->redirection_fd), delimiter, vars, 1))
+//                 {
+//                     // Restore file descriptors
+//                     reset_std_fd(vars->pipes);
+//                     return (vars->error_code = 1);
+//                 }
+                    
+//                 vars->pipes->heredoc_fd = vars->pipes->redirection_fd;
+//             }
+//         }
+//         current = current->next;
+//     }
+    
+//     // Find and process output redirections
+//     current = find_linked_redirects(cmd_node, vars);
+//     while (current)
+//     {
+//         if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
+//         {
+//             // Process quotes in the redirection filename
+//             process_quotes_in_redirect(current);
+            
+//             // Store append mode in the pipes structure
+//             vars->pipes->append_mode = (current->type == TYPE_APPEND_REDIRECT);
+//             vars->pipes->current_redirect = current;
+            
+//             // Set up output redirection
+//             if (!setup_out_redir(current, vars))
+//             {
+//                 // Restore file descriptors
+//                 reset_std_fd(vars->pipes);
+//                 return (vars->error_code = 1);
+//             }
+//         }
+//         current = current->next;
+//     }
+    
+//     // Execute the command
+//     result = execute_cmd(cmd_node, vars->env, vars);
+    
+//     // Store result in vars->error_code
+//     vars->error_code = result;
+    
+//     // Restore original stdin/stdout
+//     reset_std_fd(vars->pipes);
+    
+//     return vars->error_code;
+// }
 int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
 {
     t_node  *current;
     int     result;
-    char    *delimiter;
+    // char    *delimiter;
     
     // Initialize pipes structure if it doesn't exist
     if (!vars->pipes)
@@ -489,41 +590,30 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
     {
         if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
         {
+            // Set current redirection node in pipes struct
+            vars->pipes->current_redirect = current;
+            
             // Process quotes in the redirection filename
             process_quotes_in_redirect(current);
             
             // Set up the input redirection
             if (current->type == TYPE_IN_REDIRECT)
             {
-                if (!setup_in_redir(current, &(vars->pipes->redirection_fd), vars))
+                if (!setup_in_redir(current, vars))
                 {
                     // Restore file descriptors
-                    reset_std_fd(vars->pipes);
-                    return (vars->error_code = 1);
+                    reset_redirect_fds(vars);
+                    return (vars->error_code);
                 }
             }
             else if (current->type == TYPE_HEREDOC)
             {
-                // Extract delimiter from the heredoc node
-                delimiter = NULL;
-                if (current->args && current->args[0])
-                    delimiter = current->args[0];
-                else
+                // Handle heredoc
+                if (!proc_heredoc(current, vars))
                 {
-                    // Restore file descriptors
-                    reset_std_fd(vars->pipes);
-                    return (vars->error_code = 1);
+                    reset_redirect_fds(vars);
+                    return (vars->error_code);
                 }
-                
-                // Call read_heredoc with proper arguments
-                if (!read_heredoc(&(vars->pipes->redirection_fd), delimiter, vars, 1))
-                {
-                    // Restore file descriptors
-                    reset_std_fd(vars->pipes);
-                    return (vars->error_code = 1);
-                }
-                    
-                vars->pipes->heredoc_fd = vars->pipes->redirection_fd;
             }
         }
         current = current->next;
@@ -535,19 +625,20 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
     {
         if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
         {
-            // Process quotes in the redirection filename
-            process_quotes_in_redirect(current);
-            
-            // Store append mode in the pipes structure
-            vars->pipes->append_mode = (current->type == TYPE_APPEND_REDIRECT);
+            // Set current redirection node in pipes struct
             vars->pipes->current_redirect = current;
             
-            // Set up output redirection
-            if (!setup_out_redir(current, &(vars->pipes->redirection_fd), vars->pipes->append_mode))
+            // Set mode based on redirection type without ternary
+            if (current->type == TYPE_APPEND_REDIRECT)
+                vars->pipes->out_mode = OUT_MODE_APPEND;
+            else
+                vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+            
+            // Process quotes and set up output redirection
+            if (!setup_out_redir(current, vars))
             {
-                // Restore file descriptors
-                reset_std_fd(vars->pipes);
-                return (vars->error_code = 1);
+                reset_redirect_fds(vars);
+                return (vars->error_code);
             }
         }
         current = current->next;
@@ -556,13 +647,10 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
     // Execute the command
     result = execute_cmd(cmd_node, vars->env, vars);
     
-    // Store result in vars->error_code
-    vars->error_code = result;
+    // Restore original file descriptors
+    reset_redirect_fds(vars);
     
-    // Restore original stdin/stdout
-    reset_std_fd(vars->pipes);
-    
-    return vars->error_code;
+    return result;
 }
 
 /*
