@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:30:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 09:51:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,15 +231,14 @@ Example: For "echo hello | grep h"
 // 	if (vars->astroot)
 // 		execute_cmd(vars->astroot, vars->env, vars);
 // }
-void build_and_execute(t_vars *vars)
+void	build_and_execute(t_vars *vars)
 {
-    t_node *root = NULL;
+    t_node	*root;
     
-    // Return early if no token list or vars
+	root = NULL;
     if (!vars || !vars->head)
-        return;
-    
-    // Build AST from token list
+        return ;
+
     DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
     get_cmd_nodes(vars);
     process_token_list(vars);
@@ -251,7 +250,6 @@ void build_and_execute(t_vars *vars)
         root = vars->cmd_nodes[0];
         vars->astroot = root;
     }
-    
     // Execute the command if AST built successfully
     if (vars->astroot)
     {
