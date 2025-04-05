@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 07:47:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 11:08:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,23 +102,6 @@ void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
 	{
         DBG_PRINTF(DEBUG_ARGS, "Failed to create node\n");
     }
-}
-
-// Helper function to find the last command node
-t_node	*find_last_command(t_node *head)
-{
-	t_node	*current;
-	t_node	*last_cmd;
-
-	current = head;
-	last_cmd = NULL;
-	while (current)
-	{
-		if (current->type == TYPE_CMD)
-			last_cmd = current;
-		current = current->next;
-	}
-	return (last_cmd);
 }
 
 /*
@@ -225,7 +208,7 @@ int process_expand_char(char *input, int *i, t_vars *vars)
         if (!var_value)
             return (0);
         
-        cmd_node = find_last_command(vars->head);
+        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         
         // If adjacent to previous text, join with last argument
         if (cmd_node && is_adjacent)
@@ -266,7 +249,7 @@ int process_expand_char(char *input, int *i, t_vars *vars)
         var_value = get_env_val(var_name, vars->env);
         free(var_name);
         
-        cmd_node = find_last_command(vars->head);
+        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         
         // If adjacent to previous text, try joining with last argument
         if (cmd_node && is_adjacent)
@@ -357,7 +340,7 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     // If adjacent to previous token, join with it
     if (is_adjacent)
     {
-        cmd_node = find_last_command(vars->head);
+        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         if (cmd_node && join_with_cmd_arg(cmd_node, content))
         {
             free(content);
@@ -367,7 +350,7 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     }
     
     // Otherwise add as separate argument with appropriate quote type
-    cmd_node = find_last_command(vars->head);
+    cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
     if (cmd_node)
         append_arg(cmd_node, content, quote_type);
     else

@@ -6,64 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:31:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 11:10:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Collects and stores command nodes from the token list in vars->cmd_nodes.
-- Traverses linked list of tokens starting from vars->head.
-- Identifies command nodes (TYPE_CMD).
-- Stores them in vars->cmd_nodes array for easier reference.
-- Updates vars->cmd_count with total count of commands found.
-Works with proc_token_list().
-*/
-void	get_cmd_nodes(t_vars *vars)
-{
-	t_node	*current;
-
-	if (!vars || !vars->head)
-		return ;
-	vars->cmd_count = 0;
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_CMD && vars->cmd_count < 100)
-		{
-			DBG_PRINTF(DEBUG_ARGS, "get_cmd_nodes: Found command node: content='%s'\n", current->args[0]);
-			vars->cmd_nodes[vars->cmd_count] = current;
-			vars->cmd_count++;
-		}
-		current = current->next;
-	}
-}
-
-/*
-Locates the next command node in the token list after a specified position.
-- Traverses the token list starting from the given node.
-- Returns first node of type TYPE_CMD encountered.
-Returns:
-- Pointer to the next command node.
-- NULL if no command node found or if start is NULL.
-Works with proc_pipes_pt1() and proc_pipes_pt2().
-*/
-t_node	*find_next_cmd(t_node *start)
-{
-	t_node	*temp;
-
-	if (!start)
-		return (NULL);
-	temp = start;
-	while (temp)
-	{
-		if (temp->type == TYPE_CMD)
-			return (temp);
-		temp = temp->next;
-	}
-	return (NULL);
-}
 
 /*
 Initializes the first pipe node in a pipes structure.
@@ -127,7 +74,7 @@ t_node	*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd)
 		{
 			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Found pipe: content='%s'\n", current->args[0]);
 			pipe_root = current;
-			next_cmd = find_next_cmd(current->next);
+			next_cmd = find_cmd(current->next, NULL, FIND_NEXT, NULL);
 			if (next_cmd)
 			{
 				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Next command: content='%s'\n", next_cmd->args[0]);
@@ -162,7 +109,7 @@ void	proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
 			&& current != pipe_root)
 		{
 			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Found pipe: content='%s'\n", current->args[0]);
-			next_cmd = find_next_cmd(current->next);
+			next_cmd = find_cmd(current->next, NULL, FIND_NEXT, NULL);
 			if (*last_cmd && next_cmd)
 			{
 				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Next command: content='%s'\n", next_cmd->args[0]);
@@ -356,7 +303,12 @@ t_node	*proc_token_list(t_vars *vars)
 	DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Starting\n");
 	if (!vars || !vars->head)
 		return (NULL);
-	get_cmd_nodes(vars);
+	find_cmd(NULL, NULL, FIND_ALL, vars);
+	/* Fix: Only print debug if we have at least one command node */
+    if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
+        DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Found command node: content='%s'\n", 
+            vars->cmd_nodes[0]->args[0]);
+	}
 	pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
 	proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
 	redir_root = proc_redir_pt1(vars, pipe_root);
@@ -444,7 +396,7 @@ void	build_pipe_ast(t_vars *vars)
 			cmd_before = current;
 		else if (current->type == TYPE_PIPE)
 		{
-			cmd_after = find_next_cmd(current->next);
+			cmd_after = find_cmd(current->next, NULL, FIND_NEXT, NULL);
 			if (!vars->astroot)
 			{
 				vars->astroot = current;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 07:58:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 11:10:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,14 @@ This enables easy conversion between enum and string.
 # define TOKEN_TYPE_EXPANSION        "$"
 # define TOKEN_TYPE_PIPE             "|"
 # define TOKEN_TYPE_EXIT_STATUS      "$?"
+
+/*
+Mode settings for the find_cmd function.
+*/
+# define FIND_LAST 1
+# define FIND_PREV 2
+# define FIND_NEXT 3
+# define FIND_ALL 4
 
 /*
 This enum stores the possible token types.
@@ -314,8 +322,6 @@ In buildast_utils.c
 AST token processing and AST tree building.
 In buildast.c
 */
-void		get_cmd_nodes(t_vars *vars);
-t_node		*find_next_cmd(t_node *start);
 void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd,
 				t_node *next_cmd);
 void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
@@ -375,6 +381,12 @@ void		cleanup_ast(t_node *node);
 void		free_token_node(t_node *node);
 void		cleanup_token_list(t_vars *vars);
 void		cleanup_fds(int fd_in, int fd_out);
+
+/*
+Master command finder function.
+In cmd_finder.c
+*/
+t_node *find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
 
 /*
 Error handling.
@@ -518,7 +530,6 @@ Input verification functions.
 In input_verify.c
 */
 void		process_expansions(t_vars *vars);
-t_node		*find_preceding_cmd(t_node *head, t_node *exp_node);
 
 /*
 Lexer utility functions.
@@ -652,7 +663,6 @@ In tokenize.c
 */
 void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
-t_node		*find_last_command(t_node *head);
 int 		is_adjacent_token(char *input, int pos);
 int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
 int			process_expand_char(char *input, int *i, t_vars *vars);

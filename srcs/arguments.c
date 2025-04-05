@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:36:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 09:47:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 10:57:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ Creates an argument array for a node with a single argument.
 Allocates memory for the array and initializes it with the given token.
 The quote type is set to default 0 (no quotes).
 Returns NULL on failure.
-*/
 */
 void	create_args_array(t_node *node, char *token)
 {

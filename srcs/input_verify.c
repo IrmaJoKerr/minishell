@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:51:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 11:09:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void	process_expansions(t_vars *vars)
             DBG_PRINTF(DEBUG_EXPAND, "Replacing token content with expanded value: %s\n", expanded_value);
             
             // Find the preceding command node
-            cmd_node = find_preceding_cmd(vars->head, current);
+            cmd_node = find_cmd(vars->head, current, FIND_PREV, NULL);
             if (cmd_node)
             {
                 append_arg(cmd_node, expanded_value, 0); // Append to command node
@@ -76,27 +76,4 @@ void	process_expansions(t_vars *vars)
         current = current->next;
     }
     DBG_PRINTF(DEBUG_EXPAND, "Ending process_expansions\n");
-}
-
-/*
-Finds the command node that precedes a given expansion node
-Used to determine which command an expansion belongs to
-Returns the command node or NULL if none found
-*/
-t_node	*find_preceding_cmd(t_node *head, t_node *exp_node)
-{
-	t_node *current = head;
-	t_node *last_cmd = NULL;
-	 
-	// Loop through nodes until we reach the expansion node
-	while (current && current != exp_node)
-	{
-		if (current->type == TYPE_CMD)
-			last_cmd = current;
-		// If we find a pipe, reset the command context
-		if (current->type == TYPE_PIPE)
-			last_cmd = NULL;		 
-		current = current->next;
-	} 
-	return last_cmd;
 }

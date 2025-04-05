@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 09:51:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 11:03:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,7 +240,12 @@ void	build_and_execute(t_vars *vars)
         return ;
 
     DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
-    get_cmd_nodes(vars);
+    find_cmd(NULL, NULL, FIND_ALL, vars);
+	// Fix: Use vars->cmd_nodes[0] instead of undefined 'current'
+	if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
+        DBG_PRINTF(DEBUG_ARGS, "build_and_execute: Found command node: content='%s'\n", 
+            vars->cmd_nodes[0]->args[0]);
+    }
     process_token_list(vars);
     
     // Get the root node
