@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 14:26:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 01:51:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,7 +270,7 @@ int	prep_pipe_complete(char *cmd, char **result, char **pipe_cmd, t_ast **ast)
 		free(*result);
 		return (-1);
 	}
-	*ast = init_ast_struct();
+	*ast = init_ast();
 	if (!*ast)
 	{
 		free(*result);
@@ -371,88 +371,179 @@ Example: For "ls -l | grep txt"
 - Waits for both commands to complete
 - Returns final execution status
 */
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int     pipefd[2];
+//     pid_t   left_pid;
+// 	pid_t	right_pid;
+//     int     left_status = 0;
+//     int     right_status = 0;
+    
+//     if (!pipe_node || pipe_node->type != TYPE_PIPE)
+//         return 1;
+    
+//     // Initialize pipes structure if not already done
+//     if (!vars->pipes)
+//     {
+//         vars->pipes = init_pipes();
+//         if (!vars->pipes)
+//             return print_error("failed to initialize pipes", vars, 1);
+//     }
+// 	// Debugging output
+// 	fprintf(stderr, "[DEBUG-PIPE] Starting execute_pipes on node type=%d\n", pipe_node->type);
+// 	if (pipe_node->left && pipe_node->left->args)
+//     	fprintf(stderr, "[DEBUG-PIPE] Left command: %s\n", pipe_node->left->args[0]);
+// 	if (pipe_node->right && pipe_node->right->args)
+//     	fprintf(stderr, "[DEBUG-PIPE] Right command/pipe: %s\n", pipe_node->right->args[0]);
+
+//     // Track pipe depth
+//     vars->pipes->pipe_count++;
+    
+//     // Create the pipe
+//     if (pipe(pipefd) == -1)
+//         return print_error("pipe creation failed", vars, 1);
+//     // After pipe creation
+// 	fprintf(stderr, "[DEBUG-PIPE] Created pipe: fd[0]=%d, fd[1]=%d\n", pipefd[0], pipefd[1]);
+//     // Execute left side of pipe
+//     left_pid = fork();
+//     if (left_pid == 0)
+//     {
+//         // Child process for left command
+//         close(pipefd[0]);  // Close read end
+//         if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+//             exit(1);
+//         close(pipefd[1]);
+// 		// In left child process before execution
+// 		fprintf(stderr, "[DEBUG-PIPE] Left child process (pid=%d) redirecting stdout to fd=%d\n", getpid(), pipefd[1]);
+//         exit(execute_cmd(pipe_node->left, vars->env, vars));
+//     }
+//     else if (left_pid < 0)
+//     {
+//         close(pipefd[0]);
+//         close(pipefd[1]);
+//         return print_error("fork failed", vars, 1);
+//     }
+    
+//     // Parent process
+//     close(pipefd[1]);  // Parent doesn't write to pipe
+    
+//     // Handle right side - check if it's a pipe or command
+//     if (pipe_node->right->type == TYPE_PIPE)
+//     {
+//         // Save current stdin using the struct field
+//         vars->pipes->saved_stdin = dup(STDIN_FILENO);
+        
+//         // Connect pipe output to stdin
+//         if (dup2(pipefd[0], STDIN_FILENO) == -1)
+//         {
+//             close(pipefd[0]);
+//             return print_error("dup2 failed", vars, 1);
+//         }
+//         close(pipefd[0]);
+//         // Before recursive call for right pipe
+// 		fprintf(stderr, "[DEBUG-PIPE] About to recurse on right pipe (pid=%d)\n", getpid());
+//         // Recursively handle the rest of the pipeline
+//         right_status = execute_pipes(pipe_node->right, vars);
+        
+//         // Restore stdin
+//         if (vars->pipes->saved_stdin > 2)
+//         {
+//             dup2(vars->pipes->saved_stdin, STDIN_FILENO);
+//             close(vars->pipes->saved_stdin);
+//             vars->pipes->saved_stdin = -1;
+//         }
+//     }
+//     else
+//     {
+//         // Right side is a command, fork and execute it
+//         right_pid = fork();
+//         if (right_pid == 0)
+//         {
+//             // Child process
+// 			// When handling right command execution
+// 			fprintf(stderr, "[DEBUG-PIPE] Executing right command directly (pid=%d)\n", getpid());
+//             if (dup2(pipefd[0], STDIN_FILENO) == -1)
+//                 exit(1);
+//             close(pipefd[0]);
+//             exit(execute_cmd(pipe_node->right, vars->env, vars));
+//         }
+//         else if (right_pid < 0)
+//         {
+//             close(pipefd[0]);
+//             return print_error("fork failed", vars, 1);
+//         }
+//         // When waiting for processes
+// 		fprintf(stderr, "[DEBUG-PIPE] Parent waiting for child pid=%d\n", left_pid);
+//         // Parent closes pipe and waits for right command
+//         close(pipefd[0]);
+//         waitpid(right_pid, &right_status, 0);
+//     }
+    
+//     // Wait for left command to complete
+//     waitpid(left_pid, &left_status, 0);
+    
+//     // Decrement pipe count as we exit this level
+//     vars->pipes->pipe_count--;
+    
+//     // Return the status of the last command in the pipeline
+//     vars->error_code = handle_cmd_status(right_status, vars);
+//     return vars->error_code;
+// }
+/* 
+ * Main function to execute a pipeline of commands
+ * Returns exit code of last command in pipeline
+ */
+/* 
+ * Simplified pipeline execution using the cmd_nodes array
+ * Return: Final command status
+ */
 int execute_pipes(t_node *pipe_node, t_vars *vars)
 {
-    int     pipefd[2];
-    pid_t   left_pid;
-    pid_t   right_pid;
-    int     left_status;
-    int     right_status;
+    int pipe_count;
+    int result;
     
-    left_status = 0;
-	right_status = 0;
     if (!pipe_node || pipe_node->type != TYPE_PIPE)
         return (1);
-        
-    // Create the pipe
-    if (pipe(pipefd) == -1)
-    {
-        print_error("pipe creation failed", vars, 1);
+    
+    DBG_PRINTF(DEBUG_EXEC, "=== EXECUTING PIPELINE ===\n");
+    
+    // Get pipe count from command count
+    pipe_count = vars->cmd_count - 1;  // Pipes = commands - 1
+    if (pipe_count < 1)
         return (1);
-    }
-    
-    // Execute left side of pipe
-    left_pid = fork();
-    if (left_pid == 0)
-    {
-        // Child process for left command
-        close(pipefd[0]);  // Close read end
         
-        // Redirect stdout to pipe
-        if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-            exit(1);
-            
-        close(pipefd[1]);  // Close original write end
-        
-        // Execute the left command
-        exit(execute_cmd(pipe_node->left, vars->env, vars));
+    DBG_PRINTF(DEBUG_EXEC, "Pipeline has %d pipes (%d commands)\n", 
+              pipe_count, vars->cmd_count);
+    
+    // Initialize pipe arrays
+    if (!init_pipe_arrays(vars->pipes, pipe_count))
+        return print_error("Failed to allocate pipe arrays", vars, 1);
+    vars->pipes->pipe_count = pipe_count;
+    
+    // Simply copy commands from cmd_nodes (already in correct order)
+    int i = 0;
+    while (i < vars->cmd_count) {
+        vars->pipes->exec_cmds[i] = vars->cmd_nodes[i];
+        DBG_PRINTF(DEBUG_EXEC, "Using command[%d]: %s\n", 
+                  i, vars->cmd_nodes[i]->args[0]);
+        i++;
     }
-    else if (left_pid < 0)
+    
+    // Rest of pipeline execution remains the same...
+    if (!make_pipes(vars->pipes, pipe_count))
+        return print_error("Failed to create pipes", vars, 1);
+    
+    if (!fork_processes(vars->pipes, pipe_count, vars))
     {
-        print_error("fork failed", vars, 1);
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return (1);
+        close_all_pipe_fds(vars->pipes);
+        return print_error("Failed to create processes", vars, 1);
     }
     
-    // Execute right side of pipe
-    right_pid = fork();
-    if (right_pid == 0)
-    {
-        // Child process for right command
-        close(pipefd[1]);  // Close write end
-        
-        // Redirect stdin to pipe
-        if (dup2(pipefd[0], STDIN_FILENO) == -1)
-            exit(1);
-            
-        close(pipefd[0]);  // Close original read end
-        
-        // Execute the right command
-        exit(execute_cmd(pipe_node->right, vars->env, vars));
-    }
-    else if (right_pid < 0)
-    {
-        print_error("fork failed", vars, 1);
-        close(pipefd[0]);
-        close(pipefd[1]);
-        return (1);
-    }
-    close(pipefd[0]);
-    close(pipefd[1]);
+    close_all_pipe_fds(vars->pipes);
     
-    // Wait for left process
- 
-    waitpid(left_pid, &left_status, 0);
-    
-    // Wait for right process and use its status
-    
-    waitpid(right_pid, &right_status, 0);
-    
-    // Set error code based on right process status
-    vars->error_code = handle_cmd_status(right_status, vars);
-    
-    return (vars->error_code);
+    result = wait_for_processes(vars->pipes, vars);
+    DBG_PRINTF(DEBUG_EXEC, "=== PIPELINE EXECUTION COMPLETE ===\n");
+    return result;
 }
 
 /*
@@ -463,107 +554,6 @@ Sets up all redirections for a command and executes it.
 Returns:
 Command execution status code properly stored in vars->error_code.
 */
-// int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
-// {
-//     t_node  *current;
-//     int     result;
-//     char    *delimiter;
-    
-//     // Initialize pipes structure if it doesn't exist
-//     if (!vars->pipes)
-//     {
-//         vars->pipes = init_pipes();
-//         if (!vars->pipes)
-//             return (vars->error_code = 1);
-//     }
-    
-//     // Save original stdin/stdout for restoration in pipes struct
-//     vars->pipes->saved_stdin = dup(STDIN_FILENO);
-//     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-//     if (vars->pipes->saved_stdin == -1 || vars->pipes->saved_stdout == -1)
-//         return (vars->error_code = 1);
-        
-//     // Find and process input redirections
-//     current = find_linked_redirects(cmd_node, vars);
-//     while (current)
-//     {
-//         if (current->type == TYPE_IN_REDIRECT || current->type == TYPE_HEREDOC)
-//         {
-//             // Process quotes in the redirection filename
-//             process_quotes_in_redirect(current);
-            
-//             // Set up the input redirection
-//             if (current->type == TYPE_IN_REDIRECT)
-//             {
-//                 if (!setup_in_redir(current, vars))
-//                 {
-//                     // Restore file descriptors
-//                     reset_std_fd(vars->pipes);
-//                     return (vars->error_code = 1);
-//                 }
-//             }
-//             else if (current->type == TYPE_HEREDOC)
-//             {
-//                 // Extract delimiter from the heredoc node
-//                 delimiter = NULL;
-//                 if (current->args && current->args[0])
-//                     delimiter = current->args[0];
-//                 else
-//                 {
-//                     // Restore file descriptors
-//                     reset_std_fd(vars->pipes);
-//                     return (vars->error_code = 1);
-//                 }
-                
-//                 // Call read_heredoc with proper arguments
-//                 if (!read_heredoc(&(vars->pipes->redirection_fd), delimiter, vars, 1))
-//                 {
-//                     // Restore file descriptors
-//                     reset_std_fd(vars->pipes);
-//                     return (vars->error_code = 1);
-//                 }
-                    
-//                 vars->pipes->heredoc_fd = vars->pipes->redirection_fd;
-//             }
-//         }
-//         current = current->next;
-//     }
-    
-//     // Find and process output redirections
-//     current = find_linked_redirects(cmd_node, vars);
-//     while (current)
-//     {
-//         if (current->type == TYPE_OUT_REDIRECT || current->type == TYPE_APPEND_REDIRECT)
-//         {
-//             // Process quotes in the redirection filename
-//             process_quotes_in_redirect(current);
-            
-//             // Store append mode in the pipes structure
-//             vars->pipes->append_mode = (current->type == TYPE_APPEND_REDIRECT);
-//             vars->pipes->current_redirect = current;
-            
-//             // Set up output redirection
-//             if (!setup_out_redir(current, vars))
-//             {
-//                 // Restore file descriptors
-//                 reset_std_fd(vars->pipes);
-//                 return (vars->error_code = 1);
-//             }
-//         }
-//         current = current->next;
-//     }
-    
-//     // Execute the command
-//     result = execute_cmd(cmd_node, vars->env, vars);
-    
-//     // Store result in vars->error_code
-//     vars->error_code = result;
-    
-//     // Restore original stdin/stdout
-//     reset_std_fd(vars->pipes);
-    
-//     return vars->error_code;
-// }
 int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
 {
     t_node  *current;
@@ -817,4 +807,310 @@ t_node *find_linked_redirects(t_node *cmd_node, t_vars *vars)
         current = current->prev;
     }
     return (NULL);
+}
+
+/* 
+Extracts all commands from pipe structure 
+*/
+void get_pipe_cmds(t_node *pipe_node, t_pipe *pipes)
+{
+    int cmd_idx;
+    t_node *current;
+    
+    cmd_idx = 0;
+    current = pipe_node;
+    
+    // First command is always the left side of the first pipe
+    if (pipe_node && pipe_node->left)
+    {
+        pipes->exec_cmds[cmd_idx] = pipe_node->left;
+        cmd_idx++;
+        
+        // Debug command extraction
+        DBG_PRINTF(DEBUG_EXEC, "Extracted CMD[%d]: %s\n", 
+                  cmd_idx-1, pipes->exec_cmds[cmd_idx-1]->args[0]);
+    }
+    
+    // Extract all middle commands by traversing pipe chain
+    while (current && current->type == TYPE_PIPE)
+    {
+        if (current->right)
+        {
+            if (current->right->type == TYPE_PIPE)
+            {
+                // If right child is pipe, extract its left child as command
+                if (current->right->left)
+                {
+                    pipes->exec_cmds[cmd_idx] = current->right->left;
+                    DBG_PRINTF(DEBUG_EXEC, "Extracted CMD[%d]: %s\n", 
+                            cmd_idx, pipes->exec_cmds[cmd_idx]->args[0]);
+                    cmd_idx++;
+                }
+                current = current->right; // Move to next pipe node
+            }
+            else
+            {
+                pipes->exec_cmds[cmd_idx] = current->right;
+                DBG_PRINTF(DEBUG_EXEC, "Extracted last CMD[%d]: %s\n", 
+                          cmd_idx, pipes->exec_cmds[cmd_idx]->args[0]);
+                cmd_idx++;
+                break;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    // Verify all commands are extracted
+    for (int i = 0; i < cmd_idx; i++)
+    {
+        DBG_PRINTF(DEBUG_EXEC, "VERIFY CMD[%d]: %s\n", i, 
+                  pipes->exec_cmds[i]->args[0]);
+    }
+}
+
+/* 
+ * Creates all pipes needed for execution 
+ * Returns 1 on success, 0 on failure
+ */
+int	make_pipes(t_pipe *pipes, int pipe_count)
+{
+    int i;
+    int j;
+    
+    i = 0;
+    DBG_PRINTF(DEBUG_EXEC, "Creating %d pipes\n", pipe_count);
+    while (i < pipe_count)
+    {
+        /* Reuse existing setup_pipe function */
+        if (!setup_pipe(pipes->pipe_fds + (i * 2)))
+        {
+			DBG_PRINTF(DEBUG_EXEC, "Failed to create pipe %d\n", i);
+            /* Clean up previously created pipes */
+            /* Clean up previously created pipes */
+            j = 0;
+            while (j < i)
+            {
+                close(pipes->pipe_fds[j * 2]);
+                close(pipes->pipe_fds[j * 2 + 1]);
+                j++;
+            }
+            return (0);
+        }
+		DBG_PRINTF(DEBUG_EXEC, "Pipe %d created: read_fd=%d, write_fd=%d\n", 
+			i, pipes->pipe_fds[i * 2], pipes->pipe_fds[i * 2 + 1]);
+        i++;
+    }
+    return (1);
+}
+
+/* 
+ * Sets up child process pipe redirections
+ */
+void setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count)
+{
+    int i;
+    
+	DBG_PRINTF(DEBUG_EXEC, "Setting up pipes for command %d of %d\n", 
+		cmd_idx, pipe_count);
+    /* Set up stdin from previous pipe (if not first command) */
+    if (cmd_idx > 0)
+    {
+		DBG_PRINTF(DEBUG_EXEC, "Command %d: Redirecting stdin from pipe %d (fd=%d)\n", 
+                  cmd_idx, cmd_idx-1, pipes->pipe_fds[(cmd_idx - 1) * 2]);
+        dup2(pipes->pipe_fds[(cmd_idx - 1) * 2], STDIN_FILENO);
+    }
+	else
+    {
+        DBG_PRINTF(DEBUG_EXEC, "Command %d: Using original stdin\n", cmd_idx);
+    }
+    
+    /* Set up stdout to next pipe (if not last command) */
+    if (cmd_idx < pipe_count)
+    {
+        DBG_PRINTF(DEBUG_EXEC, "Command %d: Redirecting stdout to pipe %d (fd=%d)\n", 
+                  cmd_idx, cmd_idx, pipes->pipe_fds[cmd_idx * 2 + 1]);
+        dup2(pipes->pipe_fds[cmd_idx * 2 + 1], STDOUT_FILENO);
+    }
+    else
+    {
+        DBG_PRINTF(DEBUG_EXEC, "Command %d: Using original stdout (last command)\n", cmd_idx);
+    }
+    /* Close all pipe fds in child */
+    DBG_PRINTF(DEBUG_EXEC, "Closing all pipe fds in child %d\n", cmd_idx);
+    i = 0;
+    while (i < pipe_count * 2)
+    {
+        close(pipes->pipe_fds[i]);
+        i++;
+    }
+}
+
+/* 
+ * Creates all child processes for the pipeline
+ * Returns 1 on success, 0 on failure
+ */
+int fork_processes(t_pipe *pipes, int pipe_count, t_vars *vars)
+{
+    int		i;
+    int		j;
+    pid_t	pid;
+    
+    i = 0;
+	DBG_PRINTF(DEBUG_EXEC, "Creating %d processes for pipeline\n", pipe_count + 1);
+    
+    while (i <= pipe_count)
+    {
+		if (pipes->exec_cmds[i] && pipes->exec_cmds[i]->args)
+            DBG_PRINTF(DEBUG_EXEC, "Forking process for command %d: %s\n", 
+                       i, pipes->exec_cmds[i]->args[0]);
+        else
+            DBG_PRINTF(DEBUG_EXEC, "Forking process for command %d: <null>\n", i);
+            
+        pid = fork();
+        if (pid < 0)
+        {
+            DBG_PRINTF(DEBUG_EXEC, "Fork failed for command %d\n", i);
+            /* Handle fork error */
+            j = 0;
+            while (j < i)
+            {
+                kill(pipes->pids[j], SIGTERM);
+                j++;
+            }
+            return (0);
+        }
+        else if (pid == 0)
+        {
+            /* Child process - set up pipes and execute command */
+			DBG_PRINTF(DEBUG_EXEC, "Child process %d (pid=%d) setting up pipes\n", i, getpid());
+            setup_child_pipes(pipes, i, pipe_count);
+            DBG_PRINTF(DEBUG_EXEC, "Child process %d executing command\n", i);
+            exit(execute_cmd(pipes->exec_cmds[i], vars->env, vars));
+        }
+         /* Parent process */
+		 DBG_PRINTF(DEBUG_EXEC, "Parent saved child pid %d for command %d\n", pid, i);
+        pipes->pids[i] = pid;
+        i++;
+    }
+    return (1);
+}
+
+/* 
+ * Counts pipe nodes in a command chain
+ */
+int count_pipes(t_node *node)
+{
+    int count;
+    t_node *current;
+    
+    count = 0;
+    current = node;
+    DBG_PRINTF(DEBUG_EXEC, "Starting pipe count for AST node %p\n", (void*)node);
+    
+    while (current && current->type == TYPE_PIPE)
+    {
+        count++;
+		DBG_PRINTF(DEBUG_EXEC, "Found pipe %d\n", count);
+        current = current->right;
+        if (current && current->type != TYPE_PIPE)
+            break;
+    }
+    DBG_PRINTF(DEBUG_EXEC, "Total pipes counted: %d\n", count);
+    return count;
+}
+
+/*
+ * Closes all pipe file descriptors in parent
+ */
+void close_all_pipe_fds(t_pipe *pipes)
+{
+    int i;
+    int count;
+    
+    i = 0;
+    count = pipes->pipe_count * 2;
+    
+    while (i < count)
+    {
+        close(pipes->pipe_fds[i]);
+        i++;
+    }
+}
+
+/*
+ * Waits for all child processes
+ */
+int wait_for_processes(t_pipe *pipes, t_vars *vars)
+{
+    int i;
+    int last_status;
+    i = 0;
+	DBG_PRINTF(DEBUG_EXEC, "Parent waiting for %d processes\n", pipes->pipe_count + 1);
+    
+    while (i <= pipes->pipe_count)
+    {
+        DBG_PRINTF(DEBUG_EXEC, "Waiting for process %d (pid=%d)\n", i, pipes->pids[i]);
+        waitpid(pipes->pids[i], &(pipes->status[i]), 0);
+        DBG_PRINTF(DEBUG_EXEC, "Process %d (pid=%d) exited with status %d\n", 
+                  i, pipes->pids[i], WEXITSTATUS(pipes->status[i]));
+        i++;
+    }
+    
+    /* Return status of last command */
+    last_status = handle_cmd_status(pipes->status[pipes->pipe_count], vars);
+    DBG_PRINTF(DEBUG_EXEC, "Pipeline completed with final status %d\n", last_status);
+    return (last_status);
+}
+
+/* 
+ * Initializes arrays in pipe structure based on pipe count
+ * Returns 1 on success, 0 on failure
+ */
+int init_pipe_arrays(t_pipe *pipes, int pipe_count)
+{
+    /* Free previous arrays if they exist */
+    if (pipes->pipe_fds)
+        free(pipes->pipe_fds);
+    if (pipes->pids)
+        free(pipes->pids);
+    if (pipes->status)
+        free(pipes->status);
+    if (pipes->exec_cmds)
+        free(pipes->exec_cmds);
+    
+    /* Allocate pipe file descriptors array (2 fds per pipe) */
+    pipes->pipe_fds = (int *)malloc(sizeof(int) * pipe_count * 2);
+    if (!pipes->pipe_fds)
+        return (0);
+        
+    /* Allocate process IDs array (cmd_count = pipe_count + 1) */
+    pipes->pids = (pid_t *)malloc(sizeof(pid_t) * (pipe_count + 1));
+    if (!pipes->pids)
+    {
+        free(pipes->pipe_fds);
+        pipes->pipe_fds = NULL;
+        return (0);
+    }
+        
+    /* Allocate status array and command node array */
+    pipes->status = (int *)malloc(sizeof(int) * (pipe_count + 1));
+    pipes->exec_cmds = (t_node **)malloc(sizeof(t_node *) * (pipe_count + 1));
+    
+    if (!pipes->status || !pipes->exec_cmds)
+    {
+        free(pipes->pipe_fds);
+        free(pipes->pids);
+        free(pipes->status);
+        free(pipes->exec_cmds);
+        pipes->pipe_fds = NULL;
+        pipes->pids = NULL;
+        pipes->status = NULL;
+        pipes->exec_cmds = NULL;
+        return (0);
+    }
+    
+    return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 18:35:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 23:19:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,32 +98,7 @@ void	setup_env(t_vars *vars, char **envp)
 		ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
 }
 
-/*
-Initializes the shell environment and variables.
-- Sets up signal handlers.
-- Initializes environment variables.
-- Sets up shell history.
-- Prepares the command prompt.
-Works with main() as program entry point.
-*/
-/*
-Initializes the shell environment and variables.
-- Sets up signal handlers.
-- Initializes environment variables.
-- Sets up shell history.
-- Prepares the command prompt.
-Works with main() as program entry point.
-*/
-void	init_shell(t_vars *vars, char **envp)
-{
-	vars->env = dup_env(envp);
-	if (!vars->env)
-		exit(1);
-	get_shell_level(vars);
-	incr_shell_level(vars);
-	load_signals();
-	load_history();
-}
+
 
 /*
 Processes input with quotes that need completion.
@@ -164,8 +139,6 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
 	}
     // Re-tokenize with the completed command
     cleanup_token_list(vars);
-	// For handle_quote_completion()
-	DBG_PRINTF(DEBUG_TOKENIZE, "handle_quote_completion: about to tokenize '%s'\n", cmd);
     improved_tokenize(cmd, vars);
     
     return (cmd);
@@ -224,39 +197,55 @@ Example: For "echo hello | grep h"
 */
 // void	build_and_execute(t_vars *vars)
 // {
-// 	vars->astroot = build_ast(vars);
-// 	if (vars->astroot)
-// 		execute_cmd(vars->astroot, vars->env, vars);
-// }
-void	build_and_execute(t_vars *vars)
-{
-    t_node	*root;
+//     t_node	*root;
     
-	root = NULL;
+// 	root = NULL;
+//     if (!vars || !vars->head)
+//         return ;
+
+//     DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+//     find_cmd(NULL, NULL, FIND_ALL, vars);
+// 	// Fix: Use vars->cmd_nodes[0] instead of undefined 'current'
+// 	if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
+//         DBG_PRINTF(DEBUG_ARGS, "build_and_execute: Found command node: content='%s'\n", 
+//             vars->cmd_nodes[0]->args[0]);
+//     }
+//     process_token_list(vars);
+    
+//     // Get the root node
+//     root = vars->astroot;
+//     if (!root && vars->cmd_count > 0)
+//     {
+//         root = vars->cmd_nodes[0];
+//         vars->astroot = root;
+//     }
+//     // Execute the command if AST built successfully
+//     if (vars->astroot)
+//     {
+//         DBG_PRINTF(DEBUG_EXEC, "Executing command tree\n");
+//         execute_cmd(vars->astroot, vars->env, vars);
+//     }
+// }
+void build_and_execute(t_vars *vars)
+{
+    t_node *root;
+    
     if (!vars || !vars->head)
-        return ;
+        return;
 
     DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
-    find_cmd(NULL, NULL, FIND_ALL, vars);
-	// Fix: Use vars->cmd_nodes[0] instead of undefined 'current'
-	if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
-        DBG_PRINTF(DEBUG_ARGS, "build_and_execute: Found command node: content='%s'\n", 
-            vars->cmd_nodes[0]->args[0]);
-    }
-    process_token_list(vars);
     
-    // Get the root node
-    root = vars->astroot;
-    if (!root && vars->cmd_count > 0)
-    {
-        root = vars->cmd_nodes[0];
+    // Use proc_token_list instead of process_token_list
+    root = proc_token_list(vars);
+    
+    // Only update astroot if we got a valid root node
+    if (root) {
         vars->astroot = root;
-    }
-    // Execute the command if AST built successfully
-    if (vars->astroot)
-    {
-        DBG_PRINTF(DEBUG_EXEC, "Executing command tree\n");
+        DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
+        // Execute the command tree
         execute_cmd(vars->astroot, vars->env, vars);
+    } else {
+        DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
     }
 }
 
@@ -279,8 +268,6 @@ int process_input_tokens(char *command, t_vars *vars)
     cleanup_token_list(vars);
     
     /* Tokenize the input with improved quote handling */
-	// For process_input_tokens()
-	DBG_PRINTF(DEBUG_TOKENIZE, "process_input_tokens: about to tokenize '%s'\n", command);
     if (!improved_tokenize(command, vars))
 	{
         return (0);
@@ -342,45 +329,6 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
-// int process_command(char *command, t_vars *vars)
-// {
-//     char *processed_cmd;
-    
-//     // Make a copy to work with
-//     processed_cmd = ft_strdup(command);
-//     if (!processed_cmd)
-//         return (1);
-    
-//     // Handle unclosed quotes first
-//     processed_cmd = handle_quote_completion(processed_cmd, vars);
-//     if (!processed_cmd)
-//         return (1);
-    
-//     /* Tokenize and process input */
-//     if (!process_input_tokens(processed_cmd, vars))
-//     {
-//         if (processed_cmd != command)
-//             ft_safefree((void **)&processed_cmd);
-//         return (1);
-//     }
-    
-//     /* Check pipe syntax and handle completion */
-//     if (!process_pipe_syntax(processed_cmd, vars))
-//     {
-//         if (processed_cmd != command)
-//             ft_safefree((void **)&processed_cmd);
-//         return (1);
-//     }
-    
-//     /* Build and execute AST */
-//     build_and_execute(vars);
-    
-//     // Free the processed command if it's different from the original
-//     if (processed_cmd != command)
-//         ft_safefree((void **)&processed_cmd);
-        
-//     return (1);
-// }
 int process_command(char *command, t_vars *vars)
 {
     // Store original command in vars->partial_input

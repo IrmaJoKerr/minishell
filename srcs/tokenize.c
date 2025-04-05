@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 17:03:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 19:33:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ void set_token_type(t_vars *vars, char *input)
     int advance;
     t_tokentype special_type = 0;
     
-	DBG_PRINTF(DEBUG_TOKENIZE, "set_token_type: input='%s', curr_type=%d\n", input, vars->curr_type);
     // Save previous type
     vars->prev_type = vars->curr_type;
     
@@ -31,7 +30,6 @@ void set_token_type(t_vars *vars, char *input)
     if (input && input[0] == '$')
     {
         vars->curr_type = TYPE_EXPANSION;
-        DBG_PRINTF(DEBUG_TOKENIZE, "Setting token as expansion: '%s'\n", input);
         return;
     }
     
@@ -42,8 +40,6 @@ void set_token_type(t_vars *vars, char *input)
         if (special_type != 0)
         {
             vars->curr_type = special_type;
-            DBG_PRINTF(DEBUG_TOKENIZE, "Setting token as special type: %d (%s)\n", 
-                    special_type, get_token_str(special_type));
             return;
         }
     }
@@ -52,15 +48,11 @@ void set_token_type(t_vars *vars, char *input)
     if (!vars->head || vars->prev_type == TYPE_PIPE)
     {
         vars->curr_type = TYPE_CMD;
-        DBG_PRINTF(DEBUG_TOKENIZE, "Setting token as command (position: %s)\n", 
-                !vars->head ? "first token" : "after pipe");
     }
     else
     {
         vars->curr_type = TYPE_ARGS;
-        DBG_PRINTF(DEBUG_TOKENIZE, "Setting token as argument\n");
     }
-	DBG_PRINTF(DEBUG_TOKENIZE, "set_token_type: Setting type to %d\n", vars->curr_type);
 }
 
 /*
@@ -79,31 +71,17 @@ void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
 {
 	t_node	*node;
 	
-	// In maketoken_with_type() at the beginning
-	DBG_PRINTF(DEBUG_TOKENIZE, "maketoken_with_type: Creating token '%s' with type %d\n", 
-	token, type);
 	node = NULL;
 	if (!token || !*token)
 	{
-        DBG_PRINTF(DEBUG_ARGS, "Empty token, not creating node\n");
-        return ;
+        return;
     }
-	DBG_PRINTF(DEBUG_ARGS, "Creating token of type %d with content '%s'\n", 
-		type, token);
+    
     node = initnode(type, token);
     if (node)
 	{
-        DBG_PRINTF(DEBUG_ARGS, "Node created with args[0]='%s'\n", 
-                  node->args ? node->args[0] : "NULL");
         // Add to linked list
         build_token_linklist(vars, node);
-        if (vars->head == node) {
-            DBG_PRINTF(DEBUG_ARGS, "Node is head of token list\n");
-        }
-    } 
-	else
-	{
-        DBG_PRINTF(DEBUG_ARGS, "Failed to create node\n");
     }
 }
 
@@ -115,9 +93,6 @@ int is_adjacent_token(char *input, int pos)
 {
     if (pos <= 0)
         return (0);
-        
-    DBG_PRINTF(DEBUG_TOKENIZE, "is_adjacent_token: Checking character at pos %d: '%c'\n", 
-               pos-1, input[pos-1]);
     
     // Check if previous character is not whitespace
     if (ft_isspace(input[pos - 1]))
@@ -126,6 +101,7 @@ int is_adjacent_token(char *input, int pos)
     // It's adjacent if previous char is not whitespace
     return (1);
 }
+
 /*
  * Joins token with the last argument of the command node
  * Returns 1 if joined successfully, 0 if failed
@@ -138,9 +114,6 @@ int join_with_cmd_arg(t_node *cmd_node, char *token_val)
       
     if (!cmd_node || !token_val)
         return (0);
-        
-    DBG_PRINTF(DEBUG_TOKENIZE, "join_with_cmd_arg: Joining '%s' with last arg of command\n", 
-               token_val);
     
     // Count arguments
     arg_count = 0;
@@ -154,8 +127,6 @@ int join_with_cmd_arg(t_node *cmd_node, char *token_val)
     if (!last_arg)
         return (0); 
     
-    DBG_PRINTF(DEBUG_TOKENIZE, "Joining with last arg: '%s'\n", last_arg);
-    
     // Join the strings
     new_arg = ft_strjoin(last_arg, token_val);
     if (!new_arg)
@@ -163,9 +134,7 @@ int join_with_cmd_arg(t_node *cmd_node, char *token_val)
     
     // Replace the last argument with joined string
     free(cmd_node->args[arg_count - 1]);
-    cmd_node->args[arg_count - 1] = new_arg; 
-    
-    DBG_PRINTF(DEBUG_TOKENIZE, "Joined value with previous arg to form '%s'\n", new_arg);
+    cmd_node->args[arg_count - 1] = new_arg;
      
     return (1);
 }
@@ -385,34 +354,12 @@ Example: For input "cmd > file"
 Processes operator characters like pipes and redirections.
 Returns 1 if operator was processed, 0 otherwise.
 */
-// int process_operator_char(char *input, int *i, t_vars *vars)
-// {
-//     int advance;
-//     t_tokentype token_type;
-    
-//     token_type = get_token_at(input, *i, &advance);
-    
-//     if (!is_operator_token(token_type))
-//         return (0);
-// 	DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Found operator '%c' at pos %d\n", 
-// 		input[*i], *i);
-//     /* Create operator token */
-//     create_operator_token(vars, token_type, get_token_str(token_type));
-    
-//     /* Advance position */
-//     (*i) += advance;
-//     vars->start = *i;
-    
-//     return (1);
-// }
 int process_operator_char(char *input, int *i, t_vars *vars)
 {
     int advance;
     t_tokentype token_type;
     
     token_type = get_token_at(input, *i, &advance);
-    DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Got token type %d at pos %d, advance %d\n", 
-               token_type, *i, advance);
                
     if (token_type == 0)
 	{
@@ -421,22 +368,12 @@ int process_operator_char(char *input, int *i, t_vars *vars)
 	vars->curr_type = token_type;   
     // Handle double operators (>>, <<, etc.)
     if (advance == 2) {
-        DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Processing double operator '%c%c'\n", 
-                   input[*i], input[*i+1]);
         handle_double_operator(input, vars);
-		// In process_operator_char() after handling token
-		DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: After handling, curr_type=%d\n", 
-			vars->curr_type);
     }
     
     // Handle single operators (>, <, |, etc.)
     else {
-        DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: Processing single operator '%c'\n", 
-                   input[*i]);
         handle_single_operator(input, vars);
-		// In process_operator_char() after handling token
-		DBG_PRINTF(DEBUG_TOKENIZE, "process_operator_char: After handling, curr_type=%d\n", 
-			vars->curr_type);
     }
     
     return (1);
@@ -456,10 +393,7 @@ Example: For input "cat > file.txt"
 int	handle_redirection(char *input, int *pos, t_vars *vars)
 {
     int	result;
-	t_tokentype token_type = 0; // Declare the variable. FOR DEBUG ONLY. 
     
-	DBG_PRINTF(DEBUG_TOKENIZE, "handle_redirection: Processing '%c%c', type=%d\n", 
-		input[*pos], input[*pos+1] ? input[*pos+1] : ' ', token_type);
     if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
     {
         vars->pos = *pos;
@@ -469,36 +403,6 @@ int	handle_redirection(char *input, int *pos, t_vars *vars)
     }
     return (0);
 }
-
-// int handle_redirection(char *input, int *pos, t_vars *vars)
-// {
-//     int result;
-//     t_tokentype token_type = 0; // Declare the variable. FOR DEBUG ONLY. 
-    
-//     // Determine the token type before logging
-//     if (input[*pos] == '<' && input[*pos + 1] == '<')
-//         token_type = TYPE_HEREDOC;
-//     else if (input[*pos] == '>' && input[*pos + 1] == '>')
-//         token_type = TYPE_APPEND_REDIRECT;
-//     else if (input[*pos] == '<')
-//         token_type = TYPE_IN_REDIRECT;
-//     else if (input[*pos] == '>')
-//         token_type = TYPE_OUT_REDIRECT;
-//     else if (input[*pos] == '|')
-//         token_type = TYPE_PIPE;
-    
-//     DBG_PRINTF(DEBUG_TOKENIZE, "handle_redirection: Processing '%c%c', type=%d\n", 
-//         input[*pos], input[*pos+1] ? input[*pos+1] : ' ', token_type);
-    
-//     if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
-//     {
-//         vars->pos = *pos;
-//         result = operators(input, vars);
-//         *pos = vars->pos;
-//         return (result);
-//     }
-//     return (0);
-// }
 
 /* 
 Tokenizes input string with improved quote handling.
@@ -514,8 +418,6 @@ int improved_tokenize(char *input, t_vars *vars)
     vars->pos = 0;
     vars->start = 0;
     vars->quote_depth = 0;
-    
-    DBG_PRINTF(DEBUG_TOKENIZE, "Starting tokenization of: '%s'\n", input);
     
     while (input && input[vars->pos])
     {
@@ -580,8 +482,6 @@ int improved_tokenize(char *input, t_vars *vars)
             {
                 token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
                 set_token_type(vars, token_preview);
-                DBG_PRINTF(DEBUG_TOKENIZE, "Whitespace boundary at pos %d, processing text from %d to %d\n", 
-                          vars->pos, vars->start, vars->pos);
                 handle_string(input, vars);
                 free(token_preview);
             }
@@ -603,18 +503,19 @@ int improved_tokenize(char *input, t_vars *vars)
     {
         token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
         set_token_type(vars, token_preview);
-        DBG_PRINTF(DEBUG_TOKENIZE, "Final text from %d to %d\n", vars->start, vars->pos);
         handle_string(input, vars);
         free(token_preview);
     }
     
+    // Keeping these as instructed
     DBG_PRINTF(DEBUG_TOKENIZE, "improved_tokenize: Token type=%d, content='%s'\n", 
               vars->curr_type, (vars->current && vars->current->args) ? 
               vars->current->args[0] : "(null)");
     DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
-	// Call at end of improved_tokenize()
-	debug_token_list(vars);
-	return(1);
+    
+    // Keeping the debug_token_list call as instructed
+    debug_token_list(vars);
+    return(1);
 }
 
 /*
@@ -630,9 +531,6 @@ Example: When adding command node
 */
 void build_token_linklist(t_vars *vars, t_node *node)
 {
-	// In build_token_linklist() before adding node to list
-	DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: type=%d (%s), content='%s'\n", 
-		node->type, get_token_str(node->type), node->args[0]);
     t_node *cmd_node;
     
     if (!vars || !node)
@@ -640,15 +538,11 @@ void build_token_linklist(t_vars *vars, t_node *node)
         return;
     }
     
-    DBG_PRINTF(DEBUG_ARGS, "build_token_linklist: type=%d (%s), content='%s'\n", 
-              node->type, get_token_str(node->type), node->args ? node->args[0] : "NULL");
-              
     // If this is the first token
     if (!vars->head)
     {
         vars->head = node;
         vars->current = node;
-        DBG_PRINTF(DEBUG_ARGS, "First token in list\n");
         return;
     }
     
@@ -656,16 +550,12 @@ void build_token_linklist(t_vars *vars, t_node *node)
     if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
     {
         node->type = TYPE_CMD;
-        DBG_PRINTF(DEBUG_ARGS, "Converting node to command after pipe\n");
     }
     
     // If this is an argument and previous node is a command, attach it
     if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
     {
         cmd_node = vars->current;
-        
-        DBG_PRINTF(DEBUG_ARGS, "build_token_linklist: Appending '%s' to command '%s'\n", 
-                  node->args[0], vars->current->args[0]);
         
         // Attach as argument
         append_arg(cmd_node, node->args[0], 0);
@@ -680,11 +570,10 @@ void build_token_linklist(t_vars *vars, t_node *node)
         vars->current->next = node;
         node->prev = vars->current;
         vars->current = node;
-        DBG_PRINTF(DEBUG_ARGS, "Added as new node in list\n");
     }
 }
 
-// Add at the end of improved_tokenize()
+// Keeping this as instructed
 void debug_token_list(t_vars *vars)
 {
     t_node *current = vars->head;

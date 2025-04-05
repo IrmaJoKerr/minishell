@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 17:38:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 18:50:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -385,42 +385,56 @@ Exit code which is also stored in vars->error_code.
 //     int result = 0;
     
 //     if (!node)
-//         return (vars->error_code = 1);
-// 		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", node->type, node->args[0]);
+//         return 1;
+        
+//     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
+//                node->type, node->args[0]);
+               
 //     // Handle different node types
 //     if (node->type == TYPE_PIPE)
 //         result = execute_pipes(node, vars);
 //     else if (is_redirection(node->type))
 //         result = exec_redirect_cmd(node, envp, vars);
 //     else if (node->type == TYPE_CMD)
-//     {
-//         if (is_builtin(node->args[0]))
-//             result = execute_builtin(node->args[0], node->args, vars);
-//         else
-//             result = exec_external_cmd(node, envp, vars);
-//     }
+//         result = exec_std_cmd(node, envp, vars);
     
 //     // Ensure error code is set in vars
 //     vars->error_code = result;
-//     return (result);
+//     return result;
 // }
 int execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
     int result = 0;
     
-    if (!node)
-        return 1;
-        
+    if (!node) {
+        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
+        return (vars->error_code = 1);
+    }
+    
     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
                node->type, node->args[0]);
-               
+    
     // Handle different node types
-    if (node->type == TYPE_PIPE)
+    if (node->type == TYPE_PIPE) {
+        // For pipe nodes, validate they have both left and right children
+        if (!node->left || !node->right) {
+            DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
+            return (vars->error_code = 1);
+        }
         result = execute_pipes(node, vars);
-    else if (is_redirection(node->type))
+    } 
+    else if (is_redirection(node->type)) {
+        // For redirection nodes, validate they have both command and target
+        if (!node->left || !node->right) {
+            DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid redirection node (missing child)\n");
+            return (vars->error_code = 1);
+        }
         result = exec_redirect_cmd(node, envp, vars);
-    else if (node->type == TYPE_CMD)
+    }
+    else if (node->type == TYPE_CMD) {
+        // For command nodes, execute them directly
         result = exec_std_cmd(node, envp, vars);
+    }
     
     // Ensure error code is set in vars
     vars->error_code = result;

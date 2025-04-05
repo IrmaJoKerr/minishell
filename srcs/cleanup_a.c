@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 13:51:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 23:34:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ Cleanup AST struct variables.
 - Takes a pointer to an AST structure.
 - Safely frees the structure itself.
 - Prevents memory leaks after AST processing.
-Works with init_ast_struct().
+Works with init_ast().
 */
 void	cleanup_ast_struct(t_ast *ast)
 {

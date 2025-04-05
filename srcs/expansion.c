@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 07:57:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 19:47:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,27 +132,19 @@ char	*handle_expansion(char *input, int *pos, t_vars *vars)
 	char	*var_name;
 	char	*var_value;
 
-	DBG_PRINTF(DEBUG_EXPAND, "Expansion at pos %d: '%s'\n", *pos, input + *pos);
-    
 	(*pos)++;
 	var_name = get_var_name(input, pos);
 	if (!var_name)
 	{
-        DBG_PRINTF(DEBUG_EXPAND, "Empty variable name\n");
         return (ft_strdup("$"));
 	}
-	DBG_PRINTF(DEBUG_EXPAND, "Variable name: '%s'\n", var_name);
 	var_value = handle_special_var(var_name, vars);
 	if (var_value)
 	{
-        DBG_PRINTF(DEBUG_EXPAND, "Special variable '%s' expanded to '%s'\n", 
-                  var_name, var_value);
         free(var_name);
         return var_value;
     }
 	var_value = get_env_val(var_name, vars->env);
-	DBG_PRINTF(DEBUG_EXPAND, "Environment variable '%s' expanded to '%s'\n", 
-		var_name, var_value ? var_value : "");
 	free(var_name);
 	if (var_value)
 		return (var_value);
@@ -173,11 +165,8 @@ void expand_cmd_args(t_node *node, t_vars *vars)
     char *old_arg;
     char temp_str[2];
     
-       if (!node || !node->args)
+    if (!node || !node->args)
         return;
-    
-    DBG_PRINTF(DEBUG_EXPAND, "Expanding args for node type %d (%s)\n", 
-              node->type, get_token_str(node->type));
     
     // Start from args[0] for all nodes (we'll handle commands separately)
     i = 0;
@@ -191,15 +180,10 @@ void expand_cmd_args(t_node *node, t_vars *vars)
         // Skip expansion in single quotes (quote_type == 1)
         if (node->arg_quote_type && node->arg_quote_type[i] == 1)
         {
-            DBG_PRINTF(DEBUG_EXPAND, "Skipping expansion for '%s' (in single quotes)\n", 
-                      node->args[i]);
             i++;
             continue;
         }
-		
-        DBG_PRINTF(DEBUG_EXPAND, "Processing arg '%s', quote_type=%d\n", 
-			node->args[i], node->arg_quote_type ? node->arg_quote_type[i] : 0);
-			
+        
         // Process expansion in double quotes (quote_type == 2) or unquoted
         if (ft_strchr(node->args[i], '$'))
         {
@@ -214,8 +198,6 @@ void expand_cmd_args(t_node *node, t_vars *vars)
                 // If we find a $ that's not escaped
                 if (old_arg[j] == '$')
                 {
-					DBG_PRINTF(DEBUG_EXPAND, "Found $ at position %d in '%s'\n", j, old_arg);
-                    
                     // Handle $? special case
                     if (old_arg[j+1] == '?')
                     {
@@ -225,8 +207,6 @@ void expand_cmd_args(t_node *node, t_vars *vars)
                             ft_safefree((void **)&result);
                             return;
                         }
-						
-                        DBG_PRINTF(DEBUG_EXPAND, "Expanding $? to '%s'\n", exit_status);
                         
                         char *temp = ft_strjoin(result, exit_status);
                         ft_safefree((void **)&result);
@@ -252,16 +232,12 @@ void expand_cmd_args(t_node *node, t_vars *vars)
                             ft_safefree((void **)&result);
                             return;
                         }
-						
-                        DBG_PRINTF(DEBUG_EXPAND, "Found var name: '%s'\n", var_name);
                         
                         var_value = get_env_val(var_name, vars->env);
                         ft_safefree((void **)&var_name);
                         
                         if (var_value)
                         {
-							DBG_PRINTF(DEBUG_EXPAND, "Expanding to: '%s'\n", var_value);
-                            
                             // Critical change: Join without adding space
                             char *temp = ft_strjoin(result, var_value);
                             ft_safefree((void **)&result);
@@ -277,8 +253,6 @@ void expand_cmd_args(t_node *node, t_vars *vars)
                     }
                     else // Just a lone $ with no valid variable name
                     {
-						DBG_PRINTF(DEBUG_EXPAND, "Lone $ with no variable name\n");
-                        
                         char *temp = ft_strjoin(result, "$");
                         ft_safefree((void **)&result);
                         
@@ -301,18 +275,15 @@ void expand_cmd_args(t_node *node, t_vars *vars)
                 result = temp;
                 j++;
             }
-            DBG_PRINTF(DEBUG_EXPAND, "Final expansion: '%s' to '%s'\n", old_arg, result);
             
             // Replace old argument with expanded version
             ft_safefree((void **)&node->args[i]);
             node->args[i] = result;
-            
-            DBG_PRINTF(DEBUG_EXPAND, "Expanded '%s' to '%s'\n", old_arg, result);
         }
         
         i++;
     }
-	debug_cmd_args(node);
+debug_cmd_args(node);
 }
 
 /*

@@ -6,18 +6,17 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 16:51:38 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 17:21:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 19:42:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <string.h>
 
 /*
-Returns string representation of basic token types.
-Handles the first part of token types.
+Returns string representation of token types.
+Example: TYPE_PIPE -> "|" (String representation)
 */
-char	*get_token_str_basic(t_tokentype type)
+char	*get_token_str(t_tokentype type)
 {
 	if (type == TYPE_ARGS)
 		return (TOKEN_TYPE_ARGS);
@@ -33,24 +32,7 @@ char	*get_token_str_basic(t_tokentype type)
 		return (TOKEN_TYPE_PIPE);
 	else if (type == TYPE_EXPANSION)
 		return (TOKEN_TYPE_EXPANSION);
-	return (TOKEN_TYPE_NULL);
-}
-
-/*
-Returns string representation of advanced token types.
-Example: TYPE_PIPE -> "|" (String representation)
-Handles the second part of token types.
-Main control function for getting token strings.
-*/
-char	*get_token_str(t_tokentype type)
-{
-	char	*basic_token;
-
-	basic_token = NULL;
-	basic_token = get_token_str_basic(type);
-	if (ft_strcmp(basic_token, TOKEN_TYPE_NULL) != 0)
-        return (basic_token);
-	if (type == TYPE_IN_REDIRECT)
+	else if (type == TYPE_IN_REDIRECT)
 		return (TOKEN_TYPE_IN_REDIRECT);
 	else if (type == TYPE_OUT_REDIRECT)
 		return (TOKEN_TYPE_OUT_REDIRECT);
@@ -60,5 +42,4 @@ char	*get_token_str(t_tokentype type)
 		return (TOKEN_TYPE_EXIT_STATUS);
 	else
 		return (TOKEN_TYPE_ARGS);
-	return (TOKEN_TYPE_ARGS);
 }

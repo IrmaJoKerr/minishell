@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 18:36:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 19:07:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,12 +72,10 @@ t_node	*proc_pipes_pt1(t_vars *vars, t_node **last_pipe, t_node **last_cmd)
 		else if (current->type == TYPE_PIPE && !pipe_root
 			&& current->prev && current->prev->type == TYPE_CMD)
 		{
-			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Found pipe: content='%s'\n", current->args[0]);
 			pipe_root = current;
 			next_cmd = find_cmd(current->next, NULL, FIND_NEXT, NULL);
 			if (next_cmd)
 			{
-				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt1: Next command: content='%s'\n", next_cmd->args[0]);
 				setup_first_pipe(pipe_root, current->prev, next_cmd);
 			}
 			*last_pipe = pipe_root;
@@ -108,11 +106,9 @@ void	proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
 		if (current->type == TYPE_PIPE && pipe_root
 			&& current != pipe_root)
 		{
-			DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Found pipe: content='%s'\n", current->args[0]);
 			next_cmd = find_cmd(current->next, NULL, FIND_NEXT, NULL);
 			if (*last_cmd && next_cmd)
 			{
-				DBG_PRINTF(DEBUG_ARGS, "proc_pipes_pt2: Next command: content='%s'\n", next_cmd->args[0]);
 				setup_next_pipes(current, *last_pipe,
 					*last_cmd, next_cmd);
 				*last_pipe = current;
@@ -136,8 +132,6 @@ void	setup_redir_ast(t_node *redir, t_node *cmd, t_node *target)
 		return ;
 	redir->left = cmd;
 	redir->right = target;
-	DBG_PRINTF(DEBUG_ARGS, "setup_redir_ast: Linked command '%s' with redirect '%s' to '%s'\n",
-        cmd->args[0], redir->args[0], target->args[0]);
 }
 
 /*
@@ -234,14 +228,10 @@ t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 			last_cmd = current;
 		else if (is_valid_redir_node(current))
 		{
-			DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt1: Found redirection: type=%d, content='%s'\n", current->type, current->args[0]);
 			target_cmd = get_redir_target(current, last_cmd);
 			if (target_cmd)
 			{
-				DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt1: Target command: content='%s'\n", target_cmd->args[0]);
 				setup_redir_ast(current, target_cmd, current->next);
-				// if (!pipe_root && !redir_root)
-				// 	redir_root = current;
 				if (!redir_root)
                     redir_root = current;
 			}
@@ -272,7 +262,6 @@ void	proc_redir_pt2(t_vars *vars, t_node *pipe_root)
 			last_cmd = current;
 		else if (is_valid_redir_node(current))
 		{
-			DBG_PRINTF(DEBUG_ARGS, "proc_redir_pt2: Found redirection: type=%d, content='%s'\n", current->type, current->args[0]);
 			target_cmd = get_redir_target(current, last_cmd);
 			if (target_cmd && pipe_root)
 				upd_pipe_redir(pipe_root, target_cmd, current);
@@ -305,8 +294,6 @@ t_node *proc_token_list(t_vars *vars)
     t_node *last_cmd;
     t_node *redir_root;
     
-    DBG_PRINTF(DEBUG_ARGS, "proc_token_list: Starting\n");
-    
     // Base case validation
     if (!vars || !vars->head)
         return (NULL);
@@ -327,21 +314,15 @@ t_node *proc_token_list(t_vars *vars)
     // Process pipes - first pass identifies the first pipe
     pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
     
-    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing pipes part 1 complete\n");
-    
     // Process pipes - second pass handles remaining pipes
     if (pipe_root)
         proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
-    
-    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing pipes part 2 complete\n");
     
     // Process redirections - two phases
     redir_root = proc_redir_pt1(vars, pipe_root);
     
     if (pipe_root)
         proc_redir_pt2(vars, pipe_root);
-    
-    DBG_PRINTF(DEBUG_TOKENIZE, "proc_token_list: Processing redirects complete\n");
     
     // Return the appropriate root node
     if (pipe_root)
@@ -461,11 +442,15 @@ Processes token list to build the AST structure.
 - Sets the root node of the AST
 Debug output helps trace the AST building process.
 */
-void	process_token_list(t_vars *vars)
+// void	process_token_list(t_vars *vars)
+// {
+// 	convert_strs_to_cmds(vars);
+// 	link_strargs_to_cmds(vars);
+// 	build_pipe_ast(vars);
+// }
+void process_token_list(t_vars *vars)
 {
-	convert_strs_to_cmds(vars);
-	link_strargs_to_cmds(vars);
-	build_pipe_ast(vars);
+    vars->astroot = proc_token_list(vars);
 }
 
 /*
