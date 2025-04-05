@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 01:26:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:58:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ Processes operators and surrounding text in command input.
 - Updates token start/end positions for proper tokenization.
 Returns:
 - New position index after operator processing.
-Works with handle_token() during input tokenization.
 */
 int	operators(char *input, t_vars *vars)
 {

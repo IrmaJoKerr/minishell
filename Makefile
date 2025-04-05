@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/05 05:36:59 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/05 07:43:41 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -51,7 +51,6 @@ MINISHELL_SRCS = \
 			srcs/redirect.c \
 			srcs/shell_level.c \
 			srcs/signals.c \
-			srcs/tokenclass.c \
 			srcs/tokenize.c \
 			srcs/typeconvert.c \
 			 

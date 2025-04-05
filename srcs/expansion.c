@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 04:50:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 07:57:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ Processes environment variable expansion.
 Returns:
 Newly allocated string with expanded value.
 NULL if not a variable or on allocation failure.
-Works with lexerlist() and expand_cmd_args().
+Works with expand_cmd_args().
 
 Example: Input: "$HOME/file" at position 0
 - Recognizes $ character

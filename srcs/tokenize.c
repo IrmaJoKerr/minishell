@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 05:33:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 07:47:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,84 +104,6 @@ void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
     }
 }
 
-int process_quoted_content(char *input, int *i, t_vars *vars)
-{
-    int advance;
-    t_tokentype quote_type;
-    char quote_char;
-    int content_length;
-    char *quoted_content;
-    t_node *cmd_node;
-    
-    quote_type = get_token_at(input, *i, &advance);
-    
-    if (quote_type != TYPE_SINGLE_QUOTE && quote_type != TYPE_DOUBLE_QUOTE)
-        return (0);
-    
-    if (quote_type == TYPE_SINGLE_QUOTE)
-        quote_char = '\'';
-    else
-        quote_char = '"';
-    
-    // Store start position in vars->pos (reuse existing variable)
-    vars->pos = *i;
-    (*i)++;  // Skip past opening quote
-    // Store content start in vars->start (reuse existing variable)
-    vars->start = *i;
-    
-    // Find matching closing quote
-    while (input[*i] && input[*i] != quote_char)
-        (*i)++;
-    
-    if (input[*i] == quote_char)
-    {
-        content_length = *i - vars->start;
-        
-        // Extract content BETWEEN quotes (not including the quotes)
-        quoted_content = ft_substr(input, vars->start, content_length);
-        
-        if (!quoted_content)
-            return (0);
-        
-        cmd_node = find_last_command(vars->head);
-        
-        if (cmd_node)
-        {
-            // Use direct condition instead of ternary
-            if (quote_type == TYPE_SINGLE_QUOTE)
-                append_arg(cmd_node, quoted_content, 1);
-            else
-                append_arg(cmd_node, quoted_content, 2);
-        }
-        else
-        {
-            maketoken_with_type(quoted_content, TYPE_ARGS, vars);
-            
-            if (vars->head && vars->head == vars->current)
-                vars->head->type = TYPE_CMD;
-        }
-        
-        free(quoted_content);
-        
-        (*i)++;  // Skip past closing quote
-        vars->start = *i;
-        
-        return (1);
-    }
-    else
-    {
-        // Handle unclosed quote - store context for later completion
-        if (vars->quote_depth < 32)
-        {
-            vars->quote_ctx[vars->quote_depth].type = quote_char;
-            vars->quote_ctx[vars->quote_depth].start_pos = vars->pos;
-            vars->quote_ctx[vars->quote_depth].depth = vars->quote_depth + 1;
-            vars->quote_depth++;
-        }
-        return (1);
-    }
-}
-
 // Helper function to find the last command node
 t_node	*find_last_command(t_node *head)
 {
@@ -197,77 +119,6 @@ t_node	*find_last_command(t_node *head)
 		current = current->next;
 	}
 	return (last_cmd);
-}
-
-/*
-Determines if variable expansion is allowed in current context.
-- Returns 1 if no quotes or in double quotes.
-- Returns 0 if in single quotes.
-Works with process_char() for expansion handling.
-
-Example: For input "echo '$USER'"
-- When inside single quotes, returns 0 (no expansion)
-- For "echo "$USER"", returns 1 (expansion allowed)
-*/
-int	handle_expand(t_vars *vars)
-{
-	if (vars->quote_depth == 0)
-		return (1);
-	if (vars->quote_ctx[vars->quote_depth - 1].type == '"')
-		return (1);
-	return (0);
-}
-
-/*
-Processes special characters like dollar sign for variable expansion.
-- Detects $ character and expands the following variable name.
-- Creates appropriate tokens with expanded values.
-- Handles integration with the command argument structure.
-- Updates position pointers to continue processing after expansion.
-Returns:
-- 1 if special char was processed.
-- 0 if not processed.
-Works with process_char() during tokenization.
-
-Example: For "echo $TEST"
-- Detects $ at position 5
-- Expands TEST to its value (e.g., "123")
-- Adds "123" as argument to "echo" command
-*/
-int	process_special_char(char *input, int *i, t_vars *vars)
-{
-    char	*expanded;
-    char	*var_name;
-    int		pos;
-    int		first_token;
-
-    if (input[*i] == '$' && handle_expand(vars))
-    {
-        first_token = 0;
-        if (*i > vars->start)
-            process_text(input, vars, &first_token, TYPE_NULL);
-        pos = *i;
-        pos++;
-        var_name = get_var_name(input, &pos);
-        expanded = get_env_val(var_name, vars->env);
-        free(var_name);
-        if (expanded)
-        {
-            maketoken_with_type(expanded, vars->curr_type, vars);
-            *i = pos;
-            vars->start = pos;
-            free(expanded);
-            return (1);
-        }
-        else
-        {
-            maketoken_with_type("", vars->curr_type, vars);
-            *i = pos;
-            vars->start = pos;
-            return (1);
-        }
-    }
-    return (0);
 }
 
 /*
@@ -340,7 +191,6 @@ Processes expansion characters in the input.
 - Extracts variable name and its value.
 Returns:
 1 if expansion was processed, 0 otherwise.
-Works with process_char() during tokenization.
 
 Example: For input "echo $HOME"
 - Detects $ at position
@@ -362,8 +212,6 @@ int process_expand_char(char *input, int *i, t_vars *vars)
     
     start_pos = *i;
     
-    // Check if this expansion is adjacent to previous text
-    // is_adjacent = is_adjacent_expansion(input, start_pos);
     is_adjacent = is_adjacent_token(input, start_pos);
     /* Skip $ */
     (*i)++;
@@ -464,17 +312,11 @@ Processes quoted characters in the input string.
 - Creates tokens for quote content.
 Returns:
 1 if quote was processed, 0 otherwise.
-Works with process_char() for quoted content handling.
 
 Example: For input with quotes like "echo 'hello'"
-- Processes the quoted content
-- Creates appropriate token
-- Returns 1 to indicate quote was handled
+Process single or double quoted text
+Handles joining to previous token when adjacent
 */
-/*
- * Process single or double quoted text
- * Handles joining to previous token when adjacent
- */
 int process_quote_char(char *input, int *i, t_vars *vars)
 {
     int quote_type;
@@ -547,7 +389,6 @@ Processes operator characters in the input string.
 - Updates position past the operator.
 Returns:
 1 if operator was processed, 0 otherwise.
-Works with process_char() for operator handling.
 
 Example: For input "cmd > file"
 - Processes the '>' operator
@@ -579,106 +420,10 @@ int process_operator_char(char *input, int *i, t_vars *vars)
 }
 
 /*
-Processes a single character in the input string.
-- Updates token boundary at whitespace.
-- Delegates to specialized handlers for:
-  - Quotes
-  - Variable expansion
-  - Operators
-- Advances position for regular characters.
-Works with tokenize() for character-by-character processing.
-
-Example: For input "echo hello"
-- Sets token boundary at start of "echo"
-- Advances through characters
-- Handles special characters appropriately
-*/
-void	process_char(char *input, int *i, t_vars *vars)
-{
-	if (!input || !i || !vars)
-		return ;
-	if (*i == 0 || ft_isspace(input[*i - 1]))
-		vars->start = *i;
-	if (process_quote_char(input, i, vars))
-		return ;
-	if (process_expand_char(input, i, vars))
-		return ;
-	if (process_operator_char(input, i, vars))
-		return ;
-	(*i)++;
-}
-
-/*
-Processes token position for quoted content.
-- Advances position past opening quote.
-- Searches for matching closing quote.
-- Updates position accordingly.
-Returns:
-Position after scanning for quote.
-Works with handle_quote_token() during quote processing.
-
-Example: For input "echo 'hello world'"
-- Advances past opening quote
-- Scans for closing quote
-- Returns position of closing quote or end of string
-*/
-int	scan_quote_position(char *str, int *pos, char quote_char)
-{
-	int	start;
-
-	start = *pos;
-	(*pos)++;
-	while (str[*pos])
-	{
-		if (str[*pos] == quote_char)
-			break ;
-		(*pos)++;
-	}
-	return (start);
-}
-
-/*
-Creates token for quoted content.
-- Updates token boundary for quote content.
-- Sets token type based on quote type.
-- Creates token with the quoted content.
-- Updates position for next token.
-Works with handle_quote_token() for token creation.
-
-Example: For input "echo "hello world""
-- Creates token with TYPE_DOUBLE_QUOTE
-- Sets content to "hello world"
-- Updates position past closing quote
-*/
-/*
-Creates token for quoted content.
-- Updates token boundary for quote content.
-- Sets token type based on quote type.
-- Creates token with the quoted content.
-- Updates position for next token.
-Works with handle_quote_token() for token creation.
-*/
-void	create_quote_token(char *str, t_vars *vars, int *pos, int start)
-{
-	char	quote_char;
-
-	quote_char = str[start];
-	(*pos)++;
-	vars->start = start;
-	if (quote_char == '"')
-		vars->curr_type = TYPE_DOUBLE_QUOTE;
-	else
-		vars->curr_type = TYPE_SINGLE_QUOTE;
-	maketoken_with_type(str, vars->curr_type, vars);
-	vars->start = *pos;
-}
-
-/*
 Processes redirection operators in the input.
 - Handles <, >, << and >> operators.
 - Creates tokens for the operators.
 - Updates position past the operator.
-Works with process_char() for operator handling.
 
 Example: For input "cat > file.txt"
 - When position is at '>'
@@ -815,36 +560,10 @@ int improved_tokenize(char *input, t_vars *vars)
 }
 
 /*
-Creates a non-command token node.
-- Allocates node with specified token type.
-- Handles memory errors properly.
-Returns:
-Pointer to new token node or NULL on failure.
-Works with process_other_token() for token creation.
-
-Example: For redirect token ">"
-- Creates node with TYPE_OUT_REDIRECT
-- Returns node pointer or NULL on failure
-*/
-t_node	*new_other_node(char *token, t_tokentype type)
-{
-	t_node	*node;
-
-	node = initnode(type, token);
-	if (!node)
-	{
-		free(token);
-		return (NULL);
-	}
-	return (node);
-}
-
-/*
 Updates the token list with a new node.
 - Handles first token as head.
 - Otherwise adds to end of list.
 - Updates current pointer.
-Works with process_cmd_token() and process_other_token().
 
 Example: When adding command node
 - If first token, sets as head
@@ -902,143 +621,4 @@ void build_token_linklist(t_vars *vars, t_node *node)
         vars->current = node;
         DBG_PRINTF(DEBUG_ARGS, "Added as new node in list\n");
     }
-}
-
-/*
-Checks if current argument is a flag separator.
-- Identifies standalone '-' followed by alphabetic arg.
-- Used to detect cases like "cmd - x" that should be "cmd -x".
-Returns:
-- 1 if it's a flag arg pattern.
-- 0 if not.
-Works with process_cmd_token() for argument processing.
-
-Example: For arguments ["ls", "-", "l"]
-- Returns 1 for position 1
-- Indicates "-" and "l" should be joined as "-l"
-*/
-int	is_flag_arg(char **args, int i)
-{
-	if (i > 0 && args[i][0] == '-' && ft_strlen(args[i]) == 1
-		&& args[i + 1] && ft_isalpha(args[i + 1][0]))
-		return (1);
-	return (0);
-}
-
-/*
-Joins flag arguments that were incorrectly split.
-- Combines "-" and the following argument.
-- Shifts remaining arguments up.
-- Updates the args array in place.
-Works with process_cmd_token() during argument processing.
-
-Example: For arguments ["ls", "-", "l", "a"]
-- Joins "-" and "l" to become "-l"
-- Shifts "a" up in position
-- Results in ["ls", "-l", "a", NULL]
-*/
-void	join_flag_args(char **args, int i)
-{
-	char	*combined;
-	int		j;
-
-	combined = ft_strjoin(args[i], args[i + 1]);
-	if (combined)
-	{
-		free(args[i]);
-		free(args[i + 1]);
-		args[i] = combined;
-		j = i + 1;
-		while (args[j + 1])
-		{
-			args[j] = args[j + 1];
-			j++;
-		}
-		args[j] = NULL;
-	}
-}
-
-/*
-Processes arguments by removing outer quotes.
-- Applies quote removal to each argument.
-- Ensures proper argument interpretation.
-Works with process_cmd_token() for argument processing.
-
-Example: For arguments ["'hello'", "\"world\""]
-- Processes to remove outer quotes
-- Transforms to ["hello", "world"]
-*/
-void	process_args_tokens(char **args)
-{
-	int	i;
-
-	i = 0;
-	while (args[i])
-	{
-		process_quotes_in_arg(&args[i]);
-		i++;
-	}
-}
-
-/*
-Handles quoted tokens during tokenization.
-- Detects quote character type (single/double).
-- Processes content between quotes.
-- Updates position past closing quote.
-- Creates token with appropriate type.
-Works with process_char() for quoted content.
-
-Example: For input "echo "hello world""
-- Detects quote at start position
-- Extracts "hello world" as content
-- Creates token for quoted content
-- Updates position past closing quote
-*/
-void	handle_quote_token(char *str, t_vars *vars, int *pos)
-{
-    char	quote_char;
-    int		start;
-
-    if (!str || !vars || !pos)
-        return ;
-    quote_char = str[*pos];
-    start = *pos;
-    (*pos)++;
-    while (str[*pos] && str[*pos] != quote_char)
-        (*pos)++;
-    if (str[*pos] == quote_char)
-    {
-        vars->start = start;
-        if (quote_char == '"')
-            vars->curr_type = TYPE_DOUBLE_QUOTE;
-        else
-            vars->curr_type = TYPE_SINGLE_QUOTE;
-        maketoken_with_type(str, vars->curr_type, vars);
-        vars->start = ++(*pos);
-    }
-    else
-    {
-        vars->quote_depth++;
-        vars->quote_ctx[vars->quote_depth - 1].type = quote_char;
-    }
-}
-
-/*
-Validate token type and content.
-*/
-int	validate_token(t_node *token)
-{
-	if (!token)
-		return (0);
-	if (token->type == TYPE_PIPE)
-	{
-		if (!token->next)
-			return (0);
-	}
-	if (redirection_type(NULL, 0, token->type, 0))
-	{
-		if (!token->next)
-			return (0);
-	}
-	return (1);
 }

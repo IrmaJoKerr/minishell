@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:17:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:51:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,40 +99,4 @@ t_node	*find_preceding_cmd(t_node *head, t_node *exp_node)
 		current = current->next;
 	} 
 	return last_cmd;
-}
-
-/*
-Joins two strings with a newline character between them.
-Takes ownership of first string and frees it.
-Returns the joined string or NULL on failure.
-*/
-char	*join_with_newline(char *first, char *second)
-{
-	char	*with_newline;
-	char	*result;
-
-	with_newline = ft_strjoin(first, "\n");
-	free(first);
-	if (!with_newline)
-		return (NULL);
-	result = ft_strjoin(with_newline, second);
-	free(with_newline);
-	return (result);
-}
-
-/*
-Helper function to append input with newline.
-Takes ownership of first string and frees it after joining.
-Returns a newly allocated string with combined content.
-*/
-char	*append_new_input(char *first, char *second)
-{
-	char	*result;
-
-	if (!first)
-		return (ft_strdup(second));
-	if (!second)
-		return (first);
-	result = join_with_newline(first, second);
-	return (result);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:07:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 06:47:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,39 +123,6 @@ int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars, t_ast *ast)
 	// For handle_unfinished_pipes()
 	DBG_PRINTF(DEBUG_TOKENIZE, "handle_unfinished_pipes: about to tokenize '%s'\n", *processed_cmd);
 	improved_tokenize(*processed_cmd, vars);
-	return (1);
-}
-
-/*
-Main handler for unclosed quotes in input
-Returns:
-  1 if quotes were handled and modifications were made
-  0 if no unclosed quotes found
- -1 if an error occurred
-*/
-int handle_unclosed_quotes(char **processed_cmd, t_vars *vars)
-{
-	char *completed_input;
-	char *temp;
-	 
-	if (!processed_cmd || !*processed_cmd)
-		return (-1);	 
-	// First check if we have unclosed quotes
-	if (validate_quotes(*processed_cmd, vars))
-		return (0); // All quotes are closed, nothing to do	 
-	// We have unclosed quotes, get completion
-	completed_input = complete_quoted_input(vars, *processed_cmd);
-	if (!completed_input)
-		return (-1); 
-	// Replace the original command with the completed one
-	temp = *processed_cmd;  // Store the old pointer
-	*processed_cmd = completed_input;  // Update to the new pointer
-	free(temp);  // Free the old memory
-	// Re-tokenize with the completed command
-	cleanup_token_list(vars);
-	// For handle_unclosed_quotes()
-	DBG_PRINTF(DEBUG_TOKENIZE, "handle_unclosed_quotes: about to tokenize '%s'\n", *processed_cmd);
-	improved_tokenize(*processed_cmd, vars); 
 	return (1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 06:31:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/05 07:58:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -411,8 +411,8 @@ char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
-// int			expand_one_arg(char **arg, t_vars *vars);
 void		expand_cmd_args(t_node *node, t_vars *vars);
+void 		process_quotes_and_expansions(t_vars *vars);
 void 		debug_cmd_args(t_node *node);
 
 /*
@@ -511,8 +511,6 @@ int			is_input_complete(t_vars *vars);
 int			check_unfinished_pipe(t_vars *vars, t_ast *ast);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars,
 				t_ast *ast);
-int			quotes_are_closed(const char *str);
-int 		handle_unclosed_quotes(char **processed_cmd, t_vars *vars);
 char		*append_input(char *original, char *additional);
 
 /*
@@ -521,8 +519,6 @@ In input_verify.c
 */
 void		process_expansions(t_vars *vars);
 t_node		*find_preceding_cmd(t_node *head, t_node *exp_node);
-char		*join_with_newline(char *first, char *second);
-char		*append_new_input(char *first, char *second);
 
 /*
 Lexer utility functions.
@@ -535,16 +531,10 @@ In lexer.c
 */
 void		skip_whitespace(char *str, t_vars *vars);
 char		*read_added_input(char *prompt);
-void		handle_text_chunk(char *str, t_vars *vars);
 void		process_text(char *str, t_vars *vars, int *first_token,
 				t_tokentype override_type);
-void		handle_quote_content(char *str, t_vars *vars, int *first_token);
-char		*lexing_unclosed_quo(char *input, t_vars *vars);
-void		handle_expansion_token(char *str, t_vars *vars, int *first_token);
-void		handle_token_boundary(char *str, t_vars *vars, int *first_token);
 void 		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
-void		handle_operator_token(char *str, t_vars *vars, int *first_token);
-void		handle_token(char *str, t_vars *vars);
+
 
 /*
 Minishell program entry point functions.
@@ -592,26 +582,6 @@ char		*get_cmd_path(char *cmd, char **envp);
 char		**dup_env(char **envp);
 
 /*
-pipes handling utility functions.
-In pipes_utils.c
-*/
-
-/*
-pipes main handling functions.
-In pipes.c
-*/
-
-/*
-Pipes execution functions.
-In pipes_execution.c
-*/
-
-/*
-Pipes syntax checking functions.
-In pipes_syntax.c
-*/
-
-/*
 Pipes main functions.
 In pipes.c
 */
@@ -642,32 +612,8 @@ Quote handling.
 In quotes.c
 */
 int 		validate_quotes(char *input, t_vars *vars);
-char 		*complete_quoted_input(t_vars *vars, char *original_input);
-void		make_quote_token(char *input, t_vars *vars);
-void		handle_quotes(char *input, t_vars *vars);
 char		*fix_open_quotes(char *input, t_vars *vars);
-char		*read_quoted_content(char *input, int *pos, char quote);
-void		strip_quotes(char **str_ptr, char quote_char);
 void		process_quotes_in_arg(char **arg);
-int			scan_for_endquote(char *str, int *pos, char quote_char);
-void		valid_quote_token(char *str, t_vars *vars, int *pos, int start);
-int			skip_quoted_content(char *input, int *pos, char quote_char);
-void 		process_quotes_and_expansions(t_vars *vars);
-
-/*
-Rediretion AST node handling.
-In redirect_ast.c
-*/
-
-/*
-Redirection processing functions.
-In redirect_process.c
-*/
-
-/*
-Redirection utility functions.
-In redirect_utils.c
-*/
 
 /*
 Redirection handling.
@@ -701,46 +647,19 @@ void		sigint_handler(int sig);
 void		sigquit_handler(int sig);
 
 /*
-Token classification handling.
-In tokenclass.c
-*/
-char		*handle_exit_status(t_vars *vars);
-t_tokentype	redirection_type(char *str, int mode, t_tokentype type, int pos);
-t_tokentype	classify(char *str, int pos);
-
-/*
-Tokenizing utility functions.
-In tokenize_utils.c
-*/
-
-/*
 Tokenizing functions.
 In tokenize.c
 */
-int			process_quoted_content(char *input, int *i, t_vars *vars);
 void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 t_node		*find_last_command(t_node *head);
-int			handle_expand(t_vars *vars);
-int			process_special_char(char *input, int *i, t_vars *vars);
-// int 		is_adjacent_expansion(char *input, int pos);
 int 		is_adjacent_token(char *input, int pos);
 int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
 int			process_expand_char(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
-void		process_char(char *input, int *i, t_vars *vars);
-int			scan_quote_position(char *str, int *pos, char quote_char);
-void		create_quote_token(char *str, t_vars *vars, int *pos, int start);
-void		handle_quote_token(char *str, t_vars *vars, int *pos);
-int			handle_redirection(char *input, int *pos, t_vars *vars);
-int		improved_tokenize(char *input, t_vars *vars);
-void		process_other_token(char *input, t_vars *vars);
-t_node		*new_other_node(char *token, t_tokentype type);
+int			improved_tokenize(char *input, t_vars *vars);
 void		build_token_linklist(t_vars *vars, t_node *node);
-int			is_flag_arg(char **args, int i);
-void		join_flag_args(char **args, int i);
-void		process_args_tokens(char **args);
 
 /*
 Type conversion functions.
