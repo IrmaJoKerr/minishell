@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 09:07:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 13:29:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,10 +144,47 @@ Example: After command execution
 - Cleans up any open file descriptors
 - Resets pipes state for next command
 */
+// void reset_redirect_fds(t_vars *vars)
+// {
+//     if (!vars || !vars->pipes)
+//         return ;
+//     if (vars->pipes->saved_stdin > 2)
+//     {
+//         dup2(vars->pipes->saved_stdin, STDIN_FILENO);
+//         close(vars->pipes->saved_stdin);
+//         vars->pipes->saved_stdin = -1;
+//     }
+//     if (vars->pipes->saved_stdout > 2)
+//     {
+//         dup2(vars->pipes->saved_stdout, STDOUT_FILENO);
+//         close(vars->pipes->saved_stdout);
+//         vars->pipes->saved_stdout = -1;
+//     }
+//     if (vars->pipes->heredoc_fd > 2)
+//     {
+//         close(vars->pipes->heredoc_fd);
+//         vars->pipes->heredoc_fd = -1;
+//     }
+//     if (vars->pipes->redirection_fd > 2)
+//     {
+//         close(vars->pipes->redirection_fd);
+//         vars->pipes->redirection_fd = -1;
+//     }
+//     vars->pipes->out_mode = OUT_MODE_NONE;
+//     vars->pipes->current_redirect = NULL;
+// }
+/*
+Resets saved standard file descriptors.
+- Restores original stdin and stdout if they were changed.
+- Closes any open heredoc file descriptor.
+- Updates the pipes state in vars.
+Works with execute_cmd() to clean up after command execution.
+*/
 void reset_redirect_fds(t_vars *vars)
 {
     if (!vars || !vars->pipes)
-        return ;
+        return;
+    /* Reset file descriptors */
     if (vars->pipes->saved_stdin > 2)
     {
         dup2(vars->pipes->saved_stdin, STDIN_FILENO);
@@ -170,9 +207,15 @@ void reset_redirect_fds(t_vars *vars)
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
     }
+	/* Reset redirection node tracking */
     vars->pipes->out_mode = OUT_MODE_NONE;
     vars->pipes->current_redirect = NULL;
+    vars->pipes->last_heredoc = NULL;
+    vars->pipes->last_in_redir = NULL;
+    vars->pipes->last_out_redir = NULL;
+    vars->pipes->cmd_redir = NULL;
 }
+
 
 /*
 Handles input redirection (< filename).
@@ -394,34 +437,108 @@ t_node *find_linked_redirects(t_node *cmd_node, t_vars *vars)
  * Last redirection of each type (input/output) takes precedence
  * Returns 1 on success, 0 on failure
  */
-int setup_multi_redirects(t_node *cmd_node, t_vars *vars)
-{
-    t_node *current;
-    t_node *last_in_redir = NULL;
-    t_node *last_out_redir = NULL;
-    int fd = -1;
+// int setup_multi_redirects(t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current;
+//     t_node *last_in_redir = NULL;
+//     t_node *last_out_redir = NULL;
+//     int fd = -1;
     
-    if (!cmd_node || !vars || !vars->head)
+//     if (!cmd_node || !vars || !vars->head)
+//         return (1);
+    
+//     // Store the current command in AST
+//     vars->pipes->last_cmd = cmd_node;
+//     vars->pipes->cmd_redir = NULL;
+    
+//     // Scan for redirections related to this command
+//     current = vars->head;
+//     while (current)
+//     {
+//         if (current->type == TYPE_IN_REDIRECT && 
+//             is_related_to_cmd(current, cmd_node, vars))
+//         {
+//             last_in_redir = current;
+//         }
+//         else if ((current->type == TYPE_OUT_REDIRECT || 
+//                 current->type == TYPE_APPEND_REDIRECT) && 
+//                 is_related_to_cmd(current, cmd_node, vars))
+//         {
+//             last_out_redir = current;
+//         }
+//         else if (current->type == TYPE_HEREDOC && 
+//                 is_related_to_cmd(current, cmd_node, vars))
+//         {
+//             vars->pipes->last_heredoc = current;
+//         }
+        
+//         current = current->next;
+//     }
+    
+//     // Save original file descriptors if we have any redirections
+//     if (last_in_redir || last_out_redir || vars->pipes->last_heredoc)
+//     {
+//         if (vars->pipes->saved_stdin == -1)
+//             vars->pipes->saved_stdin = dup(STDIN_FILENO);
+//         if (vars->pipes->saved_stdout == -1)
+//             vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+//     }
+    
+//     // Process redirections in order: heredoc first, input second, output last
+//     if (vars->pipes->last_heredoc)
+//     {
+//         vars->pipes->cmd_redir = vars->pipes->last_heredoc;
+//         if (!setup_redirection(vars->pipes->last_heredoc, vars, &fd))
+//             return (0);
+//     }
+//     else if (last_in_redir)
+//     {
+//         vars->pipes->cmd_redir = last_in_redir;
+//         if (!setup_redirection(last_in_redir, vars, &fd))
+//             return (0);
+//     }
+    
+//     if (last_out_redir)
+//     {
+//         vars->pipes->cmd_redir = last_out_redir;
+//         if (!setup_redirection(last_out_redir, vars, &fd))
+//             return (0);
+//     }
+    
+//     return (1);
+// }
+int	setup_multi_redirects(t_node *cmd_node, t_vars *vars)
+{
+    t_node	*current;
+    int		fd;
+    
+	fd = -1;
+    if (!cmd_node || !vars || !vars->head || !vars->pipes)
         return (1);
     
-    // Store the current command in AST
+    /* Store the current command in pipes structure */
     vars->pipes->last_cmd = cmd_node;
     vars->pipes->cmd_redir = NULL;
     
-    // Scan for redirections related to this command
+    /* Reset redirection tracking */
+    vars->pipes->last_in_redir = NULL;
+    vars->pipes->last_out_redir = NULL;
+    vars->pipes->last_heredoc = NULL;
+    
+    /* Scan for redirections related to this command */
     current = vars->head;
     while (current)
     {
         if (current->type == TYPE_IN_REDIRECT && 
             is_related_to_cmd(current, cmd_node, vars))
         {
-            last_in_redir = current;
+            vars->pipes->last_in_redir = current;
         }
         else if ((current->type == TYPE_OUT_REDIRECT || 
                 current->type == TYPE_APPEND_REDIRECT) && 
                 is_related_to_cmd(current, cmd_node, vars))
         {
-            last_out_redir = current;
+            vars->pipes->last_out_redir = current;
         }
         else if (current->type == TYPE_HEREDOC && 
                 is_related_to_cmd(current, cmd_node, vars))
@@ -432,8 +549,8 @@ int setup_multi_redirects(t_node *cmd_node, t_vars *vars)
         current = current->next;
     }
     
-    // Save original file descriptors if we have any redirections
-    if (last_in_redir || last_out_redir || vars->pipes->last_heredoc)
+    /* Save original file descriptors if we have any redirections */
+    if (vars->pipes->last_in_redir || vars->pipes->last_out_redir || vars->pipes->last_heredoc)
     {
         if (vars->pipes->saved_stdin == -1)
             vars->pipes->saved_stdin = dup(STDIN_FILENO);
@@ -441,24 +558,24 @@ int setup_multi_redirects(t_node *cmd_node, t_vars *vars)
             vars->pipes->saved_stdout = dup(STDOUT_FILENO);
     }
     
-    // Process redirections in order: heredoc first, input second, output last
+    /* Process redirections in order: heredoc first, input second, output last */
     if (vars->pipes->last_heredoc)
     {
         vars->pipes->cmd_redir = vars->pipes->last_heredoc;
         if (!setup_redirection(vars->pipes->last_heredoc, vars, &fd))
             return (0);
     }
-    else if (last_in_redir)
+    else if (vars->pipes->last_in_redir)
     {
-        vars->pipes->cmd_redir = last_in_redir;
-        if (!setup_redirection(last_in_redir, vars, &fd))
+        vars->pipes->cmd_redir = vars->pipes->last_in_redir;
+        if (!setup_redirection(vars->pipes->last_in_redir, vars, &fd))
             return (0);
     }
     
-    if (last_out_redir)
+    if (vars->pipes->last_out_redir)
     {
-        vars->pipes->cmd_redir = last_out_redir;
-        if (!setup_redirection(last_out_redir, vars, &fd))
+        vars->pipes->cmd_redir = vars->pipes->last_out_redir;
+        if (!setup_redirection(vars->pipes->last_out_redir, vars, &fd))
             return (0);
     }
     

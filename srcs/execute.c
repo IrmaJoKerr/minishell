@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 11:53:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 13:51:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,19 +282,89 @@ Works with exec_redirect_cmd().
 //     }
 //     return (1);
 // }
+// int setup_redirection(t_node *node, t_vars *vars, int *fd)
+// {
+//     // Store current redirection node
+//     vars->pipes->current_redirect = node;
+    
+//     // Process quotes in redirection filename (right child contains filename)
+//     if (node->right)
+//         process_quotes_in_arg(&node->right->args[0]);
+    
+//     // Handle different redirection types
+//     if (node->type == TYPE_IN_REDIRECT)
+//     {
+//         if (!setup_in_redir(node->right, vars)) // Use right child for filename
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_OUT_REDIRECT)
+//     {
+//         vars->pipes->out_mode = 1; // Truncate mode
+//         if (!setup_out_redir(node->right, vars)) // Use right child for filename
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_APPEND_REDIRECT)
+//     {
+//         vars->pipes->out_mode = 2; // Append mode
+//         if (!setup_out_redir(node->right, vars)) // Use right child for filename
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_HEREDOC)
+//     {
+//         // Heredoc uses delimiter directly from the node
+//         *fd = handle_heredoc(node, vars);
+//         if (*fd == -1)
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//         vars->pipes->heredoc_fd = *fd;
+        
+//         // Redirect stdin to read from heredoc
+//         if (dup2(*fd, STDIN_FILENO) == -1)
+//         {
+//             close(*fd);
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+    
+//     return (1);
+// }
+/*
+Sets up appropriate redirection based on node type.
+- Handles all redirection types (input, output, append, heredoc).
+- Creates or opens files with appropriate permissions.
+- Redirects stdin/stdout as needed.
+Returns:
+1 on success, 0 on failure.
+Works with exec_redirect_cmd().
+*/
 int setup_redirection(t_node *node, t_vars *vars, int *fd)
 {
-    // Store current redirection node
+    if (!node || !vars || !vars->pipes)
+        return (0);
+        
+    /* Store current redirection node */
     vars->pipes->current_redirect = node;
     
-    // Process quotes in redirection filename (right child contains filename)
+    /* Process quotes in redirection filename (right child contains filename) */
     if (node->right)
         process_quotes_in_arg(&node->right->args[0]);
     
-    // Handle different redirection types
+    /* Handle different redirection types */
     if (node->type == TYPE_IN_REDIRECT)
     {
-        if (!setup_in_redir(node->right, vars)) // Use right child for filename
+        if (!setup_in_redir(node->right, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -302,8 +372,8 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_OUT_REDIRECT)
     {
-        vars->pipes->out_mode = 1; // Truncate mode
-        if (!setup_out_redir(node->right, vars)) // Use right child for filename
+        vars->pipes->out_mode = OUT_MODE_TRUNCATE; /* Truncate mode */
+        if (!setup_out_redir(node->right, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -311,8 +381,8 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_APPEND_REDIRECT)
     {
-        vars->pipes->out_mode = 2; // Append mode
-        if (!setup_out_redir(node->right, vars)) // Use right child for filename
+        vars->pipes->out_mode = OUT_MODE_APPEND; /* Append mode */
+        if (!setup_out_redir(node->right, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -320,7 +390,7 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_HEREDOC)
     {
-        // Heredoc uses delimiter directly from the node
+        /* Heredoc-specific handling */
         *fd = handle_heredoc(node, vars);
         if (*fd == -1)
         {
@@ -329,7 +399,7 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
         }
         vars->pipes->heredoc_fd = *fd;
         
-        // Redirect stdin to read from heredoc
+        /* Redirect stdin to read from heredoc */
         if (dup2(*fd, STDIN_FILENO) == -1)
         {
             close(*fd);
@@ -531,9 +601,12 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
     int		status;
     char	*cmd_path;
 
-    if (!node || !node->args || !node->args[0])
-        return (vars->error_code = 1);
-
+	if (!node || !node->args || !node->args[0])
+    {
+        // Set error code consistently for invalid arguments case
+        vars->error_code = 1;
+        return vars->error_code;
+    }
     // Get command path
     cmd_path = get_cmd_path(node->args[0], envp);
     if (!cmd_path)

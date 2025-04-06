@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 09:23:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 12:31:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,9 @@ void	init_lexer(t_vars *vars)
 Initialise pipes structure.
 Allocates and sets up the pipes state.
 */
-t_pipe	*init_pipes(void)
+t_pipe *init_pipes(void)
 {
-    t_pipe	*pipes;
+    t_pipe *pipes;
     
     pipes = (t_pipe *)malloc(sizeof(t_pipe));
     if (!pipes)
@@ -79,6 +79,15 @@ t_pipe	*init_pipes(void)
     pipes->saved_stdout = -1;
     pipes->heredoc_fd = -1;
     pipes->redirection_fd = -1;
+    pipes->last_cmd = NULL;
+    pipes->last_heredoc = NULL;
+    pipes->last_pipe = NULL;
+    pipes->pipe_root = NULL;
+    pipes->redir_root = NULL;
+    pipes->last_in_redir = NULL;
+    pipes->last_out_redir = NULL;
+    pipes->cmd_redir = NULL;
+    pipes->pipe_at_end = 0;
     return (pipes);
 }
 
@@ -103,7 +112,15 @@ void	reset_shell(t_vars *vars)
         vars->pipes->pipe_count = 0;
         vars->pipes->out_mode = OUT_MODE_NONE;
         vars->pipes->current_redirect = NULL;
-		vars->pipes->last_cmd = NULL;
+        vars->pipes->last_cmd = NULL;
+        vars->pipes->last_heredoc = NULL;
+        vars->pipes->last_pipe = NULL;
+        vars->pipes->pipe_root = NULL;
+        vars->pipes->redir_root = NULL;
+        vars->pipes->last_in_redir = NULL;
+        vars->pipes->last_out_redir = NULL;
+        vars->pipes->cmd_redir = NULL;
+        vars->pipes->pipe_at_end = 0;
     }
 	init_lexer(vars);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 12:19:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 14:33:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,16 +304,14 @@ void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd,
 				t_node *next_cmd);
 void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
 				t_node *last_cmd, t_node *next_cmd);
-t_node		*proc_pipes_pt1(t_vars *vars, t_node **last_pipe,
-				t_node **last_cmd);
-void		proc_pipes_pt2(t_vars *vars, t_node *pipe_root,
-				t_node **last_pipe, t_node **last_cmd);
+t_node		*proc_pipes_pt1(t_vars *vars);
+void		proc_pipes_pt2(t_vars *vars);
 void		setup_redir_ast(t_node *redir, t_node *cmd, t_node *target);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 int			is_valid_redir_node(t_node *current);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-t_node		*proc_redir_pt1(t_vars *vars, t_node *pipe_root);
-void		proc_redir_pt2(t_vars *vars, t_node *pipe_root);
+t_node		*proc_redir_pt1(t_vars *vars);
+void		proc_redir_pt2(t_vars *vars);
 t_node		*proc_token_list(t_vars *vars);
 void		setup_pipe_links(t_node *pipe_node, t_node *left_cmd,
 				t_node *right_cmd);
@@ -521,6 +519,7 @@ void		print_tokens(t_node *head); // Debug function
 char		*reader(void);
 void		setup_env(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
+t_node		*find_command_end(t_node *start_node);
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
 char		*process_pipe_syntax(char *command, t_vars *vars);
@@ -571,7 +570,7 @@ void		process_quotes_in_redirect(t_node *redir_node);
 t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
 int			make_pipes(t_pipe *pipes, int pipe_count);
 void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count);
-int 		fork_processes(t_pipe *pipes, int pipe_count, t_vars *vars);
+int			fork_processes(t_pipe *pipes, t_vars *vars);
 int			count_pipes(t_vars *vars);
 void 		close_all_pipe_fds(t_pipe *pipes);
 int			wait_for_processes(t_pipe *pipes, t_vars *vars);

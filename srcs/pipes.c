@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 11:12:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 14:04:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,24 +262,26 @@ int execute_pipes(t_node *pipe_node, t_vars *vars)
     int result;
     
     if (!pipe_node || pipe_node->type != TYPE_PIPE)
+	{
         return (1);
-    
+	}
     DBG_PRINTF(DEBUG_EXEC, "=== EXECUTING PIPELINE ===\n");
-    // Get pipe count from command count
-    pipe_count = vars->cmd_count - 1;  // Pipes = commands - 1
+    // Use dedicated function to count pipes accurately
+    pipe_count = count_pipes(vars);
     if (pipe_count < 1)
+	{
         return (1);
-    DBG_PRINTF(DEBUG_EXEC, "Pipeline has %d pipes (%d commands)\n", 
-              pipe_count, vars->cmd_count);
+	}
+	vars->pipes->pipe_count = pipe_count;
+    DBG_PRINTF(DEBUG_EXEC, "Pipeline has %d pipes\n", pipe_count);
     // Initialize pipe arrays
     if (!init_pipe_arrays(vars->pipes, pipe_count))
         return print_error("Failed to allocate pipe arrays", vars, 1);
-    vars->pipes->pipe_count = pipe_count;
     // Create the actual pipes
     if (!make_pipes(vars->pipes, pipe_count))
         return print_error("Failed to create pipes", vars, 1);
     // Fork processes using cmd_nodes directly
-    if (!fork_processes(vars->pipes, pipe_count, vars))
+    if (!fork_processes(vars->pipes, vars))
     {
         close_all_pipe_fds(vars->pipes);
         return print_error("Failed to create processes", vars, 1);
@@ -295,73 +297,147 @@ int execute_pipes(t_node *pipe_node, t_vars *vars)
  * Takes into account the position of nodes in the token list
  * Returns 1 if related, 0 if not
  */
+// int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current;
+//     t_node *prev_cmd = NULL;
+//     t_node *next_cmd = NULL;
+    
+//     if (!redir_node || !cmd_node || !is_redirection(redir_node->type))
+//         return (0);
+        
+//     // Find previous and next commands relative to this redirection
+//     current = vars->head;
+//     while (current)
+//     {
+//         if (current == redir_node)
+//             break;
+//         if (current->type == TYPE_CMD)
+//             prev_cmd = current;
+//         current = current->next;
+//     }
+    
+//     // If we didn't find the redirection node, return false
+//     if (!current)
+//         return (0);
+        
+//     // Find next command after the redirection
+//     while (current)
+//     {
+//         current = current->next;
+//         if (current && current->type == TYPE_CMD)
+//         {
+//             next_cmd = current;
+//             break;
+//         }
+//     }
+    
+//     // Redirection is related to cmd_node if:
+//     // 1. cmd_node is prev_cmd and there's no pipe between them, or
+//     // 2. cmd_node is next_cmd and there's no pipe between them
+    
+//     if (cmd_node == prev_cmd)
+//     {
+//         // Check no pipe between cmd_node and redir_node
+//         current = cmd_node->next;
+//         while (current && current != redir_node)
+//         {
+//             if (current->type == TYPE_PIPE)
+//                 return (0);
+//             current = current->next;
+//         }
+//         return (1);
+//     }
+//     else if (cmd_node == next_cmd)
+//     {
+//         // Check no pipe between redir_node and cmd_node
+//         current = redir_node->next;
+//         while (current && current != cmd_node)
+//         {
+//             if (current->type == TYPE_PIPE)
+//                 return (0);
+//             current = current->next;
+//         }
+//         return (1);
+//     }
+    
+//     return (0);
+// }
+/*
+Determines if a redirection node relates to a specific command.
+- Checks relative position of redirection and command in token list.
+- Considers commands before and after redirection.
+Returns:
+- 1 if redirection relates to the command.
+- 0 otherwise.
+Works with setup_multi_redirects().
+*/
 int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars)
 {
     t_node *current;
     t_node *prev_cmd = NULL;
     t_node *next_cmd = NULL;
     
-    if (!redir_node || !cmd_node || !is_redirection(redir_node->type))
+    if (!redir_node || !cmd_node || !vars || !vars->head)
         return (0);
-        
-    // Find previous and next commands relative to this redirection
+    
+    /* Find the command positions */
     current = vars->head;
     while (current)
     {
-        if (current == redir_node)
-            break;
         if (current->type == TYPE_CMD)
+        {
+            if (current == cmd_node)
+            {
+                /* We found our target command */
+                break;
+            }
             prev_cmd = current;
+        }
         current = current->next;
     }
     
-    // If we didn't find the redirection node, return false
-    if (!current)
-        return (0);
-        
-    // Find next command after the redirection
-    while (current)
+    /* Find next command after our target */
+    next_cmd = find_cmd(cmd_node->next, NULL, FIND_NEXT, NULL);
+    
+    /* Check if redirection is between our command and the next one */
+    current = cmd_node->next;
+    while (current && current != next_cmd)
     {
+        if (current == redir_node)
+            return (1);
         current = current->next;
-        if (current && current->type == TYPE_CMD)
-        {
-            next_cmd = current;
-            break;
-        }
     }
     
-    // Redirection is related to cmd_node if:
-    // 1. cmd_node is prev_cmd and there's no pipe between them, or
-    // 2. cmd_node is next_cmd and there's no pipe between them
-    
-    if (cmd_node == prev_cmd)
+    /* Check if redirection is between previous command and our command */
+    if (prev_cmd)
     {
-        // Check no pipe between cmd_node and redir_node
-        current = cmd_node->next;
-        while (current && current != redir_node)
-        {
-            if (current->type == TYPE_PIPE)
-                return (0);
-            current = current->next;
-        }
-        return (1);
-    }
-    else if (cmd_node == next_cmd)
-    {
-        // Check no pipe between redir_node and cmd_node
-        current = redir_node->next;
+        current = prev_cmd->next;
         while (current && current != cmd_node)
         {
-            if (current->type == TYPE_PIPE)
-                return (0);
+            if (current == redir_node)
+                return (0); /* Belongs to previous command */
             current = current->next;
         }
-        return (1);
     }
+    
+    /* Redirection before first command belongs to first command */
+    if (!prev_cmd && cmd_node == vars->cmd_nodes[0])
+    {
+        current = vars->head;
+        while (current && current != cmd_node)
+        {
+            if (current == redir_node)
+                return (1);
+            current = current->next;
+        }
+    }
+    
+    /* Check for special cases like consecutive commands without pipes */
+    /* Redirections after a command belong to it until another command is found */
     
     return (0);
 }
-
 
 /**
  * Clean up memory after pipe completion processing
@@ -819,23 +895,25 @@ void setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count)
 Creates all child processes for the pipeline
 Returns 1 on success, 0 on failure
 */
-int fork_processes(t_pipe *pipes, int pipe_count, t_vars *vars)
+/* 
+Creates all child processes for the pipeline
+Returns 1 on success, 0 on failure
+*/
+int fork_processes(t_pipe *pipes, t_vars *vars)
 {
     int     i;
     int     j;
     pid_t   pid;
     
     i = 0;
-    DBG_PRINTF(DEBUG_EXEC, "Creating %d processes for pipeline\n", pipe_count + 1);
-    
-    while (i <= pipe_count)
+    DBG_PRINTF(DEBUG_EXEC, "Creating %d processes for pipeline\n", pipes->pipe_count + 1);
+    while (i <= pipes->pipe_count)
     {
         if (vars->cmd_nodes[i] && vars->cmd_nodes[i]->args)
             DBG_PRINTF(DEBUG_EXEC, "Forking process for command %d: %s\n", 
                        i, vars->cmd_nodes[i]->args[0]);
         else
             DBG_PRINTF(DEBUG_EXEC, "Forking process for command %d: <null>\n", i);
-            
         pid = fork();
         if (pid < 0)
         {
@@ -843,37 +921,29 @@ int fork_processes(t_pipe *pipes, int pipe_count, t_vars *vars)
             j = 0;
             while (j < i)
             {
-                kill(pipes->pids[j], SIGTERM);
+                // Kill existing child processes
+                if (pipes->pids[j] > 0)
+                    kill(pipes->pids[j], SIGTERM);
                 j++;
             }
             return (0);
         }
         else if (pid == 0)
         {
-            /* Child process */
-            DBG_PRINTF(DEBUG_EXEC, "Child process %d (pid=%d) setting up pipes\n", i, getpid());
-            setup_child_pipes(pipes, i, pipe_count);
-            
-            /* Set up command redirections */
-            if (!setup_multi_redirects(vars->cmd_nodes[i], vars))
-            {
-                DBG_PRINTF(DEBUG_EXEC, "Redirection setup failed for command %d\n", i);
-                exit(1);
-            }
-            
-            DBG_PRINTF(DEBUG_EXEC, "Child process %d executing command\n", i);
-            exit(execute_cmd(vars->cmd_nodes[i], vars->env, vars));
+            // Child process - set up pipes and execute command
+            setup_child_pipes(pipes, i, pipes->pipe_count);
+            // Execute the command
+            if (vars->cmd_nodes[i])
+                execute_cmd(vars->cmd_nodes[i], vars->env, vars);
+            exit(vars->error_code);
         }
-        
         /* Parent process */
         DBG_PRINTF(DEBUG_EXEC, "Parent saved child pid %d for command %d\n", pid, i);
         pipes->pids[i] = pid;
         i++;
     }
-    
     return (1);
 }
-
 
 /* 
  * Counts pipe nodes in a command chain
@@ -921,7 +991,7 @@ void close_all_pipe_fds(t_pipe *pipes)
 
 /*
  * Waits for all child processes
- */
+*/
 int wait_for_processes(t_pipe *pipes, t_vars *vars)
 {
     int i;

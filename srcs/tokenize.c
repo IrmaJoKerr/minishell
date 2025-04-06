@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 19:33:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 15:01:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,16 +89,39 @@ void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
  * Checks if tokens should be joined (no whitespace in between)
  * Returns 1 if they should be joined, 0 otherwise
  */
+// int is_adjacent_token(char *input, int pos)
+// {
+//     if (pos <= 0)
+//         return (0);
+    
+//     // Check if previous character is not whitespace
+//     if (ft_isspace(input[pos - 1]))
+//         return (0);
+    
+//     // It's adjacent if previous char is not whitespace
+//     return (1);
+// }
 int is_adjacent_token(char *input, int pos)
 {
     if (pos <= 0)
+        return (0);
+    
+    // Don't join if previous char is an operator
+    if (input[pos - 1] == '<' || input[pos - 1] == '>' || 
+        input[pos - 1] == '|' || input[pos - 1] == ';')
+        return (0);
+        
+    // Don't join if current position is an operator
+    if ((size_t)pos < ft_strlen(input) && 
+        (input[pos] == '<' || input[pos] == '>' || 
+         input[pos] == '|' || input[pos] == ';'))
         return (0);
     
     // Check if previous character is not whitespace
     if (ft_isspace(input[pos - 1]))
         return (0);
     
-    // It's adjacent if previous char is not whitespace
+    // It's adjacent if previous char is not whitespace or operator
     return (1);
 }
 

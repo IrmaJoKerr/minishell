@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 09:29:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 14:48:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,28 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
     
     return (cmd);
 }
+/*
+Finds the end of a command sequence in the token list
+Returns:
+ - The last node in the list if not empty
+ - NULL if start_node is NULL
+*/
+t_node *find_command_end(t_node *start_node)
+{
+    t_node *current;
+    
+    if (!start_node)
+        return (NULL);
+    
+    current = start_node;
+    
+    // Traverse to the end of the list
+    while (current && current->next)
+        current = current->next;
+    
+    // Return the last node in the list
+    return (current);
+}
 
 /*
 Builds and executes the command's abstract syntax tree.
@@ -158,37 +180,6 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
-// void	build_and_execute(t_vars *vars)
-// {
-//     t_node	*root;
-    
-// 	root = NULL;
-//     if (!vars || !vars->head)
-//         return ;
-
-//     DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
-//     find_cmd(NULL, NULL, FIND_ALL, vars);
-// 	// Fix: Use vars->cmd_nodes[0] instead of undefined 'current'
-// 	if (vars->cmd_count > 0 && vars->cmd_nodes[0] && vars->cmd_nodes[0]->args) {
-//         DBG_PRINTF(DEBUG_ARGS, "build_and_execute: Found command node: content='%s'\n", 
-//             vars->cmd_nodes[0]->args[0]);
-//     }
-//     process_token_list(vars);
-    
-//     // Get the root node
-//     root = vars->astroot;
-//     if (!root && vars->cmd_count > 0)
-//     {
-//         root = vars->cmd_nodes[0];
-//         vars->astroot = root;
-//     }
-//     // Execute the command if AST built successfully
-//     if (vars->astroot)
-//     {
-//         DBG_PRINTF(DEBUG_EXEC, "Executing command tree\n");
-//         execute_cmd(vars->astroot, vars->env, vars);
-//     }
-// }
 void build_and_execute(t_vars *vars)
 {
     t_node *root;
@@ -211,6 +202,53 @@ void build_and_execute(t_vars *vars)
         DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
     }
 }
+
+// void	build_and_execute(t_vars *vars)
+// {
+//     t_node *cmd_start;
+//     t_node *cmd_end;
+//     t_vars temp_vars;
+    
+// 	cmd_start = vars->head;
+// 	cmd_end = NULL;
+//     while (cmd_start)
+// 	{
+//         // Find end of current command (until we hit a semicolon or NULL)
+//         cmd_end = find_command_end(cmd_start);
+//         // Create a temporary vars with just this command's tokens
+//         ft_memcpy(&temp_vars, vars, sizeof(t_vars));
+//         temp_vars.head = cmd_start;
+//         temp_vars.current = cmd_start;
+//         // If there's a next command, temporarily break the list
+//         if (cmd_end && cmd_end->next)
+// 		{
+//             t_node *next_cmd = cmd_end->next;
+//             cmd_end->next = NULL;
+            
+//             // Build and execute current command
+//             root = proc_token_list(&temp_vars);
+//             if (root) {
+//                 temp_vars.astroot = root;
+//                 execute_cmd(temp_vars.astroot, vars->env, vars);
+//             }
+            
+//             // Reconnect for next iteration
+//             cmd_end->next = next_cmd;
+//             cmd_start = next_cmd;
+//         } 
+// 		else 
+// 		{
+//             // Process final command
+//             root = proc_token_list(&temp_vars);
+//             if (root)
+// 			{
+//                 temp_vars.astroot = root;
+//                 execute_cmd(temp_vars.astroot, vars->env, vars);
+//             }
+//             break;
+//         }
+//     }
+// }
 
 /*
 Main entry point for tokenization and expansion. 
