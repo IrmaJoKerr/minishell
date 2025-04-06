@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 13:51:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 20:46:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,7 +289,7 @@ Works with exec_redirect_cmd().
     
 //     // Process quotes in redirection filename (right child contains filename)
 //     if (node->right)
-//         process_quotes_in_arg(&node->right->args[0]);
+//         process_arg_quotes(&node->right->args[0]);
     
 //     // Handle different redirection types
 //     if (node->type == TYPE_IN_REDIRECT)
@@ -359,7 +359,7 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     
     /* Process quotes in redirection filename (right child contains filename) */
     if (node->right)
-        process_quotes_in_arg(&node->right->args[0]);
+        process_arg_quotes(&node->right->args[0]);
     
     /* Handle different redirection types */
     if (node->type == TYPE_IN_REDIRECT)

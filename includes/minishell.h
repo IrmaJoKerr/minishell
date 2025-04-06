@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 14:33:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 23:28:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ extern volatile sig_atomic_t	g_signal_received;
 
 // Debug print macro for cleaner code
 #define DBG_PRINTF(flag, fmt, ...) \
-    do { if (flag) fprintf(stderr, "[%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__); } while (0)
+	do { if (flag) fprintf(stderr, "[%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__); } while (0)
 // Debug print macro for cleaner code
 
 /*
@@ -167,9 +167,9 @@ typedef struct s_pipe
 	t_node		*last_heredoc;   // Last heredoc node encountered during parsing
 	t_node      *last_pipe;       // Last pipe node processed
 	t_node      *pipe_root;       // Root of temporary pipe structure for AST
-    t_node      *redir_root;      // Root redirection node
+	t_node      *redir_root;      // Root redirection node
 	t_node      *last_in_redir;   // Last input redirection encountered
-    t_node      *last_out_redir;  // Last output redirection encountered
+	t_node      *last_out_redir;  // Last output redirection encountered
 	t_node		*cmd_redir;      // Command node being targeted for redirection
 	// t_node		*root;           // Root node of the AST (ADDED)
 	// int			cmd_idx;         // Current index in the cmd_nodes array being processed
@@ -285,46 +285,45 @@ void		modify_env(char ***env, int changes, char *var);
 /* Main minishell functions. In srcs directory. */
 
 /*
+Append arguments to a node's argument array.
+In append_args.c
+*/
+void		append_arg(t_node *node, char *new_arg, int quote_type);
+/*
 Argument handling.
 In arguments.c
 */
 void		create_args_array(t_node *node, char *token);
-void		append_arg(t_node *node, char *new_arg, int quote_type);
-
-/*
-AST token processing and AST tree building utility functions.
-In buildast_utils.c
-*/
 
 /*
 AST token processing and AST tree building.
 In buildast.c
 */
-void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd,
-				t_node *next_cmd);
-void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
-				t_node *last_cmd, t_node *next_cmd);
-t_node		*proc_pipes_pt1(t_vars *vars);
-void		proc_pipes_pt2(t_vars *vars);
-void		setup_redir_ast(t_node *redir, t_node *cmd, t_node *target);
+// void		setup_first_pipe(t_node *pipe_node, t_node *prev_cmd,
+// 				t_node *next_cmd);
+// void		setup_next_pipes(t_node *pipe_node, t_node *last_pipe,
+// 				t_node *last_cmd, t_node *next_cmd);
+// t_node		*proc_pipes_pt1(t_vars *vars);
+// void		proc_pipes_pt2(t_vars *vars);
+// void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
-int			is_valid_redir_node(t_node *current);
-t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-t_node		*proc_redir_pt1(t_vars *vars);
-void		proc_redir_pt2(t_vars *vars);
+// int			is_valid_redir_node(t_node *current);
+// t_node		*get_redir_target(t_node *current, t_node *last_cmd);
+// t_node		*proc_redir_pt1(t_vars *vars);
+// void		proc_redir_pt2(t_vars *vars);
 t_node		*proc_token_list(t_vars *vars);
 void		setup_pipe_links(t_node *pipe_node, t_node *left_cmd,
 				t_node *right_cmd);
-void		convert_strs_to_cmds(t_vars *vars);
 void		del_list_node(t_node *node);
 int			is_special_token(t_node *token);
-void		link_strargs_to_cmds(t_vars *vars);
-void		link_addon_pipe(t_node *last_pipe,
-				t_node *new_pipe, t_node *right_cmd);
-void		build_pipe_ast(t_vars *vars);
+void		convert_strs_to_cmds(t_vars *vars);
+// void		link_strargs_to_cmds(t_vars *vars);
+// void		link_addon_pipe(t_node *last_pipe,
+// 				t_node *new_pipe, t_node *right_cmd);
+// void		build_pipe_ast(t_vars *vars);
 int			chk_start_pipe(t_vars *vars);
 int			chk_multi_pipes(t_vars *vars, int pipes_count);
-int			chk_adj_pipes(t_vars *vars, t_node *current);
+// int			chk_adj_pipes(t_vars *vars, t_node *current);
 int			chk_next_pipes(t_vars *vars);
 int			chk_end_pipe(t_vars *vars);
 int			chk_pipe_syntax_err(t_vars *vars);
@@ -550,6 +549,15 @@ char		*get_cmd_path(char *cmd, char **envp);
 char		**dup_env(char **envp);
 
 /*
+Pipes syntax checking functions.
+In pipes_syntax.c
+*/
+int			chk_start_pipe(t_vars *vars);
+int			chk_next_pipes(t_vars *vars);
+int			chk_end_pipe(t_vars *vars);
+int			chk_pipe_syntax_err(t_vars *vars);
+
+/*
 Pipes main functions.
 In pipes.c
 */
@@ -577,12 +585,38 @@ int			wait_for_processes(t_pipe *pipes, t_vars *vars);
 int 		init_pipe_arrays(t_pipe *pipes, int pipe_count);
 
 /*
+Pipeline processing functions.
+In process_pipes.c
+*/
+void		setup_pipe_node(t_node *pipe_node, t_node *left_cmd,
+				t_node *right_cmd);
+t_node		*process_first_pipe(t_vars *vars);
+void		process_addon_pipes(t_vars *vars);
+t_node		*proc_pipes(t_vars *vars);
+
+/*
+Redirection processing functions.
+In process_redirect.c
+*/
+t_node		*proc_redir(t_vars *vars);
+void		reset_redir_tracking(t_pipe *pipes);
+void		build_redir_ast(t_vars *vars);
+void 		process_redir_node(t_node *redir_node, t_vars *vars);
+void		integrate_redirections_with_pipes(t_vars *vars);
+void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
+t_node		*get_redir_target(t_node *current, t_node *last_cmd);
+void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
+int			is_valid_redir_node(t_node *current);
+// t_node		*proc_redir_pt1(t_vars *vars);
+// void		proc_redir_pt2(t_vars *vars);
+
+/*
 Quote handling.
 In quotes.c
 */
 int 		validate_quotes(char *input, t_vars *vars);
 char		*fix_open_quotes(char *input, t_vars *vars);
-void		process_quotes_in_arg(char **arg);
+void		process_arg_quotes(char **arg);
 
 /*
 Redirection handling.

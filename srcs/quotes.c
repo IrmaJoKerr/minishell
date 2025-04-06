@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 07:46:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 20:47:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ char *fix_open_quotes(char *original_input, t_vars *vars)
  * - For double quotes: keeps content for later expansion
  * - Handles adjacent quoted text by joining with previous arg when needed
  */
-void process_quotes_in_arg(char **arg)
+void process_arg_quotes(char **arg)
 {
     char *str;
     size_t len;
@@ -117,7 +117,7 @@ void process_quotes_in_arg(char **arg)
     str = *arg;
     len = ft_strlen(str);
     
-    DBG_PRINTF(DEBUG_QUOTES, "process_quotes_in_arg: Processing '%s'\n", str);
+    DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
     
     // Need at least 2 chars for quotes
     if (len < 2)

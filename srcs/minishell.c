@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 14:48:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 23:36:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,12 +193,15 @@ void build_and_execute(t_vars *vars)
     root = proc_token_list(vars);
     
     // Only update astroot if we got a valid root node
-    if (root) {
+    if (root)
+	{
         vars->astroot = root;
         DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
         // Execute the command tree
         execute_cmd(vars->astroot, vars->env, vars);
-    } else {
+    }
+	else
+	{
         DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
     }
 }

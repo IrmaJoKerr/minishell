@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 14:04:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 20:46:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -769,7 +769,7 @@ void process_quotes_in_redirect(t_node *redir_node)
     if (!redir_node || !redir_node->args || !redir_node->args[0])
         return;
     
-    process_quotes_in_arg(&redir_node->args[0]);
+    process_arg_quotes(&redir_node->args[0]);
 }
 
 // /*

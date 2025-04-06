@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/05 12:26:51 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/06 23:21:58 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,6 +26,7 @@ INCLUDE_DIRS = includes $(LIBFT_DIR)/includes
 INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 
 MINISHELL_SRCS = \
+			srcs/append_args.c \
 			srcs/arguments.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
@@ -47,7 +48,10 @@ MINISHELL_SRCS = \
 			srcs/minishell.c \
 			srcs/operators.c \
 			srcs/paths.c \
+			srcs/pipes_syntax.c \
 			srcs/pipes.c \
+			srcs/process_pipes.c \
+			srcs/process_redirect.c \
 			srcs/quotes.c \
 			srcs/redirect.c \
 			srcs/shell_level.c \
