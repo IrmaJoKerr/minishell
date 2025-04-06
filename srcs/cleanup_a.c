@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 23:34:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 09:21:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,19 +29,7 @@ void	cleanup_env_error(char **env, int n)
 	free(env);
 }
 
-/*
-Cleanup AST struct variables.
-- Takes a pointer to an AST structure.
-- Safely frees the structure itself.
-- Prevents memory leaks after AST processing.
-Works with init_ast().
-*/
-void	cleanup_ast_struct(t_ast *ast)
-{
-	if (!ast)
-		return ;
-	free(ast);
-}
+
 
 /*
 Cleanup pipes struct variables.
@@ -53,7 +41,6 @@ void	cleanup_pipes(t_pipe *pipes)
 {
 	if (!pipes)
 		return ;
-	free(pipes->exec_cmds);
 	free(pipes->pipe_fds);
 	free(pipes->pids);
 	free(pipes->status);

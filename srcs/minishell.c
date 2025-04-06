@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 23:19:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 09:29:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,43 +142,6 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
     improved_tokenize(cmd, vars);
     
     return (cmd);
-}
-
-/*
-Processes input with pipes that need continuation.
-- Gets additional input for pipes at end of line.
-- Re-tokenizes the completed command.
-- Ensures proper error handling.
-Returns:
-Newly allocated complete command string.
-NULL on memory allocation failure.
-Works with process_command().
-
-Example: When user types "ls |"
-- Prompts for continuation after the pipe
-- User types "grep foo" and Enter
-- Returns combined string: "ls | grep foo"
-*/
-char	*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk)
-{
-	char	*new_cmd;
-	char	*pipe_cmd;
-
-	if (syntax_chk != 2)
-		return (cmd);
-	pipe_cmd = ft_strdup(cmd);
-	if (handle_unfinished_pipes(&pipe_cmd, vars, NULL) >= 0)
-		new_cmd = pipe_cmd;
-	else
-		new_cmd = NULL;
-	if (!new_cmd)
-		return (NULL);
-	if (new_cmd != cmd)
-	{
-    	free(cmd);  // Remove the conditional check for error_msg
-    	cmd = new_cmd;
-	}
-	return (cmd);
 }
 
 /*

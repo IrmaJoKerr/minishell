@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 23:33:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 09:23:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,21 +83,6 @@ t_pipe	*init_pipes(void)
 }
 
 /*
-Initialize a new AST state structure.
-Allocates and sets up the AST building state.
-*/
-t_ast	*init_ast(void)
-{
-	t_ast	*ast;
-
-	ast = (t_ast *)malloc(sizeof(t_ast));
-	if (!ast)
-		return (NULL);
-	ft_memset(ast, 0, sizeof(t_ast));
-	return (ast);
-}
-
-/*
 Reset the shell state.
 - Cleans up the token list.
 - Re-initializes the lexer state.
@@ -118,7 +103,7 @@ void	reset_shell(t_vars *vars)
         vars->pipes->pipe_count = 0;
         vars->pipes->out_mode = OUT_MODE_NONE;
         vars->pipes->current_redirect = NULL;
-        vars->pipes->root_node = NULL;
+		vars->pipes->last_cmd = NULL;
     }
 	init_lexer(vars);
 }

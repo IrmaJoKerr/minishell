@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 19:07:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 11:46:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,8 @@ int	is_valid_redir_node(t_node *current)
 		return (0);
 	if (!is_redirection(current->type))
 		return (0);
-	if (!current->next || current->next->type != TYPE_CMD)
+	 // Modified to accept ARGS type for redirection targets
+	if (!current->next || (current->next->type != TYPE_CMD && current->next->type != TYPE_ARGS))
 		return (0);
 	return (1);
 }
@@ -189,16 +190,32 @@ Returns:
 - NULL if no suitable command found.
 Works with proc_redir_pt1().
 */
-t_node	*get_redir_target(t_node *current, t_node *last_cmd)
-{
-	t_node	*target;
+// t_node	*get_redir_target(t_node *current, t_node *last_cmd)
+// {
+// 	t_node	*target;
 
-	target = NULL;
-	if (current->prev && current->prev->type == TYPE_CMD)
-		target = current->prev;
-	else
-		target = last_cmd;
-	return (target);
+// 	target = NULL;
+// 	if (current->prev && current->prev->type == TYPE_CMD)
+// 		target = current->prev;
+// 	else
+// 		target = last_cmd;
+// 	return (target);
+// }
+t_node *get_redir_target(t_node *current, t_node *last_cmd)
+{
+    t_node *target;
+
+    target = NULL;
+    if (current->prev && current->prev->type == TYPE_CMD)
+        target = current->prev;
+    else
+        target = last_cmd;
+        
+    // Make sure we have a valid target
+    if (!target)
+        DBG_PRINTF(DEBUG_EXEC, "No valid redirection target found\n");
+    
+    return (target);
 }
 
 /*
@@ -211,6 +228,35 @@ Returns:
 - NULL otherwise or if no valid redirections found.
 Works with proc_token_list().
 */
+// t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
+// {
+// 	t_node	*current;
+// 	t_node	*last_cmd;
+// 	t_node	*redir_root;
+// 	t_node	*target_cmd;
+
+// 	current = vars->head;
+// 	last_cmd = NULL;
+// 	redir_root = NULL;
+// 	(void)pipe_root;
+// 	while (current)
+// 	{
+// 		if (current->type == TYPE_CMD)
+// 			last_cmd = current;
+// 		else if (is_valid_redir_node(current))
+// 		{
+// 			target_cmd = get_redir_target(current, last_cmd);
+// 			if (target_cmd)
+// 			{
+// 				setup_redir_ast(current, target_cmd, current->next);
+// 				if (!redir_root)
+//                     redir_root = current;
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// 	return (redir_root);
+// }
 t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 {
 	t_node	*current;
@@ -222,22 +268,48 @@ t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 	last_cmd = NULL;
 	redir_root = NULL;
 	(void)pipe_root;
+	
+	DBG_PRINTF(DEBUG_EXEC, "Starting redirection processing (proc_redir_pt1)\n");
+	
 	while (current)
 	{
 		if (current->type == TYPE_CMD)
+		{
 			last_cmd = current;
+			DBG_PRINTF(DEBUG_EXEC, "Found command node: %s\n", 
+					  current->args ? current->args[0] : "NULL");
+		}
 		else if (is_valid_redir_node(current))
 		{
+			DBG_PRINTF(DEBUG_EXEC, "Found valid redirection node type=%d (%s)\n", 
+					  current->type, get_token_str(current->type));
+			
 			target_cmd = get_redir_target(current, last_cmd);
+			
+			DBG_PRINTF(DEBUG_EXEC, "Target command for redirection: %p\n", (void*)target_cmd);
+			if (target_cmd && target_cmd->args)
+				DBG_PRINTF(DEBUG_EXEC, "Target command content: %s\n", target_cmd->args[0]);
+			
 			if (target_cmd)
 			{
+				DBG_PRINTF(DEBUG_EXEC, "Setting up redirection AST: %s %s %s\n",
+						  target_cmd->args ? target_cmd->args[0] : "NULL",
+						  get_token_str(current->type),
+						  current->next && current->next->args ? current->next->args[0] : "NULL");
+				
 				setup_redir_ast(current, target_cmd, current->next);
 				if (!redir_root)
-                    redir_root = current;
+				{
+					redir_root = current;
+					DBG_PRINTF(DEBUG_EXEC, "Set redir_root to node %p\n", (void*)redir_root);
+				}
 			}
 		}
 		current = current->next;
 	}
+	
+	DBG_PRINTF(DEBUG_EXEC, "Completed redirection processing, returning root: %p\n", (void*)redir_root);
+	
 	return (redir_root);
 }
 
@@ -289,50 +361,62 @@ Example: For input "ls -l | grep a > output.txt":
 */
 t_node *proc_token_list(t_vars *vars)
 {
-    t_node *pipe_root;
-    t_node *last_pipe;
-    t_node *last_cmd;
-    t_node *redir_root;
-    
-    // Base case validation
-    if (!vars || !vars->head)
-        return (NULL);
-        
-    // Find all command nodes
-    find_cmd(NULL, NULL, FIND_ALL, vars);
-    
-    // Safety check: make sure we have at least one valid command
-    if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args)
-        return (NULL);
-        
-    // Initialize for pipe processing
-    pipe_root = NULL;
-    last_pipe = NULL;
-    last_cmd = NULL;
-    redir_root = NULL;
-    
-    // Process pipes - first pass identifies the first pipe
-    pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
-    
-    // Process pipes - second pass handles remaining pipes
-    if (pipe_root)
-        proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
-    
-    // Process redirections - two phases
-    redir_root = proc_redir_pt1(vars, pipe_root);
-    
-    if (pipe_root)
-        proc_redir_pt2(vars, pipe_root);
-    
-    // Return the appropriate root node
-    if (pipe_root)
-        return (pipe_root);
-    else if (redir_root)
-        return (redir_root);
-    else if (vars->cmd_count > 0)
-        return (vars->cmd_nodes[0]);  // For simple commands with no pipes/redirects
-    
-    return (NULL);
+	t_node *pipe_root;
+	t_node *last_pipe;
+	t_node *last_cmd;
+	t_node *redir_root;
+	
+	// Base case validation
+	if (!vars || !vars->head)
+		return (NULL);
+		
+	// Find all command nodes
+	find_cmd(NULL, NULL, FIND_ALL, vars);
+	
+	// Safety check: make sure we have at least one valid command
+	if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args)
+		return (NULL);
+		
+	// Initialize for pipe processing
+	pipe_root = NULL;
+	last_pipe = NULL;
+	last_cmd = NULL;
+	redir_root = NULL;
+	
+	// Process pipes - first pass identifies the first pipe
+	pipe_root = proc_pipes_pt1(vars, &last_pipe, &last_cmd);
+	
+	// Process pipes - second pass handles remaining pipes
+	if (pipe_root)
+		proc_pipes_pt2(vars, pipe_root, &last_pipe, &last_cmd);
+	
+	// Process redirections - two phases
+	DBG_PRINTF(DEBUG_EXEC, "Processing redirections: pipe_root=%p\n", (void*)pipe_root);
+	redir_root = proc_redir_pt1(vars, pipe_root);
+	DBG_PRINTF(DEBUG_EXEC, "After proc_redir_pt1: redir_root=%p\n", (void*)redir_root);
+	if (pipe_root)
+	{
+		proc_redir_pt2(vars, pipe_root);
+	}
+	DBG_PRINTF(DEBUG_EXEC, "After proc_redir_pt2: redir_root=%p\n", (void*)redir_root);
+
+	// Return the appropriate root node
+	DBG_PRINTF(DEBUG_EXEC, "Final AST root selection: pipe_root=%p, redir_root=%p\n", 
+		(void*)pipe_root, (void*)redir_root);
+	if (pipe_root)
+	{
+		DBG_PRINTF(DEBUG_EXEC, "Returning pipe_root type=%d\n", pipe_root->type);
+		return (pipe_root);
+	}
+	else if (redir_root)
+	{
+		DBG_PRINTF(DEBUG_EXEC, "Returning redir_root type=%d\n", redir_root->type);
+		return (redir_root);
+	}
+	else if (vars->cmd_count > 0)
+		return (vars->cmd_nodes[0]);  // For simple commands with no pipes/redirects
+	
+	return (NULL);
 }
 
 /*
@@ -356,24 +440,24 @@ Attaches string tokens as arguments to their commands.
 */
 void	link_strargs_to_cmds(t_vars *vars)
 {
-    t_node	*current;
-    t_node	*cmd_node;
+	t_node	*current;
+	t_node	*cmd_node;
 
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-            cmd_node = current;
-        else if (cmd_node && current->type == TYPE_ARGS)
-        {
-            // Append the argument to the command node
-            if (cmd_node->args && current->args && current->args[0])
-            {
-                cmd_node->args[0] = ft_strdup(current->args[0]);
-            }
-        }
-        current = current->next;
-    }
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+			cmd_node = current;
+		else if (cmd_node && current->type == TYPE_ARGS)
+		{
+			// Append the argument to the command node
+			if (cmd_node->args && current->args && current->args[0])
+			{
+				cmd_node->args[0] = ft_strdup(current->args[0]);
+			}
+		}
+		current = current->next;
+	}
 }
 
 /*
@@ -434,24 +518,6 @@ void	build_pipe_ast(t_vars *vars)
 	}
 }
 
-/*
-Processes token list to build the AST structure.
-- Converts strings after pipes to commands
-- Links string arguments to appropriate commands
-- Builds the AST structure for pipes and commands
-- Sets the root node of the AST
-Debug output helps trace the AST building process.
-*/
-// void	process_token_list(t_vars *vars)
-// {
-// 	convert_strs_to_cmds(vars);
-// 	link_strargs_to_cmds(vars);
-// 	build_pipe_ast(vars);
-// }
-void process_token_list(t_vars *vars)
-{
-    vars->astroot = proc_token_list(vars);
-}
 
 /*
 Detects if a pipe token appears at the beginning of input.

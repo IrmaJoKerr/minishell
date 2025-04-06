@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 18:50:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 11:53:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,24 +92,28 @@ Works with setup_redirection().
 // Updated setup_out_redir function
 int setup_out_redir(t_node *node, t_vars *vars)
 {
-    char *file;
 	
+    char *file;
     int flags = O_WRONLY | O_CREAT;
     
     if (!node || !node->args || !node->args[0])
+	{
         return (0);
-    
-    file = node->args[0];
-    
+	}
+	file = node->args[0];
+	DBG_PRINTF(DEBUG_EXEC, "Setting up output redirection to file: %s\n", file);
+	DBG_PRINTF(DEBUG_EXEC, "File open flags: %d (append mode: %d)\n", 
+		flags, vars->pipes->out_mode);
     // Set flags based on out_mode
     if (vars->pipes->out_mode == 2)
         flags |= O_APPEND;
     else
         flags |= O_TRUNC;
-    
-    // Open the file
-	
+
+	// Open the file with proper permissions
     vars->pipes->redirection_fd = open(file, flags, 0644);
+	DBG_PRINTF(DEBUG_EXEC, "File open result: fd=%d, errno=%d (%s)\n", 
+          	vars->pipes->redirection_fd, errno, strerror(errno));
     if (vars->pipes->redirection_fd == -1)
     {
         ft_putstr_fd("bleshell: ", 2);
@@ -225,19 +229,72 @@ Works with exec_redirect_cmd().
     
 //     return (1);
 // }
+// int setup_redirection(t_node *node, t_vars *vars, int *fd)
+// {
+//     // Store current redirection node - common for all redirect types
+//     vars->pipes->current_redirect = node;
+//     // Process quotes in redirection filename
+//     process_quotes_in_redirect(node);
+//     // Handle different redirection types
+//     if (node->type == TYPE_IN_REDIRECT)
+//     {
+//         if (!setup_in_redir(node, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_OUT_REDIRECT)
+//     {
+//         vars->pipes->out_mode = 1; // Truncate mode
+//         if (!setup_out_redir(node, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_APPEND_REDIRECT)
+//     {
+//         vars->pipes->out_mode = 2; // Append mode
+//         if (!setup_out_redir(node, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_HEREDOC)
+//     {
+//         // Heredoc-specific handling
+//         *fd = handle_heredoc(node, vars);
+//         if (*fd == -1)
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//         vars->pipes->heredoc_fd = *fd;
+//         // Redirect stdin to read from heredoc
+//         if (dup2(*fd, STDIN_FILENO) == -1)
+//         {
+//             close(*fd);
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     return (1);
+// }
 int setup_redirection(t_node *node, t_vars *vars, int *fd)
 {
-    // Store current redirection node - common for all redirect types
+    // Store current redirection node
     vars->pipes->current_redirect = node;
-	vars->pipes->redirection_fd = *fd;
     
-    // Process quotes in redirection filename
-    process_quotes_in_redirect(node);
+    // Process quotes in redirection filename (right child contains filename)
+    if (node->right)
+        process_quotes_in_arg(&node->right->args[0]);
     
     // Handle different redirection types
     if (node->type == TYPE_IN_REDIRECT)
     {
-        if (!setup_in_redir(node, vars))
+        if (!setup_in_redir(node->right, vars)) // Use right child for filename
         {
             vars->error_code = 1;
             return (0);
@@ -246,31 +303,39 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     else if (node->type == TYPE_OUT_REDIRECT)
     {
         vars->pipes->out_mode = 1; // Truncate mode
-        if (!setup_out_redir(node, vars))
+        if (!setup_out_redir(node->right, vars)) // Use right child for filename
+        {
+            vars->error_code = 1;
             return (0);
-
+        }
     }
     else if (node->type == TYPE_APPEND_REDIRECT)
     {
         vars->pipes->out_mode = 2; // Append mode
-        if (!setup_out_redir(node, vars))
+        if (!setup_out_redir(node->right, vars)) // Use right child for filename
+        {
+            vars->error_code = 1;
             return (0);
+        }
     }
     else if (node->type == TYPE_HEREDOC)
     {
-        // Heredoc-specific handling
-        char *delimiter = NULL;
-        if (node->args && node->args[0])
-            delimiter = node->args[0];
-        else
-            return (vars->error_code = 1);
-            
-        if (!read_heredoc(fd, delimiter, vars, 1))
+        // Heredoc uses delimiter directly from the node
+        *fd = handle_heredoc(node, vars);
+        if (*fd == -1)
         {
             vars->error_code = 1;
             return (0);
         }
         vars->pipes->heredoc_fd = *fd;
+        
+        // Redirect stdin to read from heredoc
+        if (dup2(*fd, STDIN_FILENO) == -1)
+        {
+            close(*fd);
+            vars->error_code = 1;
+            return (0);
+        }
     }
     
     return (1);
@@ -412,7 +477,7 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
     }
     
     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-               node->type, node->args[0]);
+		node->type, node->args ? node->args[0] : "NULL");
     
     // Handle different node types
     if (node->type == TYPE_PIPE) {
@@ -423,13 +488,17 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
         }
         result = execute_pipes(node, vars);
     } 
-    else if (is_redirection(node->type)) {
-        // For redirection nodes, validate they have both command and target
-        if (!node->left || !node->right) {
-            DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid redirection node (missing child)\n");
-            return (vars->error_code = 1);
-        }
-        result = exec_redirect_cmd(node, envp, vars);
+    else if (is_redirection(node->type))
+	{
+		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+			(void*)node->left, (void*)node->right);
+  		if (node->left)
+	  	DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+				node->left->type, node->left->args ? node->left->args[0] : "NULL");
+  		if (node->right)
+	  	DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+				node->right->type, node->right->args ? node->right->args[0] : "NULL");
+  		result = exec_redirect_cmd(node, envp, vars);
     }
     else if (node->type == TYPE_CMD) {
         // For command nodes, execute them directly

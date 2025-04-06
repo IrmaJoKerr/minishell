@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/05 04:45:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 02:15:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ int	builtin_exit(char **args, t_vars *vars)
 	rl_clear_history();
 	if (vars && vars->pipes)
 	{
-		vars->pipes->exec_cmds = NULL;
 		vars->pipes->pipe_fds = NULL;
 		vars->pipes->pids = NULL;
 		vars->pipes->status = NULL;

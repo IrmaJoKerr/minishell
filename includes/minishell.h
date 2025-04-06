@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 01:01:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/06 12:19:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,36 +141,6 @@ typedef struct s_node
 }	t_node;
 
 /*
-Structure for storing AST (Abstract Syntax Tree) building state.
-Has variables tracking:
-- Current node processing state
-- Command and redirection references
-- Syntax validation information
-- Pipe structure analysis
-- Tree construction progress
-This structure centralizes AST building information to simplify
-function signatures and improve maintainability. It holds temporary
-references needed during the parsing phase but not required after
-the AST is fully constructed.
-*/
-typedef struct s_ast
-{
-	t_node	*current;        // Current node being processed in the token list
-	t_node	*last_cmd;       // Last command node encountered during parsing
-	t_node	*last_heredoc;   // Last heredoc node encountered during parsing
-	t_node	*cmd_redir;      // Command node being targeted for redirection
-	t_node	*pipe_root;      // Root node of pipe structure (ADDED)
-	t_node	*root;           // Root node of the AST (ADDED)
-	int		cmd_idx;         // Current index in the cmd_nodes array being processed
-	int		syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
-	int		serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
-	int		pipe_at_front;   // Flag indicating pipe at beginning (syntax error)
-	int		pipe_at_end;     // Flag indicating pipe at end (requires more input)
-	int		fd_write;        // File descriptor for writing (ADDED for heredoc)
-	int		expand_vars;     // Flag for expanding variables (ADDED for heredoc)
-} t_ast;
-
-/*
 Structure for storing pipeline information.
 Has variables tracking:
 - Pipe structure
@@ -182,7 +152,6 @@ Has variables tracking:
 typedef struct s_pipe
 {
 	int			pipe_count;     // Number of pipes in the chain
-	t_node		**exec_cmds;     // Array of command nodes for execution
 	int			*pipe_fds;      // Array of pipe file descriptors
 	pid_t		*pids;          // Array of process IDs
 	int			*status;        // Status for each process
@@ -190,9 +159,26 @@ typedef struct s_pipe
 	int			saved_stdout;   // Saved standard output
 	int			heredoc_fd;     // File descriptor for heredoc if present
 	int			redirection_fd; // Current redirection file descriptor
-	t_node		*root_node;     // Root node of the pipe structure
 	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
+	// t_node		*current;        // Current node being processed in the token list
+	
+	t_node		*last_cmd;       // Last command node encountered during parsing
+	t_node		*last_heredoc;   // Last heredoc node encountered during parsing
+	t_node      *last_pipe;       // Last pipe node processed
+	t_node      *pipe_root;       // Root of temporary pipe structure for AST
+    t_node      *redir_root;      // Root redirection node
+	t_node      *last_in_redir;   // Last input redirection encountered
+    t_node      *last_out_redir;  // Last output redirection encountered
+	t_node		*cmd_redir;      // Command node being targeted for redirection
+	// t_node		*root;           // Root node of the AST (ADDED)
+	// int			cmd_idx;         // Current index in the cmd_nodes array being processed
+	// int			syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
+	// int			serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
+	// int			pipe_at_front;   // Flag indicating pipe at beginning (syntax error)
+	int			pipe_at_end;     // Flag indicating pipe at end (requires more input)
+	// int			fd_write;        // File descriptor for writing (ADDED for heredoc)
+	// int			expand_vars;     // Flag for expanding variables (ADDED for heredoc)
 } t_pipe;
 
 /*
@@ -329,18 +315,15 @@ t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 t_node		*proc_redir_pt1(t_vars *vars, t_node *pipe_root);
 void		proc_redir_pt2(t_vars *vars, t_node *pipe_root);
 t_node		*proc_token_list(t_vars *vars);
-void		convert_str_to_cmds(t_vars *vars);
 void		setup_pipe_links(t_node *pipe_node, t_node *left_cmd,
 				t_node *right_cmd);
 void		convert_strs_to_cmds(t_vars *vars);
 void		del_list_node(t_node *node);
 int			is_special_token(t_node *token);
-void		handle_quoted_arg(t_node *cmd_node, t_node *quote_token);
 void		link_strargs_to_cmds(t_vars *vars);
 void		link_addon_pipe(t_node *last_pipe,
 				t_node *new_pipe, t_node *right_cmd);
 void		build_pipe_ast(t_vars *vars);
-void		process_token_list(t_vars *vars);
 int			chk_start_pipe(t_vars *vars);
 int			chk_multi_pipes(t_vars *vars, int pipes_count);
 int			chk_adj_pipes(t_vars *vars, t_node *current);
@@ -360,7 +343,6 @@ Group A of cleanup functions.
 In cleanup_a.c
 */
 void		cleanup_env_error(char **env, int n);
-void		cleanup_ast_struct(t_ast *ast);
 void		cleanup_pipes(t_pipe *pipes);
 void		cleanup_vars(t_vars *vars);
 void		cleanup_exit(t_vars *vars);
@@ -506,7 +488,7 @@ In initshell.c
 void		init_shell(t_vars *vars, char **envp);
 void		init_lexer(t_vars *vars);
 t_pipe		*init_pipes(void);
-t_ast		*init_ast(void);
+// t_ast		*init_ast(void);
 void		reset_shell(t_vars *vars);
 
 /*
@@ -514,9 +496,6 @@ Input completion functions.
 In input_completion.c
 */
 int			is_input_complete(t_vars *vars);
-int			check_unfinished_pipe(t_vars *vars, t_ast *ast);
-int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars,
-				t_ast *ast);
 char		*append_input(char *original, char *additional);
 
 /*
@@ -526,18 +505,11 @@ In input_verify.c
 void		process_expansions(t_vars *vars);
 
 /*
-Lexer utility functions.
-In lexer_utils.c
-*/
-
-/*
 Lexer functions.
 In lexer.c
 */
 void		skip_whitespace(char *str, t_vars *vars);
 char		*read_added_input(char *prompt);
-void		process_text(char *str, t_vars *vars, int *first_token,
-				t_tokentype override_type);
 void 		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
 
 
@@ -549,18 +521,11 @@ void		print_tokens(t_node *head); // Debug function
 char		*reader(void);
 void		setup_env(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
-char		*handle_pipe_valid(char *cmd, t_vars *vars, int syntax_chk);
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
 char		*process_pipe_syntax(char *command, t_vars *vars);
 int			process_command(char *command, t_vars *vars);
 int			main(int ac, char **av, char **envp);
-
-/*
-Node handling.
-In nodes.c
-*/
-void		redirection_node(t_node *root, t_node *redir_node);
 
 /*
 Operator handling.
@@ -591,30 +556,23 @@ In pipes.c
 */
 void		reset_std_fd(t_pipe *pipes);
 void		init_pipe(t_node *cmd, int *pipe_fd);
-int			validate_pipe_node(t_node *pipe_node);
 int			setup_pipe(int *pipefd);
 void		exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
 void		exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
 pid_t		make_child_proc(t_node *pipe_node, int *pipefd, t_vars *vars,
 				int is_left);
-void		reset_done_pipes(t_ast *ast, char **pipe_cmd, char **result,
-				int free_flags);
-int			prep_pipe_complete(char *cmd, char **result, char **pipe_cmd,
-				t_ast **ast);
-char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
-int			setup_pipes_procs(t_node *pipe_node, t_vars *vars,
-				pid_t *left_pid, pid_t *right_pid);
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
-int			setup_cmd_redirects(t_node *cmd_node, t_vars *vars);
 int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars);
-int 		setup_multi_redirects(t_node *cmd_node, t_vars *vars);
+void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
+int			check_unfinished_pipe(t_vars *vars);
+char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
+
 void		process_quotes_in_redirect(t_node *redir_node);
 t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
-void		get_pipe_cmds(t_node *pipe_node, t_pipe *pipes);
 int			make_pipes(t_pipe *pipes, int pipe_count);
 void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count);
 int 		fork_processes(t_pipe *pipes, int pipe_count, t_vars *vars);
-int 		count_pipes(t_node *node);
+int			count_pipes(t_vars *vars);
 void 		close_all_pipe_fds(t_pipe *pipes);
 int			wait_for_processes(t_pipe *pipes, t_vars *vars);
 int 		init_pipe_arrays(t_pipe *pipes, int pipe_count);
@@ -641,6 +599,9 @@ int			output_redirect(t_node *node, int *fd_out,
 				int append, t_vars *vars);
 int			open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars);
 int			handle_redirect(t_node *node, int *fd, int mode, t_vars *vars);
+int			setup_cmd_redirects(t_node *cmd_node, t_vars *vars);
+t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
+int			setup_multi_redirects(t_node *cmd_node, t_vars *vars);
 
 /*
 Shell level handling.
