@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 20:47:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ void process_arg_quotes(char **arg)
     str = *arg;
     len = ft_strlen(str);
     
-    DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
+    //DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
     
     // Need at least 2 chars for quotes
     if (len < 2)
@@ -127,13 +127,13 @@ void process_arg_quotes(char **arg)
     if ((str[0] == '"' && str[len - 1] == '"') || 
         (str[0] == '\'' && str[len - 1] == '\''))
     {
-        DBG_PRINTF(DEBUG_QUOTES, "Removing quotes from '%s'\n", str);
+        //DBG_PRINTF(DEBUG_QUOTES, "Removing quotes from '%s'\n", str);
         new_str = ft_substr(str, 1, len - 2);
         if (new_str)
         {
             free(*arg);  // Free the string content, not the pointer
             *arg = new_str;
-            DBG_PRINTF(DEBUG_QUOTES, "After removing quotes: '%s'\n", *arg);
+            //DBG_PRINTF(DEBUG_QUOTES, "After removing quotes: '%s'\n", *arg);
         }
     }
 }

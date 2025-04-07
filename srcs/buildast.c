@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 23:27:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,14 +303,14 @@ t_node *proc_token_list(t_vars *vars)
     // Process all pipe nodes
     vars->pipes->pipe_root = proc_pipes(vars);
     // Process redirections with our new unified function
-    DBG_PRINTF(DEBUG_EXEC, "Processing redirections: pipe_root=%p\n", 
-              (void*)vars->pipes->pipe_root);  
+    //DBG_PRINTF(DEBUG_EXEC, "Processing redirections: pipe_root=%p\n", 
+    //          (void*)vars->pipes->pipe_root);  
     vars->pipes->redir_root = proc_redir(vars);
-    DBG_PRINTF(DEBUG_EXEC, "After redirection processing: redir_root=%p\n", 
-              (void*)vars->pipes->redir_root);
+    //DBG_PRINTF(DEBUG_EXEC, "After redirection processing: redir_root=%p\n", 
+    //          (void*)vars->pipes->redir_root);
     // Select appropriate root node for the AST
-    DBG_PRINTF(DEBUG_EXEC, "Final AST root selection: pipe_root=%p, redir_root=%p\n", 
-              (void*)vars->pipes->pipe_root, (void*)vars->pipes->redir_root);
+    //DBG_PRINTF(DEBUG_EXEC, "Final AST root selection: pipe_root=%p, redir_root=%p\n", 
+    //          (void*)vars->pipes->pipe_root, (void*)vars->pipes->redir_root);
     if (vars->pipes->pipe_root)
         return vars->pipes->pipe_root;
     else if (vars->pipes->redir_root)

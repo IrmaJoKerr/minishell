@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 13:52:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 12:58:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,9 @@ int	redirect_error(char *filename, t_vars *vars, int use_errno)
 	int	error_code;
 
 	error_code = 1;
+	// Debug print for redirect errors
+	fprintf(stderr, "DEBUG: Redirect error for file: '%s', errno: %d (%s)\n", 
+		filename, errno, strerror(errno));
 	if (use_errno)
 		use_errno_error(filename, &error_code);
 	else

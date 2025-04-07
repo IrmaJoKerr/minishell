@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 19:47:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,13 +323,13 @@ void debug_cmd_args(t_node *node)
     if (!node || !node->args)
         return;
     
-    DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
+    //DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
     while (node->args[i])
     {
-        DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %d)\n", 
-                  i, node->args[i], 
-                  node->arg_quote_type ? node->arg_quote_type[i] : -1);
+        //DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %d)\n", 
+        //          i, node->args[i], 
+        //          node->arg_quote_type ? node->arg_quote_type[i] : -1);
         i++;
     }
-    DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
+    //DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
 }

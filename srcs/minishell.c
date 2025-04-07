@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 03:19:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,27 +17,27 @@ void print_tokens(t_node *head)
     t_node *curr = head;
     int i;
     
-    fprintf(stderr, "\n--- TOKEN LIST ---\n");
+    //fprintf(stderr, "\n--- TOKEN LIST ---\n");
     while (curr)
     {
-        fprintf(stderr, "Token: type=%d (%s), content='%s'\n", 
-               curr->type, get_token_str(curr->type), 
-               curr->args ? curr->args[0] : "NULL");
+        //fprintf(stderr, "Token: type=%d (%s), content='%s'\n", 
+        //       curr->type, get_token_str(curr->type), 
+        //       curr->args ? curr->args[0] : "NULL");
         
         if (curr->args && curr->args[1])
         {
-            fprintf(stderr, "  Arguments:");
+            //fprintf(stderr, "  Arguments:");
             i = 1;
             while (curr->args[i])
             {
-                fprintf(stderr, " '%s'", curr->args[i]);
+                //fprintf(stderr, " '%s'", curr->args[i]);
                 i++;
             }
-            fprintf(stderr, "\n");
+            //fprintf(stderr, "\n");
         }
         curr = curr->next;
     }
-    fprintf(stderr, "----------------\n\n");
+    //fprintf(stderr, "----------------\n\n");
 }
 
 /*
@@ -187,7 +187,7 @@ void build_and_execute(t_vars *vars)
     if (!vars || !vars->head)
         return;
 
-    DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+    //DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
     
     // Use proc_token_list instead of process_token_list
     root = proc_token_list(vars);
@@ -196,13 +196,13 @@ void build_and_execute(t_vars *vars)
     if (root)
 	{
         vars->astroot = root;
-        DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
+        //DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
         // Execute the command tree
         execute_cmd(vars->astroot, vars->env, vars);
     }
 	else
 	{
-        DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
+        //DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
     }
 }
 

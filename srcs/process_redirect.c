@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 23:28:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 13:27:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,22 +24,42 @@ Returns:
 - NULL if no valid redirections exist in the token stream.
 Works with proc_token_list.
 */
+// t_node *proc_redir(t_vars *vars)
+// {
+//     if (!vars || !vars->head || !vars->pipes)
+//         return (NULL);
+
+//     // Reset redirection tracking in pipes structure
+//     reset_redir_tracking(vars->pipes);
+
+//     // Phase 1: Build redirection AST
+//     build_redir_ast(vars);
+    
+//     // Phase 2: Only if we have pipes, integrate redirections with them
+//     if (vars->pipes->pipe_root)
+//         integrate_redirections_with_pipes(vars);
+    
+//     return (vars->pipes->redir_root);
+// }
 t_node *proc_redir(t_vars *vars)
 {
+    // Debug print for tracing
+    fprintf(stderr, "DEBUG: proc_redir function called\n");
+    
     if (!vars || !vars->head || !vars->pipes)
         return (NULL);
-
-    // Reset redirection tracking in pipes structure
+    
+    // Reset redirection tracking state
     reset_redir_tracking(vars->pipes);
-
-    // Phase 1: Build redirection AST
+    
+    // Build the redirection AST by connecting commands to redirection operators
     build_redir_ast(vars);
     
-    // Phase 2: Only if we have pipes, integrate redirections with them
+    // Integrate redirections with pipe structure if needed
     if (vars->pipes->pipe_root)
         integrate_redirections_with_pipes(vars);
     
-    return (vars->pipes->redir_root);
+    return vars->pipes->redir_root;
 }
 
 /*
@@ -48,14 +68,28 @@ Resets redirection tracking state in the pipes structure.
 - Prepares pipes structure for new redirection processing.
 Works with proc_redir to clean state before processing.
 */
+// void reset_redir_tracking(t_pipe *pipes)
+// {
+//     if (!pipes)
+//         return;
+        
+//     pipes->last_cmd = NULL;
+//     pipes->cmd_redir = NULL;
+//     pipes->redir_root = NULL;
+// }
+// This helper function should also be implemented
 void reset_redir_tracking(t_pipe *pipes)
 {
+    fprintf(stderr, "DEBUG: Resetting redirection tracking\n");
+    
     if (!pipes)
         return;
         
     pipes->last_cmd = NULL;
-    pipes->cmd_redir = NULL;
     pipes->redir_root = NULL;
+    pipes->last_in_redir = NULL;
+    pipes->last_out_redir = NULL;
+    pipes->cmd_redir = NULL;
 }
 
 /*
@@ -65,30 +99,106 @@ Builds the redirection AST by connecting commands to redirection operators.
 - Sets pipes->redir_root to the first valid redirection.
 Works with proc_redir for redirection structure building.
 */
+// void build_redir_ast(t_vars *vars)
+// {
+//     t_node *current;
+    
+//     current = vars->head;
+//     //DBG_PRINTF(DEBUG_EXEC, "Starting redirection AST building\n");
+    
+//     while (current)
+//     {
+//         if (current->type == TYPE_CMD)
+//         {
+//             vars->pipes->last_cmd = current;
+//             //DBG_PRINTF(DEBUG_EXEC, "Found command node: %s\n", 
+//             //          current->args ? current->args[0] : "NULL");
+//         }
+//         else if (is_valid_redir_node(current))
+//         {
+//             process_redir_node(current, vars);
+//         }
+        
+//         current = current->next;
+//     }
+    
+//     //DBG_PRINTF(DEBUG_EXEC, "Completed redirection AST building\n");
+// }
+// void build_redir_ast(t_vars *vars)
+// {
+//     t_node *current = vars->head;
+    
+//     fprintf(stderr, "DEBUG: Building redirection AST\n");
+    
+//     while (current)
+//     {
+//         // Track commands as we go
+//         if (current->type == TYPE_CMD)
+//         {
+//             vars->pipes->last_cmd = current;
+//             fprintf(stderr, "DEBUG: Found command: %s\n", 
+//                   current->args ? current->args[0] : "NULL");
+//         }
+//         // Process redirections
+//         else if (is_redirection(current->type) && current->next)
+//         {
+//             // Keep track of last redirection of each type
+//             if (current->type == TYPE_IN_REDIRECT)
+//             {
+//                 vars->pipes->last_in_redir = current;
+//                 fprintf(stderr, "DEBUG: Found input redirection\n");
+//             }
+//             else if (current->type == TYPE_OUT_REDIRECT || 
+//                      current->type == TYPE_APPEND_REDIRECT)
+//             {
+//                 vars->pipes->last_out_redir = current;
+//                 fprintf(stderr, "DEBUG: Found output redirection\n");
+//             }
+            
+//             // Process the redirection node
+//             process_redir_node(current, vars);
+//         }
+//         current = current->next;
+//     }
+// }
 void build_redir_ast(t_vars *vars)
 {
-    t_node *current;
+    t_node *current = vars->head;
     
-    current = vars->head;
-    DBG_PRINTF(DEBUG_EXEC, "Starting redirection AST building\n");
+    fprintf(stderr, "DEBUG: Building redirection AST\n");
     
     while (current)
     {
+        // Track commands as we go
         if (current->type == TYPE_CMD)
         {
             vars->pipes->last_cmd = current;
-            DBG_PRINTF(DEBUG_EXEC, "Found command node: %s\n", 
-                      current->args ? current->args[0] : "NULL");
+            fprintf(stderr, "DEBUG: Found command: %s\n", 
+                   current->args ? current->args[0] : "NULL");
         }
-        else if (is_valid_redir_node(current))
+        // Process redirections
+        else if (is_redirection(current->type) && current->next)
         {
+            // Keep track of last redirection of each type
+            if (current->type == TYPE_IN_REDIRECT)
+            {
+                vars->pipes->last_in_redir = current;
+                fprintf(stderr, "DEBUG: Found input redirection: %s\n",
+                       current->next->args ? current->next->args[0] : "NULL");
+            }
+            else if (current->type == TYPE_OUT_REDIRECT || 
+                     current->type == TYPE_APPEND_REDIRECT)
+            {
+                vars->pipes->last_out_redir = current;
+                fprintf(stderr, "DEBUG: Found output redirection: %s\n",
+                       current->next->args ? current->next->args[0] : "NULL");
+            }
+            
+            // Process the redirection node
             process_redir_node(current, vars);
         }
-        
         current = current->next;
     }
-    
-    DBG_PRINTF(DEBUG_EXEC, "Completed redirection AST building\n");
 }
 
 /*
@@ -99,32 +209,58 @@ Processes an individual redirection node.
 - Records debug information about the redirection.
 Works with build_redir_ast during AST construction.
 */
+// void process_redir_node(t_node *redir_node, t_vars *vars)
+// {
+//     t_node *target_cmd;
+    
+//     //DBG_PRINTF(DEBUG_EXEC, "Found valid redirection node type=%d (%s)\n", 
+//     //          redir_node->type, get_token_str(redir_node->type));
+              
+//     target_cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
+    
+//     //DBG_PRINTF(DEBUG_EXEC, "Target command for redirection: %p\n", (void*)target_cmd);
+//     //if (target_cmd && target_cmd->args)
+//     //    DBG_PRINTF(DEBUG_EXEC, "Target command content: %s\n", target_cmd->args[0]);
+        
+//     if (target_cmd)
+//     {
+//         //DBG_PRINTF(DEBUG_EXEC, "Setting up redirection AST: %s %s %s\n",
+//         //          target_cmd->args ? target_cmd->args[0] : "NULL",
+//         //          get_token_str(redir_node->type),
+//         //          redir_node->next && redir_node->next->args ? redir_node->next->args[0] : "NULL");
+//         set_redir_node(redir_node, target_cmd, redir_node->next);
+        
+//         if (!vars->pipes->redir_root)
+//         {
+//             vars->pipes->redir_root = redir_node;
+//             //DBG_PRINTF(DEBUG_EXEC, "Set redir_root to node %p\n", (void*)vars->pipes->redir_root);
+//         }
+//     }
+// }
 void process_redir_node(t_node *redir_node, t_vars *vars)
 {
-    t_node *target_cmd;
+    fprintf(stderr, "DEBUG: Processing redirection node, type: %d\n", 
+            redir_node->type);
+            
+    // Find the target command
+    t_node *cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
     
-    DBG_PRINTF(DEBUG_EXEC, "Found valid redirection node type=%d (%s)\n", 
-              redir_node->type, get_token_str(redir_node->type));
-              
-    target_cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
-    
-    DBG_PRINTF(DEBUG_EXEC, "Target command for redirection: %p\n", (void*)target_cmd);
-    if (target_cmd && target_cmd->args)
-        DBG_PRINTF(DEBUG_EXEC, "Target command content: %s\n", target_cmd->args[0]);
-        
-    if (target_cmd)
+    if (cmd && redir_node->next)
     {
-        DBG_PRINTF(DEBUG_EXEC, "Setting up redirection AST: %s %s %s\n",
-                  target_cmd->args ? target_cmd->args[0] : "NULL",
-                  get_token_str(redir_node->type),
-                  redir_node->next && redir_node->next->args ? redir_node->next->args[0] : "NULL");
-        set_redir_node(redir_node, target_cmd, redir_node->next);
+        // Set up the redirection relationship
+        set_redir_node(redir_node, cmd, redir_node->next);
         
+        // Update root if this is the first redirection
         if (!vars->pipes->redir_root)
-        {
             vars->pipes->redir_root = redir_node;
-            DBG_PRINTF(DEBUG_EXEC, "Set redir_root to node %p\n", (void*)vars->pipes->redir_root);
-        }
+            
+        fprintf(stderr, "DEBUG: Set up redirection from cmd '%s' to '%s'\n",
+                cmd->args ? cmd->args[0] : "NULL",
+                redir_node->next->args ? redir_node->next->args[0] : "NULL");
+    }
+    else
+    {
+        fprintf(stderr, "DEBUG: Invalid redirection setup\n");
     }
 }
 
@@ -135,34 +271,71 @@ Integrates redirection nodes with the pipe structure.
 - Makes pipe commands output to redirections correctly.
 Works with proc_redir when pipe nodes exist.
 */
-void	integrate_redirections_with_pipes(t_vars *vars)
+// void	integrate_redirections_with_pipes(t_vars *vars)
+// {
+//     t_node	*current;
+//     t_node	*target_cmd;
+    
+//     current = vars->head;
+//     vars->pipes->last_cmd = NULL;
+//     //DBG_PRINTF(DEBUG_EXEC, "Integrating redirections with pipe structure\n");
+//     while (current)
+//     {
+//         if (current->type == TYPE_CMD)
+//         {
+//             vars->pipes->last_cmd = current;
+//         }
+//         else if (is_valid_redir_node(current))
+//         {
+//             target_cmd = get_redir_target(current, vars->pipes->last_cmd);
+            
+//             if (target_cmd && vars->pipes->pipe_root)
+//             {
+//                 //DBG_PRINTF(DEBUG_EXEC, "Updating pipe for command '%s' to use redirection\n", 
+//                 //          target_cmd->args ? target_cmd->args[0] : "NULL");
+//                 upd_pipe_redir(vars->pipes->pipe_root, target_cmd, current);
+//             }
+//         }
+//         current = current->next;
+//     }
+//     //DBG_PRINTF(DEBUG_EXEC, "Completed pipe structure integration\n");
+// }
+void integrate_redirections_with_pipes(t_vars *vars)
 {
-    t_node	*current;
-    t_node	*target_cmd;
+    t_node *current;
+    t_node *target_cmd;
+    
+    if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
+        return;
     
     current = vars->head;
     vars->pipes->last_cmd = NULL;
-    DBG_PRINTF(DEBUG_EXEC, "Integrating redirections with pipe structure\n");
+    
+    fprintf(stderr, "DEBUG: Integrating redirections with pipe structure\n");
+    
     while (current)
     {
         if (current->type == TYPE_CMD)
         {
             vars->pipes->last_cmd = current;
+            fprintf(stderr, "DEBUG: Found command in pipe integration: %s\n", 
+                   current->args ? current->args[0] : "NULL");
         }
-        else if (is_valid_redir_node(current))
+        else if (is_redirection(current->type) && current->next)
         {
             target_cmd = get_redir_target(current, vars->pipes->last_cmd);
             
             if (target_cmd && vars->pipes->pipe_root)
             {
-                DBG_PRINTF(DEBUG_EXEC, "Updating pipe for command '%s' to use redirection\n", 
-                          target_cmd->args ? target_cmd->args[0] : "NULL");
+                fprintf(stderr, "DEBUG: Updating pipe for command '%s' to use redirection type %d\n", 
+                       target_cmd->args ? target_cmd->args[0] : "NULL", current->type);
                 upd_pipe_redir(vars->pipes->pipe_root, target_cmd, current);
             }
         }
         current = current->next;
     }
-    DBG_PRINTF(DEBUG_EXEC, "Completed pipe structure integration\n");
+    
+    fprintf(stderr, "DEBUG: Completed pipe structure integration\n");
 }
 
 /*
@@ -201,8 +374,8 @@ t_node	*get_redir_target(t_node *current, t_node *last_cmd)
         target = last_cmd;
         
     // Make sure we have a valid target
-    if (!target)
-        DBG_PRINTF(DEBUG_EXEC, "No valid redirection target found\n");
+    // if (!target)
+        //DBG_PRINTF(DEBUG_EXEC, "No valid redirection target found\n");
     
     return (target);
 }
@@ -215,23 +388,54 @@ Updates pipe structure when commands are redirected.
 - Handles both left and right side command replacements.
 Works with proc_redir_pt2().
 */
-void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
-{
-	t_node	*pipe_node;
+// void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
+// {
+// 	t_node	*pipe_node;
 
-	if (!pipe_root || !cmd || !redir)
-		return ;
-	pipe_node = pipe_root;
-	while (pipe_node)
-	{
-		if (pipe_node->left == cmd)
-			pipe_node->left = redir;
-		else if (pipe_node->right == cmd)
-			pipe_node->right = redir;
-		pipe_node = pipe_node->right;
-		if (pipe_node && pipe_node->type != TYPE_PIPE)
-			break ;
-	}
+// 	if (!pipe_root || !cmd || !redir)
+// 		return ;
+// 	pipe_node = pipe_root;
+// 	while (pipe_node)
+// 	{
+// 		if (pipe_node->left == cmd)
+// 			pipe_node->left = redir;
+// 		else if (pipe_node->right == cmd)
+// 			pipe_node->right = redir;
+// 		pipe_node = pipe_node->right;
+// 		if (pipe_node && pipe_node->type != TYPE_PIPE)
+// 			break ;
+// 	}
+// }
+void upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
+{
+    t_node *pipe_node;
+
+    if (!pipe_root || !cmd || !redir)
+        return;
+    
+    pipe_node = pipe_root;
+    
+    // Traverse the pipe chain
+    while (pipe_node)
+    {
+        // Check if this pipe node references the command we want to redirect
+        if (pipe_node->left == cmd)
+        {
+            fprintf(stderr, "DEBUG: Updating left branch of pipe to use redirection\n");
+            pipe_node->left = redir;
+        }
+        else if (pipe_node->right == cmd)
+        {
+            fprintf(stderr, "DEBUG: Updating right branch of pipe to use redirection\n");
+            pipe_node->right = redir;
+        }
+        
+        // Move to the next pipe in the chain (if it exists and is a pipe)
+        if (pipe_node->right && pipe_node->right->type == TYPE_PIPE)
+            pipe_node = pipe_node->right;
+        else
+            break;
+    }
 }
 
 /*
@@ -273,41 +477,41 @@ int	is_valid_redir_node(t_node *current)
 //     current = vars->head;
 //     vars->pipes->last_cmd = NULL;
 //     vars->pipes->redir_root = NULL;
-//     DBG_PRINTF(DEBUG_EXEC, "Starting redirection processing (proc_redir_pt1)\n");
+//     //DBG_PRINTF(DEBUG_EXEC, "Starting redirection processing (proc_redir_pt1)\n");
 //     while (current)
 //     {
 //         if (current->type == TYPE_CMD)
 //         {
 //             vars->pipes->last_cmd = current;
-//             DBG_PRINTF(DEBUG_EXEC, "Found command node: %s\n", 
-//                       current->args ? current->args[0] : "NULL");
+//             //DBG_PRINTF(DEBUG_EXEC, "Found command node: %s\n", 
+//             //          current->args ? current->args[0] : "NULL");
 //         }
 //         else if (is_valid_redir_node(current))
 //         {
-//             DBG_PRINTF(DEBUG_EXEC, "Found valid redirection node type=%d (%s)\n", 
-//                       current->type, get_token_str(current->type));   
+//             //DBG_PRINTF(DEBUG_EXEC, "Found valid redirection node type=%d (%s)\n", 
+//             //          current->type, get_token_str(current->type));   
 //             vars->pipes->cmd_redir = get_redir_target(current, vars->pipes->last_cmd);
-//             DBG_PRINTF(DEBUG_EXEC, "Target command for redirection: %p\n", (void*)vars->pipes->cmd_redir);
-//             if (vars->pipes->cmd_redir && vars->pipes->cmd_redir->args)
-//                 DBG_PRINTF(DEBUG_EXEC, "Target command content: %s\n", vars->pipes->cmd_redir->args[0]);
+//             //DBG_PRINTF(DEBUG_EXEC, "Target command for redirection: %p\n", (void*)vars->pipes->cmd_redir);
+//             //if (vars->pipes->cmd_redir && vars->pipes->cmd_redir->args)
+//             //    DBG_PRINTF(DEBUG_EXEC, "Target command content: %s\n", vars->pipes->cmd_redir->args[0]);
 //             if (vars->pipes->cmd_redir)
 //             {
-//                 DBG_PRINTF(DEBUG_EXEC, "Setting up redirection AST: %s %s %s\n",
-//                           vars->pipes->cmd_redir->args ? vars->pipes->cmd_redir->args[0] : "NULL",
-//                           get_token_str(current->type),
-//                           current->next && current->next->args ? current->next->args[0] : "NULL");
+//                 //DBG_PRINTF(DEBUG_EXEC, "Setting up redirection AST: %s %s %s\n",
+//                 //          vars->pipes->cmd_redir->args ? vars->pipes->cmd_redir->args[0] : "NULL",
+//                 //          get_token_str(current->type),
+//                 //          current->next && current->next->args ? current->next->args[0] : "NULL");
 //                 set_redir_node(current, vars->pipes->cmd_redir, current->next);
 //                 if (!vars->pipes->redir_root)
 //                 {
 //                     vars->pipes->redir_root = current;
-//                     DBG_PRINTF(DEBUG_EXEC, "Set redir_root to node %p\n", (void*)vars->pipes->redir_root);
+//                     //DBG_PRINTF(DEBUG_EXEC, "Set redir_root to node %p\n", (void*)vars->pipes->redir_root);
 //                 }
 //             }
 //         }
 //         current = current->next;
 //     }
-//     DBG_PRINTF(DEBUG_EXEC, "Completed redirection processing, returning root: %p\n", 
-//               (void*)vars->pipes->redir_root);
+//     //DBG_PRINTF(DEBUG_EXEC, "Completed redirection processing, returning root: %p\n", 
+//     //          (void*)vars->pipes->redir_root);
 //     return (vars->pipes->redir_root);
 // }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 15:01:05 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:46:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -531,13 +531,13 @@ int improved_tokenize(char *input, t_vars *vars)
     }
     
     // Keeping these as instructed
-    DBG_PRINTF(DEBUG_TOKENIZE, "improved_tokenize: Token type=%d, content='%s'\n", 
-              vars->curr_type, (vars->current && vars->current->args) ? 
-              vars->current->args[0] : "(null)");
-    DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
+    // DBG_PRINTF(DEBUG_TOKENIZE, "improved_tokenize: Token type=%d, content='%s'\n", 
+    //           vars->curr_type, (vars->current && vars->current->args) ? 
+    //           vars->current->args[0] : "(null)");
+    // DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
     
     // Keeping the debug_token_list call as instructed
-    debug_token_list(vars);
+    // debug_token_list(vars);
     return(1);
 }
 
@@ -596,7 +596,7 @@ void build_token_linklist(t_vars *vars, t_node *node)
     }
 }
 
-// Keeping this as instructed
+/* Deprecated - comment out all calls to this function */
 void debug_token_list(t_vars *vars)
 {
     t_node *current = vars->head;

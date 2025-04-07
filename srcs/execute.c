@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 00:40:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 12:59:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,9 +101,9 @@ int setup_out_redir(t_node *node, t_vars *vars)
         return (0);
 	}
 	file = node->args[0];
-	DBG_PRINTF(DEBUG_EXEC, "Setting up output redirection to file: %s\n", file);
-	DBG_PRINTF(DEBUG_EXEC, "File open flags: %d (append mode: %d)\n", 
-		flags, vars->pipes->out_mode);
+	//DBG_PRINTF(DEBUG_EXEC, "Setting up output redirection to file: %s\n", file);
+	//DBG_PRINTF(DEBUG_EXEC, "File open flags: %d (append mode: %d)\n", 
+	//	flags, vars->pipes->out_mode);
     // Set flags based on out_mode
     if (vars->pipes->out_mode == 2)
         flags |= O_APPEND;
@@ -112,8 +112,8 @@ int setup_out_redir(t_node *node, t_vars *vars)
 
 	// Open the file with proper permissions
     vars->pipes->redirection_fd = open(file, flags, 0644);
-	DBG_PRINTF(DEBUG_EXEC, "File open result: fd=%d, errno=%d (%s)\n", 
-          	vars->pipes->redirection_fd, errno, strerror(errno));
+	//DBG_PRINTF(DEBUG_EXEC, "File open result: fd=%d, errno=%d (%s)\n", 
+    //      	vars->pipes->redirection_fd, errno, strerror(errno));
     if (vars->pipes->redirection_fd == -1)
     {
         ft_putstr_fd("bleshell: ", 2);
@@ -412,9 +412,18 @@ Works with exec_redirect_cmd().
 // }
 int setup_redirection(t_node *node, t_vars *vars)
 {
+    reset_redirect_fds(vars);
+    
     // Store current redirection node
     vars->pipes->current_redirect = node;
     
+    // Process quotes in redirection filename (right child contains filename)
+    if (node->right && node->right->args)
+        process_arg_quotes(&node->right->args[0]);
+    // Debug print for redirection setup
+    fprintf(stderr, "DEBUG: Setting up redirection type=%d for file: '%s'\n",
+		node->type, node->args ? node->args[0] : "(null)");
+
     // Handle different redirection types
     if (node->type == TYPE_IN_REDIRECT)
     {
@@ -507,7 +516,7 @@ int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
 	pid_t	pid;
 	int		status;
 
-	DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Command path='%s'\n", cmd_path);
+	//DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Command path='%s'\n", cmd_path);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -529,7 +538,7 @@ int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
 		ft_safefree((void **)&cmd_path);
 		return (handle_cmd_status(status, vars));
 	}
-	DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Args[0]='%s', Args[1]='%s'\n", node->args[0], node->args[1]);
+	//DBG_PRINTF(DEBUG_EXEC, "exec_child_cmd: Args[0]='%s', Args[1]='%s'\n", node->args[0], node->args[1]);
 	return (0);
 }
 
@@ -613,11 +622,11 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	result = 0;
     if (!node)
 	{
-        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
+        //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
         return (vars->error_code = 1);
     }
-    DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-        node->type, node->args ? node->args[0] : "NULL");
+    //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
+    //    node->type, node->args ? node->args[0] : "NULL");
     // Handle different node types
     if (node->type == TYPE_CMD)
 	{
@@ -628,33 +637,33 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	{
         // For pipe nodes, validate they have both left and right children
         if (!node->left || !node->right) {
-            DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
+            //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
             return (vars->error_code = 1);
         }
         result = execute_pipes(node, vars);
     } 
     else if (is_redirection(node->type))
 	{
-        DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-            (void*)node->left, (void*)node->right);
-        if (node->left)
-            DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-                node->left->type, node->left->args ? node->left->args[0] : "NULL");
-        if (node->right)
-            DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-                node->right->type, node->right->args ? node->right->args[0] : "NULL");
+        //DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+        //    (void*)node->left, (void*)node->right);
+        //if (node->left)
+        //    DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+        //        node->left->type, node->left->args ? node->left->args[0] : "NULL");
+        //if (node->right)
+        //    DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+        //        node->right->type, node->right->args ? node->right->args[0] : "NULL");
         // Add heredoc-specific debugging
-        if (node->type == TYPE_HEREDOC) {
-            DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
-                node->right && node->right->args ? node->right->args[0] : "NULL",
-                vars->pipes->heredoc_fd);
-        }
+        //if (node->type == TYPE_HEREDOC) {
+        //    DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
+        //        node->right && node->right->args ? node->right->args[0] : "NULL",
+        //        vars->pipes->heredoc_fd);
+        //}
         result = exec_redirect_cmd(node, envp, vars);
     }
     else
 	{
         // Unhandled node type
-        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
+        //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
         result = 1;
     }
     // Ensure error code is set in vars

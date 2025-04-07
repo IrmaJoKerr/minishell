@@ -1,0 +1,1290 @@
+                                                                                             
+[0;31m———————————— builtins
+[0;33mTest   1: ✅⚠️ [38;5;244m echo hello world 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   2: ✅⚠️ [38;5;244m echo "hello world" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   3: ✅⚠️ [38;5;244m echo 'hello world' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   4: ✅⚠️ [38;5;244m echo hello'world' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   5: ❌[38;5;244m echo hello""world 
+[0mmini output = (hello world)
+bash output = (helloworld)
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+Fix: Need to handle adjacency issues for empty double quotes in between and adjacent strings
+
+[0;33mTest   6: ✅⚠️ [38;5;244m echo '' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   7: ✅⚠️ [38;5;244m echo "$PWD" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   8: ✅⚠️ [38;5;244m echo '$PWD' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest   9: ✅⚠️ [38;5;244m echo "aspas ->'" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  10: ✅⚠️ [38;5;244m echo "aspas -> ' " 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  11: ✅⚠️ [38;5;244m echo 'aspas ->"' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  12: ✅⚠️ [38;5;244m echo 'aspas -> " ' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  13: ✅⚠️ [38;5;244m echo "> >> < * ? [ ] | ; [ ] || && ( ) & # $  <<" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  14: ✅⚠️ [38;5;244m echo '> >> < * ? [ ] | ; [ ] || && ( ) & # $  <<' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  15: ✅⚠️ [38;5;244m echo "exit_code ->$? user ->$USER home -> $HOME" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  16: ✅⚠️ [38;5;244m echo 'exit_code ->$? user ->$USER home -> $HOME' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  17: ✅⚠️ [38;5;244m echo "$" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  18: ✅⚠️ [38;5;244m echo '$' 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  19: ❌[38;5;244m echo $ 
+[0mmini output = ()
+bash output = ($)
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo double free detected in tcache 2)
+bash error = ()
+Fix: need to handle just $ by itself as a character to be printed. identify it as an arg type without expanding 
+
+[0;33mTest  20: ✅⚠️ [38;5;244m echo $? 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+[0;33mTest  21: ❌[38;5;244m echo $?HELLO 
+[0mmini output = (0 HELLO)
+bash output = (0HELLO)
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+Fix: Need to handle adjacency issues for expansion - ? and HELLO expansions adjacent to each other
+
+[0;33mTest  22: ✅⚠️ [38;5;244m pwd 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST pwd)
+bash error = ()
+[0;33mTest  23: ✅⚠️ [38;5;244m pwd oi 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST pwd)
+bash error = ()
+[0;33mTest  24: ✅⚠️ [38;5;244m export hello 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ()
+[0;33mTest  25: ✅⚠️ [38;5;244m export HELLO=123 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ()
+[0;33mTest  26: ❌[38;5;244m export A- 
+[0mmini output = (export: 'A-': not a valid identifier)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ( not a valid identifier)
+NO PROBLEM HERE
+
+[0;33mTest  27: ✅⚠️ [38;5;244m export HELLO=123 A 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ()
+[0;33mTest  28: ✅⚠️ [38;5;244m export HELLO="123 A-" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ()
+[0;33mTest  29: ✅⚠️ [38;5;244m export hello world 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ()
+[0;33mTest  30: ❌[38;5;244m export HELLO-=123 
+[0mmini output = (export: 'HELLO-=123': not a valid identifier)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ( not a valid identifier)
+NO PROBLEM HERE
+
+[0;33mTest  31: ❌[38;5;244m export = 
+[0mmini output = (export: '=': not a valid identifier)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ( not a valid identifier)
+NO PROBLEM HERE
+
+[0;33mTest  32: ❌[38;5;244m export 123 
+[0mmini output = (export: '123': not a valid identifier)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export)
+bash error = ( not a valid identifier)
+NO PROBLEM HERE
+
+[0;33mTest  33: ✅⚠️ [38;5;244m unset 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  34: ✅⚠️ [38;5;244m unset HELLO 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  35: ✅⚠️ [38;5;244m unset HELLO1 HELLO2 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  36: ✅⚠️ [38;5;244m unset HOME 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  37: ✅⚠️ [38;5;244m unset PATH 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  38: ✅⚠️ [38;5;244m unset SHELL 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST unset)
+bash error = ()
+[0;33mTest  39: ✅⚠️ [38;5;244m cd $PWD 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cd)
+bash error = ()
+[0;33mTest  40: ❌[38;5;244m cd $PWD hi 
+[0mmini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cd)
+bash error = ( too many arguments)
+Fix : Add error handling to cd function to check for too many arguments
+
+[0;33mTest  41: ❌[38;5;244m cd 123123 
+[0mmini output = (cd: no such file or directory: 123123)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cd)
+bash error = ( No such file or directory)
+NO PROBLEM HERE
+
+[0;33mTest  42: ✅⚠️ [38;5;244m exit 123 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  43: ✅⚠️ [38;5;244m exit 298 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  44: ✅⚠️ [38;5;244m exit +100 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  45: ✅⚠️ [38;5;244m exit "+100" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  46: ✅⚠️ [38;5;244m exit +"100" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  47: ✅⚠️ [38;5;244m exit -100 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  48: ✅⚠️ [38;5;244m exit "-100" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  49: ✅⚠️ [38;5;244m exit -"100" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit)
+bash error = ()
+[0;33mTest  50: ✅⚠️ [38;5;244m exit hello 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit numeric argument required)
+bash error = ( numeric argument required)
+[0;33mTest  51: ✅⚠️ [38;5;244m exit 42 world 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST exit too many arguments)
+bash error = ( too many arguments)
+[0;33mTest  52: ✅[38;5;244m  
+[0m[0;31m———————————— pipes
+[0;33mTest  53: ✅⚠️ [38;5;244m env | sort | grep -v SHLVL | grep -v ^_ 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST env sort grep grep Integrating redirections with pipe structure env sort grep grep Completed pipe structure integration)
+bash error = ()
+[0;33mTest  54: ✅⚠️ [38;5;244m cat ./test_files/infile_big | grep oi 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat grep Integrating redirections with pipe structure cat grep Completed pipe structure integration)
+bash error = ()
+
+[0;33mTest  55: ❌[38;5;244m cat minishell.h | grep ");"$ 
+[0mmini exit code = 2
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat grep Integrating redirections with pipe structure cat grep Completed pipe structure integration No such file or directory No such file or directory)
+bash error = ( No such file or directory)
+Fix: cat tries to access minishell.h, which doesnt exist in this directory. The pipe does try to pipe the output to grep, but since cat fails, grep does not get any input. So it should print 'No such file or directory' once and set exit code = 1.
+
+[0;33mTest  56: ✅⚠️ [38;5;244m export GHOST=123 | env | grep GHOST 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST export env grep Integrating redirections with pipe structure export env grep Completed pipe structure integration)
+bash error = ()
+[0;31m———————————— redirects
+
+General redirects Fix: Need to ensure that the redirections are handled first before the commands are executed. just like pipes, need to lay out the infrastructure first before forking a child process
+Example 1:
+ls > file1.txt > file2.txt
+Bash processes both redirections before running ls.
+It first opens file1.txt and sets stdout to it.
+Then it overwrites that by setting stdout to file2.txt.
+Final result: Only file2.txt gets the output from ls.
+file1.txt is created (or truncated), but remains empty.
+
+Example 2:
+cat < file1.txt < file2.txt
+Bash processes all redirections before running cat.
+First it connects stdin to file1.txt, then replaces it with file2.txt.
+Final result: cat reads only from file2.txt.
+Like before, the earlier redirection is ignored.
+
+Example 3:
+cat <infile >outfile
+What Bash really does:
+- Opens infile for reading.
+- Opens outfile for writing (creating or truncating it).
+- Duplicates the file descriptors:
+- stdin (fd 0) ← infile
+- stdout (fd 1) ← outfile
+- Only then it launches cat.
+
+[0;33mTest  57: ❌[38;5;244m grep hi <./test_files/infile 
+[0mmini output = ()
+bash output = (hi)
+mini exit code = 1
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST grep ./test_files/infile 7 Set up redirection from cmd 'grep' to './test_files/infile' '<' No such file or directory)
+bash error = ()
+Fix: Need to find path to ./test_files/infile. Set error code to 0
+
+[0;33mTest  58: ❌[38;5;244m grep hi "<infile" <         ./test_files/infile 
+[0mmini exit code = 1
+bash exit code = 2
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST grep ./test_files/infile 7 Set up redirection from cmd 'grep' to './test_files/infile' '<' No such file or directory)
+bash error = ( No such file or directory)
+Fix: grep needs handle "<infile" and ignore the redirection. Basically "<infile" should be blocking the output from the redirection. Set error code to 2
+
+[0;33mTest  59: ❌[38;5;244m echo hi < ./test_files/infile bye bye 
+[0mmini output = ()
+bash output = (hi bye bye)
+mini exit code = 1
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./test_files/infile 7 Set up redirection from cmd 'echo' to './test_files/infile' '<' No such file or directory)
+bash error = ()
+Fix: Echo needs to print the 'hi' and 'bye bye' and ignore < ./test_files/infile. Set error code to 0
+
+[0;33mTest  60: ❌[38;5;244m grep hi <./test_files/infile_big <./test_files/infile 
+[0mmini output = ()
+bash output = (hi)
+mini exit code = 1
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST grep ./test_files/infile_big 7 Set up redirection from cmd 'grep' to './test_files/infile_big' ./test_files/infile 7 Set up redirection from cmd 'grep' to './test_files/infile' '<' No such file or directory)
+bash error = ()
+Fix: Grep needs to process the rightmost redirect and ignore the one in the middle
+
+[0;33mTest  61: ❌[38;5;244m echo <"./test_files/infile" "bonjour       42" 
+[0mmini output = (./test_files/infile bonjour 42)
+bash output = (bonjour 42)
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+Fix: Quoting issue: redirect should not process file paths in quotes. echo should only print 'bonjour       42'
+
+[0;33mTest  62: ✅⚠️ [38;5;244m cat <"./test_files/file name with spaces" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat)
+bash error = ()
+[0;33mTest  63: ❌[38;5;244m cat <./test_files/infile_big ./test_files/infile 
+[0mmini output = ()
+bash output = (hi hello world 42)
+mini exit code = 1
+bash exit code = 0
+Fix: Rightmost redirect argument should take precedence
+
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat ./test_files/infile_big 7 Set up redirection from cmd 'cat' to './test_files/infile_big' '<' No such file or directory)
+bash error = ()
+[0;33mTest  64: ✅⚠️ [38;5;244m cat <"1""2""3""4""5" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat No such file or directory)
+bash error = ( No such file or directory)
+[0;33mTest  65: ✅⚠️ [38;5;244m echo <"./test_files/infile" <missing <"./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo < 7 Set up redirection from cmd 'echo' to '<' missing 7 Set up redirection from cmd 'echo' to 'missing' '<' No such file or directory)
+bash error = ( No such file or directory)
+[0;33mTest  66: ✅⚠️ [38;5;244m echo <missing <"./test_files/infile" <missing 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo missing 7 Set up redirection from cmd 'echo' to 'missing' < 7 Set up redirection from cmd 'echo' to '<' missing 7 Set up redirection from cmd 'echo' to 'missing' '<' No such file or directory)
+bash error = ( No such file or directory)
+[0;33mTest  67: ✅⚠️ [38;5;244m cat <"./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat)
+bash error = ()
+[0;33mTest  68: ✅⚠️ [38;5;244m echo <"./test_files/infile_big" | cat <"./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo | 7 Set up redirection from cmd 'echo' to '|' cat Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 7 Updating left branch of pipe to use redirection cat Completed pipe structure integration)
+bash error = ()
+[0;33mTest  69: ✅⚠️ [38;5;244m echo <"./test_files/infile_big" | cat "./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo | 7 Set up redirection from cmd 'echo' to '|' cat Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 7 Updating left branch of pipe to use redirection cat Completed pipe structure integration)
+bash error = ()
+
+[0;33mTest  70: ❌[38;5;244m echo <"./test_files/infile_big" | echo <"./test_files/infile" 
+[0mmini output = (./test_files/infile)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo | 7 Set up redirection from cmd 'echo' to '|' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 7 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ()
+Fix: 
+Left: echo <"./test_files/infile_big"
+- echo runs.
+- Has no arguments.
+- It prints a single newline.
+Right: echo <"./test_files/infile"
+- echo runs, but its stdin comes from the pipe.
+- The <"./test_files/infile" redirection gets overridden by the pipe’s input.
+- So echo gets no arguments, ignores the piped input, and prints a newline.
+
+[0;33mTest  71: ✅⚠️ [38;5;244m echo hi | cat <"./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo cat Integrating redirections with pipe structure echo cat Completed pipe structure integration)
+bash error = ()
+[0;33mTest  72: ✅⚠️ [38;5;244m echo hi | cat "./test_files/infile" 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo cat Integrating redirections with pipe structure echo cat Completed pipe structure integration)
+bash error = ( Broken pipe)
+[0;33mTest  73: ✅⚠️ [38;5;244m cat <"./test_files/infile" | echo hi 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat | 7 Set up redirection from cmd 'cat' to '|' echo Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection echo Completed pipe structure integration Broken pipe)
+bash error = ( Broken pipe)
+[0;33mTest  74: ✅⚠️ [38;5;244m cat <"./test_files/infile" | grep hello 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat | 7 Set up redirection from cmd 'cat' to '|' grep Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection grep Completed pipe structure integration)
+bash error = ()
+[0;33mTest  75: ✅⚠️ [38;5;244m cat <"./test_files/infile_big" | echo hi 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat | 7 Set up redirection from cmd 'cat' to '|' echo Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection echo Completed pipe structure integration Broken pipe)
+bash error = ( Broken pipe)
+[0;33mTest  76: ✅⚠️ [38;5;244m cat <missing 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' '<' No such file or directory)
+bash error = ( No such file or directory)
+
+[0;33mTest  77: ❌[38;5;244m cat <missing | cat 
+[0mmini exit code =
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' cat Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection cat Completed pipe structure integration)
+bash error = ( No such file or directory)
+Fix: Need to identify the string 'missing' as a file path and attempt to access it before printing an error "bleshell: missing: No such file or directory". Set error code to 0
+
+[0;33mTest  78: ❌[38;5;244m cat <missing | echo oi 
+[0mmini exit code = oi
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' echo Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ( No such file or directory)
+Fix: Need to identify the string 'missing' as a file path and attempt to access it before printing an error "bleshell: missing: No such file or directory". Execute echo and print oi. Set error code to 0
+
+[0;33mTest  79: ❌[38;5;244m cat <missing | cat <"./test_files/infile" 
+[0mmini exit code = 42
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' cat Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection cat Completed pipe structure integration)
+bash error = ( No such file or directory)
+Fix: cat <missing should print an error message and set the error code to 0. cat <"./test_files/infile" should print the contents of the file. Set error code to 0
+
+[0;33mTest  80: ✅⚠️ [38;5;244m echo <123 <456 hi | echo 42 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo 123 7 Set up redirection from cmd 'echo' to '123' 456 7 Set up redirection from cmd 'echo' to '456' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 7 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 7 echo Completed pipe structure integration)
+bash error = ( No such file or directory)
+Fix: Should print:
+42
+bleshell: 123: No such file or directory
+echo <123 <456 : while the rightmost redirection is processed, files are opened from LEFT TO RIGHT
+Explanation:
+From left to right:
+- echo <123 <456 hi is parsed first.
+- Bash tries to set up two input redirections:
+- <123: sets stdin to file 123
+- <456: overrides the previous, sets stdin to file 456
+- Then echo hi is the command run with the final redirected stdin.
+- even though only the last input redirection is used (<456), Bash still tries to open both files in the order they appear.
+That means:
+- Bash tries to open 123 — and fails ⇒ bash: 123: No such file or directory
+- Bash tries to open 456 — lets assume it succeeds
+- It runs echo hi with stdin redirected from 456
+- echo hi is connected via pipe to echo 42
+- But echo doesn’t read from stdin, so:
+- "hi" gets discarded
+- echo 42 just prints 42
+- Bash prints error from trying to open 123
+
+[0;33mTest  81: ❌[38;5;244m ls >./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>')
+bash error = ()
+Fix: ls should redirect output to the file and not print anything. Set error code to 0
+
+[0;33mTest  82: ❌[38;5;244m ls >         ./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>')
+bash error = ()
+Fix: ls should redirect output to the file and not print anything. Spaces should not affect tokenizing of ./outfiles/outfile01 path. Set error code to 0
+
+[0;33mTest  83: ❌[38;5;244m echo hi >         ./outfiles/outfile01 bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+hi bye
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' '>')
+bash error = ()
+Fix: Echo should print 'hi bye' and redirect the output to the file. Set error code to 0
+Explanation:
+bash treats echo hi >         ./outfiles/outfile01 bye  as 
+echo hi bye with the redirection: > ./outfiles/outfile01
+
+[0;33mTest  84: ❌[38;5;244m ls >./outfiles/outfile01 >./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile02 8 Set up redirection from cmd 'ls' to './outfiles/outfile02' '>')
+bash error = ()
+Fix: ls should redirect output to outfile02, attempting to access then bypassing outfile01. Set error code to 0
+
+[0;33mTest  85: ❌[38;5;244m ls >./outfiles/outfile01 >./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./test_files/invalid_permission 8 Set up redirection from cmd 'ls' to './test_files/invalid_permission' '>')
+bash error = ( Permission denied)
+Fix: ls should attempt to access then bypass ./outfiles/outfile01. it then tries to access /test_files/invalid_permission. when it fails, it prints an error "Permission denied" and sets the error code to 1.
+
+[0;33mTest  86: ❌[38;5;244m ls >"./outfiles/outfile with spaces" 
+[0mOnly in ./bash_outfiles: outfile with spaces
+mini outfiles:
+bash outfiles:
+>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls No such file or directory)
+bash error = ()
+Fix: ls should redirect output to ./outfiles/outfile with spaces. if it doesnt exist the file should be created. file creation module should be able to handle making files with spaces. Set error code to 0
+
+[0;33mTest  87: ❌[38;5;244m ls >"./outfiles/outfile""1""2""3""4""5" 
+[0mOnly in ./bash_outfiles: outfile12345
+mini outfiles:
+bash outfiles:
+>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls No such file or directory)
+bash error = ()
+Fix: ls should redirect output to file outfile12345 and not print anything. Set error code to 0. if there is no existing file then it MUST be created. all the double quoted strings MUST be concatenated.double quotes should not affect the tokenizing of the file path.
+I have a lib_ft function that concatenates strings. See if it suits the purpose:
+size_t	ft_strlcat(char *dest, const char *src, size_t size)
+{
+	size_t	dest_len;
+	size_t	src_len;
+	size_t	i;
+
+	if (!dest && size == 0)
+		return (0);
+	dest_len = ft_strlen(dest);
+	src_len = ft_strlen(src);
+	i = 0;
+	if (size <= dest_len)
+		return (src_len + size);
+	while (src[i] != '\0' && dest_len + i < size - 1)
+	{
+		dest[dest_len + i] = src[i];
+		i++;
+	}
+	if (dest_len + i < size)
+		dest[dest_len + i] = '\0';
+	return (dest_len + src_len);
+}
+
+[0;33mTest  88: ❌[38;5;244m ls >"./outfiles/outfile01" >./test_files/invalid_permission >"./outfiles/outfile02" 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls > 8 Set up redirection from cmd 'ls' to '>' ./test_files/invalid_permission 8 Set up redirection from cmd 'ls' to './test_files/invalid_permission' '>' No such file or directory No such file or directory)
+bash error = ( Permission denied)
+Fix: ls should attempt to access then bypass ./outfiles/outfile01 and redirect output to ./test_files/invalid_permission. it will try to access it and when it fails then it will print an error "Permission denied" and set the error code to 1. The chain of redirection is broken because there is nothing to redirect from ./test_files/invalid_permission to ./outfiles/outfile02.
+Bash does it like this:
+- Bash parses redirections first, from left to right, before running the command.
+- Command is parsed as:
+- Redirect stdout to ./outfiles/outfile01
+- Then override and redirect stdout to ./test_files/invalid_permission
+- Then override again and redirect stdout to ./outfiles/outfile02
+- Only the last redirection to stdout remains active by the time ls actually runs.
+- Bash now tries to open each target file in redirection order:
+  - Open ./outfiles/outfile01 for writing (succeeds)
+  - Open ./test_files/invalid_permission for writing (fails, permission denied)
+    - At this point, Bash stops, prints an error:
+  - Sets $? = 1
+  - ls never even runs because file descriptor setup failed
+  - ./outfiles/outfile02 is never touched
+- Bash prints the error message for the failed redirection:
+- ./outfiles/outfile01 is created, but empty
+- ./test_files/invalid_permission cant be accessed
+- ./outfiles/outfile02 is never created
+
+[0;33mTest  89: ❌[38;5;244m ls >./test_files/invalid_permission >"./outfiles/outfile01" >./test_files/invalid_permission 
+[0mmini exit code = 2
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./test_files/invalid_permission 8 Set up redirection from cmd 'ls' to './test_files/invalid_permission' > 8 Set up redirection from cmd 'ls' to '>' ./test_files/invalid_permission 8 Set up redirection from cmd 'ls' to './test_files/invalid_permission' '>' No such file or directory)
+bash error = ( Permission denied)
+Fix: ls should 
+
+[0;33mTest  90: ❌[38;5;244m cat <"./test_files/infile" >"./outfiles/outfile01" 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+hi
+hello
+world
+42
+mini exit code = 1
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat > 7 Set up redirection from cmd 'cat' to '>' '<' No such file or directory)
+bash error = ()
+Fix: Rightmost redirect should take precedence. cat should print the contents of the infile and redirect the output to the outfile01. Set error code to 0
+
+[0;33mTest  91: ❌[38;5;244m echo hi >./outfiles/outfile01 | echo bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+hi
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ()
+Fix: echo hi should redirect and attempt to access ./outfiles/outfile01. then it prints "hi" to outfile01. the pipe connecting the stdout of left to stdin of right command does nothing because redirections take priority and the stdout of left command is redirected to the file outfile01
+      echo bye should print "bye" to the stdout. Set error code to 0
+
+[0;33mTest  92: ❌[38;5;244m echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+hi
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./outfiles/outfile02 8 Set up redirection from cmd 'echo' to './outfiles/outfile02' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 echo Completed pipe structure integration)
+bash error = ()
+Fix: echo hi should redirect and attempt to access ./outfiles/outfile01. then it replaces the redirection with ./outfiles/outfile02. it prints "hi" to outfile02. the pipe connecting the stdout of left to stdin of right command does nothing because redirections take priority and the stdout of left command is redirected to the file outfile02
+	  echo bye should print "bye" to the stdout. Set error code to 0
+
+[0;33mTest  93: ❌[38;5;244m echo hi | echo >./outfiles/outfile01 bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+bye
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 8 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ()
+Fix: echo hi prints "hi" to the stdout. the data coming from pipe connecting to echo bye is ignored because echo doesnt take stdin. 
+	echo >./outfiles/outfile01 bye should redirect the output to outfile01 and print "bye" to the stdout. Set error code to 0
+
+[0;33mTest  94: ❌[38;5;244m echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+bye
+mini output = (bye)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./outfiles/outfile02 8 Set up redirection from cmd 'echo' to './outfiles/outfile02' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 8 Updating right branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 Completed pipe structure integration)
+bash error = ()
+Fix: echo hi should print "hi" to the stdout. the data coming from pipe connecting to echo bye is ignored because echo doesnt take stdin. 
+	echo bye >./outfiles/outfile01 >./outfiles/outfile02 should redirect the output to and attempt to access/create outfile01 it is then replaced by the redirection to outfile02 and attempts to access/create outfile02 and print "bye" to the outfile02. Set error code to 0
+
+[0;33mTest  95: ❌[38;5;244m echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+hi
+bye
+mini output = (bye)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo ./outfiles/outfile02 8 Set up redirection from cmd 'echo' to './outfiles/outfile02' Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection echo Updating pipe for command 'echo' to use redirection type 8 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ()
+Fix: echo hi redirects output to outfile01. the pipe connecting echo hi and echo bye does nothing since redirection comes first. 
+      echo bye is then redirected to outfiles/outfile02. error code set to 0 
+
+[0;33mTest  96: ❌[38;5;244m echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 echo Completed pipe structure integration)
+bash error = ( Permission denied)
+Fix: echo hi should attempt to access/create then bypass outfiles/outfile01 and redirect to test_files/invalid_permission. It attempts to access test_files/invalid_permission and fails. Print error message "Permission denied". Set error code to 1
+     echo bye prints "bye" to the stdout independently because echo ignores input from stdin
+
+[0;33mTest  97: ✅⚠️ [38;5;244m echo hi >./test_files/invalid_permission | echo bye 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ( Permission denied)
+[0;33mTest  98: ✅⚠️ [38;5;244m echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 8 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 echo Completed pipe structure integration)
+bash error = ( Permission denied)
+
+[0;33mTest  99: ❌[38;5;244m echo hi | echo bye >./test_files/invalid_permission 
+[0mmini output = (bye)
+bash output = ()
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 8 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ( Permission denied)
+Fix: Should not print anything. hi is being piped to echo bye, which doesnt take stdin input and is ignored. The output of echo bye is then attempted to be redirected to and access ./test_files/invalid_permission. When it fails it prints "Permission denied" and sets the error code to 1. 
+
+[0;33mTest 100: ❌[38;5;244m echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' '>')
+bash error = ( Permission denied)
+Fix: echo hi pipes to >./outfiles/outfile01. The additional > redirection is not associated with any command because it appears immediately after the pipe. 
+     this is treated as a standalone redirection rather than a part of the echo command, which is incorrect syntax. This results in no output being written to outfile01
+	 echo bye is then executed and the output is redirected to ./test_files/invalid_permission.
+	 The output of echo bye is then attempted to be redirected to ./test_files/invalid_permission. It attempts to access test_files/invalid_permission and fails.
+	 Print error message "Permission denied". Set error code to 1
+
+[0;33mTest 101: ❌[38;5;244m echo hi | echo bye >./test_files/invalid_permission >./outfiles/outfile01 
+[0mmini output = (bye)
+bash output = ()
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 8 Updating right branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 Completed pipe structure integration)
+bash error = ( Permission denied)
+Fix: echo hi should pipe to echo bye, which disappears into echo bye. The output of echo bye is then attempted to be redirected to ./test_files/invalid_permission. It attempts to access test_files/invalid_permission and fails. Print error message "Permission denied". still attempts to access/create outfile01. Chain breaks here because there is nothing to redirect from. Set error code to 1
+
+[0;33mTest 102: ✅⚠️ [38;5;244m cat <"./test_files/infile" >./test_files/invalid_permission 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat > 7 Set up redirection from cmd 'cat' to '>' ./test_files/invalid_permission 8 Set up redirection from cmd 'cat' to './test_files/invalid_permission' '<' No such file or directory)
+bash error = ( Permission denied)
+
+[0;33mTest 103: ❌[38;5;244m cat >./test_files/invalid_permission <"./test_files/infile" 
+[0mmini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat ./test_files/invalid_permission 8 Set up redirection from cmd 'cat' to './test_files/invalid_permission' '>')
+bash error = ( Permission denied)
+Fix: cat should get access and get the input from ./test_files/infile. It should print the contents of the infile to the stdout. The output of cat is then redirected to ./test_files/invalid_permission. It attempts to access it and fails. Print error message "Permission denied". Set error code to 1
+
+[0;33mTest 104: ✅⚠️ [38;5;244m cat <missing >./outfiles/outfile01 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' ./outfiles/outfile01 8 Set up redirection from cmd 'cat' to './outfiles/outfile01' '<' No such file or directory)
+bash error = ( No such file or directory)
+Fix: Cat should try to access missing and fail. It should print "No such file or directory". Chain breaks here because there is nothing to redirect from. Set error code to 1
+
+[0;33mTest 105: ❌[38;5;244m cat >./outfiles/outfile01 <missing 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code =
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat ./outfiles/outfile01 8 Set up redirection from cmd 'cat' to './outfiles/outfile01' missing 7 Set up redirection from cmd 'cat' to 'missing' '>')
+bash error = ( No such file or directory)
+Fix : cat should not print anything. The output of cat is being redirected to missing and print "No such file or directory". Set error code to 1
+
+[0;33mTest 106: ✅⚠️ [38;5;244m cat <missing >./test_files/invalid_permission 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat missing 7 Set up redirection from cmd 'cat' to 'missing' ./test_files/invalid_permission 8 Set up redirection from cmd 'cat' to './test_files/invalid_permission' '<' No such file or directory)
+bash error = ( No such file or directory)
+Fix: Cat should try to access missing and fail. It should print "No such file or directory". Chain breaks here because there is nothing to redirect from. Set error code to 1
+
+[0;33mTest 107: ❌[38;5;244m cat >./test_files/invalid_permission <missing 
+[0mmini exit code =
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat ./test_files/invalid_permission 8 Set up redirection from cmd 'cat' to './test_files/invalid_permission' missing 7 Set up redirection from cmd 'cat' to 'missing' '>')
+bash error = ( Permission denied)
+Fix: cat is redirected to <missing. It should print an error message "	No such file or directory".  Set error code to 1
+
+[0;33mTest 108: ❌[38;5;244m cat >./outfiles/outfile01 <missing >./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code =
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat ./outfiles/outfile01 8 Set up redirection from cmd 'cat' to './outfiles/outfile01' missing 7 Set up redirection from cmd 'cat' to 'missing' ./test_files/invalid_permission 8 Set up redirection from cmd 'cat' to './test_files/invalid_permission' '>')
+bash error = ( No such file or directory)
+Fix: cat attempts to redirect to ./outfiles/outfile01 <missing. It should print an error message "	No such file or directory". Chain breaks here because there is nothing to redirect from. Set error code to 1
+
+[0;33mTest 109: ❌[38;5;244m ls >>./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>>')
+bash error = ()
+Fix: ls should append to ./outfiles/outfile01 and not print anything. Set error code to 0
+
+[0;33mTest 110: ❌[38;5;244m ls >>      ./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>>')
+bash error = ()
+Fix: ls should still append to ./outfiles/outfile01 and not print anything. tokenising should skip over the spaces. Set error code to 0
+
+[0;33mTest 111: ❌[38;5;244m ls >>./outfiles/outfile01 >./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>>')
+bash error = ()
+Fix: Process all redirections from left to right, before executing ls. it basically keeps overriding the previous redirection. It should process the first append, then the second. The final output should be in ./outfiles/outfile01. Set error code to 0
+
+[0;33mTest 112: ❌[38;5;244m ls >./outfiles/outfile01 >>./outfiles/outfile01 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>')
+bash error = ()
+Fix: Process all redirections from left to right, before executing ls. it basically keeps overriding the previous redirection. It should process the first redirection, then the append. The final output should be in ./outfiles/outfile01. Set error code to 0
+
+[0;33mTest 113: ❌[38;5;244m ls >./outfiles/outfile01 >>./outfiles/outfile01 >./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile02 8 Set up redirection from cmd 'ls' to './outfiles/outfile02' '>')
+bash error = ()
+Fix: Process all redirections from left to right, before executing ls. it basically keeps overriding the previous redirection. It should process the first redirection, then the second, and finally the third. The final output should be in ./outfiles/outfile02. Set error code to 0
+
+[0;33mTest 114: ❌[38;5;244m ls >>./outfiles/outfile01 >>./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+>
+>>
+bash_outfiles
+bash.supp
+bleshell_history
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+tester
+testeroutput.c
+test_files
+wildcards
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./outfiles/outfile02 9 Set up redirection from cmd 'ls' to './outfiles/outfile02' '>>')
+bash error = ()
+Fix: Process all redirections from left to right, before executing ls. it basically keeps overriding the previous redirection. It should process the first redirection, then the second. The final output should be in ./outfiles/outfile02. Set error code to 0
+
+[0;33mTest 115: ❌[38;5;244m ls >>./test_files/invalid_permission 
+[0mmini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' '>>')
+bash error = ( Permission denied)
+Fix: ls should try to append to ./test_files/invalid_permission. It should fail and print "bleshell: ./test_files/invalid_permission: Permission denied". Set error code to 1
+
+[0;33mTest 116: ❌[38;5;244m ls >>./test_files/invalid_permission >>./outfiles/outfile01 
+[0mmini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' '>>')
+bash error = ( Permission denied)
+Fix: ls should try to append to ./test_files/invalid_permission. It should fail and print "bleshell: ./test_files/invalid_permission: Permission denied". It doesnt proceed any further because it failed at ./test_files/invalid_permission. Set error code to 1
+
+[0;33mTest 117: ❌[38;5;244m ls >>./outfiles/outfile01 >>./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 9 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' '>>')
+bash error = ( Permission denied)
+Fix: ls should attempt to access then bypass ./outfiles/outfile01 and try to append to ./test_files/invalid_permission. It should fail and print "bleshell: ./test_files/invalid_permission: Permission denied". Set error code to 1
+
+[0;33mTest 118: ❌[38;5;244m ls >./outfiles/outfile01 >>./test_files/invalid_permission >>./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./outfiles/outfile01 8 Set up redirection from cmd 'ls' to './outfiles/outfile01' ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' ./outfiles/outfile02 9 Set up redirection from cmd 'ls' to './outfiles/outfile02' '>')
+bash error = ( Permission denied)
+Fix : ls redirects to ./outfiles/outfile01, then tries to append to ./test_files/invalid_permission. It should try opening ./test_files/invalid_permission, but it fails and prints "bleshell: ./test_files/invalid_permission: Permission denied". Set error code to 1. Doesnt proceed any further because it couldnt process ./test_files/invalid_permission.
+
+[0;33mTest 119: ✅⚠️ [38;5;244m ls <missing >>./test_files/invalid_permission >>./outfiles/outfile02 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls missing 7 Set up redirection from cmd 'ls' to 'missing' ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' ./outfiles/outfile02 9 Set up redirection from cmd 'ls' to './outfiles/outfile02' '<' No such file or directory)
+bash error = ( No such file or directory)
+
+[0;33mTest 120: ❌[38;5;244m ls >>./test_files/invalid_permission >>./outfiles/outfile02 <missing 
+[0mmini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ls ./test_files/invalid_permission 9 Set up redirection from cmd 'ls' to './test_files/invalid_permission' ./outfiles/outfile02 9 Set up redirection from cmd 'ls' to './outfiles/outfile02' missing 7 Set up redirection from cmd 'ls' to 'missing' '>>')
+bash error = ( Permission denied)
+Fix: ls tries to access ./test_files/invalid_permission. After failing, it should print an error message "bleshell: ./test_files/invalid_permission: Permission denied". The chain breaks here because there is nothing to redirect from.
+
+[0;33mTest 121: ❌[38;5;244m echo hi >>./outfiles/outfile01 | echo bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+hi
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 9 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ()
+Fix: echo hi should be appended to ./outfiles/outfile01. Then pipe it to echo bye, where it is ignored. The output of echo bye should be printed to stdout. Set error code to 0
+
+[0;33mTest 122: ❌[38;5;244m echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+hi
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./outfiles/outfile02 9 Set up redirection from cmd 'echo' to './outfiles/outfile02' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 9 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 9 echo Completed pipe structure integration)
+bash error = ()
+Fix: echo hi should be appended to ./outfiles/outfile02, attempting to access, then bypassing ./outfiles/outfile01 . Then pipe it to echo bye. hi disappears into echo bye. echo bye prints to stdout. Set error code to 0
+
+[0;33mTest 123: ❌[38;5;244m echo hi | echo >>./outfiles/outfile01 bye 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+bye
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 9 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ()
+Fix: echo hi pipes into echo bye, where hi disappears into echo bye. The output of echo bye is appended to ./outfiles/outfile01. Set error code to 0
+
+[0;33mTest 124: ❌[38;5;244m echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+bye
+mini output = (bye)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./outfiles/outfile02 9 Set up redirection from cmd 'echo' to './outfiles/outfile02' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 9 Updating right branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 9 Completed pipe structure integration)
+bash error = ()
+Fix: echo hi is only piping, not appending to echo bye so it disappears into echo bye. The output of echo bye should be redirected appended to ./outfiles/outfile01. But then is overridden by append to ./outfiles/outfile02. So it is appended into outfile02 and ignores outfile01. Set error code to 0
+
+[0;33mTest 125: ❌[38;5;244m echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02 
+[0mOnly in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+bash outfiles:
+hi
+bye
+mini output = (bye)
+bash output = ()
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo ./outfiles/outfile02 9 Set up redirection from cmd 'echo' to './outfiles/outfile02' Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 9 Updating left branch of pipe to use redirection echo Updating pipe for command 'echo' to use redirection type 9 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ()
+Fix: Should append hi to ./outfiles/outfile01. Then pipe it to echo bye. The total output of echo bye should be appended to ./outfiles/outfile02.  set error code to 0
+
+[0;33mTest 126: ✅⚠️ [38;5;244m echo hi >>./test_files/invalid_permission | echo bye 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./test_files/invalid_permission 9 Set up redirection from cmd 'echo' to './test_files/invalid_permission' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 9 Updating left branch of pipe to use redirection echo Completed pipe structure integration)
+bash error = ( Permission denied)
+[0;33mTest 127: ✅⚠️ [38;5;244m echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo ./test_files/invalid_permission 9 Set up redirection from cmd 'echo' to './test_files/invalid_permission' ./outfiles/outfile01 8 Set up redirection from cmd 'echo' to './outfiles/outfile01' echo Integrating redirections with pipe structure echo Updating pipe for command 'echo' to use redirection type 9 Updating left branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 echo Completed pipe structure integration)
+bash error = ( Permission denied)
+
+[0;33mTest 128: ❌[38;5;244m echo hi | echo bye >>./test_files/invalid_permission 
+[0mmini output = (bye)
+bash output = ()
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./test_files/invalid_permission 9 Set up redirection from cmd 'echo' to './test_files/invalid_permission' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 9 Updating right branch of pipe to use redirection Completed pipe structure integration)
+bash error = ( Permission denied)
+Fix: Should try to pipe echo hi to echo bye. The output of echo bye should be appended to ./test_files/invalid_permission. This file permissions wont let it so print "bleshell: permissions". Set error code to 1
+
+[0;33mTest 129: ❌[38;5;244m echo hi | echo >>./outfiles/outfile01 bye >./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini exit code = 0
+bash exit code = 1
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo echo ./outfiles/outfile01 9 Set up redirection from cmd 'echo' to './outfiles/outfile01' ./test_files/invalid_permission 8 Set up redirection from cmd 'echo' to './test_files/invalid_permission' Integrating redirections with pipe structure echo echo Updating pipe for command 'echo' to use redirection type 9 Updating right branch of pipe to use redirection Updating pipe for command 'echo' to use redirection type 8 Completed pipe structure integration)
+bash error = ( Permission denied)
+Fix: Should try to pipe echo hi to echo bye. The output of echo bye should be redirected to ./outfiles/outfile01. This file doesnt exist so should print a "bleshell: minishell.h: No such file or directory". Then bye then gets redirected into ./test_files/invalid_permission. Set error code to 1
+
+[0;33mTest 130: ✅⚠️ [38;5;244m cat <minishell.h>./outfiles/outfile 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat minishell.h 7 Set up redirection from cmd 'cat' to 'minishell.h' ./outfiles/outfile 8 Set up redirection from cmd 'cat' to './outfiles/outfile' '<' No such file or directory)
+bash error = ( No such file or directory)
+
+[0;33mTest 131: ❌[38;5;244m cat <minishell.h|ls 
+[0mmini exit code = wildcards
+bash exit code = 0
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST cat minishell.h 7 Set up redirection from cmd 'cat' to 'minishell.h' ls Integrating redirections with pipe structure cat Updating pipe for command 'cat' to use redirection type 7 Updating left branch of pipe to use redirection ls Completed pipe structure integration)
+bash error = ( No such file or directory)
+Fix: Cat should try to find and access minishell.h. Print out an error message when it fails "bleshell: minishell.h: No such file or directory". Continue to pipe output of cat anyway to ls, which will ignore it. ls will then run and print its output.
+
+[0;31m———————————— extras
+[0;33mTest 132: ✅[38;5;244m
+
+[0m[0;33mTest 133: ❌[38;5;244m $PWD 
+[0mmini exit code = 0
+bash exit code = 126
+mini error = ()
+bash error = ( Is a directory)
+Fix: Should expand it and attempt to access it as a command. when it fails, check to see what type it is. Return 126 because it was a directory.
+
+[0;33mTest 134: ✅[38;5;244m $EMPTY 
+
+[0m[0;33mTest 135: ❌ [38;5;244m $EMPTY echo hi 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST echo)
+bash error = ()
+Fix: Should attempt to expand. there should be nothing to expand then it moves on and echo prints hi
+
+[0;33mTest 136: ❌[38;5;244m ./test_files/invalid_permission 
+[0mmini exit code = 127
+bash exit code = 126
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ./test_files/invalid_permission ./test_files/invalid_permission ./test_files/invalid_permission)
+bash error = ( Permission denied)
+Fix: Should attempt to run it as a command. When it fails, return 126 because it was found but cant be run.
+
+[0;33mTest 137: ✅⚠️ [38;5;244m ./missing.out 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ./missing.out ./missing.out ./missing.out)
+bash error = ( No such file or directory)
+[0;33mTest 138: ✅⚠️ [38;5;244m missing.out 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST missing.out missing.out missing.out)
+bash error = ( command not found)
+
+[0;33mTest 139: ❌[38;5;244m "aaa" 
+[0mmini exit code = 0
+bash exit code = 127
+mini error = ()
+bash error = ( command not found)
+Fix: Should attempt to run it as a command but fail. The quotes are not escaped so the command is not found. The error code should be 127
+
+[0;33mTest 140: ✅⚠️ [38;5;244m test_files 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST test_files test_files test_files)
+bash error = ( command not found)
+[0;33mTest 141: ❌[38;5;244m ./test_files 
+[0mmini exit code = 1
+bash exit code = 126
+mini error = ( proc_redir function called Resetting redirection tracking Building redirection AST ./test_files Permission denied)
+bash error = ( Is a directory)
+Fix: Should attempt to access it as a command. when it fails, check to see what type it is. Return 126 because it was a directory.
+
+[0;33mTest 142: ✅⚠️ [38;5;244m /test_files 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST /test_files /test_files /test_files)
+bash error = ( No such file or directory)
+[0;33mTest 143: ✅⚠️ [38;5;244m minishell.h 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST minishell.h minishell.h minishell.h)
+bash error = ( command not found)
+
+[0;33mTest 144: ❌[38;5;244m $ 
+[0mmini exit code = 134
+bash exit code = 127
+mini error = ( double free detected in tcache 2)
+bash error = ( command not found)
+Fix: Check why there is a double free error. Here is the valgrind output:
+
+bleow@bleow-VM-Mint:~/Coding/Core/minishell$ valgrind --leak-check=full ./minishell 
+==183480== Memcheck, a memory error detector
+==183480== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==183480== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==183480== Command: ./minishell
+==183480== 
+bleshell$> $
+==183480== Invalid read of size 1
+==183480==    at 0x11285D: improved_tokenize (tokenize.c:445)
+==183480==    by 0x10D757: process_input_tokens (minishell.c:275)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480==  Address 0x4b54832 is 0 bytes after a block of size 2 alloc'd
+==183480==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x114AAC: ft_strdup (in /home/bleow/Coding/Core/minishell/minishell)
+==183480==    by 0x10D7A1: process_command (minishell.c:304)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480== 
+==183480== Invalid free() / delete / delete[] / realloc()
+==183480==    at 0x484988F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x10D2BD: process_expansions (input_verify.c:61)
+==183480==    by 0x10D77A: process_input_tokens (minishell.c:281)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480==  Address 0x4b54a90 is 0 bytes inside a block of size 1 free'd
+==183480==    at 0x484988F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x10D29E: process_expansions (input_verify.c:56)
+==183480==    by 0x10D77A: process_input_tokens (minishell.c:281)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480==  Block was alloc'd at
+==183480==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x114AAC: ft_strdup (in /home/bleow/Coding/Core/minishell/minishell)
+==183480==    by 0x10B1F9: get_env_val (expansion.c:77)
+==183480==    by 0x10D22E: process_expansions (input_verify.c:41)
+==183480==    by 0x10D77A: process_input_tokens (minishell.c:281)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480== 
+bleshell$> 
+exit
+==183480== Invalid free() / delete / delete[] / realloc()
+==183480==    at 0x484988F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x10A18D: free_token_node (cleanup_b.c:56)
+==183480==    by 0x10A243: cleanup_token_list (cleanup_b.c:88)
+==183480==    by 0x113481: builtin_exit (builtin_exit.c:82)
+==183480==    by 0x10D95D: main (minishell.c:349)
+==183480==  Address 0x4b549f0 is 0 bytes inside a block of size 2 free'd
+==183480==    at 0x484988F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x10D2B1: process_expansions (input_verify.c:60)
+==183480==    by 0x10D77A: process_input_tokens (minishell.c:281)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480==  Block was alloc'd at
+==183480==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x114AAC: ft_strdup (in /home/bleow/Coding/Core/minishell/minishell)
+==183480==    by 0x109984: create_args_array (arguments.c:29)
+==183480==    by 0x10C8ED: make_nodeframe (initnode.c:32)
+==183480==    by 0x10C97E: initnode (initnode.c:51)
+==183480==    by 0x111ABE: maketoken_with_type (tokenize.c:80)
+==183480==    by 0x10DBC0: handle_string (operators.c:104)
+==183480==    by 0x1128DC: improved_tokenize (tokenize.c:529)
+==183480==    by 0x10D757: process_input_tokens (minishell.c:275)
+==183480==    by 0x10D813: process_command (minishell.c:310)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480== 
+==183480== 
+==183480== HEAP SUMMARY:
+==183480==     in use at exit: 237,068 bytes in 294 blocks
+==183480==   total heap usage: 558 allocs, 266 frees, 263,860 bytes allocated
+==183480== 
+==183480== 2 bytes in 1 blocks are definitely lost in loss record 1 of 79
+==183480==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==183480==    by 0x114AAC: ft_strdup (in /home/bleow/Coding/Core/minishell/minishell)
+==183480==    by 0x10F0F8: handle_pipe_completion (pipes.c:710)
+==183480==    by 0x10E6AF: process_pipe_syntax (pipes_syntax.c:158)
+==183480==    by 0x10D855: process_command (minishell.c:316)
+==183480==    by 0x10D186: handle_input (input_handlers.c:84)
+==183480==    by 0x10D995: main (minishell.c:355)
+==183480== 
+==183480== LEAK SUMMARY:
+==183480==    definitely lost: 2 bytes in 1 blocks
+==183480==    indirectly lost: 0 bytes in 0 blocks
+==183480==      possibly lost: 0 bytes in 0 blocks
+==183480==    still reachable: 237,066 bytes in 293 blocks
+==183480==         suppressed: 0 bytes in 0 blocks
+==183480== Reachable blocks (those to which a pointer was found) are not shown.
+==183480== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==183480== 
+==183480== For lists of detected and suppressed errors, rerun with: -s
+==183480== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 0 from 0)
+
+
+[0;33mTest 145: ❌[38;5;244m $? 
+[0mmini exit code = 0
+bash exit code = 127
+mini error = ()
+bash error = ( command not found)
+Fix: Should expand it and print its value. attempt to access it as a command. when it fails, print an error that its not a command. Return 127 because command was not found.
+
+[0;33mTest 146: ✅⚠️ [38;5;244m README.md 
+[0mmini error = ( proc_redir function called Resetting redirection tracking Building redirection AST README.md README.md README.md)
+bash error = ( command not found)
+[0;35m[1m78/146
+[0m😭 😭 😭

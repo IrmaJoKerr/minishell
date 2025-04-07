@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 01:59:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 13:22:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,9 @@ int	chk_permissions(char *filename, int mode, t_vars *vars)
     /* Read mode - check if file exists first */
     if (mode == O_RDONLY)
     {
+		// Debug permissions check for read mode
+        fprintf(stderr, "DEBUG: Checking permissions for file: '%s', mode: read\n", 
+			filename);
         if (access(filename, F_OK) == -1)
         {
             ft_putstr_fd("bleshell: ", 2);
@@ -233,16 +236,112 @@ Example: For "cmd < input.txt"
 - Sets fd_in to the file descriptor
 - Returns success/failure
 */
-int	input_redirect(t_node *node, int *fd_in, t_vars *vars)
+// int	input_redirect(t_node *node, int *fd_in, t_vars *vars)
+// {
+// 	if (!node || !node->args || !node->args[0] || !fd_in)
+// 		return (0);
+// 	if (!chk_permissions(node->args[0], O_RDONLY, vars))
+// 		return (0);
+// 	*fd_in = open(node->args[0], O_RDONLY);
+// 	if (*fd_in == -1)
+// 		return (redirect_error(node->args[0], vars, 1));
+// 	return (1);
+// }
+// int input_redirect(t_node *node, int *fd_in, t_vars *vars)
+// {
+//     char *file;
+    
+//     if (!node || !node->args || !node->args[0])
+//         return (0);
+    
+//     // Process quotes BEFORE file operations
+//     process_arg_quotes(&node->args[0]);
+    
+//     file = node->args[0];
+    
+//     // Debug to verify path and current directory
+//     fprintf(stderr, "DEBUG: Opening input file '%s' from dir '%s'\n", 
+//             file, getcwd(NULL, 0));
+    
+//     // First check existence, then open
+//     if (access(file, F_OK) == -1)
+//     {
+//         ft_putstr_fd("bleshell: ", 2);
+//         ft_putstr_fd(file, 2);
+//         ft_putendl_fd(": No such file or directory", 2);
+//         vars->error_code = 1;
+//         return (0);
+//     }
+    
+//     *fd_in = open(file, O_RDONLY);
+//     if (*fd_in == -1)
+//     {
+//         ft_putstr_fd("bleshell: ", 2);
+//         ft_putstr_fd(file, 2);
+//         ft_putendl_fd(": Cannot open file", 2);
+//         vars->error_code = 1;
+//         return (0);
+//     }
+    
+//     // Use dup2 to redirect stdin
+//     if (dup2(*fd_in, STDIN_FILENO) == -1)
+//     {
+//         close(*fd_in);
+//         vars->error_code = 1;
+//         return (0);
+//     }
+    
+//     return (1);
+// }
+int input_redirect(t_node *node, int *fd_in, t_vars *vars)
 {
-	if (!node || !node->args || !node->args[0] || !fd_in)
-		return (0);
-	if (!chk_permissions(node->args[0], O_RDONLY, vars))
-		return (0);
-	*fd_in = open(node->args[0], O_RDONLY);
-	if (*fd_in == -1)
-		return (redirect_error(node->args[0], vars, 1));
-	return (1);
+    char *file;
+    char cwd[PATH_MAX];
+    
+    if (!node || !node->args || !node->args[0])
+        return (0);
+    
+    // Get current working directory
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        fprintf(stderr, "DEBUG: Current working directory: %s\n", cwd);
+    
+    // Process quotes in filename to remove surrounding quotes
+    file = node->args[0];
+    fprintf(stderr, "DEBUG: Before quote processing: '%s'\n", file);
+    process_arg_quotes(&node->args[0]);
+    file = node->args[0];
+    fprintf(stderr, "DEBUG: After quote processing: '%s'\n", file);
+    
+    // Try access with resolved path
+    fprintf(stderr, "DEBUG: Testing access to file: '%s'\n", file);
+    if (access(file, F_OK) == -1)
+    {
+        ft_putstr_fd("bleshell: ", 2);
+        ft_putstr_fd(file, 2);
+        ft_putendl_fd(": No such file or directory", 2);
+        vars->error_code = 1;
+        return (0);
+    }
+    
+    *fd_in = open(file, O_RDONLY);
+    if (*fd_in == -1)
+    {
+        fprintf(stderr, "DEBUG: Open failed, errno: %d (%s)\n", errno, strerror(errno));
+        ft_putstr_fd("bleshell: ", 2);
+        ft_putstr_fd(file, 2);
+        ft_putendl_fd(": Cannot open file", 2);
+        vars->error_code = 1;
+        return (0);
+    }
+    
+    if (dup2(*fd_in, STDIN_FILENO) == -1)
+    {
+        close(*fd_in);
+        vars->error_code = 1;
+        return (0);
+    }
+    
+    return (1);
 }
 
 /*
@@ -293,22 +392,26 @@ Example: Opening a file for redirection
 - Opens file and captures descriptor
 - Reports errors if necessary
 */
-int	open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars)
+int open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars)
 {
-	int	flags;
+    int flags;
 
-	if (!node || !node->args || !node->args[0] || !fd)
-		return (0);
-	flags = set_redirect_flags(mode);
-	if (!chk_permissions(node->args[0], flags, vars))
-		return (0);
-	if (mode == 0)
-		*fd = open(node->args[0], flags);
-	else
-		*fd = open(node->args[0], flags, 0644);
-	if (*fd == -1)
-		return (redirect_error(node->args[0], vars, 1));
-	return (1);
+    if (!node || !node->args || !node->args[0] || !fd)
+        return (0);
+    flags = set_redirect_flags(mode);
+    
+    if (!chk_permissions(node->args[0], flags, vars))
+        return (0);
+    // Debug print before opening file
+    fprintf(stderr, "DEBUG: Opening redirect file: '%s' with flags: %d\n", 
+            node->args[0], flags);
+    if (mode == 0)
+        *fd = open(node->args[0], flags);
+    else
+        *fd = open(node->args[0], flags, 0644);
+    if (*fd == -1)
+        return (redirect_error(node->args[0], vars, 1));
+    return (1);
 }
 
 /*
