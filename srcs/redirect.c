@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 13:29:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 01:59:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,7 +359,7 @@ int	handle_redirect(t_node *node, int *fd, int mode, t_vars *vars)
 int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
 {
     t_node *redirect_node;
-    int fd = -1;
+    // int fd = -1;
     
     // Find all redirections linked to this command
     redirect_node = find_linked_redirects(cmd_node, vars);
@@ -374,7 +374,7 @@ int setup_cmd_redirects(t_node *cmd_node, t_vars *vars)
         vars->pipes->saved_stdout = dup(STDOUT_FILENO);
     
     // Process the redirection
-    if (!setup_redirection(redirect_node, vars, &fd))
+    if (!setup_redirection(redirect_node, vars))
     {
         // Error occurred during redirection setup
         reset_redirect_fds(vars);
@@ -510,9 +510,9 @@ t_node *find_linked_redirects(t_node *cmd_node, t_vars *vars)
 int	setup_multi_redirects(t_node *cmd_node, t_vars *vars)
 {
     t_node	*current;
-    int		fd;
+    // int		fd;
     
-	fd = -1;
+	// fd = -1;
     if (!cmd_node || !vars || !vars->head || !vars->pipes)
         return (1);
     
@@ -562,20 +562,20 @@ int	setup_multi_redirects(t_node *cmd_node, t_vars *vars)
     if (vars->pipes->last_heredoc)
     {
         vars->pipes->cmd_redir = vars->pipes->last_heredoc;
-        if (!setup_redirection(vars->pipes->last_heredoc, vars, &fd))
+        if (!setup_redirection(vars->pipes->last_heredoc, vars))
             return (0);
     }
     else if (vars->pipes->last_in_redir)
     {
         vars->pipes->cmd_redir = vars->pipes->last_in_redir;
-        if (!setup_redirection(vars->pipes->last_in_redir, vars, &fd))
+        if (!setup_redirection(vars->pipes->last_in_redir, vars))
             return (0);
     }
     
     if (vars->pipes->last_out_redir)
     {
         vars->pipes->cmd_redir = vars->pipes->last_out_redir;
-        if (!setup_redirection(vars->pipes->last_out_redir, vars, &fd))
+        if (!setup_redirection(vars->pipes->last_out_redir, vars))
             return (0);
     }
     

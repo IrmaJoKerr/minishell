@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:31:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 22:32:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 03:14:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,4 +123,38 @@ int	chk_pipe_syntax_err(t_vars *vars)
 	if (result != 0)
 		return (result);
 	return (0);
+}
+
+/*
+Handles pipe syntax validation and completion.
+- Checks for pipe syntax errors.
+- Handles unfinished pipes by prompting for continuation.
+Returns:
+- Updated command string after pipe processing.
+- NULL on memory allocation failure or other error.
+- Command unchanged if no pipe issues detected.
+Works with process_command() as second processing stage.
+
+Example: For input "ls |"
+- Detects unfinished pipe
+- Prompts for continuation
+- Returns completed command with pipe and continuation
+*/
+char	*process_pipe_syntax(char *command, t_vars *vars)
+{
+	int		syntax_chk;
+	char	*processed_cmd;
+
+	processed_cmd = command;
+	syntax_chk = chk_pipe_syntax_err(vars);
+	if (syntax_chk == 1)
+	{
+		if (processed_cmd != vars->partial_input && processed_cmd != command)
+			free(processed_cmd);
+		if (vars->partial_input && vars->partial_input != command)
+			free(vars->partial_input);
+		return (NULL);
+	}
+	processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
+	return (processed_cmd);
 }

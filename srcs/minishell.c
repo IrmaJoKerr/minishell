@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 23:36:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 03:19:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,49 +283,14 @@ int process_input_tokens(char *command, t_vars *vars)
     return (1);
 }
 
-/*
-Handles pipe syntax validation and completion.
-- Checks for pipe syntax errors.
-- Handles unfinished pipes by prompting for continuation.
-Returns:
-- Updated command string after pipe processing.
-- NULL on memory allocation failure or other error.
-- Command unchanged if no pipe issues detected.
-Works with process_command() as second processing stage.
 
-Example: For input "ls |"
-- Detects unfinished pipe
-- Prompts for continuation
-- Returns completed command with pipe and continuation
-*/
-char	*process_pipe_syntax(char *command, t_vars *vars)
-{
-	int		syntax_chk;
-	char	*processed_cmd;
-
-	processed_cmd = command;
-	syntax_chk = chk_pipe_syntax_err(vars);
-	if (syntax_chk == 1)
-	{
-		if (processed_cmd != vars->partial_input && processed_cmd != command)
-			free(processed_cmd);
-		if (vars->partial_input && vars->partial_input != command)
-			free(vars->partial_input);
-		return (NULL);
-	}
-	processed_cmd = handle_pipe_completion(processed_cmd, vars, syntax_chk);
-	return (processed_cmd);
-}
 
 /*
 Process the user command through lexing and execution.
 - Handles input tokenization, syntax checking, and execution.
 - Breaks processing into smaller logical stages.
 - Manages memory throughout command processing lifecycle.
-Returns:
-- 1 to continue shell loop.
-- 0 to exit.
-Works with main() in command processing loop.
+Works with handle_input() in command processing loop.
 
 Example: When user types a complex command
 - Processes tokens and handles unclosed quotes
@@ -333,31 +298,30 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
-int process_command(char *command, t_vars *vars)
+void	process_command(char *command, t_vars *vars)
 {
     // Store original command in vars->partial_input
     vars->partial_input = ft_strdup(command);
     if (!vars->partial_input)
-        return (1);
+        return ;
     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
     if (!vars->partial_input)
-        return (1);
+        return ;
     if (!process_input_tokens(vars->partial_input, vars))
     {
         free(vars->partial_input);
         vars->partial_input = NULL;
-        return (1);
+        return ;
     }
     if (!process_pipe_syntax(vars->partial_input, vars))
     {
         free(vars->partial_input);
         vars->partial_input = NULL;
-        return (1);
+        return ;
     }
     build_and_execute(vars);
     free(vars->partial_input);
     vars->partial_input = NULL;
-    return (1);
 }
 
 /*
@@ -388,7 +352,7 @@ int	main(int argc, char **argv, char **envp)
             free(input);
             continue ;
         }
-        process_command(input, &vars);
+        handle_input(input, &vars);
         free(input);
     }
     return (0);

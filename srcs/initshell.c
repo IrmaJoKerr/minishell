@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 12:31:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 11:11:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ void	init_lexer(t_vars *vars)
     vars->quote_depth = 0;
     ft_memset(vars->quote_ctx, 0, sizeof(vars->quote_ctx));
     ft_memset(vars->cmd_nodes, 0, sizeof(vars->cmd_nodes));
+    vars->heredoc_count = 0;
+    vars->heredoc_index = 0;
     vars->cmd_count = 0;
     vars->astroot = NULL;
     vars->partial_input = NULL;
@@ -99,13 +101,20 @@ Reset the shell state.
 - Frees the partial input buffer.
 - Cleans up the AST root node.
 */
-void	reset_shell(t_vars *vars)
+void reset_shell(t_vars *vars)
 {
     if (!vars)
-        return ;
+        return;
     cleanup_token_list(vars);
-	if (vars->partial_input)
+    if (vars->partial_input)
         free(vars->partial_input);
+    if (vars->heredoc_lines)
+    {
+        ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
+        vars->heredoc_lines = NULL;
+        vars->heredoc_count = 0;
+        vars->heredoc_index = 0;
+    }
     if (vars->pipes)
     {
         reset_redirect_fds(vars);
@@ -122,5 +131,5 @@ void	reset_shell(t_vars *vars)
         vars->pipes->cmd_redir = NULL;
         vars->pipes->pipe_at_end = 0;
     }
-	init_lexer(vars);
+    init_lexer(vars);
 }

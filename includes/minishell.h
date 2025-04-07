@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 23:28:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 10:39:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,9 @@ typedef struct s_vars
 	char			**env;
 	t_quote_context	quote_ctx[32];
 	int				quote_depth;
+	char			**heredoc_lines;   // Array of pending heredoc content lines
+    int				heredoc_count;     // Number of stored lines
+    int				heredoc_index;     // Current position in stored lines
 	char			*partial_input;
 	int				pos;
 	int				start;
@@ -306,7 +309,7 @@ In buildast.c
 // t_node		*proc_pipes_pt1(t_vars *vars);
 // void		proc_pipes_pt2(t_vars *vars);
 // void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
-void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
+// void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 // int			is_valid_redir_node(t_node *current);
 // t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 // t_node		*proc_redir_pt1(t_vars *vars);
@@ -321,12 +324,12 @@ void		convert_strs_to_cmds(t_vars *vars);
 // void		link_addon_pipe(t_node *last_pipe,
 // 				t_node *new_pipe, t_node *right_cmd);
 // void		build_pipe_ast(t_vars *vars);
-int			chk_start_pipe(t_vars *vars);
-int			chk_multi_pipes(t_vars *vars, int pipes_count);
-// int			chk_adj_pipes(t_vars *vars, t_node *current);
-int			chk_next_pipes(t_vars *vars);
-int			chk_end_pipe(t_vars *vars);
-int			chk_pipe_syntax_err(t_vars *vars);
+// int			chk_start_pipe(t_vars *vars);
+// int			chk_multi_pipes(t_vars *vars, int pipes_count);
+// // int			chk_adj_pipes(t_vars *vars, t_node *current);
+// int			chk_next_pipes(t_vars *vars);
+// int			chk_end_pipe(t_vars *vars);
+// int			chk_pipe_syntax_err(t_vars *vars);
 
 /*
 Builtin control handling.
@@ -376,7 +379,7 @@ In execute.c
 int			handle_cmd_status(int status, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
 int			setup_in_redir(t_node *node, t_vars *vars);
-int			setup_redirection(t_node *node, t_vars *vars, int *fd);
+int			setup_redirection(t_node *node, t_vars *vars);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_child_cmd(t_node *node, char **envp,
 				t_vars *vars, char *cmd_path);
@@ -397,26 +400,6 @@ char		*handle_expansion(char *input, int *pos, t_vars *vars);
 void		expand_cmd_args(t_node *node, t_vars *vars);
 void 		process_quotes_and_expansions(t_vars *vars);
 void 		debug_cmd_args(t_node *node);
-
-/*
-Heredoc checking and utility functions.
-In heredoc_checks_and_utils.c
-*/
-
-/*
-Heredoc execution functions.
-In heredoc_execute.c
-*/
-
-/*
-Heredoc expansion handling.
-In heredoc_expand.c
-*/
-
-/*
-Heredoc pasted text handling.
-In heredoc_pasted.c
-*/
 
 /*
 Heredoc main handling.
@@ -496,6 +479,12 @@ int			is_input_complete(t_vars *vars);
 char		*append_input(char *original, char *additional);
 
 /*
+Input processing functions.
+In input_handlers.c
+*/
+void		handle_input(char *input, t_vars *vars);
+
+/*
 Input verification functions.
 In input_verify.c
 */
@@ -521,8 +510,7 @@ char		*handle_quote_completion(char *cmd, t_vars *vars);
 t_node		*find_command_end(t_node *start_node);
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
-char		*process_pipe_syntax(char *command, t_vars *vars);
-int			process_command(char *command, t_vars *vars);
+void		process_command(char *command, t_vars *vars);
 int			main(int ac, char **av, char **envp);
 
 /*
@@ -556,6 +544,7 @@ int			chk_start_pipe(t_vars *vars);
 int			chk_next_pipes(t_vars *vars);
 int			chk_end_pipe(t_vars *vars);
 int			chk_pipe_syntax_err(t_vars *vars);
+char		*process_pipe_syntax(char *command, t_vars *vars);
 
 /*
 Pipes main functions.

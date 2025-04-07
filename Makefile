@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/06 23:21:58 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/07 02:52:21 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,6 +43,7 @@ MINISHELL_SRCS = \
 			srcs/initnode.c \
 			srcs/initshell.c \
 			srcs/input_completion.c \
+			srcs/input_handlers.c \
 			srcs/input_verify.c \
 			srcs/lexer.c \
 			srcs/minishell.c \

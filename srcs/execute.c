@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 20:46:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 00:40:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -349,22 +349,76 @@ Returns:
 1 on success, 0 on failure.
 Works with exec_redirect_cmd().
 */
-int setup_redirection(t_node *node, t_vars *vars, int *fd)
-{
-    if (!node || !vars || !vars->pipes)
-        return (0);
+// int setup_redirection(t_node *node, t_vars *vars, int *fd)
+// {
+//     if (!node || !vars || !vars->pipes)
+//         return (0);
         
-    /* Store current redirection node */
+//     /* Store current redirection node */
+//     vars->pipes->current_redirect = node;
+    
+//     /* Process quotes in redirection filename (right child contains filename) */
+//     if (node->right)
+//         process_arg_quotes(&node->right->args[0]);
+    
+//     /* Handle different redirection types */
+//     if (node->type == TYPE_IN_REDIRECT)
+//     {
+//         if (!setup_in_redir(node->right, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_OUT_REDIRECT)
+//     {
+//         vars->pipes->out_mode = OUT_MODE_TRUNCATE; /* Truncate mode */
+//         if (!setup_out_redir(node->right, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_APPEND_REDIRECT)
+//     {
+//         vars->pipes->out_mode = OUT_MODE_APPEND; /* Append mode */
+//         if (!setup_out_redir(node->right, vars))
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+//     else if (node->type == TYPE_HEREDOC)
+//     {
+//         /* Heredoc-specific handling */
+//         *fd = handle_heredoc(node, vars);
+//         if (*fd == -1)
+//         {
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//         vars->pipes->heredoc_fd = *fd;
+        
+//         /* Redirect stdin to read from heredoc */
+//         if (dup2(*fd, STDIN_FILENO) == -1)
+//         {
+//             close(*fd);
+//             vars->error_code = 1;
+//             return (0);
+//         }
+//     }
+    
+//     return (1);
+// }
+int setup_redirection(t_node *node, t_vars *vars)
+{
+    // Store current redirection node
     vars->pipes->current_redirect = node;
     
-    /* Process quotes in redirection filename (right child contains filename) */
-    if (node->right)
-        process_arg_quotes(&node->right->args[0]);
-    
-    /* Handle different redirection types */
+    // Handle different redirection types
     if (node->type == TYPE_IN_REDIRECT)
     {
-        if (!setup_in_redir(node->right, vars))
+        if (!setup_in_redir(node, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -372,8 +426,8 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_OUT_REDIRECT)
     {
-        vars->pipes->out_mode = OUT_MODE_TRUNCATE; /* Truncate mode */
-        if (!setup_out_redir(node->right, vars))
+        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+        if (!setup_out_redir(node, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -381,8 +435,8 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_APPEND_REDIRECT)
     {
-        vars->pipes->out_mode = OUT_MODE_APPEND; /* Append mode */
-        if (!setup_out_redir(node->right, vars))
+        vars->pipes->out_mode = OUT_MODE_APPEND;
+        if (!setup_out_redir(node, vars))
         {
             vars->error_code = 1;
             return (0);
@@ -390,24 +444,19 @@ int setup_redirection(t_node *node, t_vars *vars, int *fd)
     }
     else if (node->type == TYPE_HEREDOC)
     {
-        /* Heredoc-specific handling */
-        *fd = handle_heredoc(node, vars);
-        if (*fd == -1)
+        // For heredoc, we need the delimiter
+        if (!node->right || !node->right->args || !node->right->args[0])
         {
             vars->error_code = 1;
             return (0);
         }
-        vars->pipes->heredoc_fd = *fd;
-        
-        /* Redirect stdin to read from heredoc */
-        if (dup2(*fd, STDIN_FILENO) == -1)
+        // Call handle_heredoc with the delimiter
+        if (handle_heredoc(node, vars) == -1)
         {
-            close(*fd);
             vars->error_code = 1;
             return (0);
         }
     }
-    
     return (1);
 }
 
@@ -433,7 +482,7 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	saved_stdout = dup(STDOUT_FILENO);
 	saved_stdin = dup(STDIN_FILENO);
 	fd = -1;
-	if (!setup_redirection(node, vars, &fd))
+	if (!setup_redirection(node, vars))
 		return (1);
 	result = execute_cmd(node->left, envp, vars);
 	dup2(saved_stdout, STDOUT_FILENO);
@@ -519,38 +568,64 @@ Exit code which is also stored in vars->error_code.
 // {
 //     int result = 0;
     
-//     if (!node)
-//         return 1;
-        
+//     if (!node) {
+//         DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
+//         return (vars->error_code = 1);
+//     }
+    
 //     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-//                node->type, node->args[0]);
-               
+// 		node->type, node->args ? node->args[0] : "NULL");
+    
 //     // Handle different node types
-//     if (node->type == TYPE_PIPE)
+//     if (node->type == TYPE_PIPE) {
+//         // For pipe nodes, validate they have both left and right children
+//         if (!node->left || !node->right) {
+//             DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
+//             return (vars->error_code = 1);
+//         }
 //         result = execute_pipes(node, vars);
+//     } 
 //     else if (is_redirection(node->type))
-//         result = exec_redirect_cmd(node, envp, vars);
-//     else if (node->type == TYPE_CMD)
+// 	{
+// 		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+// 			(void*)node->left, (void*)node->right);
+//   		if (node->left)
+// 	  	DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+// 				node->left->type, node->left->args ? node->left->args[0] : "NULL");
+//   		if (node->right)
+// 	  	DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+// 				node->right->type, node->right->args ? node->right->args[0] : "NULL");
+//   		result = exec_redirect_cmd(node, envp, vars);
+//     }
+//     else if (node->type == TYPE_CMD) {
+//         // For command nodes, execute them directly
 //         result = exec_std_cmd(node, envp, vars);
+//     }
     
 //     // Ensure error code is set in vars
 //     vars->error_code = result;
 //     return result;
 // }
-int execute_cmd(t_node *node, char **envp, t_vars *vars)
+int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int result = 0;
+    int result;
     
-    if (!node) {
+	result = 0;
+    if (!node)
+	{
         DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
         return (vars->error_code = 1);
     }
-    
     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-		node->type, node->args ? node->args[0] : "NULL");
-    
+        node->type, node->args ? node->args[0] : "NULL");
     // Handle different node types
-    if (node->type == TYPE_PIPE) {
+    if (node->type == TYPE_CMD)
+	{
+        // Handle regular command
+        result = exec_std_cmd(node, envp, vars);
+    }
+    else if (node->type == TYPE_PIPE)
+	{
         // For pipe nodes, validate they have both left and right children
         if (!node->left || !node->right) {
             DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
@@ -560,21 +635,28 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
     } 
     else if (is_redirection(node->type))
 	{
-		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-			(void*)node->left, (void*)node->right);
-  		if (node->left)
-	  	DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-				node->left->type, node->left->args ? node->left->args[0] : "NULL");
-  		if (node->right)
-	  	DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-				node->right->type, node->right->args ? node->right->args[0] : "NULL");
-  		result = exec_redirect_cmd(node, envp, vars);
+        DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+            (void*)node->left, (void*)node->right);
+        if (node->left)
+            DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+                node->left->type, node->left->args ? node->left->args[0] : "NULL");
+        if (node->right)
+            DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+                node->right->type, node->right->args ? node->right->args[0] : "NULL");
+        // Add heredoc-specific debugging
+        if (node->type == TYPE_HEREDOC) {
+            DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
+                node->right && node->right->args ? node->right->args[0] : "NULL",
+                vars->pipes->heredoc_fd);
+        }
+        result = exec_redirect_cmd(node, envp, vars);
     }
-    else if (node->type == TYPE_CMD) {
-        // For command nodes, execute them directly
-        result = exec_std_cmd(node, envp, vars);
+    else
+	{
+        // Unhandled node type
+        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
+        result = 1;
     }
-    
     // Ensure error code is set in vars
     vars->error_code = result;
     return result;

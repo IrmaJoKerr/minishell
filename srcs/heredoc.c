@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 02:22:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/07 10:40:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,31 +198,61 @@ Example: Line "echo $HOME" with expand_vars=true
 - Expands to "echo /Users/username"
 - Writes expanded content plus newline to fd
 */
-int	write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
-{
-	char	*expanded_line;
-	int		write_result;
-	int		newline_result;
+// int	write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
+// {
+// 	char	*expanded_line;
+// 	int		write_result;
+// 	int		newline_result;
 
-	if (!line)
-		return (0);
-	if (expand_vars && vars)
-	{
-		expanded_line = expand_heredoc_line(line, vars);
-		if (!expanded_line)
-			return (0);
-		write_result = write(fd, expanded_line, ft_strlen(expanded_line));
-		newline_result = write(fd, "\n", 1);
-		free(expanded_line);
-		if (write_result == -1 || newline_result == -1)
-			return (0);
-		return (1);
-	}
-	write_result = write(fd, line, ft_strlen(line));
-	newline_result = write(fd, "\n", 1);
-	if (write_result == -1 || newline_result == -1)
-		return (0);
-	return (1);
+// 	if (!line)
+// 		return (0);
+// 	if (expand_vars && vars)
+// 	{
+// 		expanded_line = expand_heredoc_line(line, vars);
+// 		if (!expanded_line)
+// 			return (0);
+// 		write_result = write(fd, expanded_line, ft_strlen(expanded_line));
+// 		newline_result = write(fd, "\n", 1);
+// 		free(expanded_line);
+// 		if (write_result == -1 || newline_result == -1)
+// 			return (0);
+// 		return (1);
+// 	}
+// 	write_result = write(fd, line, ft_strlen(line));
+// 	newline_result = write(fd, "\n", 1);
+// 	if (write_result == -1 || newline_result == -1)
+// 		return (0);
+// 	return (1);
+// }
+int write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
+{
+    char *expanded_line;
+    int write_result;
+    
+    if (!line)
+        return (0);
+    
+    // Expand variables if needed
+    if (expand_vars)
+    {
+        expanded_line = expand_heredoc_line(line, vars);
+        if (!expanded_line)
+            return (0);
+    }
+    else
+    {
+        expanded_line = ft_strdup(line);
+        if (!expanded_line)
+            return (0);
+    }
+    
+    // Write the line to the pipe with newline
+    write_result = write(fd, expanded_line, ft_strlen(expanded_line));
+    write(fd, "\n", 1);
+    
+    free(expanded_line);
+    
+    return (write_result != -1);
 }
 
 /*
@@ -240,27 +270,111 @@ Example: With delimiter "EOF"
 - Writes "Hello" and expanded "$USER" to pipe
 - Stops at "EOF" line, returning 1
 */
-int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
-{
-	char	*line;
-	int		write_success;
+// int	read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
+// {
+// 	char	*line;
+// 	int		write_success;
 
-	while (1)
-	{
-		line = readline("> ");
-		if (!line)
-			break ;
-		if (ft_strcmp(line, delimiter) == 0)
-		{
-			free(line);
-			break ;
-		}
-		write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
-		free(line);
-		if (!write_success)
-			return (0);
-	}
-	return (1);
+// 	while (1)
+// 	{
+// 		line = readline("> ");
+// 		if (!line)
+// 			break ;
+// 		if (ft_strcmp(line, delimiter) == 0)
+// 		{
+// 			free(line);
+// 			break ;
+// 		}
+// 		write_success = write_to_heredoc(fd[1], line, vars, expand_vars);
+// 		free(line);
+// 		if (!write_success)
+// 			return (0);
+// 	}
+// 	return (1);
+// }
+// int read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
+// {
+//     char *line;
+    
+//     // Prompt for input until delimiter is found
+//     while (1)
+//     {
+//         line = readline("> ");
+//         if (!line)  // EOF or error
+//             return (0);
+//         // Check if line matches delimiter
+//         if (ft_strcmp(line, delimiter) == 0)
+//         {
+//             free(line);
+//             break;
+//         }
+//         // Write line to heredoc pipe with variable expansion if needed
+//         if (!write_to_heredoc(fd[1], line, vars, expand_vars))
+//         {
+//             free(line);
+//             return (0);
+//         }
+//         free(line);
+//     }
+//     return (1);
+// }
+int read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
+{
+    char *line;
+    
+    DBG_PRINTF(1, "Reading heredoc with delimiter: '%s'\n", delimiter);
+    
+    // First check if we have stored lines from pasted content
+    if (vars->heredoc_lines && vars->heredoc_index < vars->heredoc_count)
+    {
+        DBG_PRINTF(1, "Using stored heredoc content (%d lines)\n", 
+                  vars->heredoc_count - vars->heredoc_index);
+                  
+        while (vars->heredoc_index < vars->heredoc_count)
+        {
+            line = vars->heredoc_lines[vars->heredoc_index++];
+            
+            DBG_PRINTF(1, "Checking heredoc line: '%s'\n", line);
+            
+            // Check if this line is the delimiter
+            if (ft_strcmp(line, delimiter) == 0)
+            {
+                DBG_PRINTF(1, "Found delimiter in stored content\n");
+                return 1;
+            }
+            
+            // Not the delimiter, add to heredoc content
+            write_to_heredoc(fd[1], line, vars, expand_vars);
+        }
+        
+        DBG_PRINTF(1, "Used all stored content, delimiter not found\n");
+    }
+    
+    // If we get here, either:
+    // 1. There were no stored lines
+    // 2. We've used all stored lines but didn't find the delimiter
+    // So continue with interactive mode
+    
+    DBG_PRINTF(1, "Entering interactive heredoc mode\n");
+    while (1)
+    {
+        line = readline("> ");
+        if (!line)
+        {
+            DBG_PRINTF(1, "EOF in heredoc\n");
+            return 0;  // EOF
+        }
+        
+        if (ft_strcmp(line, delimiter) == 0)
+        {
+            DBG_PRINTF(1, "Found delimiter: '%s'\n", line);
+            free(line);
+            return 1;
+        }
+        
+        write_to_heredoc(fd[1], line, vars, expand_vars);
+        free(line);
+    }
 }
 
 /*
@@ -313,22 +427,52 @@ Example: Node with delimiter "EOF"
 - Reads input lines until "EOF"
 - Returns read end of pipe for command input
 */
+// int	handle_heredoc(t_node *node, t_vars *vars)
+// {
+// 	int	fd[2];
+// 	int	expand_vars;
+// 	int	read_success;
+
+// 	if (!node || !node->args || !node->args[0])
+// 		return (handle_heredoc_err(node, vars));
+// 	if (pipe(fd) == -1)
+// 		return (handle_heredoc_err(node, vars));
+// 	expand_vars = chk_expand_heredoc(node->args[0]);
+// 	read_success = read_heredoc(fd, node->args[0], vars, expand_vars);
+// 	if (!read_success)
+// 		return (cleanup_heredoc_fail(fd, vars));
+// 	close(fd[1]);
+// 	return (fd[0]);
+// }
 int	handle_heredoc(t_node *node, t_vars *vars)
 {
-	int	fd[2];
-	int	expand_vars;
-	int	read_success;
-
-	if (!node || !node->args || !node->args[0])
-		return (handle_heredoc_err(node, vars));
-	if (pipe(fd) == -1)
-		return (handle_heredoc_err(node, vars));
-	expand_vars = chk_expand_heredoc(node->args[0]);
-	read_success = read_heredoc(fd, node->args[0], vars, expand_vars);
-	if (!read_success)
-		return (cleanup_heredoc_fail(fd, vars));
-	close(fd[1]);
-	return (fd[0]);
+    int		fd[2];
+    char	*delimiter;
+    int		expand_vars;
+    
+    if (!node->right || !node->right->args || !node->right->args[0])
+        return (handle_heredoc_err(node, vars));
+    delimiter = node->right->args[0];
+    // Check if heredoc content should have variables expanded
+    expand_vars = chk_expand_heredoc(delimiter);
+    // Create a pipe for the heredoc content
+    if (pipe(fd) == -1)
+        return (cleanup_heredoc_fail(fd, vars));
+    // Read content until delimiter and write to pipe
+    if (!read_heredoc(fd, delimiter, vars, expand_vars))
+        return (cleanup_heredoc_fail(fd, vars));
+    // Close write end, keep read end for command input
+    close(fd[1]);
+    // Save fd for redirecting command input
+    vars->pipes->heredoc_fd = fd[0];
+    // Redirect stdin to read from the pipe
+    if (dup2(fd[0], STDIN_FILENO) == -1)
+    {
+        close(fd[0]);
+        vars->error_code = 1;
+        return (-1);
+    }
+    return (0);
 }
 
 /*
