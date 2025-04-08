@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:46:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 03:09:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,10 +295,76 @@ Example: For input with quotes like "echo 'hello'"
 Process single or double quoted text
 Handles joining to previous token when adjacent
 */
+// int process_quote_char(char *input, int *i, t_vars *vars)
+// {
+//     int quote_type;
+//     int start_pos;
+//     char *content;
+//     int is_adjacent;
+//     t_node *cmd_node;
+    
+//     start_pos = *i;
+//     is_adjacent = is_adjacent_token(input, start_pos);
+    
+//     // Determine quote type
+//     quote_type = (input[*i] == '\'') ? 1 : 2;
+    
+//     // Skip opening quote
+//     (*i)++;
+    
+//     // Find closing quote
+//     start_pos = *i;
+//     while (input[*i] && input[*i] != input[start_pos - 1])
+//         (*i)++;
+    
+//     // If no closing quote found, treat as normal text and return
+//     if (!input[*i])
+//     {
+//         *i = start_pos;
+//         return (0);
+//     }
+    
+//     // Extract text between quotes
+//     content = ft_substr(input, start_pos, *i - start_pos);
+//     if (!content)
+//         return (0);
+    
+//     // Skip closing quote
+//     (*i)++;
+    
+//     // If adjacent to previous token, join with it
+//     if (is_adjacent)
+//     {
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+//         if (cmd_node && join_with_cmd_arg(cmd_node, content))
+//         {
+//             free(content);
+//             vars->start = *i;
+//             return (1);
+//         }
+//     }
+    
+//     // Otherwise add as separate argument with appropriate quote type
+//     cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+//     if (cmd_node)
+//         append_arg(cmd_node, content, quote_type);
+//     else
+//     {
+//         // If no command to append to, create new token
+//         maketoken_with_type(content, TYPE_ARGS, vars);
+//     }
+    
+//     free(content);
+//     vars->start = *i;
+    
+//     return (1);
+// }
+// filepath: 
 int process_quote_char(char *input, int *i, t_vars *vars)
 {
-    int quote_type;
     int start_pos;
+    char quote_char = input[*i];
+    int quote_type;
     char *content;
     int is_adjacent;
     t_node *cmd_node;
@@ -306,8 +372,8 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     start_pos = *i;
     is_adjacent = is_adjacent_token(input, start_pos);
     
-    // Determine quote type
-    quote_type = (input[*i] == '\'') ? 1 : 2;
+    // Determine quote type (1=single, 2=double)
+    quote_type = (quote_char == '\'') ? 1 : 2;
     
     // Skip opening quote
     (*i)++;
@@ -324,7 +390,12 @@ int process_quote_char(char *input, int *i, t_vars *vars)
         return (0);
     }
     
-    // Extract text between quotes
+    // Get the quoted text length for debugging
+    int quote_len = *i - start_pos;
+    fprintf(stderr, "DEBUG: Quote handling - quote_len=%d, quote_char=%c\n", 
+            quote_len, quote_char);
+    
+    // Extract quoted text
     content = ft_substr(input, start_pos, *i - start_pos);
     if (!content)
         return (0);
@@ -332,6 +403,10 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     // Skip closing quote
     (*i)++;
     
+    // Special handling for empty quotes ("" or '')
+    if (quote_len == 0)
+        fprintf(stderr, "DEBUG: Empty quote detected\n");
+        
     // If adjacent to previous token, join with it
     if (is_adjacent)
     {

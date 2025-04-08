@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 03:10:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,43 +127,219 @@ Example: Input: "$HOME/file" at position 0
 - Extracts "HOME" as variable name
 - Returns value (e.g., "/Users/username")
 */
-char	*handle_expansion(char *input, int *pos, t_vars *vars)
-{
-	char	*var_name;
-	char	*var_value;
+// char	*handle_expansion(char *input, int *pos, t_vars *vars)
+// {
+// 	char	*var_name;
+// 	char	*var_value;
 
-	(*pos)++;
-	var_name = get_var_name(input, pos);
-	if (!var_name)
-	{
+// 	(*pos)++;
+// 	var_name = get_var_name(input, pos);
+// 	if (!var_name)
+// 	{
+//         return (ft_strdup("$"));
+// 	}
+// 	var_value = handle_special_var(var_name, vars);
+// 	if (var_value)
+// 	{
+//         free(var_name);
+//         return var_value;
+//     }
+// 	var_value = get_env_val(var_name, vars->env);
+// 	free(var_name);
+// 	if (var_value)
+// 		return (var_value);
+// 	return (ft_strdup(""));
+// }
+char *handle_expansion(char *input, int *pos, t_vars *vars)
+{
+    char *var_name;
+    char *var_value;
+
+    // Skip the $ symbol
+    (*pos)++;
+    
+    // Check if we're at the end of input or at whitespace (lonely $)
+    if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n') {
+        fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
         return (ft_strdup("$"));
-	}
-	var_value = handle_special_var(var_name, vars);
-	if (var_value)
-	{
+    }
+    
+    // Check for special case $?
+    if (input[*pos] == '?') {
+        (*pos)++;
+        var_value = chk_exitstatus(vars);
+        fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
+        return var_value;
+    }
+    
+    // Extract variable name
+    var_name = get_var_name(input, pos);
+    if (!var_name || !*var_name) {
+        fprintf(stderr, "DEBUG: Empty var name, returning literal $\n");
+        free(var_name); // Free if allocated but empty
+        return (ft_strdup("$"));
+    }
+    
+    // Try to handle as special variable first
+    var_value = handle_special_var(var_name, vars);
+    if (var_value) {
+        fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
+                var_name, var_value);
         free(var_name);
         return var_value;
     }
-	var_value = get_env_val(var_name, vars->env);
-	free(var_name);
-	if (var_value)
-		return (var_value);
-	return (ft_strdup(""));
+    
+    // Try to handle as environment variable
+    var_value = get_env_val(var_name, vars->env);
+    fprintf(stderr, "DEBUG: Expanded env var $%s to '%s'\n", 
+            var_name, var_value ? var_value : "");
+    
+    free(var_name);
+    return (var_value ? var_value : ft_strdup(""));
 }
 
 /*
 Expands command arguments, properly handling quoted and unquoted variables
 */
+// void expand_cmd_args(t_node *node, t_vars *vars)
+// {
+//     int i;
+//     int j;
+//     int k;
+//     char *result;
+//     char *var_name;
+//     char *var_value;
+//     char *old_arg;
+//     char temp_str[2];
+    
+//     if (!node || !node->args)
+//         return;
+    
+//     // Start from args[0] for all nodes (we'll handle commands separately)
+//     i = 0;
+    
+//     // For command nodes, skip the command name (args[0])
+//     if (node->type == TYPE_CMD)
+//         i = 1;
+        
+//     while (node->args[i])
+//     {
+//         // Skip expansion in single quotes (quote_type == 1)
+//         if (node->arg_quote_type && node->arg_quote_type[i] == 1)
+//         {
+//             i++;
+//             continue;
+//         }
+        
+//         // Process expansion in double quotes (quote_type == 2) or unquoted
+//         if (ft_strchr(node->args[i], '$'))
+//         {
+//             old_arg = node->args[i];
+//             result = ft_strdup("");
+//             if (!result)
+//                 return;
+            
+//             j = 0;
+//             while (old_arg[j])
+//             {
+//                 // If we find a $ that's not escaped
+//                 if (old_arg[j] == '$')
+//                 {
+//                     // Handle $? special case
+//                     if (old_arg[j+1] == '?')
+//                     {
+//                         char *exit_status = ft_itoa(vars->error_code);
+//                         if (!exit_status)
+//                         {
+//                             ft_safefree((void **)&result);
+//                             return;
+//                         }
+                        
+//                         char *temp = ft_strjoin(result, exit_status);
+//                         ft_safefree((void **)&result);
+//                         ft_safefree((void **)&exit_status);
+                        
+//                         if (!temp)
+//                             return;
+//                         result = temp;
+//                         j += 2; // Skip past $?
+//                         continue;
+//                     }
+                    
+//                     // Regular variable name
+//                     k = j + 1;
+//                     while (old_arg[k] && (ft_isalnum(old_arg[k]) || old_arg[k] == '_'))
+//                         k++;
+                    
+//                     if (k > j + 1) // We have a variable name
+//                     {
+//                         var_name = ft_substr(old_arg, j + 1, k - j - 1);
+//                         if (!var_name)
+//                         {
+//                             ft_safefree((void **)&result);
+//                             return;
+//                         }
+                        
+//                         var_value = get_env_val(var_name, vars->env);
+//                         ft_safefree((void **)&var_name);
+                        
+//                         if (var_value)
+//                         {
+//                             // Critical change: Join without adding space
+//                             char *temp = ft_strjoin(result, var_value);
+//                             ft_safefree((void **)&result);
+//                             ft_safefree((void **)&var_value);
+                            
+//                             if (!temp)
+//                                 return;
+//                             result = temp;
+//                         }
+                        
+//                         j = k; // Skip past the variable name
+//                         continue;
+//                     }
+//                     else // Just a lone $ with no valid variable name
+//                     {
+//                         char *temp = ft_strjoin(result, "$");
+//                         ft_safefree((void **)&result);
+                        
+//                         if (!temp)
+//                             return;
+//                         result = temp;
+//                         j++; // Skip past the $
+//                         continue;
+//                     }
+//                 }
+                
+//                 // For regular characters, append to result
+//                 temp_str[0] = old_arg[j];
+//                 temp_str[1] = '\0';
+//                 char *temp = ft_strjoin(result, temp_str);
+//                 ft_safefree((void **)&result);
+                
+//                 if (!temp)
+//                     return;
+//                 result = temp;
+//                 j++;
+//             }
+            
+//             // Replace old argument with expanded version
+//             ft_safefree((void **)&node->args[i]);
+//             node->args[i] = result;
+//         }
+        
+//         i++;
+//     }
+// debug_cmd_args(node);
+// }
 void expand_cmd_args(t_node *node, t_vars *vars)
 {
     int i;
-    int j;
-    int k;
-    char *result;
-    char *var_name;
-    char *var_value;
     char *old_arg;
-    char temp_str[2];
+    char *result;
+    int pos;
+    char *var_value;
+    char *expanded_arg;
     
     if (!node || !node->args)
         return;
@@ -178,112 +354,54 @@ void expand_cmd_args(t_node *node, t_vars *vars)
     while (node->args[i])
     {
         // Skip expansion in single quotes (quote_type == 1)
-        if (node->arg_quote_type && node->arg_quote_type[i] == 1)
-        {
+        if (node->arg_quote_type && node->arg_quote_type[i] == 1) {
             i++;
             continue;
         }
         
         // Process expansion in double quotes (quote_type == 2) or unquoted
-        if (ft_strchr(node->args[i], '$'))
-        {
+        if (ft_strchr(node->args[i], '$')) {
             old_arg = node->args[i];
+            pos = 0;
             result = ft_strdup("");
             if (!result)
                 return;
-            
-            j = 0;
-            while (old_arg[j])
-            {
-                // If we find a $ that's not escaped
-                if (old_arg[j] == '$')
-                {
-                    // Handle $? special case
-                    if (old_arg[j+1] == '?')
-                    {
-                        char *exit_status = ft_itoa(vars->error_code);
-                        if (!exit_status)
-                        {
-                            ft_safefree((void **)&result);
-                            return;
-                        }
-                        
-                        char *temp = ft_strjoin(result, exit_status);
-                        ft_safefree((void **)&result);
-                        ft_safefree((void **)&exit_status);
-                        
-                        if (!temp)
-                            return;
-                        result = temp;
-                        j += 2; // Skip past $?
-                        continue;
-                    }
+                
+            while (old_arg[pos]) {
+                // Handle variable expansion
+                if (old_arg[pos] == '$') {
+                    fprintf(stderr, "DEBUG: Expanding $ at pos %d in '%s'\n", 
+                            pos, old_arg);
                     
-                    // Regular variable name
-                    k = j + 1;
-                    while (old_arg[k] && (ft_isalnum(old_arg[k]) || old_arg[k] == '_'))
-                        k++;
-                    
-                    if (k > j + 1) // We have a variable name
-                    {
-                        var_name = ft_substr(old_arg, j + 1, k - j - 1);
-                        if (!var_name)
-                        {
-                            ft_safefree((void **)&result);
-                            return;
-                        }
-                        
-                        var_value = get_env_val(var_name, vars->env);
-                        ft_safefree((void **)&var_name);
-                        
-                        if (var_value)
-                        {
-                            // Critical change: Join without adding space
-                            char *temp = ft_strjoin(result, var_value);
-                            ft_safefree((void **)&result);
-                            ft_safefree((void **)&var_value);
-                            
-                            if (!temp)
-                                return;
-                            result = temp;
-                        }
-                        
-                        j = k; // Skip past the variable name
-                        continue;
+                    var_value = handle_expansion(old_arg, &pos, vars);
+                    if (var_value) {
+                        // Append expansion result directly without spaces
+                        expanded_arg = ft_strjoin(result, var_value);
+                        fprintf(stderr, "DEBUG: Joined '%s' + '%s' = '%s'\n", 
+                                result, var_value, expanded_arg);
+                                
+                        free(result);
+                        free(var_value);
+                        result = expanded_arg;
                     }
-                    else // Just a lone $ with no valid variable name
-                    {
-                        char *temp = ft_strjoin(result, "$");
-                        ft_safefree((void **)&result);
-                        
-                        if (!temp)
-                            return;
-                        result = temp;
-                        j++; // Skip past the $
-                        continue;
-                    }
+                } else {
+                    // Handle regular character
+                    char tmp[2] = {old_arg[pos], '\0'};
+                    expanded_arg = ft_strjoin(result, tmp);
+                    free(result);
+                    result = expanded_arg;
+                    pos++;
                 }
-                
-                // For regular characters, append to result
-                temp_str[0] = old_arg[j];
-                temp_str[1] = '\0';
-                char *temp = ft_strjoin(result, temp_str);
-                ft_safefree((void **)&result);
-                
-                if (!temp)
-                    return;
-                result = temp;
-                j++;
             }
             
-            // Replace old argument with expanded version
-            ft_safefree((void **)&node->args[i]);
+            // Replace original argument with expanded version
+            free(node->args[i]);
             node->args[i] = result;
+            
+            fprintf(stderr, "DEBUG: Final expanded arg: '%s'\n", node->args[i]);
         }
-        
         i++;
     }
-debug_cmd_args(node);
 }
 
 /*
