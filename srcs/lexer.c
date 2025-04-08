@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 09:40:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 19:22:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,15 @@ Example: read_added_input("quote> ")
 - Shows "quote> " prompt to user
 - Returns user input as newly allocated string
 */
-char	*read_added_input(char *prompt)
-{
-	char	*line;
+// char	*read_added_input(char *prompt)
+// {
+// 	char	*line;
 
-	line = readline(prompt);
-	if (!line)
-		return (NULL);
-	return (line);
-}
+// 	line = readline(prompt);
+// 	if (!line)
+// 		return (NULL);
+// 	return (line);
+// }
 
 /*
 Creates an operator token and adds to token list.
@@ -65,14 +65,14 @@ Example: For | operator
 - Creates TYPE_PIPE node
 - Adds to token linked list
 */
-void create_operator_token(t_vars *vars, t_tokentype type, char *symbol)
-{
-	t_node	*operator_node;
+// void create_operator_token(t_vars *vars, t_tokentype type, char *symbol)
+// {
+// 	t_node	*operator_node;
 	
-	operator_node = initnode(type, symbol);
-	if (!operator_node)
-		return ;
-	vars->curr_type = type;
+// 	operator_node = initnode(type, symbol);
+// 	if (!operator_node)
+// 		return ;
+// 	vars->curr_type = type;
 	
-	build_token_linklist(vars, operator_node);
-}
+// 	build_token_linklist(vars, operator_node);
+// }

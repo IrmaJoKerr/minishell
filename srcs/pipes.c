@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:37:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 19:17:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,39 +14,39 @@
 
 
 // Helper function to restore standard file descriptors
-void reset_std_fd(t_pipe *pipes)
-{
-    if (!pipes)
-        return ;
+// void reset_std_fd(t_pipe *pipes)
+// {
+//     if (!pipes)
+//         return ;
         
-    if (pipes->saved_stdin != -1)
-    {
-        dup2(pipes->saved_stdin, STDIN_FILENO);
-        close(pipes->saved_stdin);
-        pipes->saved_stdin = -1;
-    }
+//     if (pipes->saved_stdin != -1)
+//     {
+//         dup2(pipes->saved_stdin, STDIN_FILENO);
+//         close(pipes->saved_stdin);
+//         pipes->saved_stdin = -1;
+//     }
     
-    if (pipes->saved_stdout != -1)
-    {
-        dup2(pipes->saved_stdout, STDOUT_FILENO);
-        close(pipes->saved_stdout);
-        pipes->saved_stdout = -1;
-    }
+//     if (pipes->saved_stdout != -1)
+//     {
+//         dup2(pipes->saved_stdout, STDOUT_FILENO);
+//         close(pipes->saved_stdout);
+//         pipes->saved_stdout = -1;
+//     }
     
-    // Close heredoc fd if it was opened
-    if (pipes->heredoc_fd > 2)
-    {
-        close(pipes->heredoc_fd);
-        pipes->heredoc_fd = -1;
-    }
+//     // Close heredoc fd if it was opened
+//     if (pipes->heredoc_fd > 2)
+//     {
+//         close(pipes->heredoc_fd);
+//         pipes->heredoc_fd = -1;
+//     }
     
-    // Close redirection fd if it was opened
-    if (pipes->redirection_fd > 2)
-    {
-        close(pipes->redirection_fd);
-        pipes->redirection_fd = -1;
-    }
-}
+//     // Close redirection fd if it was opened
+//     if (pipes->redirection_fd > 2)
+//     {
+//         close(pipes->redirection_fd);
+//         pipes->redirection_fd = -1;
+//     }
+// }
 
 /*
 Configures pipe redirections for command execution.
@@ -63,15 +63,15 @@ Example: For first command in "ls | grep txt"
 - Output of "ls" flows through pipe to "grep"
 - Ensures file descriptors are properly managed
 */
-void	init_pipe(t_node *cmd, int *pipe_fd)
-{
-	if (cmd->type == TYPE_PIPE)
-	{
-		close(pipe_fd[0]);
-		dup2(pipe_fd[1], STDOUT_FILENO);
-		close(pipe_fd[1]);
-	}
-}
+// void	init_pipe(t_node *cmd, int *pipe_fd)
+// {
+// 	if (cmd->type == TYPE_PIPE)
+// 	{
+// 		close(pipe_fd[0]);
+// 		dup2(pipe_fd[1], STDOUT_FILENO);
+// 		close(pipe_fd[1]);
+// 	}
+// }
 
 /*
 Creates and sets up pipe for command communication.
@@ -86,15 +86,15 @@ Example: Before forking processes
 - Reports errors if pipe creation fails
 - Returns success/failure status
 */
-int	setup_pipe(int *pipefd)
-{
-	if (pipe(pipefd) == -1)
-	{
-		ft_putendl_fd("pipe: Creation failed", 2);
-		return (0);
-	}
-	return (1);
-}
+// int	setup_pipe(int *pipefd)
+// {
+// 	if (pipe(pipefd) == -1)
+// 	{
+// 		ft_putendl_fd("pipe: Creation failed", 2);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
 
 /*
 Executes left side of pipe in child process.
@@ -111,17 +111,17 @@ Example: For "ls | grep txt"
 - Executes "ls" command
 - Exits with command status
 */
-void	exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
-{
-	int	exit_status;
+// void	exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
+// {
+// 	int	exit_status;
 
-	close(pipefd[0]);
-	if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-		exit(1);
-	close(pipefd[1]);
-	exit_status = execute_cmd(pipe_node->left, vars->env, vars);
-	exit(exit_status);
-}
+// 	close(pipefd[0]);
+// 	if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+// 		exit(1);
+// 	close(pipefd[1]);
+// 	exit_status = execute_cmd(pipe_node->left, vars->env, vars);
+// 	exit(exit_status);
+// }
 
 /*
 Executes right side of pipe in child process.
@@ -138,36 +138,36 @@ Example: For "ls | grep txt"
 - Executes "grep" command
 - Exits with command status
 */
-void	exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
-{
-	t_node	*cmd;
-	t_node	*redir_node;
-	int		saved_stdout;
-	int		append;
+// void	exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars)
+// {
+// 	t_node	*cmd;
+// 	t_node	*redir_node;
+// 	int		saved_stdout;
+// 	int		append;
 
-	close(pipefd[1]);
-	if (dup2(pipefd[0], STDIN_FILENO) == -1)
-		exit(1);
-	close(pipefd[0]);
-	cmd = pipe_node->right;
-	redir_node = NULL;
-	if (cmd && cmd->right)
-	{
-		redir_node = cmd->right;
-		if (is_redirection(redir_node->type))
-		{
-			saved_stdout = dup(STDOUT_FILENO);
-			if (saved_stdout == -1)
-				exit(1);
-			append = 0;
-			if (redir_node->type == TYPE_APPEND_REDIRECT)
-				append = 1;
-			if (!output_redirect(redir_node, &saved_stdout, append, vars))
-				exit(1);
-		}
-	}
-	exit(execute_cmd(pipe_node->right, vars->env, vars));
-}
+// 	close(pipefd[1]);
+// 	if (dup2(pipefd[0], STDIN_FILENO) == -1)
+// 		exit(1);
+// 	close(pipefd[0]);
+// 	cmd = pipe_node->right;
+// 	redir_node = NULL;
+// 	if (cmd && cmd->right)
+// 	{
+// 		redir_node = cmd->right;
+// 		if (is_redirection(redir_node->type))
+// 		{
+// 			saved_stdout = dup(STDOUT_FILENO);
+// 			if (saved_stdout == -1)
+// 				exit(1);
+// 			append = 0;
+// 			if (redir_node->type == TYPE_APPEND_REDIRECT)
+// 				append = 1;
+// 			if (!output_redirect(redir_node, &saved_stdout, append, vars))
+// 				exit(1);
+// 		}
+// 	}
+// 	exit(execute_cmd(pipe_node->right, vars->env, vars));
+// }
 
 /*
 Creates child process for a pipeline command.
@@ -184,23 +184,23 @@ Example: Creating process for command in pipeline
 - Parent returns child's PID
 - Returns -1 if fork fails
 */
-pid_t	make_child_proc(t_node *pipe_node, int *pipefd,
-		t_vars *vars, int is_left)
-{
-	pid_t	pid;
+// pid_t	make_child_proc(t_node *pipe_node, int *pipefd,
+// 		t_vars *vars, int is_left)
+// {
+// 	pid_t	pid;
 
-	pid = fork();
-	if (pid == 0)
-	{
-		if (is_left)
-			exec_left_cmd(pipe_node, pipefd, vars);
-		else
-			exec_right_cmd(pipe_node, pipefd, vars);
-	}
-	else if (pid < 0)
-		ft_putendl_fd("fork: Creation failed", 2);
-	return (pid);
-}
+// 	pid = fork();
+// 	if (pid == 0)
+// 	{
+// 		if (is_left)
+// 			exec_left_cmd(pipe_node, pipefd, vars);
+// 		else
+// 			exec_right_cmd(pipe_node, pipefd, vars);
+// 	}
+// 	else if (pid < 0)
+// 		ft_putendl_fd("fork: Creation failed", 2);
+// 	return (pid);
+// }
 
 /*
 Executes commands connected by a pipe.
@@ -748,7 +748,36 @@ void process_quotes_in_redirect(t_node *redir_node)
  * Creates all pipes needed for execution 
  * Returns 1 on success, 0 on failure
  */
-int	make_pipes(t_pipe *pipes, int pipe_count)
+// int	make_pipes(t_pipe *pipes, int pipe_count)
+// {
+//     int i;
+//     int j;
+    
+//     i = 0;
+//     while (i < pipe_count)
+//     {
+//         /* Reuse existing setup_pipe function */
+//         if (!setup_pipe(pipes->pipe_fds + (i * 2)))
+//         {
+//             /* Clean up previously created pipes */
+//             j = 0;
+//             while (j < i)
+//             {
+//                 close(pipes->pipe_fds[j * 2]);
+//                 close(pipes->pipe_fds[j * 2 + 1]);
+//                 j++;
+//             }
+//             return (0);
+//         }
+//         i++;
+//     }
+//     return (1);
+// }
+/* 
+ * Creates all pipes needed for execution 
+ * Returns 1 on success, 0 on failure
+ */
+int make_pipes(t_pipe *pipes, int pipe_count)
 {
     int i;
     int j;
@@ -756,8 +785,8 @@ int	make_pipes(t_pipe *pipes, int pipe_count)
     i = 0;
     while (i < pipe_count)
     {
-        /* Reuse existing setup_pipe function */
-        if (!setup_pipe(pipes->pipe_fds + (i * 2)))
+        /* Create pipe directly instead of using setup_pipe function */
+        if (pipe(pipes->pipe_fds + (i * 2)) == -1)
         {
             /* Clean up previously created pipes */
             j = 0;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 10:39:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 23:55:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,6 @@ typedef struct s_pipe
 	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
 	// t_node		*current;        // Current node being processed in the token list
-	
 	t_node		*last_cmd;       // Last command node encountered during parsing
 	t_node		*last_heredoc;   // Last heredoc node encountered during parsing
 	t_node      *last_pipe;       // Last pipe node processed
@@ -208,6 +207,9 @@ typedef struct s_vars
 	char			*partial_input;
 	int				pos;
 	int				start;
+	t_node			*find_start;
+	t_node			*find_tgt;
+	int				find_mode;
 	int				shell_level;
 	int				error_code;
 	t_pipe			*pipes;
@@ -291,6 +293,10 @@ void		modify_env(char ***env, int changes, char *var);
 Append arguments to a node's argument array.
 In append_args.c
 */
+char		**dup_node_args(t_node *node, size_t len);
+int			*set_quote_type(t_node *node, size_t len, int quote_type);
+void		update_node_args(t_node *node, char **new_args, int *quote_types);
+void		clean_new_args(char **new_args, size_t len);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 /*
 Argument handling.
@@ -315,11 +321,11 @@ In buildast.c
 // t_node		*proc_redir_pt1(t_vars *vars);
 // void		proc_redir_pt2(t_vars *vars);
 t_node		*proc_token_list(t_vars *vars);
-void		setup_pipe_links(t_node *pipe_node, t_node *left_cmd,
-				t_node *right_cmd);
-void		del_list_node(t_node *node);
-int			is_special_token(t_node *token);
-void		convert_strs_to_cmds(t_vars *vars);
+// void		setup_pipe_links(t_node *pipe_node, t_node *left_cmd,
+// 				t_node *right_cmd);
+// void		del_list_node(t_node *node);
+// int			is_special_token(t_node *token);
+// void		convert_strs_to_cmds(t_vars *vars);
 // void		link_strargs_to_cmds(t_vars *vars);
 // void		link_addon_pipe(t_node *last_pipe,
 // 				t_node *new_pipe, t_node *right_cmd);
@@ -346,6 +352,7 @@ void		cleanup_env_error(char **env, int n);
 void		cleanup_pipes(t_pipe *pipes);
 void		cleanup_vars(t_vars *vars);
 void		cleanup_exit(t_vars *vars);
+void		cleanup_fds(int fd_in, int fd_out);
 
 /*
 Group B of cleanup functions.
@@ -354,7 +361,6 @@ In cleanup_b.c
 void		cleanup_ast(t_node *node);
 void		free_token_node(t_node *node);
 void		cleanup_token_list(t_vars *vars);
-void		cleanup_fds(int fd_in, int fd_out);
 
 /*
 Master command finder function.
@@ -397,8 +403,8 @@ char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
-void		expand_cmd_args(t_node *node, t_vars *vars);
-void 		process_quotes_and_expansions(t_vars *vars);
+// void		expand_cmd_args(t_node *node, t_vars *vars);
+// void 		process_quotes_and_expansions(t_vars *vars);
 void 		debug_cmd_args(t_node *node);
 
 /*
@@ -488,15 +494,20 @@ void		handle_input(char *input, t_vars *vars);
 Input verification functions.
 In input_verify.c
 */
+int			handle_adjacent_args(t_node *current, char *expanded_value, t_node *cmd_node, int is_adjacent);
+char 		*expand_value(char *var_name, t_vars *vars);
 void		process_expansions(t_vars *vars);
+void		process_arg_expansion(char **arg_ptr, int quote_type, t_vars *vars);
+int			is_command_position(t_node *node, t_vars *vars);
+int			is_in_single_quotes(int pos, t_vars *vars);
 
 /*
 Lexer functions.
 In lexer.c
 */
 void		skip_whitespace(char *str, t_vars *vars);
-char		*read_added_input(char *prompt);
-void 		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
+// char		*read_added_input(char *prompt);
+// void 		create_operator_token(t_vars *vars, t_tokentype type, char *symbol);
 
 
 /*
@@ -550,13 +561,13 @@ char		*process_pipe_syntax(char *command, t_vars *vars);
 Pipes main functions.
 In pipes.c
 */
-void		reset_std_fd(t_pipe *pipes);
-void		init_pipe(t_node *cmd, int *pipe_fd);
-int			setup_pipe(int *pipefd);
-void		exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
-void		exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
-pid_t		make_child_proc(t_node *pipe_node, int *pipefd, t_vars *vars,
-				int is_left);
+// void		reset_std_fd(t_pipe *pipes);
+// void		init_pipe(t_node *cmd, int *pipe_fd);
+// int			setup_pipe(int *pipefd);
+// void		exec_left_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
+// void		exec_right_cmd(t_node *pipe_node, int *pipefd, t_vars *vars);
+// pid_t		make_child_proc(t_node *pipe_node, int *pipefd, t_vars *vars,
+// 				int is_left);
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
 int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars);
 void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
@@ -649,7 +660,7 @@ void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 int 		is_adjacent_token(char *input, int pos);
 int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
-int			process_expand_char(char *input, int *i, t_vars *vars);
+int			make_exp_token(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);

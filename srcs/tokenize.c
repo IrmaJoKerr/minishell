@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 03:09:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 16:43:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,24 +137,20 @@ int join_with_cmd_arg(t_node *cmd_node, char *token_val)
       
     if (!cmd_node || !token_val)
         return (0);
-    
     // Count arguments
     arg_count = 0;
     while (cmd_node->args[arg_count])
         arg_count++; 
     if (arg_count < 1)
         return (0);     
-    
     // Get last argument
     last_arg = cmd_node->args[arg_count - 1];
     if (!last_arg)
         return (0); 
-    
     // Join the strings
     new_arg = ft_strjoin(last_arg, token_val);
     if (!new_arg)
         return (0); 
-    
     // Replace the last argument with joined string
     free(cmd_node->args[arg_count - 1]);
     cmd_node->args[arg_count - 1] = new_arg;
@@ -163,124 +159,171 @@ int join_with_cmd_arg(t_node *cmd_node, char *token_val)
 }
 
 /*
-Processes expansion characters in the input.
+Process variable expansion characters ($VAR or $?)
 - Handles variable expansion with $.
 - Updates position after expansion.
 - Extracts variable name and its value.
+- Joins adjacent expansions with previous text
 Returns:
-1 if expansion was processed, 0 otherwise.
+- 1 if expansion was processed
+- 0 if otherwise.
 
 Example: For input "echo $HOME"
 - Detects $ at position
 - Creates expansion token for HOME
 - Updates position past the variable name
 */
-/*
-Process variable expansion characters ($VAR or $?)
-Now handles joining adjacent expansions with previous text
-Returns 1 if expansion was processed, 0 otherwise
-*/
-int process_expand_char(char *input, int *i, t_vars *vars)
-{
-    int     start_pos;
-    char    *var_name;
-    char    *var_value;
-    t_node  *cmd_node;
-    int     is_adjacent;
+// int make_exp_token(char *input, int *i, t_vars *vars)
+// {
+//     int     start_pos;
+//     char    *var_name;
+//     char    *var_value;
+//     t_node  *cmd_node;
+//     int     is_adjacent;
     
-    start_pos = *i;
+//     start_pos = *i;
     
-    is_adjacent = is_adjacent_token(input, start_pos);
-    /* Skip $ */
-    (*i)++;
+//     is_adjacent = is_adjacent_token(input, start_pos);
+//     /* Skip $ */
+//     (*i)++;
     
-    /* Special case for $? */
-    if (input[*i] == '?')
-    {
-        (*i)++;
-        var_value = ft_itoa(vars->error_code);
+//     /* Special case for $? */
+//     if (input[*i] == '?')
+//     {
+//         (*i)++;
+//         var_value = ft_itoa(vars->error_code);
         
-        if (!var_value)
-            return (0);
+//         if (!var_value)
+//             return (0);
         
-        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         
-        // If adjacent to previous text, join with last argument
-        if (cmd_node && is_adjacent)
-        {
-            if (join_with_cmd_arg(cmd_node, var_value))
-            {
-                free(var_value);
-                vars->start = *i;
-                return (1);
-            }
-        }
+//         // If adjacent to previous text, join with last argument
+//         if (cmd_node && is_adjacent)
+//         {
+//             if (join_with_cmd_arg(cmd_node, var_value))
+//             {
+//                 free(var_value);
+//                 vars->start = *i;
+//                 return (1);
+//             }
+//         }
         
-        if (cmd_node)
-            append_arg(cmd_node, var_value, 0);
-        else
-            maketoken_with_type(var_value, TYPE_ARGS, vars);
+//         if (cmd_node)
+//             append_arg(cmd_node, var_value, 0);
+//         else
+//             maketoken_with_type(var_value, TYPE_ARGS, vars);
         
-        free(var_value);
-        vars->start = *i;
+//         free(var_value);
+//         vars->start = *i;
         
-        return (1);
-    }
+//         return (1);
+//     }
     
-    /* Process variable name */
-    if (ft_isalpha(input[*i]) || input[*i] == '_')
-    {
-        /* Read variable name */
-        start_pos = *i;
+//     /* Process variable name */
+//     if (ft_isalpha(input[*i]) || input[*i] == '_')
+//     {
+//         /* Read variable name */
+//         start_pos = *i;
         
-        while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-            (*i)++;
+//         while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+//             (*i)++;
         
-        var_name = ft_substr(input, start_pos, *i - start_pos);
+//         var_name = ft_substr(input, start_pos, *i - start_pos);
         
-        if (!var_name)
-            return (0);
+//         if (!var_name)
+//             return (0);
         
-        var_value = get_env_val(var_name, vars->env);
-        free(var_name);
+//         var_value = get_env_val(var_name, vars->env);
+//         free(var_name);
         
-        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         
-        // If adjacent to previous text, try joining with last argument
-        if (cmd_node && is_adjacent)
-        {
-            if (join_with_cmd_arg(cmd_node, var_value ? var_value : ""))
-            {
-                if (var_value)
-                    free(var_value);
-                vars->start = *i;
-                return (1);
-            }
-        }
+//         // If adjacent to previous text, try joining with last argument
+//         if (cmd_node && is_adjacent)
+//         {
+//             if (join_with_cmd_arg(cmd_node, var_value ? var_value : ""))
+//             {
+//                 if (var_value)
+//                     free(var_value);
+//                 vars->start = *i;
+//                 return (1);
+//             }
+//         }
         
-        // Fall back to standard behavior
-        if (cmd_node && var_value)
-            append_arg(cmd_node, var_value, 0);
-        else if (cmd_node)
-            append_arg(cmd_node, "", 0);
-        else if (var_value)
-            maketoken_with_type(var_value, TYPE_ARGS, vars);
-        else
-            maketoken_with_type("", TYPE_ARGS, vars);
+//         // Fall back to standard behavior
+//         if (cmd_node && var_value)
+//             append_arg(cmd_node, var_value, 0);
+//         else if (cmd_node)
+//             append_arg(cmd_node, "", 0);
+//         else if (var_value)
+//             maketoken_with_type(var_value, TYPE_ARGS, vars);
+//         else
+//             maketoken_with_type("", TYPE_ARGS, vars);
         
-        if (var_value)
-            free(var_value);
+//         if (var_value)
+//             free(var_value);
             
-        vars->start = *i;
+//         vars->start = *i;
         
-        return (1);
+//         return (1);
+//     }
+    
+//     /* Just a lone $ character */
+//     (*i) = start_pos + 1;
+//     vars->start = start_pos;
+    
+//     return (0);
+// }
+/*
+ * Creates an expansion token from input
+ * - Identifies $ variables and creates TYPE_EXPANSION tokens
+ * - Handles $? as special case (exit status)
+ * - Doesn't perform expansion - just identifies tokens
+ * Returns 1 if expansion token was created, 0 otherwise
+ */
+int make_exp_token(char *input, int *i, t_vars *vars)
+{
+    char		*token;
+    t_tokentype	type;
+    
+    // Mark start position of variable
+    vars->start = *i;
+    // Check if this is $? (exit status)
+    if (input[*i] == '$' && input[*i + 1] == '?') 
+    {
+        // Create token for $?
+        token = ft_substr(input, vars->start, 2);
+        if (!token)
+            return (0); 
+        // Track the token type but don't expand yet
+        type = TYPE_EXIT_STATUS;
+        (*i) += 2; // Skip past $?
     }
-    
-    /* Just a lone $ character */
-    (*i) = start_pos + 1;
-    vars->start = start_pos;
-    
-    return (0);
+    else if (input[*i] == '$')
+    {
+        // Skip $ character
+        (*i)++;
+        
+        // Find end of variable name (alphanumeric + underscore)
+        // Removed unused variable 'name_start'
+        while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+            (*i)++; 
+        // Create token for the entire variable reference including $
+        token = ft_substr(input, vars->start, *i - vars->start);
+        if (!token)
+            return (0);
+        type = TYPE_EXPANSION;
+    }
+    else
+    {
+        return (0);
+    }
+    // Create token (expansion will happen later in process_expansions)
+    maketoken_with_type(token, type, vars);
+    free(token);
+    vars->start = *i;
+    return (1);
 }
 
 /*
@@ -297,141 +340,217 @@ Handles joining to previous token when adjacent
 */
 // int process_quote_char(char *input, int *i, t_vars *vars)
 // {
-//     int quote_type;
-//     int start_pos;
-//     char *content;
-//     int is_adjacent;
-//     t_node *cmd_node;
-    
-//     start_pos = *i;
-//     is_adjacent = is_adjacent_token(input, start_pos);
-    
-//     // Determine quote type
-//     quote_type = (input[*i] == '\'') ? 1 : 2;
-    
+//     int		quote_start;
+//     char	quote_char = input[*i];
+//     int		quote_type;
+//     char	*content;
+//     t_node	*cmd_node;
+//     int		is_adjacent;
+// 	int		quote_len; //For debugging
+// 	int		last_arg_idx;
+// 	char	*joined;
+	
+//     // Check for adjacency with previous tokens
+//     is_adjacent = is_adjacent_token(input, *i);
+//     // Determine quote type (1=single, 2=double)
+// 	if (quote_char == '\'')
+// 		quote_type = 1;
+// 	else
+// 		quote_type = 2;
 //     // Skip opening quote
-//     (*i)++;
-    
+//     quote_start = ++(*i);
 //     // Find closing quote
-//     start_pos = *i;
-//     while (input[*i] && input[*i] != input[start_pos - 1])
+//     while (input[*i] && input[*i] != quote_char)
 //         (*i)++;
-    
-//     // If no closing quote found, treat as normal text and return
+//     // If no closing quote, treat as normal text
 //     if (!input[*i])
 //     {
-//         *i = start_pos;
+//         *i = quote_start;
 //         return (0);
 //     }
-    
-//     // Extract text between quotes
-//     content = ft_substr(input, start_pos, *i - start_pos);
+//     // Get quoted content length for debugging
+//     quote_len = *i - quote_start;
+//     fprintf(stderr, "DEBUG: Quote handling - quote_len=%d, quote_char=%c\n", 
+//             quote_len, quote_char);
+//     // Extract quoted content
+//     content = ft_substr(input, quote_start, quote_len);
 //     if (!content)
 //         return (0);
-    
 //     // Skip closing quote
 //     (*i)++;
-    
+//     // Special handling for empty quotes
+//     if (quote_len == 0)
+//         fprintf(stderr, "DEBUG: Empty quote detected\n");
+// 	// Add debug print for quote type
+//     fprintf(stderr, "DEBUG: Setting quote_type=%d for content='%s'\n", 
+// 		quote_type, content);
 //     // If adjacent to previous token, join with it
 //     if (is_adjacent)
 //     {
 //         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
-//         if (cmd_node && join_with_cmd_arg(cmd_node, content))
+//         if (cmd_node && cmd_node->args)
 //         {
-//             free(content);
-//             vars->start = *i;
-//             return (1);
+//             // Find last argument
+//             last_arg_idx = 0;
+//             while (cmd_node->args[last_arg_idx+1])
+//                 last_arg_idx++;
+//             // Join with last argument
+// 			if (cmd_node->arg_quote_type)
+//                 fprintf(stderr, "DEBUG: Original arg '%s' had quote_type=%d\n", 
+//                     cmd_node->args[last_arg_idx], cmd_node->arg_quote_type[last_arg_idx]);
+//             joined = ft_strjoin(cmd_node->args[last_arg_idx], content);
+//             fprintf(stderr, "DEBUG: Joining quote '%s' with '%s' = '%s'\n",
+//                    cmd_node->args[last_arg_idx], content, joined);   
+//             if (joined)
+// 			{
+//                 free(cmd_node->args[last_arg_idx]);
+//                 cmd_node->args[last_arg_idx] = joined;
+// 				// Update quote_type when joining with a single-quoted string
+//     			// Single quotes (type 1) have highest precedence to prevent expansion
+//     			if (quote_type == 1)
+// 				{
+//         			cmd_node->arg_quote_type[last_arg_idx] = 1;
+//         			fprintf(stderr, "DEBUG: Updated quote_type to 1 (single quotes) for '%s'\n", joined);
+//     			}
+//                 fprintf(stderr, "DEBUG: After join, keeping quote_type=%d for '%s'\n", 
+//                     cmd_node->arg_quote_type[last_arg_idx], joined);
+//                 free(content);
+//                 vars->start = *i;
+//                 return (1);
+//             }
 //         }
 //     }
-    
-//     // Otherwise add as separate argument with appropriate quote type
+//     // Otherwise add as separate argument
 //     cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
 //     if (cmd_node)
 //         append_arg(cmd_node, content, quote_type);
 //     else
-//     {
-//         // If no command to append to, create new token
 //         maketoken_with_type(content, TYPE_ARGS, vars);
-//     }
-    
 //     free(content);
 //     vars->start = *i;
-    
 //     return (1);
 // }
-// filepath: 
+/*
+ * Processes quoted text in input
+ * - Handles single and double quotes
+ * - Manages empty quotes
+ * - Handles adjacency with previous tokens
+ * Returns 1 if quote processed successfully, 0 otherwise
+ */
 int process_quote_char(char *input, int *i, t_vars *vars)
 {
-    int start_pos;
-    char quote_char = input[*i];
-    int quote_type;
-    char *content;
-    int is_adjacent;
-    t_node *cmd_node;
+    int     quote_start;
+    char    quote_char = input[*i];
+    int     quote_type;
+    char    *content;
+    t_node  *cmd_node;
+    int     is_adjacent;
+    int     quote_len; // For debugging
+    int     last_arg_idx;
+    char    *joined;
     
-    start_pos = *i;
-    is_adjacent = is_adjacent_token(input, start_pos);
+    // Check for adjacency with previous tokens
+    is_adjacent = is_adjacent_token(input, *i);
     
     // Determine quote type (1=single, 2=double)
-    quote_type = (quote_char == '\'') ? 1 : 2;
-    
+    if (quote_char == '\'')
+        quote_type = 1;
+    else
+        quote_type = 2;
+        
     // Skip opening quote
-    (*i)++;
+    quote_start = ++(*i);
     
     // Find closing quote
-    start_pos = *i;
-    while (input[*i] && input[*i] != input[start_pos - 1])
+    while (input[*i] && input[*i] != quote_char)
         (*i)++;
-    
-    // If no closing quote found, treat as normal text and return
+        
+    // If no closing quote, treat as normal text
     if (!input[*i])
     {
-        *i = start_pos;
+        *i = quote_start;
         return (0);
     }
     
-    // Get the quoted text length for debugging
-    int quote_len = *i - start_pos;
+    // Get quoted content length for debugging
+    quote_len = *i - quote_start;
     fprintf(stderr, "DEBUG: Quote handling - quote_len=%d, quote_char=%c\n", 
             quote_len, quote_char);
-    
-    // Extract quoted text
-    content = ft_substr(input, start_pos, *i - start_pos);
+            
+    // Extract quoted content
+    content = ft_substr(input, quote_start, quote_len);
     if (!content)
         return (0);
-    
+        
     // Skip closing quote
     (*i)++;
     
-    // Special handling for empty quotes ("" or '')
+    // Special handling for empty quotes
     if (quote_len == 0)
         fprintf(stderr, "DEBUG: Empty quote detected\n");
+        
+    // Add debug print for quote type
+    fprintf(stderr, "DEBUG: Setting quote_type=%d for content='%s'\n", 
+        quote_type, content);
         
     // If adjacent to previous token, join with it
     if (is_adjacent)
     {
         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
-        if (cmd_node && join_with_cmd_arg(cmd_node, content))
+        if (cmd_node && cmd_node->args)
         {
-            free(content);
-            vars->start = *i;
-            return (1);
+            // Find last argument
+            last_arg_idx = 0;
+            while (cmd_node->args[last_arg_idx+1])
+                last_arg_idx++;
+                
+            // Join with last argument
+            if (cmd_node->arg_quote_type)
+                fprintf(stderr, "DEBUG: Original arg '%s' had quote_type=%d\n", 
+                    cmd_node->args[last_arg_idx], cmd_node->arg_quote_type[last_arg_idx]);
+                    
+            joined = ft_strjoin(cmd_node->args[last_arg_idx], content);
+            fprintf(stderr, "DEBUG: Joining quote '%s' with '%s' = '%s'\n",
+                   cmd_node->args[last_arg_idx], content, joined);
+                   
+            if (joined)
+            {
+                free(cmd_node->args[last_arg_idx]);
+                cmd_node->args[last_arg_idx] = joined;
+                
+                // Update quote_type when joining with a single-quoted string
+                // Single quotes (type 1) have highest precedence to prevent expansion
+                if (quote_type == 1)
+                {
+                    cmd_node->arg_quote_type[last_arg_idx] = 1;
+                    fprintf(stderr, "DEBUG: Updated quote_type to 1 (single quotes) for '%s'\n", joined);
+                }
+                
+                fprintf(stderr, "DEBUG: After join, quote_type=%d for '%s'\n", 
+                    cmd_node->arg_quote_type[last_arg_idx], joined);
+                
+                free(content);
+                vars->start = *i;
+                return (1);
+            }
         }
     }
     
-    // Otherwise add as separate argument with appropriate quote type
+    // Otherwise add as separate argument
     cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
     if (cmd_node)
         append_arg(cmd_node, content, quote_type);
     else
     {
-        // If no command to append to, create new token
-        maketoken_with_type(content, TYPE_ARGS, vars);
+        // Check if this is in command position (first token)
+        if (!vars->head)
+            maketoken_with_type(content, TYPE_CMD, vars);
+        else
+            maketoken_with_type(content, TYPE_ARGS, vars);
     }
     
     free(content);
     vars->start = *i;
-    
     return (1);
 }
 
@@ -550,8 +669,8 @@ int improved_tokenize(char *input, t_vars *vars)
                 free(token_preview);
             } 
             
-            /* Process expansion */
-            if (process_expand_char(input, &vars->pos, vars))
+            
+            if (make_exp_token(input, &vars->pos, vars))
                 continue;
         }
         

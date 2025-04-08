@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 20:57:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 22:52:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@
 Copy all arguments from the original node to a newly allocated array
 Returns NULL on failure
 */
-static	char **dup_node_args(t_node *node, size_t len)
+char	**dup_node_args(t_node *node, size_t len)
 {
-	char **new_args;
-	size_t i;
+	char	**new_args;
+	size_t	i;
 
 	new_args = malloc(sizeof(char *) * (len + 2));
 	if (!new_args)
@@ -43,7 +43,7 @@ Returns :
 - Pointer to the new quote_types array on success
 - NULL on failure
 */
-static int	*set_quote_type(t_node *node, size_t len, int quote_type)
+int	*set_quote_type(t_node *node, size_t len, int quote_type)
 {
 	int		*quote_types;
 	size_t	i;
@@ -62,14 +62,13 @@ static int	*set_quote_type(t_node *node, size_t len, int quote_type)
 	}
 	quote_types[len] = quote_type;
 	quote_types[len + 1] = 0;
-	
 	return (quote_types);
 }
 
 /*
 Updates node with new arguments and quote types arrays
 */
-static void update_node_args(t_node *node, char **new_args, int *quote_types)
+void	update_node_args(t_node *node, char **new_args, int *quote_types)
 {
 	free(node->arg_quote_type);
 	free(node->args);
@@ -80,7 +79,7 @@ static void update_node_args(t_node *node, char **new_args, int *quote_types)
 /*
 Helper function to clean up allocated memory for new arguments
 */
-static void clean_new_args(char **new_args, size_t len)
+void	clean_new_args(char **new_args, size_t len)
 {
 	free(new_args[len]);
 	free(new_args);
@@ -96,6 +95,9 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 	int		*quote_types;
 	size_t	len;
 	
+    // Add debug print to trace the input values
+    fprintf(stderr, "DEBUG: append_arg called with arg='%s', quote_type=%d\n", 
+		new_arg ? new_arg : "NULL", quote_type);
 	if (!node || !new_arg || !node->args)
 		return;
 	len = ft_arrlen(node->args);

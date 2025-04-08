@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 12:59:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 23:09:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -552,7 +552,7 @@ int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
 	i = 0;
 	while (node->args[i])
 		i++;
-	expand_cmd_args(node, vars);
+	// expand_cmd_args(node, vars);
 	if (is_builtin(node->args[0]))
 		return (execute_builtin(node->args[0], node->args, vars));
 	cmd_path = get_cmd_path(node->args[0], envp);
@@ -617,21 +617,39 @@ Exit code which is also stored in vars->error_code.
 // }
 int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int result;
+    int	result;
     
 	result = 0;
     if (!node)
 	{
-        //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
+        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
         return (vars->error_code = 1);
     }
-    //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-    //    node->type, node->args ? node->args[0] : "NULL");
-    // Handle different node types
+    DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
+       node->type, node->args ? node->args[0] : "NULL");
+    //Handle different node types
     if (node->type == TYPE_CMD)
 	{
         // Handle regular command
         result = exec_std_cmd(node, envp, vars);
+    }
+	else if (is_redirection(node->type))
+	{
+        DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+           (void*)node->left, (void*)node->right);
+        if (node->left)
+           DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+               node->left->type, node->left->args ? node->left->args[0] : "NULL");
+        if (node->right)
+           DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+               node->right->type, node->right->args ? node->right->args[0] : "NULL");
+        // Add heredoc-specific debugging
+        if (node->type == TYPE_HEREDOC) {
+           DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
+               node->right && node->right->args ? node->right->args[0] : "NULL",
+               vars->pipes->heredoc_fd);
+        }
+        result = exec_redirect_cmd(node, envp, vars);
     }
     else if (node->type == TYPE_PIPE)
 	{
@@ -642,24 +660,6 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
         }
         result = execute_pipes(node, vars);
     } 
-    else if (is_redirection(node->type))
-	{
-        //DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-        //    (void*)node->left, (void*)node->right);
-        //if (node->left)
-        //    DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-        //        node->left->type, node->left->args ? node->left->args[0] : "NULL");
-        //if (node->right)
-        //    DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-        //        node->right->type, node->right->args ? node->right->args[0] : "NULL");
-        // Add heredoc-specific debugging
-        //if (node->type == TYPE_HEREDOC) {
-        //    DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
-        //        node->right && node->right->args ? node->right->args[0] : "NULL",
-        //        vars->pipes->heredoc_fd);
-        //}
-        result = exec_redirect_cmd(node, envp, vars);
-    }
     else
 	{
         // Unhandled node type

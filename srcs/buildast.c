@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 23:00:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,18 +323,18 @@ t_node *proc_token_list(t_vars *vars)
 /*
 Converts string tokens after pipes to command tokens.
 */
-void	convert_strs_to_cmds(t_vars *vars)
-{
-	t_node	*current;
+// void	convert_strs_to_cmds(t_vars *vars)
+// {
+// 	t_node	*current;
 
-	current = vars->head;
-	while (current && current->next)
-	{
-		if (current->type == TYPE_PIPE && current->next->type == TYPE_ARGS)
-			current->next->type = TYPE_CMD;
-		current = current->next;
-	}
-}
+// 	current = vars->head;
+// 	while (current && current->next)
+// 	{
+// 		if (current->type == TYPE_PIPE && current->next->type == TYPE_ARGS)
+// 			current->next->type = TYPE_CMD;
+// 		current = current->next;
+// 	}
+// }
 
 // /*
 // Attaches string tokens as arguments to their commands.

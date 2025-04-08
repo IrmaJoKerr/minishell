@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:40:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 10:40:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 00:12:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,56 +23,124 @@
  * Returns the found command node, or NULL if not found
  * In FIND_ALL mode, returns first command node and populates vars->cmd_nodes
  */
+// t_node *find_cmd(t_node *start, t_node *target, int mode, t_vars *vars)
+// {
+//     t_node	*current;
+//     t_node	*last_cmd;
+//     int		cmd_index;
+    
+// 	last_cmd = NULL;
+// 	cmd_index = 0;
+//     if (!start && mode != FIND_ALL)
+//         return NULL;
+//     if (mode == FIND_ALL && vars)
+//     {
+//         vars->cmd_count = 0;
+//         current = vars->head;
+//     }
+//     else
+//     {
+//         current = start;
+//     }
+//     while (current)
+//     {
+//         if (current->type == TYPE_CMD)
+//         {
+//             if (mode == FIND_ALL && vars && cmd_index < 100)
+//             {
+//                 vars->cmd_nodes[cmd_index++] = current;
+//                 vars->cmd_count = cmd_index;
+//             }
+//             last_cmd = current;
+//             if (mode == FIND_NEXT && start != current)
+//                 return (current);
+//         }
+//         if (mode == FIND_PREV && current == target)
+//             return (last_cmd);
+//         if ((mode == FIND_PREV) && current->type == TYPE_PIPE)
+//             last_cmd = NULL;
+//         current = current->next;
+//     }
+//     return (last_cmd);
+// }
+
+/*
+Handles command node processing based on the current mode.
+Returns a node if we found what we're looking for, NULL to continue searching.
+*/
+t_node *mode_action(t_node *current, t_node **last_cmd, int *cmd_index, t_vars *vars)
+{
+    if (current->type == TYPE_CMD)
+    {
+        if (vars->find_mode == FIND_ALL && *cmd_index < 100)
+        {
+            vars->cmd_nodes[*cmd_index] = current;
+            (*cmd_index)++;
+            vars->cmd_count = *cmd_index;
+        }
+        *last_cmd = current;
+        if (vars->find_mode == FIND_NEXT && vars->find_start != current)
+            return (current);
+    }
+    if (vars->find_mode == FIND_PREV && current == vars->find_tgt)
+        return (*last_cmd);
+    if ((vars->find_mode == FIND_PREV) && current->type == TYPE_PIPE)
+        *last_cmd = NULL;
+    
+    return (NULL);
+}
+
+/*
+Sets up find_cmd temporary variables in the vars struct.
+Used at the start and end of find_cmd().
+*/
+void init_find_cmd(t_vars *vars, t_node *start, t_node *target, int mode)
+{
+    if (!vars)
+        return;
+    vars->find_start = start;
+    vars->find_tgt = target;
+    vars->find_mode = mode;
+}
+
+/*
+Core command finding function with multiple modes.
+Modes:
+- FIND_LAST: Find last command in the list (from head to end)
+- FIND_PREV: Find last command before a specific node
+- FIND_NEXT: Find next command after a specific node
+- FIND_ALL: Returns first command node and populates vars->cmd_nodes 
+   with all commands
+Returns:
+- The found command node.
+- NULL if not found
+*/
 t_node *find_cmd(t_node *start, t_node *target, int mode, t_vars *vars)
 {
-    t_node *current;
-    t_node *last_cmd = NULL;
-    int cmd_idx = 0;
+    t_node	*current;
+    t_node	*last_cmd;
+    t_node	*result;
+    int		cmd_index;
     
+    last_cmd = NULL;
+    cmd_index = 0;
     if (!start && mode != FIND_ALL)
-        return NULL;
-    
-    if (mode == FIND_ALL && vars)
+        return (NULL);
+    init_find_cmd(vars, start, target, mode);
+    if (vars->find_mode == FIND_ALL && vars)
     {
-        // Reset command count
         vars->cmd_count = 0;
         current = vars->head;
     }
     else
-    {
         current = start;
-    }
-
     while (current)
     {
-        // Check if current node is a command
-        if (current->type == TYPE_CMD)
-        {
-            // In FIND_ALL mode, populate the command array
-            if (mode == FIND_ALL && vars && cmd_idx < 100)
-            {
-                vars->cmd_nodes[cmd_idx++] = current;
-                vars->cmd_count = cmd_idx;
-            }
-            
-            last_cmd = current;
-            
-            // In FIND_NEXT mode, if we already found a command after the starting point, return it
-            if (mode == FIND_NEXT && start != current)
-                return current;
-        }
-        
-        // In FIND_PREV mode, if we've reached the target node, return the last command
-        if (mode == FIND_PREV && current == target)
-            return last_cmd;
-            
-        // In pipe-sensitive modes, reset command context after a pipe
-        if ((mode == FIND_PREV) && current->type == TYPE_PIPE)
-            last_cmd = NULL;
-            
+        result = mode_action(current, &last_cmd, &cmd_index, vars);
+        if (result)
+            return (result);
         current = current->next;
     }
-    
-    // For FIND_LAST, FIND_ALL, or if no command found after start in FIND_NEXT
-    return last_cmd;
+    init_find_cmd(vars, NULL, NULL, 0);
+    return (last_cmd);
 }

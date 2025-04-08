@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 03:10:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 16:03:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ char *handle_expansion(char *input, int *pos, t_vars *vars)
     
     // Try to handle as environment variable
     var_value = get_env_val(var_name, vars->env);
-    fprintf(stderr, "DEBUG: Expanded env var $%s to '%s'\n", 
+    fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
             var_name, var_value ? var_value : "");
     
     free(var_name);
@@ -332,77 +332,77 @@ Expands command arguments, properly handling quoted and unquoted variables
 //     }
 // debug_cmd_args(node);
 // }
-void expand_cmd_args(t_node *node, t_vars *vars)
-{
-    int i;
-    char *old_arg;
-    char *result;
-    int pos;
-    char *var_value;
-    char *expanded_arg;
+// void expand_cmd_args(t_node *node, t_vars *vars)
+// {
+//     int i;
+//     char *old_arg;
+//     char *result;
+//     int pos;
+//     char *var_value;
+//     char *expanded_arg;
     
-    if (!node || !node->args)
-        return;
+//     if (!node || !node->args)
+//         return;
     
-    // Start from args[0] for all nodes (we'll handle commands separately)
-    i = 0;
+//     // Start from args[0] for all nodes (we'll handle commands separately)
+//     i = 0;
     
-    // For command nodes, skip the command name (args[0])
-    if (node->type == TYPE_CMD)
-        i = 1;
+//     // For command nodes, skip the command name (args[0])
+//     if (node->type == TYPE_CMD)
+//         i = 1;
         
-    while (node->args[i])
-    {
-        // Skip expansion in single quotes (quote_type == 1)
-        if (node->arg_quote_type && node->arg_quote_type[i] == 1) {
-            i++;
-            continue;
-        }
+//     while (node->args[i])
+//     {
+//         // Skip expansion in single quotes (quote_type == 1)
+//         if (node->arg_quote_type && node->arg_quote_type[i] == 1) {
+//             i++;
+//             continue;
+//         }
         
-        // Process expansion in double quotes (quote_type == 2) or unquoted
-        if (ft_strchr(node->args[i], '$')) {
-            old_arg = node->args[i];
-            pos = 0;
-            result = ft_strdup("");
-            if (!result)
-                return;
+//         // Process expansion in double quotes (quote_type == 2) or unquoted
+//         if (ft_strchr(node->args[i], '$')) {
+//             old_arg = node->args[i];
+//             pos = 0;
+//             result = ft_strdup("");
+//             if (!result)
+//                 return;
                 
-            while (old_arg[pos]) {
-                // Handle variable expansion
-                if (old_arg[pos] == '$') {
-                    fprintf(stderr, "DEBUG: Expanding $ at pos %d in '%s'\n", 
-                            pos, old_arg);
+//             while (old_arg[pos]) {
+//                 // Handle variable expansion
+//                 if (old_arg[pos] == '$') {
+//                     fprintf(stderr, "DEBUG: Expanding $ at pos %d in '%s'\n", 
+//                             pos, old_arg);
                     
-                    var_value = handle_expansion(old_arg, &pos, vars);
-                    if (var_value) {
-                        // Append expansion result directly without spaces
-                        expanded_arg = ft_strjoin(result, var_value);
-                        fprintf(stderr, "DEBUG: Joined '%s' + '%s' = '%s'\n", 
-                                result, var_value, expanded_arg);
+//                     var_value = handle_expansion(old_arg, &pos, vars);
+//                     if (var_value) {
+//                         // Append expansion result directly without spaces
+//                         expanded_arg = ft_strjoin(result, var_value);
+//                         fprintf(stderr, "DEBUG: Joined '%s' + '%s' = '%s'\n", 
+//                                 result, var_value, expanded_arg);
                                 
-                        free(result);
-                        free(var_value);
-                        result = expanded_arg;
-                    }
-                } else {
-                    // Handle regular character
-                    char tmp[2] = {old_arg[pos], '\0'};
-                    expanded_arg = ft_strjoin(result, tmp);
-                    free(result);
-                    result = expanded_arg;
-                    pos++;
-                }
-            }
+//                         free(result);
+//                         free(var_value);
+//                         result = expanded_arg;
+//                     }
+//                 } else {
+//                     // Handle regular character
+//                     char tmp[2] = {old_arg[pos], '\0'};
+//                     expanded_arg = ft_strjoin(result, tmp);
+//                     free(result);
+//                     result = expanded_arg;
+//                     pos++;
+//                 }
+//             }
             
-            // Replace original argument with expanded version
-            free(node->args[i]);
-            node->args[i] = result;
+//             // Replace original argument with expanded version
+//             free(node->args[i]);
+//             node->args[i] = result;
             
-            fprintf(stderr, "DEBUG: Final expanded arg: '%s'\n", node->args[i]);
-        }
-        i++;
-    }
-}
+//             fprintf(stderr, "DEBUG: Final expanded arg: '%s'\n", node->args[i]);
+//         }
+//         i++;
+//     }
+// }
 
 /*
 Process expansions and quote handling in the token list.
@@ -410,25 +410,25 @@ Process expansions and quote handling in the token list.
 - Handles special cases like $?
 - Only expands variables in double quotes or outside quotes
 */
-void process_quotes_and_expansions(t_vars *vars)
-{
-    t_node *current;
+// void process_quotes_and_expansions(t_vars *vars)
+// {
+//     t_node *current;
     
-    if (!vars || !vars->head)
-        return;
+//     if (!vars || !vars->head)
+//         return;
     
-    // First validate quote structure
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD || current->type == TYPE_ARGS)
-        {
-            // Expand variables in arguments based on quote type
-            expand_cmd_args(current, vars);
-        }
-        current = current->next;
-    }
-}
+//     // First validate quote structure
+//     current = vars->head;
+//     while (current)
+//     {
+//         if (current->type == TYPE_CMD || current->type == TYPE_ARGS)
+//         {
+//             // Expand variables in arguments based on quote type
+//             expand_cmd_args(current, vars);
+//         }
+//         current = current->next;
+//     }
+// }
 
 /*
 DEBUG FUNCTION

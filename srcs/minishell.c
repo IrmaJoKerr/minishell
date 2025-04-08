@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/08 14:20:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,7 @@ int process_input_tokens(char *command, t_vars *vars)
 	{
         return (0);
 	}
-	process_quotes_and_expansions(vars);
+	// process_quotes_and_expansions(vars);
     /* Process variable expansions in tokens */
     process_expansions(vars);
     
