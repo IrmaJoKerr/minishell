@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:11:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 00:56:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	init_shell(t_vars *vars, char **envp)
 	}
 	get_shell_level(vars);
 	incr_shell_level(vars);
-	init_lexer(vars);
+	init_vars(vars);
 	vars->pipes = init_pipes();
     if (!vars->pipes)
 	{
@@ -45,10 +45,10 @@ void	init_shell(t_vars *vars, char **envp)
 Initialize the lexer state.
 Reset position trackers and node pointers.
 */
-void	init_lexer(t_vars *vars)
+void init_vars(t_vars *vars)
 {
     if (!vars)
-        return ;
+        return;
     vars->head = NULL;
     vars->current = NULL;
     vars->curr_type = TYPE_NULL;
@@ -63,6 +63,9 @@ void	init_lexer(t_vars *vars)
     vars->cmd_count = 0;
     vars->astroot = NULL;
     vars->partial_input = NULL;
+    vars->find_start = NULL;
+    vars->find_tgt = NULL;
+    vars->find_mode = 0;
 }
 
 /*
@@ -94,12 +97,34 @@ t_pipe *init_pipes(void)
 }
 
 /*
+Resets all pipeline and redirection tracking variables.
+Works with reset_shell().
+*/
+void	reset_pipe_vars(t_vars *vars)
+{
+	if (!vars || !vars->pipes)
+		return;
+	vars->pipes->pipe_count = 0;
+    vars->pipes->out_mode = OUT_MODE_NONE;
+    vars->pipes->current_redirect = NULL;
+    vars->pipes->last_cmd = NULL;
+    vars->pipes->last_heredoc = NULL;
+    vars->pipes->last_pipe = NULL;
+    vars->pipes->pipe_root = NULL;
+    vars->pipes->redir_root = NULL;
+    vars->pipes->last_in_redir = NULL;
+    vars->pipes->last_out_redir = NULL;
+    vars->pipes->cmd_redir = NULL;
+    vars->pipes->pipe_at_end = 0;
+}
+
+/*
 Reset the shell state.
 - Cleans up the token list.
-- Re-initializes the lexer state.
-- Resets the pipes state.
 - Frees the partial input buffer.
-- Cleans up the AST root node.
+- Cleans up heredoc lines and counts.
+- Resets the pipes state.
+- Resets vars struct.
 */
 void reset_shell(t_vars *vars)
 {
@@ -118,18 +143,7 @@ void reset_shell(t_vars *vars)
     if (vars->pipes)
     {
         reset_redirect_fds(vars);
-        vars->pipes->pipe_count = 0;
-        vars->pipes->out_mode = OUT_MODE_NONE;
-        vars->pipes->current_redirect = NULL;
-        vars->pipes->last_cmd = NULL;
-        vars->pipes->last_heredoc = NULL;
-        vars->pipes->last_pipe = NULL;
-        vars->pipes->pipe_root = NULL;
-        vars->pipes->redir_root = NULL;
-        vars->pipes->last_in_redir = NULL;
-        vars->pipes->last_out_redir = NULL;
-        vars->pipes->cmd_redir = NULL;
-        vars->pipes->pipe_at_end = 0;
+        reset_pipe_vars(vars);
     }
-    init_lexer(vars);
+    init_vars(vars);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 23:09:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 11:15:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,29 +50,31 @@ Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
 */
-// int setup_out_redir(t_node *node, int *fd, int append)
+// int setup_out_redir(t_node *node, t_vars *vars)
 // {
+	
 //     char *file;
-//     int flags;
+//     int flags = O_WRONLY | O_CREAT;
     
 //     if (!node || !node->args || !node->args[0])
+// 	{
 //         return (0);
-    
-//     // Process quotes in file before accessing it
-//     process_quotes_in_redirect(node);
-    
-//     file = node->args[0];
-    
-//     // Set flags based on append mode
-//     flags = O_WRONLY | O_CREAT;
-//     if (append)
+// 	}
+// 	file = node->args[0];
+// 	//DBG_PRINTF(DEBUG_EXEC, "Setting up output redirection to file: %s\n", file);
+// 	//DBG_PRINTF(DEBUG_EXEC, "File open flags: %d (append mode: %d)\n", 
+// 	//	flags, vars->pipes->out_mode);
+//     // Set flags based on out_mode
+//     if (vars->pipes->out_mode == 2)
 //         flags |= O_APPEND;
 //     else
 //         flags |= O_TRUNC;
-    
-//     // Open the file
-//     *fd = open(file, flags, 0644);
-//     if (*fd == -1)
+
+// 	// Open the file with proper permissions
+//     vars->pipes->redirection_fd = open(file, flags, 0644);
+// 	//DBG_PRINTF(DEBUG_EXEC, "File open result: fd=%d, errno=%d (%s)\n", 
+//     //      	vars->pipes->redirection_fd, errno, strerror(errno));
+//     if (vars->pipes->redirection_fd == -1)
 //     {
 //         ft_putstr_fd("bleshell: ", 2);
 //         ft_putstr_fd(file, 2);
@@ -81,39 +83,39 @@ Works with setup_redirection().
 //     }
     
 //     // Redirect stdout to the file
-//     if (dup2(*fd, STDOUT_FILENO) == -1)
+//     if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
 //     {
-//         close(*fd);
+//         close(vars->pipes->redirection_fd);
 //         return (0);
 //     }
     
+//     vars->error_code = 1;
 //     return (1);
 // }
-// Updated setup_out_redir function
 int setup_out_redir(t_node *node, t_vars *vars)
 {
-	
     char *file;
     int flags = O_WRONLY | O_CREAT;
     
-    if (!node || !node->args || !node->args[0])
-	{
+    // Use the right node's args for the filename
+    if (!node->right || !node->right->args || !node->right->args[0])
+    {
+        fprintf(stderr, "DEBUG: Output redirection missing filename\n");
         return (0);
-	}
-	file = node->args[0];
-	//DBG_PRINTF(DEBUG_EXEC, "Setting up output redirection to file: %s\n", file);
-	//DBG_PRINTF(DEBUG_EXEC, "File open flags: %d (append mode: %d)\n", 
-	//	flags, vars->pipes->out_mode);
+    }
+    
+    file = node->right->args[0];
+    fprintf(stderr, "DEBUG: Opening output redirection file: '%s', mode: %s\n", 
+            file, vars->pipes->out_mode == OUT_MODE_APPEND ? "append" : "truncate");
+    
     // Set flags based on out_mode
-    if (vars->pipes->out_mode == 2)
+    if (vars->pipes->out_mode == OUT_MODE_APPEND)
         flags |= O_APPEND;
     else
         flags |= O_TRUNC;
 
-	// Open the file with proper permissions
+    // Open the file with proper permissions
     vars->pipes->redirection_fd = open(file, flags, 0644);
-	//DBG_PRINTF(DEBUG_EXEC, "File open result: fd=%d, errno=%d (%s)\n", 
-    //      	vars->pipes->redirection_fd, errno, strerror(errno));
     if (vars->pipes->redirection_fd == -1)
     {
         ft_putstr_fd("bleshell: ", 2);
@@ -129,7 +131,6 @@ int setup_out_redir(t_node *node, t_vars *vars)
         return (0);
     }
     
-    vars->error_code = 1;
     return (1);
 }
 
@@ -142,14 +143,48 @@ Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
 */
+// int setup_in_redir(t_node *node, t_vars *vars)
+// {
+//     char *file;
+    
+//     if (!node || !node->args || !node->args[0])
+//         return (0);
+    
+//     file = node->args[0];
+    
+//     // Open file for reading
+//     vars->pipes->redirection_fd = open(file, O_RDONLY);
+//     if (vars->pipes->redirection_fd == -1)
+//     {
+//         ft_putstr_fd("bleshell: ", 2);
+//         ft_putstr_fd(file, 2);
+//         ft_putendl_fd(": No such file or directory", 2);
+//         vars->error_code = 1; // Set error code to 1
+//         return (0);
+//     }
+    
+//     // Redirect stdin to the file
+//     if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
+//     {
+//         close(vars->pipes->redirection_fd);
+//         return (0);
+//     }
+//     vars->error_code = 1; // Set error code to 1
+//     return (1);
+// }
 int setup_in_redir(t_node *node, t_vars *vars)
 {
     char *file;
     
-    if (!node || !node->args || !node->args[0])
+    // Use the right node's args for the filename, not the node's own args
+    if (!node->right || !node->right->args || !node->right->args[0])
+    {
+        fprintf(stderr, "DEBUG: Input redirection missing filename\n");
         return (0);
+    }
     
-    file = node->args[0];
+    file = node->right->args[0];
+    fprintf(stderr, "DEBUG: Opening input redirection file: '%s'\n", file);
     
     // Open file for reading
     vars->pipes->redirection_fd = open(file, O_RDONLY);
@@ -158,7 +193,7 @@ int setup_in_redir(t_node *node, t_vars *vars)
         ft_putstr_fd("bleshell: ", 2);
         ft_putstr_fd(file, 2);
         ft_putendl_fd(": No such file or directory", 2);
-        vars->error_code = 1; // Set error code to 1
+        vars->error_code = 1;
         return (0);
     }
     
@@ -168,7 +203,6 @@ int setup_in_redir(t_node *node, t_vars *vars)
         close(vars->pipes->redirection_fd);
         return (0);
     }
-    vars->error_code = 1; // Set error code to 1
     return (1);
 }
 
@@ -420,9 +454,11 @@ int setup_redirection(t_node *node, t_vars *vars)
     // Process quotes in redirection filename (right child contains filename)
     if (node->right && node->right->args)
         process_arg_quotes(&node->right->args[0]);
-    // Debug print for redirection setup
-    fprintf(stderr, "DEBUG: Setting up redirection type=%d for file: '%s'\n",
-		node->type, node->args ? node->args[0] : "(null)");
+    // Enhanced debug print showing operator and filename
+    fprintf(stderr, "DEBUG: Setting up redirection type=%d operator='%s' file='%s'\n",
+        node->type, 
+        node->args ? node->args[0] : "(null)",
+        (node->right && node->right->args) ? node->right->args[0] : "(null)");
 
     // Handle different redirection types
     if (node->type == TYPE_IN_REDIRECT)

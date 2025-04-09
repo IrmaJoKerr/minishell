@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 23:55:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 01:26:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,7 +366,10 @@ void		cleanup_token_list(t_vars *vars);
 Master command finder function.
 In cmd_finder.c
 */
-t_node *find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
+t_node		*mode_action(t_node *current, t_node **last_cmd, t_vars *vars);
+void		init_find_cmd(t_vars *vars, t_node *start, t_node *target
+				,int mode);
+t_node		*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
 
 /*
 Error handling.
@@ -435,11 +438,6 @@ void		read_history_lines(int fd);
 void		load_history(void);
 
 /*
-History saving utility functions.
-In history_save_utils.c
-*/
-
-/*
 History saving functions.
 In history_save.c
 */
@@ -472,9 +470,9 @@ Shell and structure initialization functions.
 In initshell.c
 */
 void		init_shell(t_vars *vars, char **envp);
-void		init_lexer(t_vars *vars);
+void		init_vars(t_vars *vars);
 t_pipe		*init_pipes(void);
-// t_ast		*init_ast(void);
+void		reset_pipe_vars(t_vars *vars);
 void		reset_shell(t_vars *vars);
 
 /*
@@ -488,6 +486,8 @@ char		*append_input(char *original, char *additional);
 Input processing functions.
 In input_handlers.c
 */
+void		proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars);
+void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
 void		handle_input(char *input, t_vars *vars);
 
 /*

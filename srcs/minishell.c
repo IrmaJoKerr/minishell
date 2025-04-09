@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 14:20:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 01:33:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,8 +282,6 @@ int process_input_tokens(char *command, t_vars *vars)
     
     return (1);
 }
-
-
 
 /*
 Process the user command through lexing and execution.

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 16:43:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 10:44:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -496,7 +496,8 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     // If adjacent to previous token, join with it
     if (is_adjacent)
     {
-        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+		// cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         if (cmd_node && cmd_node->args)
         {
             // Find last argument
@@ -537,7 +538,8 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     }
     
     // Otherwise add as separate argument
-    cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+    // cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
     if (cmd_node)
         append_arg(cmd_node, content, quote_type);
     else

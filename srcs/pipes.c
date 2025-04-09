@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 19:17:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 10:42:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -524,7 +524,8 @@ int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars)
     }
     
     /* Find next command after our target */
-    next_cmd = find_cmd(cmd_node->next, NULL, FIND_NEXT, NULL);
+	next_cmd = find_cmd(cmd_node->next, NULL, FIND_NEXT, vars);
+    // next_cmd = find_cmd(cmd_node->next, NULL, FIND_NEXT, NULL);
     
     /* Check if redirection is between our command and the next one */
     current = cmd_node->next;
