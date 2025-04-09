@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 11:12:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 22:47:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -408,7 +408,6 @@ void process_expansions(t_vars *vars)
                         int i;
                         
                         current->type = TYPE_CMD;
-                        
                         // Print debug information about promotion
                         if (current->args)
                         {
@@ -419,7 +418,6 @@ void process_expansions(t_vars *vars)
                         {
                             fprintf(stderr, "DEBUG: Empty command removed, promoting 'NULL' to command\n");
                         }
-                        
                         // Find and merge arguments from subsequent argument nodes
                         arg_node = current->next;
                         while (arg_node && arg_node->type == TYPE_ARGS)

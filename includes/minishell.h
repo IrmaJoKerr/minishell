@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 12:28:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 01:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ typedef struct s_node
 {
 	t_tokentype		type;
 	char			**args;
-	int				*arg_quote_type;
+	int				**arg_quote_type;
 	struct s_node	*next;
 	struct s_node	*prev;
 	struct s_node	*left;
@@ -191,25 +191,26 @@ Has variables tracking:
 */
 typedef struct s_vars
 {
+	char			**env;
+	char			*partial_input;
+	int				next_flag;
 	t_node			*cmd_nodes[100];
 	int				cmd_count;
-	t_node			*astroot;
-	t_node			*head;
-	t_node			*current;
-	t_tokentype		curr_type;
-	t_tokentype		prev_type;
-	char			**env;
 	t_quote_context	quote_ctx[32];
 	int				quote_depth;
-	char			**heredoc_lines;   // Array of pending heredoc content lines
-    int				heredoc_count;     // Number of stored lines
-    int				heredoc_index;     // Current position in stored lines
-	char			*partial_input;
-	int				pos;
-	int				start;
 	t_node			*find_start;
 	t_node			*find_tgt;
 	int				find_mode;
+	t_node			*current;
+	t_node			*head;
+	t_node			*astroot;
+	t_tokentype		curr_type;
+	t_tokentype		prev_type;
+	int				pos;
+	int				start;
+	char			**heredoc_lines;   // Array of pending heredoc content lines
+    int				heredoc_count;     // Number of stored lines
+    int				heredoc_index;     // Current position in stored lines
 	int				shell_level;
 	int				error_code;
 	t_pipe			*pipes;
@@ -366,8 +367,9 @@ void		cleanup_token_list(t_vars *vars);
 Master command finder function.
 In cmd_finder.c
 */
+t_node		*init_find_cmd(t_node *start, t_vars *vars);
 t_node		*mode_action(t_node *current, t_node **last_cmd, t_vars *vars);
-void		init_find_cmd(t_vars *vars, t_node *start, t_node *target
+void		reset_find_cmd(t_vars *vars, t_node *start, t_node *target
 				,int mode);
 t_node		*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
 
@@ -376,8 +378,9 @@ Error handling.
 In errormsg.c
 */
 void		file_access_error(char *filename);
-void		use_errno_error(char *filename, int *error_code);
-int			redirect_error(char *filename, t_vars *vars, int use_errno);
+void		not_found_error(char *filename);
+// void		use_errno_error(char *filename, int *error_code);
+// int			redirect_error(char *filename, t_vars *vars, int use_errno);
 int			print_error(const char *msg, t_vars *vars, int error_code);
 void		crit_error(t_vars *vars);
 
@@ -531,9 +534,9 @@ In operators.c
 int			operators(char *input, t_vars *vars);
 void		handle_string(char *input, t_vars *vars);
 int			is_operator_token(t_tokentype type);
-int			is_single_token(char *input, int pos, int *advance);
-int			is_double_token(char *input, int pos, int *advance);
-t_tokentype	get_token_at(char *input, int pos, int *advance);
+int			is_single_token(char *input, int pos, int *moves);
+int			is_double_token(char *input, int pos, int *moves);
+t_tokentype	get_token_at(char *input, int pos, int *moves);
 int			handle_single_operator(char *input, t_vars *vars);
 int			handle_double_operator(char *input, t_vars *vars);
 
@@ -623,18 +626,18 @@ Redirection handling.
 In redirect.c
 */
 int			chk_permissions(char *filename, int mode, t_vars *vars);
-int			set_output_flags(int append);
-int			set_redirect_flags(int mode);
+// int			set_output_flags(int append);
+// int			set_redirect_flags(int mode);
 int			is_redirection(t_tokentype type);
 void		reset_redirect_fds(t_vars *vars);
-int			input_redirect(t_node *node, int *fd_in, t_vars *vars);
+// int			input_redirect(t_node *node, int *fd_in, t_vars *vars);
 int			output_redirect(t_node *node, int *fd_out,
 				int append, t_vars *vars);
-int			open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars);
-int			handle_redirect(t_node *node, int *fd, int mode, t_vars *vars);
-int			setup_cmd_redirects(t_node *cmd_node, t_vars *vars);
-t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
-int			setup_multi_redirects(t_node *cmd_node, t_vars *vars);
+// int			open_redirect_file(t_node *node, int *fd, int mode, t_vars *vars);
+// int			handle_redirect(t_node *node, int *fd, int mode, t_vars *vars);
+// int			setup_cmd_redirects(t_node *cmd_node, t_vars *vars);
+// t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
+// int			setup_multi_redirects(t_node *cmd_node, t_vars *vars);
 
 /*
 Shell level handling.
@@ -659,11 +662,12 @@ In tokenize.c
 void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 int 		is_adjacent_token(char *input, int pos);
-int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
+// int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
 int			make_exp_token(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
+void		token_link(t_node *node, t_vars *vars);
 void		build_token_linklist(t_vars *vars, t_node *node);
 void 		debug_token_list(t_vars *vars);
 

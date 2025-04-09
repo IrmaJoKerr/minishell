@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 12:28:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 20:33:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,7 +269,7 @@ int execute_pipes(t_node *pipe_node, t_vars *vars)
             if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
                 return left_status;
             else
-                return handle_cmd_status(status, vars);
+                return (handle_cmd_status(status, vars));
         }
     }
     

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 10:44:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 23:23:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Updates vars->curr_type accordingly
 */
 void set_token_type(t_vars *vars, char *input)
 {
-    int advance;
+    int moves;
     t_tokentype special_type = 0;
     
     // Save previous type
@@ -36,7 +36,7 @@ void set_token_type(t_vars *vars, char *input)
     // Check for special token types
     if (input && *input)
     {
-        special_type = get_token_at(input, 0, &advance);
+        special_type = get_token_at(input, 0, &moves);
         if (special_type != 0)
         {
             vars->curr_type = special_type;
@@ -125,38 +125,38 @@ int is_adjacent_token(char *input, int pos)
     return (1);
 }
 
-/*
- * Joins token with the last argument of the command node
- * Returns 1 if joined successfully, 0 if failed
- */
-int join_with_cmd_arg(t_node *cmd_node, char *token_val)
-{
-    int     arg_count;
-    char    *last_arg;
-    char    *new_arg;
+// /*
+//  * Joins token with the last argument of the command node
+//  * Returns 1 if joined successfully, 0 if failed
+//  */
+// int join_with_cmd_arg(t_node *cmd_node, char *token_val)
+// {
+//     int     arg_count;
+//     char    *last_arg;
+//     char    *new_arg;
       
-    if (!cmd_node || !token_val)
-        return (0);
-    // Count arguments
-    arg_count = 0;
-    while (cmd_node->args[arg_count])
-        arg_count++; 
-    if (arg_count < 1)
-        return (0);     
-    // Get last argument
-    last_arg = cmd_node->args[arg_count - 1];
-    if (!last_arg)
-        return (0); 
-    // Join the strings
-    new_arg = ft_strjoin(last_arg, token_val);
-    if (!new_arg)
-        return (0); 
-    // Replace the last argument with joined string
-    free(cmd_node->args[arg_count - 1]);
-    cmd_node->args[arg_count - 1] = new_arg;
+//     if (!cmd_node || !token_val)
+//         return (0);
+//     // Count arguments
+//     arg_count = 0;
+//     while (cmd_node->args[arg_count])
+//         arg_count++; 
+//     if (arg_count < 1)
+//         return (0);     
+//     // Get last argument
+//     last_arg = cmd_node->args[arg_count - 1];
+//     if (!last_arg)
+//         return (0); 
+//     // Join the strings
+//     new_arg = ft_strjoin(last_arg, token_val);
+//     if (!new_arg)
+//         return (0); 
+//     // Replace the last argument with joined string
+//     free(cmd_node->args[arg_count - 1]);
+//     cmd_node->args[arg_count - 1] = new_arg;
      
-    return (1);
-}
+//     return (1);
+// }
 
 /*
 Process variable expansion characters ($VAR or $?)
@@ -287,39 +287,27 @@ int make_exp_token(char *input, int *i, t_vars *vars)
     char		*token;
     t_tokentype	type;
     
-    // Mark start position of variable
     vars->start = *i;
-    // Check if this is $? (exit status)
     if (input[*i] == '$' && input[*i + 1] == '?') 
     {
-        // Create token for $?
         token = ft_substr(input, vars->start, 2);
         if (!token)
             return (0); 
-        // Track the token type but don't expand yet
         type = TYPE_EXIT_STATUS;
-        (*i) += 2; // Skip past $?
+        (*i) += 2;
     }
     else if (input[*i] == '$')
     {
-        // Skip $ character
         (*i)++;
-        
-        // Find end of variable name (alphanumeric + underscore)
-        // Removed unused variable 'name_start'
         while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
             (*i)++; 
-        // Create token for the entire variable reference including $
         token = ft_substr(input, vars->start, *i - vars->start);
         if (!token)
             return (0);
         type = TYPE_EXPANSION;
     }
     else
-    {
         return (0);
-    }
-    // Create token (expansion will happen later in process_expansions)
     maketoken_with_type(token, type, vars);
     free(token);
     vars->start = *i;
@@ -437,10 +425,92 @@ Handles joining to previous token when adjacent
  * - Handles adjacency with previous tokens
  * Returns 1 if quote processed successfully, 0 otherwise
  */
+// int process_quote_char(char *input, int *i, t_vars *vars)
+// {
+//     int     quote_start;
+//     char    quote_char;
+//     int     quote_type;
+//     char    *content;
+//     t_node  *cmd_node;
+//     int     is_adjacent;
+//     int     quote_len; // For debugging
+//     int     last_arg_idx;
+//     char    *joined;
+    
+// 	quote_char = input[*i];
+//     is_adjacent = is_adjacent_token(input, *i);
+//     if (quote_char == '\'')
+//         quote_type = 1;
+//     else
+//         quote_type = 2;
+//     quote_start = ++(*i);
+//     while (input[*i] && input[*i] != quote_char)
+//         (*i)++;
+//     if (!input[*i])
+//     {
+//         *i = quote_start;
+//         return (0);
+//     }
+//     quote_len = *i - quote_start;
+//     fprintf(stderr, "DEBUG: Quote handling - quote_len=%d, quote_char=%c\n", 
+//             quote_len, quote_char);
+//     content = ft_substr(input, quote_start, quote_len);
+//     if (!content)
+//         return (0);
+//     (*i)++;
+//     if (quote_len == 0)
+//         fprintf(stderr, "DEBUG: Empty quote detected\n");
+//     fprintf(stderr, "DEBUG: Setting quote_type=%d for content='%s'\n", 
+//         quote_type, content);
+//     if (is_adjacent)
+//     {
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         if (cmd_node && cmd_node->args)
+//         {
+//             last_arg_idx = 0;
+//             while (cmd_node->args[last_arg_idx+1])
+//                 last_arg_idx++;
+//             if (cmd_node->arg_quote_type)
+//                 fprintf(stderr, "DEBUG: Original arg '%s' had quote_type=%d\n", 
+//                     cmd_node->args[last_arg_idx], cmd_node->arg_quote_type[last_arg_idx]);
+//             joined = ft_strjoin(cmd_node->args[last_arg_idx], content);
+//             fprintf(stderr, "DEBUG: Joining quote '%s' with '%s' = '%s'\n",
+//                    cmd_node->args[last_arg_idx], content, joined);
+//             if (joined)
+//             {
+//                 free(cmd_node->args[last_arg_idx]);
+//                 cmd_node->args[last_arg_idx] = joined;
+//                 if (quote_type == 1)
+//                 {
+//                     cmd_node->arg_quote_type[last_arg_idx] = 1;
+//                     fprintf(stderr, "DEBUG: Updated quote_type to 1 (single quotes) for '%s'\n", joined);
+//                 }
+//                 fprintf(stderr, "DEBUG: After join, quote_type=%d for '%s'\n", 
+//                     cmd_node->arg_quote_type[last_arg_idx], joined);
+//                 free(content);
+//                 vars->start = *i;
+//                 return (1);
+//             }
+//         }
+//     }
+// 	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//     if (cmd_node)
+//         append_arg(cmd_node, content, quote_type);
+//     else
+//     {
+//         if (!vars->head)
+//             maketoken_with_type(content, TYPE_CMD, vars);
+//         else
+//             maketoken_with_type(content, TYPE_ARGS, vars);
+//     }
+//     free(content);
+//     vars->start = *i;
+//     return (1);
+// }
 int process_quote_char(char *input, int *i, t_vars *vars)
 {
     int     quote_start;
-    char    quote_char = input[*i];
+    char    quote_char;
     int     quote_type;
     char    *content;
     t_node  *cmd_node;
@@ -449,108 +519,137 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     int     last_arg_idx;
     char    *joined;
     
-    // Check for adjacency with previous tokens
+    quote_char = input[*i];
     is_adjacent = is_adjacent_token(input, *i);
-    
-    // Determine quote type (1=single, 2=double)
     if (quote_char == '\'')
         quote_type = 1;
     else
         quote_type = 2;
-        
-    // Skip opening quote
     quote_start = ++(*i);
-    
-    // Find closing quote
     while (input[*i] && input[*i] != quote_char)
         (*i)++;
-        
-    // If no closing quote, treat as normal text
     if (!input[*i])
     {
         *i = quote_start;
         return (0);
     }
-    
-    // Get quoted content length for debugging
     quote_len = *i - quote_start;
     fprintf(stderr, "DEBUG: Quote handling - quote_len=%d, quote_char=%c\n", 
             quote_len, quote_char);
-            
-    // Extract quoted content
     content = ft_substr(input, quote_start, quote_len);
     if (!content)
         return (0);
-        
-    // Skip closing quote
     (*i)++;
-    
-    // Special handling for empty quotes
     if (quote_len == 0)
         fprintf(stderr, "DEBUG: Empty quote detected\n");
-        
-    // Add debug print for quote type
     fprintf(stderr, "DEBUG: Setting quote_type=%d for content='%s'\n", 
         quote_type, content);
+    // Process variables in double-quoted strings
+    if (quote_type == 2 && ft_strchr(content, '$'))
+    {
+        char *expanded = ft_strdup("");
+        int pos = 0;
+        char *chunk;
+        char *temp;
+        if (!expanded)
+        {
+            free(content);
+            return (0);
+        }
+        fprintf(stderr, "DEBUG: Pre-processing double-quoted content '%s'\n", content);
+        while (content[pos])
+        {
+            if (content[pos] == '$')
+            {
+                // Use handle_expansion to process the variable
+                char *var_value = handle_expansion(content, &pos, vars);
+                if (var_value)
+                {
+                    // Concatenate the expanded value
+                    temp = expanded;
+                    expanded = ft_strjoin(expanded, var_value);
+                    free(temp);
+                    free(var_value);
+                    
+                    if (!expanded)
+                    {
+                        free(content);
+                        return (0);
+                    }
+                }
+            }
+            else
+            {
+                // Handle regular character
+                int start = pos;
+                while (content[pos] && content[pos] != '$')
+                    pos++;
+                chunk = ft_substr(content, start, pos - start);
+                if (!chunk)
+                {
+                    free(expanded);
+                    free(content);
+                    return (0);
+                }
+                temp = expanded;
+                expanded = ft_strjoin(expanded, chunk);
+                free(temp);
+                free(chunk);
+                
+                if (!expanded)
+                {
+                    free(content);
+                    return (0);
+                }
+            }
+        }
+        fprintf(stderr, "DEBUG: Expanded double-quoted content from '%s' to '%s'\n", 
+                content, expanded);
         
-    // If adjacent to previous token, join with it
+        free(content);
+        content = expanded;
+    }
     if (is_adjacent)
     {
         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
-		// cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
         if (cmd_node && cmd_node->args)
         {
-            // Find last argument
             last_arg_idx = 0;
             while (cmd_node->args[last_arg_idx+1])
                 last_arg_idx++;
-                
-            // Join with last argument
             if (cmd_node->arg_quote_type)
                 fprintf(stderr, "DEBUG: Original arg '%s' had quote_type=%d\n", 
                     cmd_node->args[last_arg_idx], cmd_node->arg_quote_type[last_arg_idx]);
-                    
             joined = ft_strjoin(cmd_node->args[last_arg_idx], content);
             fprintf(stderr, "DEBUG: Joining quote '%s' with '%s' = '%s'\n",
                    cmd_node->args[last_arg_idx], content, joined);
-                   
             if (joined)
             {
                 free(cmd_node->args[last_arg_idx]);
                 cmd_node->args[last_arg_idx] = joined;
-                
-                // Update quote_type when joining with a single-quoted string
-                // Single quotes (type 1) have highest precedence to prevent expansion
                 if (quote_type == 1)
                 {
                     cmd_node->arg_quote_type[last_arg_idx] = 1;
                     fprintf(stderr, "DEBUG: Updated quote_type to 1 (single quotes) for '%s'\n", joined);
                 }
-                
                 fprintf(stderr, "DEBUG: After join, quote_type=%d for '%s'\n", 
                     cmd_node->arg_quote_type[last_arg_idx], joined);
-                
                 free(content);
                 vars->start = *i;
                 return (1);
             }
         }
     }
-    
-    // Otherwise add as separate argument
-	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
-    // cmd_node = find_cmd(vars->head, NULL, FIND_LAST, NULL);
+    cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
     if (cmd_node)
         append_arg(cmd_node, content, quote_type);
     else
     {
-        // Check if this is in command position (first token)
         if (!vars->head)
             maketoken_with_type(content, TYPE_CMD, vars);
         else
             maketoken_with_type(content, TYPE_ARGS, vars);
     }
-    
     free(content);
     vars->start = *i;
     return (1);
@@ -575,10 +674,10 @@ Returns 1 if operator was processed, 0 otherwise.
 */
 int process_operator_char(char *input, int *i, t_vars *vars)
 {
-    int advance;
+    int moves;
     t_tokentype token_type;
     
-    token_type = get_token_at(input, *i, &advance);
+    token_type = get_token_at(input, *i, &moves);
                
     if (token_type == 0)
 	{
@@ -586,7 +685,7 @@ int process_operator_char(char *input, int *i, t_vars *vars)
 	}
 	vars->curr_type = token_type;   
     // Handle double operators (>>, <<, etc.)
-    if (advance == 2) {
+    if (moves == 2) {
         handle_double_operator(input, vars);
     }
     
@@ -627,97 +726,96 @@ int	handle_redirection(char *input, int *pos, t_vars *vars)
 Tokenizes input string with improved quote handling.
 Creates tokens for commands, args, quotes, and operators.
 */
-int improved_tokenize(char *input, t_vars *vars)
+// int improved_tokenize(char *input, t_vars *vars)
+// {
+//     int			moves;
+//     t_tokentype	token_type;
+//     char		*token_preview;
+
+//     vars->pos = 0;
+//     vars->start = 0;
+//     vars->quote_depth = 0;
+//     while (input && input[vars->pos])
+//     {
+//         token_type = get_token_at(input, vars->pos, &moves);
+//         if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
+//         {
+//             if (vars->pos > vars->start)
+//             {
+//                 token_preview = ft_substr(input, vars->start
+// 					,vars->pos - vars->start);
+//                 set_token_type(vars, token_preview);
+//                 handle_string(input, vars);
+//                 free(token_preview);
+//             }
+//             if (process_quote_char(input, &vars->pos, vars))
+//                 continue;
+//         }
+//         if (input[vars->pos] == '$' && !vars->quote_depth)
+//         {
+//             if (vars->pos > vars->start)
+//             {
+//                 token_preview = ft_substr(input, vars->start
+// 					,vars->pos - vars->start);
+//                 set_token_type(vars, token_preview);
+//                 handle_string(input, vars);
+//                 free(token_preview);
+//             } 
+//             if (make_exp_token(input, &vars->pos, vars))
+//                 continue ;
+//         }
+//         if (is_operator_token(get_token_at(input, vars->pos, &moves))) 
+//         {
+//             if (vars->pos > vars->start)
+//             {
+//                 token_preview = ft_substr(input, vars->start
+// 					,vars->pos - vars->start);
+//                 set_token_type(vars, token_preview);
+//                 handle_string(input, vars);
+//                 free(token_preview);
+//             }
+//             if (process_operator_char(input, &vars->pos, vars))
+//                 continue ;
+//         }
+//         if (input[vars->pos] && input[vars->pos] <= ' ')
+//         {
+//             if (vars->pos > vars->start)
+//             {
+//                 token_preview = ft_substr(input, vars->start
+// 					,vars->pos - vars->start);
+//                 set_token_type(vars, token_preview);
+//                 handle_string(input, vars);
+//                 free(token_preview);
+//             }
+//             while (input[vars->pos] && input[vars->pos] <= ' ')
+//                 vars->pos++;
+//             vars->start = vars->pos;
+//             continue ;
+//         }
+//         vars->pos++;
+//     }
+//     if (vars->pos > vars->start)
+//     {
+//         token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
+//         set_token_type(vars, token_preview);
+//         handle_string(input, vars);
+//         free(token_preview);
+//     }
+//     // DBG_PRINTF(DEBUG_TOKENIZE, "improved_tokenize: Token type=%d, content='%s'\n", 
+//     //           vars->curr_type, (vars->current && vars->current->args) ? 
+//     //           vars->current->args[0] : "(null)");
+//     // DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
+//     // debug_token_list(vars);
+//     return(1);
+// }
+/*
+Process any accumulated text before a special character.
+Creates a token from the text between vars->start and vars->pos.
+*/
+static void handle_text(char *input, t_vars *vars)
 {
-    int advance;
-    t_tokentype token_type;
     char *token_preview;
-    
-    /* Initialize tokenization state */
-    vars->pos = 0;
-    vars->start = 0;
-    vars->quote_depth = 0;
-    
-    while (input && input[vars->pos])
-    {
-        /* Handle quoted text */
-        token_type = get_token_at(input, vars->pos, &advance);
-        
-        if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE) 
-        {
-            /* Process any text before the quote */
-            if (vars->pos > vars->start)
-            {
-                token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-                set_token_type(vars, token_preview);
-                handle_string(input, vars);
-                free(token_preview);
-            }
-            
-            /* Process the quoted content */
-            if (process_quote_char(input, &vars->pos, vars))
-                continue;
-        }
-        
-        /* Handle expansion variables */
-        if (input[vars->pos] == '$' && !vars->quote_depth)
-        {
-            /* Process any text before the $ sign */
-            if (vars->pos > vars->start)
-            {
-                token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-                set_token_type(vars, token_preview);
-                handle_string(input, vars);
-                free(token_preview);
-            } 
-            
-            
-            if (make_exp_token(input, &vars->pos, vars))
-                continue;
-        }
-        
-        /* Handle operators (pipes, redirections) */
-        if (is_operator_token(get_token_at(input, vars->pos, &advance))) 
-        {
-            /* Process any text before the operator */
-            if (vars->pos > vars->start)
-            {
-                token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-                set_token_type(vars, token_preview);
-                handle_string(input, vars);
-                free(token_preview);
-            }
-            
-            /* Process the operator */
-            if (process_operator_char(input, &vars->pos, vars))
-                continue;
-        }
-        
-        /* Handle whitespace */
-        if (input[vars->pos] && input[vars->pos] <= ' ')
-        {
-            /* Process text before whitespace */
-            if (vars->pos > vars->start)
-            {
-                token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-                set_token_type(vars, token_preview);
-                handle_string(input, vars);
-                free(token_preview);
-            }
-            
-            /* Skip whitespace */
-            while (input[vars->pos] && input[vars->pos] <= ' ')
-                vars->pos++;
-                
-            vars->start = vars->pos;
-            continue;
-        }
-        
-        /* Move to next character */
-        vars->pos++;
-    }
-    
-    /* Process any remaining text */
+
     if (vars->pos > vars->start)
     {
         token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
@@ -725,16 +823,110 @@ int improved_tokenize(char *input, t_vars *vars)
         handle_string(input, vars);
         free(token_preview);
     }
-    
-    // Keeping these as instructed
+}
+
+/*
+Handle quoted text in the input.
+Processes single and double quotes.
+Sets next_flag if processing should continue from the loop.
+*/
+static void imp_tok_quote(char *input, t_vars *vars)
+{
+    handle_text(input, vars);
+    if (process_quote_char(input, &vars->pos, vars))
+        vars->next_flag = 1;
+}
+
+/*
+Handle variable expansion in the input.
+Processes $ characters for variable substitution.
+Sets next_flag if processing should continue from the loop.
+*/
+static void imp_tok_expan(char *input, t_vars *vars)
+{
+    handle_text(input, vars);
+    if (make_exp_token(input, &vars->pos, vars))
+        vars->next_flag = 1;
+}
+
+/*
+Handle operator tokens in the input.
+Processes operators like >, <, |, etc.
+Sets next_flag if processing should continue from the loop.
+*/
+static void imp_tok_operat(char *input, t_vars *vars)
+{
+    handle_text(input, vars);
+    if (process_operator_char(input, &vars->pos, vars))
+        vars->next_flag = 1;
+}
+
+/*
+Handle whitespace in the input.
+Skips consecutive whitespace characters.
+Sets next_flag if processing should continue from the loop.
+*/
+static void imp_tok_white(char *input, t_vars *vars)
+{
+    handle_text(input, vars);
+    while (input[vars->pos] && input[vars->pos] <= ' ')
+        vars->pos++;
+    vars->start = vars->pos;
+    vars->next_flag = 1;
+}
+
+/* 
+Tokenizes input string with improved quote handling.
+Creates tokens for commands, args, quotes, and operators.
+*/
+int improved_tokenize(char *input, t_vars *vars)
+{
+    int			moves;
+    t_tokentype	token_type;
+
+    vars->pos = 0;
+    vars->start = 0;
+    vars->quote_depth = 0;
+    while (input && input[vars->pos])
+    {
+        vars->next_flag = 0;
+        token_type = get_token_at(input, vars->pos, &moves);
+        if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
+            imp_tok_quote(input, vars);
+        if (!vars->next_flag && input[vars->pos] == '$' && !vars->quote_depth)
+            imp_tok_expan(input, vars);
+        if (!vars->next_flag && is_operator_token(get_token_at(input
+			,vars->pos, &moves)))
+            imp_tok_operat(input, vars);
+        if (!vars->next_flag && input[vars->pos] && input[vars->pos] <= ' ')
+            imp_tok_white(input, vars);
+        if (vars->next_flag)
+            continue;
+        vars->pos++;
+    }
+    handle_text(input, vars);
     // DBG_PRINTF(DEBUG_TOKENIZE, "improved_tokenize: Token type=%d, content='%s'\n", 
     //           vars->curr_type, (vars->current && vars->current->args) ? 
     //           vars->current->args[0] : "(null)");
     // DBG_PRINTF(DEBUG_TOKENIZE, "Tokenization complete\n");
-    
-    // Keeping the debug_token_list call as instructed
     // debug_token_list(vars);
     return(1);
+}
+
+
+
+/*
+Helper function to link a new token node to the current node.
+- Sets the next pointer of the current node to the new node.
+- Sets the prev pointer of the new node to the current node.
+- Updates the current pointer to the new node.
+- Works with build_token_linklist().
+*/
+void	token_link(t_node *node, t_vars *vars)
+{
+    vars->current->next = node;
+    node->prev = vars->current;
+    vars->current = node;
 }
 
 /*
@@ -748,51 +940,36 @@ Example: When adding command node
 - Otherwise links to previous token
 - Updates current pointer
 */
-void build_token_linklist(t_vars *vars, t_node *node)
+void	build_token_linklist(t_vars *vars, t_node *node)
 {
-    t_node *cmd_node;
+    t_node	*cmd_node;
     
-    if (!vars || !node)
-    {   
-        return;
-    }
-    
-    // If this is the first token
+    if (!vars || !node) 
+        return ;
     if (!vars->head)
     {
         vars->head = node;
         vars->current = node;
-        return;
+        return ;
     }
-    
-    // Check if previous node was a pipe - if so, enforce this node as a command
-    if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
+    if (vars->current && vars->current->type == TYPE_PIPE
+		&& node->type == TYPE_ARGS)
     {
         node->type = TYPE_CMD;
     }
-    
-    // If this is an argument and previous node is a command, attach it
-    if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
+    if (node->type == TYPE_ARGS && vars->current
+		&& vars->current->type == TYPE_CMD)
     {
         cmd_node = vars->current;
-        
-        // Attach as argument
         append_arg(cmd_node, node->args[0], 0);
-        
-        // Clean up the node - we don't need it in the list
-        node->args = NULL;  // Prevent double-free
-        free_token_node(node);  // Changed from free_node to free_token_node
+        node->args = NULL;
+        free_token_node(node);
     }
     else 
-    {
-        // Add as new node to the list
-        vars->current->next = node;
-        node->prev = vars->current;
-        vars->current = node;
-    }
+       token_link(node, vars);
 }
 
-/* Deprecated - comment out all calls to this function */
+/* Debug function */
 void debug_token_list(t_vars *vars)
 {
     t_node *current = vars->head;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 16:03:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 23:08:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,28 +150,26 @@ Example: Input: "$HOME/file" at position 0
 // 		return (var_value);
 // 	return (ft_strdup(""));
 // }
-char *handle_expansion(char *input, int *pos, t_vars *vars)
+char	*handle_expansion(char *input, int *pos, t_vars *vars)
 {
-    char *var_name;
-    char *var_value;
+    char	*var_name;
+    char	*var_value;
 
     // Skip the $ symbol
     (*pos)++;
-    
     // Check if we're at the end of input or at whitespace (lonely $)
-    if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n') {
+    if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
+	{
         fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
         return (ft_strdup("$"));
     }
-    
     // Check for special case $?
     if (input[*pos] == '?') {
         (*pos)++;
         var_value = chk_exitstatus(vars);
         fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
-        return var_value;
+        return (var_value);
     }
-    
     // Extract variable name
     var_name = get_var_name(input, pos);
     if (!var_name || !*var_name) {
@@ -179,21 +177,19 @@ char *handle_expansion(char *input, int *pos, t_vars *vars)
         free(var_name); // Free if allocated but empty
         return (ft_strdup("$"));
     }
-    
     // Try to handle as special variable first
     var_value = handle_special_var(var_name, vars);
-    if (var_value) {
+    if (var_value)
+	{
         fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
                 var_name, var_value);
         free(var_name);
         return var_value;
     }
-    
     // Try to handle as environment variable
     var_value = get_env_val(var_name, vars->env);
     fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
             var_name, var_value ? var_value : "");
-    
     free(var_name);
     return (var_value ? var_value : ft_strdup(""));
 }

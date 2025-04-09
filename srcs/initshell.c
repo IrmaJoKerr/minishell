@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 00:56:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 22:34:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,24 +48,28 @@ Reset position trackers and node pointers.
 void init_vars(t_vars *vars)
 {
     if (!vars)
-        return;
-    vars->head = NULL;
-    vars->current = NULL;
+	{
+        return ;
+	}
+	vars->partial_input = NULL;
+	vars->next_flag = 0;
+	ft_memset(vars->cmd_nodes, 0, sizeof(vars->cmd_nodes));
+	vars->cmd_count = 0;
+	ft_memset(vars->quote_ctx, 0, sizeof(vars->quote_ctx));
+	vars->quote_depth = 0;
+	vars->find_start = NULL;
+    vars->find_tgt = NULL;
+    vars->find_mode = 0;
+	vars->current = NULL;
+	vars->head = NULL;
+	vars->astroot = NULL;
     vars->curr_type = TYPE_NULL;
     vars->prev_type = TYPE_NULL;
     vars->pos = 0;
     vars->start = 0;
-    vars->quote_depth = 0;
-    ft_memset(vars->quote_ctx, 0, sizeof(vars->quote_ctx));
-    ft_memset(vars->cmd_nodes, 0, sizeof(vars->cmd_nodes));
+	vars->heredoc_lines = NULL;
     vars->heredoc_count = 0;
     vars->heredoc_index = 0;
-    vars->cmd_count = 0;
-    vars->astroot = NULL;
-    vars->partial_input = NULL;
-    vars->find_start = NULL;
-    vars->find_tgt = NULL;
-    vars->find_mode = 0;
 }
 
 /*

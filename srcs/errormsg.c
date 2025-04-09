@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 12:58:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 20:37:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,27 +20,39 @@ Works with use_errno_error() and redirect_error().
 */
 void	file_access_error(char *filename)
 {
-	ft_putstr_fd("bleshell: redirect file permission denied: ", 2);
+	ft_putstr_fd("bleshell: permission denied: ", 2);
 	ft_putendl_fd(filename, 2);
 }
 
 /*
-Outputs a system error message using errno value.
-- Gets the error string from errno.
-- Formats with filename and sends to standard error.
-- Uses error code for custom error reporting.
-Works with redirect_error().
+Outputs a not found error message for file access issues.
+- Formats message with filename for clarity.
+- Sends output to standard error (fd 2).
 */
-void	use_errno_error(char *filename, int *error_code)
+void	not_found_error(char *filename)
 {
-	*error_code = errno;
-	if (*error_code == 0)
-		*error_code = 1;
-	ft_putstr_fd("bleshell: redirect: ", 2);
-	ft_putstr_fd(filename, 2);
-	ft_putstr_fd(": ", 2);
-	ft_putendl_fd(strerror(*error_code), 2);
+	ft_putstr_fd("No such file or directory: ", 2);
+	ft_putendl_fd(filename, 2);
 }
+
+
+// /*
+// Outputs a system error message using errno value.
+// - Gets the error string from errno.
+// - Formats with filename and sends to standard error.
+// - Uses error code for custom error reporting.
+// Works with redirect_error().
+// */
+// void	use_errno_error(char *filename, int *error_code)
+// {
+// 	*error_code = errno;
+// 	if (*error_code == 0)
+// 		*error_code = 1;
+// 	ft_putstr_fd("bleshell: redirect: ", 2);
+// 	ft_putstr_fd(filename, 2);
+// 	ft_putstr_fd(": ", 2);
+// 	ft_putendl_fd(strerror(*error_code), 2);
+// }
 
 /*
 Handles error messages for redirection operations.
@@ -56,21 +68,21 @@ Example: For "cat > /root/file":
 - Displays "bleshell: redirect: /root/file: Permission denied"
 - Returns 13 (EACCES)
 */
-int	redirect_error(char *filename, t_vars *vars, int use_errno)
-{
-	int	error_code;
+// int	redirect_error(char *filename, t_vars *vars, int use_errno)
+// {
+// 	int	error_code;
 
-	error_code = 1;
-	// Debug print for redirect errors
-	fprintf(stderr, "DEBUG: Redirect error for file: '%s', errno: %d (%s)\n", 
-		filename, errno, strerror(errno));
-	if (use_errno)
-		use_errno_error(filename, &error_code);
-	else
-		file_access_error(filename);
-	vars->error_code = error_code;
-	return (error_code);
-}
+// 	error_code = 1;
+// 	// Debug print for redirect errors
+// 	fprintf(stderr, "DEBUG: Redirect error for file: '%s', errno: %d (%s)\n", 
+// 		filename, errno, strerror(errno));
+// 	if (use_errno)
+// 		use_errno_error(filename, &error_code);
+// 	else
+// 		file_access_error(filename);
+// 	vars->error_code = error_code;
+// 	return (error_code);
+// }
 
 /*
 Outputs a standardized error message and updates command code.

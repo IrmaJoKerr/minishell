@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/05 19:24:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 21:58:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,15 @@ Returns:
 */
 int	operators(char *input, t_vars *vars)
 {
-    int			advance;
+    int			moves;
     t_tokentype	token_type;
     
     // Handle text before operator
     if (vars->pos > vars->start)
         handle_string(input, vars);
     
-    // Get token type and advance value
-    token_type = get_token_at(input, vars->pos, &advance);
+    // Get token type and moves value
+    token_type = get_token_at(input, vars->pos, &moves);
     
     // Store previous type before updating current
     vars->prev_type = vars->curr_type;
@@ -39,9 +39,9 @@ int	operators(char *input, t_vars *vars)
     // Process token based on its type
     if (token_type != 0)
     {
-        if (advance == 2)
+        if (moves == 2)
             return handle_double_operator(input, vars);
-        else if (advance == 1)
+        else if (moves == 1)
             return handle_single_operator(input, vars);
     }
     
@@ -80,7 +80,7 @@ Works with operators() for text segment tokenization.
 void handle_string(char *input, t_vars *vars)
 {
     char *token;
-    int advance;
+    int moves;
     t_tokentype token_type;
     
     if (vars->pos > vars->start)
@@ -90,7 +90,7 @@ void handle_string(char *input, t_vars *vars)
             return;
         
         // Determine token type based on the input
-        token_type = get_token_at(token, 0, &advance);
+        token_type = get_token_at(token, 0, &moves);
         if (token_type == 0)
         {
             // Pass the token content to help determine type
@@ -113,13 +113,12 @@ Checks if character at position is a single-character token
 Returns the token type enum value, 0 if not a special token
 Handles: ', ", <, >, $, |
 */
-int	is_single_token(char *input, int pos, int *advance)
+int	is_single_token(char *input, int pos, int *moves)
 {
 	t_tokentype	token_type;
 
 	token_type = 0;
-	*advance = 0;
-	
+	*moves = 0;
 	if (!input || !input[pos])
 		return (token_type);
 	if (input[pos] == '\'')
@@ -136,7 +135,7 @@ int	is_single_token(char *input, int pos, int *advance)
 		token_type = TYPE_PIPE;
 	if (token_type != 0)
 	{
-		*advance = 1;
+		*moves = 1;
 	}
 	return (token_type);
 }
@@ -146,13 +145,12 @@ Checks if characters at position form a double-character token
 Returns the token type enum value, 0 if not a double token
 Handles: >>, <<, $?
 */
-int	is_double_token(char *input, int pos, int *advance)
+int	is_double_token(char *input, int pos, int *moves)
 {
 	t_tokentype	token_type;
 
 	token_type = 0;
-	*advance = 0;
-	
+	*moves = 0;
 	if (!input || !input[pos] || !input[pos + 1])
 		return (token_type);
 	if (input[pos] == '>' && input[pos + 1] == '>')
@@ -163,7 +161,7 @@ int	is_double_token(char *input, int pos, int *advance)
 		token_type = TYPE_EXIT_STATUS;
 	if (token_type != 0)
 	{
-        *advance = 2;
+        *moves = 2;
     }
 	return (token_type);
 }
@@ -171,30 +169,26 @@ int	is_double_token(char *input, int pos, int *advance)
 /* 
 Master function to get token type at current position
 Checks double tokens first, then single tokens
-Returns token type and updates position via advance parameter
+Returns token type and updates position via moves parameter
 */
-t_tokentype	get_token_at(char *input, int pos, int *advance)
+t_tokentype	get_token_at(char *input, int pos, int *moves)
 {
 	t_tokentype	token_type;
 
 	token_type = 0;
-	*advance = 0;
-	
-	// Try to match double-character tokens first
-	token_type = is_double_token(input, pos, advance);
+	*moves = 0;
+	token_type = is_double_token(input, pos, moves);
 	if (token_type != 0)
 	{
         return token_type;
     }
-	// Then try single-character tokens
-	token_type = is_single_token(input, pos, advance);
+	token_type = is_single_token(input, pos, moves);
 	if (token_type != 0)
 	{
         return token_type;
     }
-	// If not a special token, treat as part of a string/command
-	*advance = 1;
-    return (0); // Will be classified as word/command later
+	*moves = 1;
+    return (0);
 }
 
 /*
@@ -205,21 +199,19 @@ Returns:
 - Position after operator (i+1).
 - Unchanged position if token creation fails.
 */
-int handle_single_operator(char *input, t_vars *vars)
+int	handle_single_operator(char *input, t_vars *vars)
 {
-    char *token;
-    
+    char	*token;
+	
     token = ft_substr(input, vars->pos, 1);
     if (!token)
-        return vars->pos;
-    
+        return (vars->pos);
     maketoken_with_type(token, vars->curr_type, vars);
     free(token);
-    
     vars->pos++;
     vars->start = vars->pos;
     vars->prev_type = vars->curr_type;
-    return vars->pos;
+    return (vars->pos);
 }
  
 /*
@@ -227,25 +219,22 @@ Processes double-character operators (>>, <<).
 Creates token with the provided token type.
 Updates position tracking.
 Returns:
- - Position after operator (i+advance).
+ - Position after operator (i+moves).
  - Unchanged position if token creation fails.
 */
 int	handle_double_operator(char *input, t_vars *vars)
 {
     char	*token;
-    int		advance;
+    int		moves;
     
-    advance = 2;  // Double operators are always 2 characters
-    
-    token = ft_substr(input, vars->pos, advance);
+    moves = 2;
+    token = ft_substr(input, vars->pos, moves);
     if (!token)
-        return vars->pos;
-    
+        return (vars->pos);
     maketoken_with_type(token, vars->curr_type, vars);
     free(token);
-    
-    vars->pos += advance;
+    vars->pos += moves;
     vars->start = vars->pos;
     vars->prev_type = vars->curr_type;
-    return vars->pos;
+    return (vars->pos);
 }
