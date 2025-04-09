@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 10:42:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 12:28:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,36 +219,67 @@ Example: For "ls -l | grep txt"
 */
 int execute_pipes(t_node *pipe_node, t_vars *vars)
 {
-    int pipe_count;
-    int result;
+    int     pipe_fd[2];
+    pid_t   left_pid;
+    pid_t   right_pid;
+    int     status;
+    int     left_status = 0;
     
-    if (!pipe_node || pipe_node->type != TYPE_PIPE)
-	{
-        return (1);
-	}
-    // Use dedicated function to count pipes accurately
-    pipe_count = count_pipes(vars);
-    if (pipe_count < 1)
-	{
-        return (1);
-	}
-	vars->pipes->pipe_count = pipe_count;
-    // Initialize pipe arrays
-    if (!init_pipe_arrays(vars->pipes, pipe_count))
-        return print_error("Failed to allocate pipe arrays", vars, 1);
-    // Create the actual pipes
-    if (!make_pipes(vars->pipes, pipe_count))
-        return print_error("Failed to create pipes", vars, 1);
-    // Fork processes using cmd_nodes directly
-    if (!fork_processes(vars->pipes, vars))
-    {
-        close_all_pipe_fds(vars->pipes);
-        return print_error("Failed to create processes", vars, 1);
+    if (pipe(pipe_fd) == -1) {
+        ft_putendl_fd("pipe: Creation failed", 2);
+        return 1;
     }
-    close_all_pipe_fds(vars->pipes);
-    result = wait_for_processes(vars->pipes, vars);
-    return result;
+    
+    // Fork left process
+    left_pid = fork();
+    if (left_pid == 0) {
+        // Child process - left side
+        close(pipe_fd[0]);  // Close read end in left process
+        if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+            exit(1);
+        close(pipe_fd[1]);
+        
+        // Execute left command - will exit on its own
+        exit(execute_cmd(pipe_node->left, vars->env, vars));
+    }
+    else if (left_pid > 0) {
+        // Parent process
+        close(pipe_fd[1]);  // Close write end in parent
+        
+        // Fork right process
+        right_pid = fork();
+        if (right_pid == 0) {
+            // Child process - right side
+            if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+                exit(1);
+            close(pipe_fd[0]);
+            
+            // Execute right command - will exit on its own
+            exit(execute_cmd(pipe_node->right, vars->env, vars));
+        }
+        else if (right_pid > 0) {
+            // Parent process - close pipe fully
+            close(pipe_fd[0]);
+            
+            // Wait for both processes independently
+            waitpid(left_pid, &left_status, 0);
+            waitpid(right_pid, &status, 0);
+            
+            // Return right command status, or left if right succeeded
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+                return left_status;
+            else
+                return handle_cmd_status(status, vars);
+        }
+    }
+    
+    // Error in fork
+    ft_putendl_fd("fork: Creation failed", 2);
+    close(pipe_fd[0]);
+    close(pipe_fd[1]);
+    return 1;
 }
+
 
 /*
  * Determines if a redirection node is related to a specific command
@@ -778,31 +809,31 @@ void process_quotes_in_redirect(t_node *redir_node)
  * Creates all pipes needed for execution 
  * Returns 1 on success, 0 on failure
  */
-int make_pipes(t_pipe *pipes, int pipe_count)
-{
-    int i;
-    int j;
+// int make_pipes(t_pipe *pipes, int pipe_count)
+// {
+//     int i;
+//     int j;
     
-    i = 0;
-    while (i < pipe_count)
-    {
-        /* Create pipe directly instead of using setup_pipe function */
-        if (pipe(pipes->pipe_fds + (i * 2)) == -1)
-        {
-            /* Clean up previously created pipes */
-            j = 0;
-            while (j < i)
-            {
-                close(pipes->pipe_fds[j * 2]);
-                close(pipes->pipe_fds[j * 2 + 1]);
-                j++;
-            }
-            return (0);
-        }
-        i++;
-    }
-    return (1);
-}
+//     i = 0;
+//     while (i < pipe_count)
+//     {
+//         /* Create pipe directly instead of using setup_pipe function */
+//         if (pipe(pipes->pipe_fds + (i * 2)) == -1)
+//         {
+//             /* Clean up previously created pipes */
+//             j = 0;
+//             while (j < i)
+//             {
+//                 close(pipes->pipe_fds[j * 2]);
+//                 close(pipes->pipe_fds[j * 2 + 1]);
+//                 j++;
+//             }
+//             return (0);
+//         }
+//         i++;
+//     }
+//     return (1);
+// }
 
 /* 
  * Sets up child process pipe redirections

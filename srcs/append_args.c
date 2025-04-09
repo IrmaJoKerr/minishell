@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 22:52:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 11:35:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,25 +16,53 @@
 Copy all arguments from the original node to a newly allocated array
 Returns NULL on failure
 */
-char	**dup_node_args(t_node *node, size_t len)
-{
-	char	**new_args;
-	size_t	i;
+// char	**dup_node_args(t_node *node, size_t len)
+// {
+// 	char	**new_args;
+// 	size_t	i;
 
-	new_args = malloc(sizeof(char *) * (len + 2));
-	if (!new_args)
-		return (NULL);
-	i = -1;
-	while (++i < len)
-	{
-		new_args[i] = node->args[i];
-		if (!new_args[i])
-		{
-			free(new_args);
-			return (NULL);
-		}
-	}
-	return (new_args);
+// 	new_args = malloc(sizeof(char *) * (len + 2));
+// 	if (!new_args)
+// 		return (NULL);
+// 	i = -1;
+// 	while (++i < len)
+// 	{
+// 		new_args[i] = node->args[i];
+// 		if (!new_args[i])
+// 		{
+// 			free(new_args);
+// 			return (NULL);
+// 		}
+// 	}
+// 	return (new_args);
+// }
+// Fix the dup_node_args function:
+char **dup_node_args(t_node *node, size_t len)
+{
+    char **new_args;
+    size_t i;
+
+    new_args = malloc(sizeof(char *) * (len + 2));
+    if (!new_args)
+        return (NULL);
+    
+    i = 0;
+    while (i < len)
+    {
+        // PROPERLY DUPLICATE each string instead of copying pointers
+        new_args[i] = ft_strdup(node->args[i]);
+        if (!new_args[i])
+        {
+            // Clean up previously allocated strings on failure
+            while (i > 0)
+                free(new_args[--i]);
+            free(new_args);
+            return (NULL);
+        }
+        i++;
+    }
+    
+    return (new_args);
 }
 
 /*

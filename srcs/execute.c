@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 11:15:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 11:39:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,10 +147,15 @@ Works with setup_redirection().
 // {
 //     char *file;
     
-//     if (!node || !node->args || !node->args[0])
+//     // Use the right node's args for the filename, not the node's own args
+//     if (!node->right || !node->right->args || !node->right->args[0])
+//     {
+//         fprintf(stderr, "DEBUG: Input redirection missing filename\n");
 //         return (0);
+//     }
     
-//     file = node->args[0];
+//     file = node->right->args[0];
+//     fprintf(stderr, "DEBUG: Opening input redirection file: '%s'\n", file);
     
 //     // Open file for reading
 //     vars->pipes->redirection_fd = open(file, O_RDONLY);
@@ -159,7 +164,7 @@ Works with setup_redirection().
 //         ft_putstr_fd("bleshell: ", 2);
 //         ft_putstr_fd(file, 2);
 //         ft_putendl_fd(": No such file or directory", 2);
-//         vars->error_code = 1; // Set error code to 1
+//         vars->error_code = 1;
 //         return (0);
 //     }
     
@@ -169,23 +174,21 @@ Works with setup_redirection().
 //         close(vars->pipes->redirection_fd);
 //         return (0);
 //     }
-//     vars->error_code = 1; // Set error code to 1
 //     return (1);
 // }
+// In the setup_in_redir function:
 int setup_in_redir(t_node *node, t_vars *vars)
 {
     char *file;
     
-    // Use the right node's args for the filename, not the node's own args
+    // Use the right node's args for the filename
     if (!node->right || !node->right->args || !node->right->args[0])
     {
         fprintf(stderr, "DEBUG: Input redirection missing filename\n");
         return (0);
     }
-    
     file = node->right->args[0];
     fprintf(stderr, "DEBUG: Opening input redirection file: '%s'\n", file);
-    
     // Open file for reading
     vars->pipes->redirection_fd = open(file, O_RDONLY);
     if (vars->pipes->redirection_fd == -1)
@@ -193,10 +196,21 @@ int setup_in_redir(t_node *node, t_vars *vars)
         ft_putstr_fd("bleshell: ", 2);
         ft_putstr_fd(file, 2);
         ft_putendl_fd(": No such file or directory", 2);
+        
+        // Add code to properly kill any other processes in the pipeline
+        if (vars->pipes->pids)
+        {
+            int i = 0;
+            while (i < vars->pipes->pipe_count)
+            {
+                if (vars->pipes->pids[i] > 0)
+                    kill(vars->pipes->pids[i], SIGTERM);
+                i++;
+            }
+        }
         vars->error_code = 1;
         return (0);
     }
-    
     // Redirect stdin to the file
     if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
     {

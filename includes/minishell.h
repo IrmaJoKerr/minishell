@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 01:26:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/09 12:28:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -576,7 +576,7 @@ char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
 
 void		process_quotes_in_redirect(t_node *redir_node);
 t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
-int			make_pipes(t_pipe *pipes, int pipe_count);
+// int			make_pipes(t_pipe *pipes, int pipe_count);
 void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count);
 int			fork_processes(t_pipe *pipes, t_vars *vars);
 int			count_pipes(t_vars *vars);
