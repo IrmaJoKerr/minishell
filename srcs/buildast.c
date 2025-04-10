@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 23:00:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 17:53:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,15 +59,15 @@
 // 	return (1);
 // }
 
-/*
-Gets target command for redirection.
-- Uses previous command if it exists and is a command node.
-- Otherwise uses last tracked command.
-Returns:
-- Pointer to target command node.
-- NULL if no suitable command found.
-Works with proc_redir_pt1().
-*/
+// /*
+// Gets target command for redirection.
+// - Uses previous command if it exists and is a command node.
+// - Otherwise uses last tracked command.
+// Returns:
+// - Pointer to target command node.
+// - NULL if no suitable command found.
+// Works with proc_redir_pt1().
+// */
 // t_node	*get_redir_target(t_node *current, t_node *last_cmd)
 // {
 // 	t_node	*target;
@@ -81,16 +81,16 @@ Works with proc_redir_pt1().
 // }
 
 
-/*
-Processes the first part of redirection nodes identification.
-- Traverses token list to find redirection operators.
-- Records last command seen for reference.
-- Identifies redirection targets.
-Returns:
-- First valid redirection node if no pipe root exists.
-- NULL otherwise or if no valid redirections found.
-Works with proc_token_list().
-*/
+// /*
+// Processes the first part of redirection nodes identification.
+// - Traverses token list to find redirection operators.
+// - Records last command seen for reference.
+// - Identifies redirection targets.
+// Returns:
+// - First valid redirection node if no pipe root exists.
+// - NULL otherwise or if no valid redirections found.
+// Works with proc_token_list().
+// */
 // t_node	*proc_redir_pt1(t_vars *vars, t_node *pipe_root)
 // {
 // 	t_node	*current;
@@ -146,16 +146,16 @@ Works with proc_token_list().
 	
 // 	return (redir_root);
 // }
-/*
-Processes the first part of redirection nodes identification.
-- Traverses token list to find redirection operators.
-- Records last command seen in vars->pipes structure.
-- Identifies redirection targets.
-Returns:
-- First valid redirection node if found.
-- NULL if no valid redirections found or on error.
-Works with proc_token_list().
-*/
+// /*
+// Processes the first part of redirection nodes identification.
+// - Traverses token list to find redirection operators.
+// - Records last command seen in vars->pipes structure.
+// - Identifies redirection targets.
+// Returns:
+// - First valid redirection node if found.
+// - NULL if no valid redirections found or on error.
+// Works with proc_token_list().
+// */
 // t_node *proc_redir_pt1(t_vars *vars)
 // {
 //     t_node *current;
@@ -206,13 +206,13 @@ Works with proc_token_list().
 //     return (vars->pipes->redir_root);
 // }
 
-/*
-Processes the second part of redirection nodes handling.
-- Updates pipe structure with redirection references.
-- Links redirections into existing pipe hierarchy.
-- Only modifies pipe structure if redirection affects piped commands.
-Works with proc_token_list().
-*/
+// /*
+// Processes the second part of redirection nodes handling.
+// - Updates pipe structure with redirection references.
+// - Links redirections into existing pipe hierarchy.
+// - Only modifies pipe structure if redirection affects piped commands.
+// Works with proc_token_list().
+// */
 // void	proc_redir_pt2(t_vars *vars, t_node *pipe_root)
 // {
 // 	t_node	*current;
@@ -234,13 +234,13 @@ Works with proc_token_list().
 // 		current = current->next;
 // 	}
 // }
-/*
-Processes the second part of redirection nodes handling.
-- Updates pipe structure with redirection references.
-- Links redirections into existing pipe hierarchy.
-- Only modifies pipe structure if redirection affects piped commands.
-Works with proc_token_list().
-*/
+// /*
+// Processes the second part of redirection nodes handling.
+// - Updates pipe structure with redirection references.
+// - Links redirections into existing pipe hierarchy.
+// - Only modifies pipe structure if redirection affects piped commands.
+// Works with proc_token_list().
+// */
 // void proc_redir_pt2(t_vars *vars)
 // {
 //     t_node *current;
@@ -312,17 +312,17 @@ t_node *proc_token_list(t_vars *vars)
     //DBG_PRINTF(DEBUG_EXEC, "Final AST root selection: pipe_root=%p, redir_root=%p\n", 
     //          (void*)vars->pipes->pipe_root, (void*)vars->pipes->redir_root);
     if (vars->pipes->pipe_root)
-        return vars->pipes->pipe_root;
+        return (vars->pipes->pipe_root);
     else if (vars->pipes->redir_root)
-        return vars->pipes->redir_root;
+        return (vars->pipes->redir_root);
     else if (vars->cmd_count > 0)
-        return vars->cmd_nodes[0];
+        return (vars->cmd_nodes[0]);
     return NULL;
 }
 
-/*
-Converts string tokens after pipes to command tokens.
-*/
+// /*
+// Converts string tokens after pipes to command tokens.
+// */
 // void	convert_strs_to_cmds(t_vars *vars)
 // {
 // 	t_node	*current;

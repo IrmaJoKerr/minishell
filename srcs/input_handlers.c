@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 01:21:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 19:39:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,12 +145,10 @@ void	handle_input(char *input, t_vars *vars)
 		DBG_PRINTF(1, "Multi-line input detected\n");
 		cmdarr = ft_split(input, '\n');
 		if (!cmdarr)
-			return;
+			return ;
 		count = ft_arrlen(cmdarr);
 		if (count > 1 && ft_strnstr(cmdarr[0], "<<" , ft_strlen(cmdarr[0])))
-		{
 			proc_heredoc_input(cmdarr, count, vars);
-		}
 		else
 		{
 			proc_multiline_input(cmdarr, count, vars);

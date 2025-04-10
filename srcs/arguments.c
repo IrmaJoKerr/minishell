@@ -6,38 +6,110 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:36:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 20:57:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 13:07:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
+/* 
 Creates an argument array for a node with a single argument.
 Allocates memory for the array and initializes it with the given token.
-The quote type is set to default 0 (no quotes).
-Returns NULL on failure.
+Also allocates character-level quote type arrays for each argument.
 */
-void	create_args_array(t_node *node, char *token)
-{
-	char	**args;
-	int		*quote_types;
+// void	create_args_array(t_node *node, char *token)
+// {
+//     char	**args;
+//     int		**quote_types;
+//     int		i;
+//     int		len;
 
-	args = malloc(sizeof(char *) * 2);
-	if (!args)
-		return ;
-	args[0] = ft_strdup(token);
-	if (!args[0])
-	{
-		free(args);
-		return ;
-	}
-	args[1] = NULL;
-	node->args = args;
-	quote_types = malloc(sizeof(int) * 2);
-	if (!quote_types)
-		return ;
-	quote_types[0] = 0;
-	quote_types[1] = 0;
-	node->arg_quote_type = quote_types;
+//     // Allocate arguments array (2 slots: 1 for arg, 1 for NULL)
+//     args = malloc(sizeof(char *) * 2);
+//     if (!args)
+//         return ;
+//     // Duplicate the token as first argument
+//     args[0] = ft_strdup(token);
+//     if (!args[0])
+//     {
+//         free(args);
+//         return ;
+//     }
+//     // Set second slot to NULL terminator
+//     args[1] = NULL;
+//     node->args = args;
+//     // Allocate quote types array (one entry per argument plus NULL)
+//     quote_types = malloc(sizeof(int *) * 2);
+//     if (!quote_types)
+//         return ;
+//     // Get length of token for character-level quote types
+//     len = ft_strlen(token);
+//     // Allocate character-level quote types for first argument
+//     quote_types[0] = malloc(sizeof(int) * (len + 1));
+//     if (!quote_types[0])
+//     {
+//         free(quote_types);
+//         return ;
+//     }
+//     // Initialize each character's quote type to 0 (unquoted)
+//     i = 0;
+//     while (i < len)
+//     {
+//         quote_types[0][i] = 0;
+//         i++;
+//     }
+//     // Set the second slot to NULL
+//     quote_types[1] = NULL;
+//     node->arg_quote_type = quote_types;
+// }
+void create_args_array(t_node *node, char *token)
+{
+    char **args;
+    int **quote_types;
+    int i;
+    int len;
+    
+    // Allocate arguments array
+    args = malloc(sizeof(char *) * 2);
+    if (!args)
+        return;
+    // Duplicate token as first argument
+    args[0] = ft_strdup(token);
+    if (!args[0])
+    {
+        free(args);
+        return;
+    }
+    // Set NULL terminator
+    args[1] = NULL;
+    node->args = args;
+    // Allocate quote types array
+    quote_types = malloc(sizeof(int *) * 2);
+    if (!quote_types)
+        return;
+    // Get token length for quote types
+    len = ft_strlen(token);
+    // Allocate character-level quote types
+    quote_types[0] = malloc(sizeof(int) * (len + 1));
+    if (!quote_types[0])
+    {
+        // Add debug print here
+        fprintf(stderr, "DEBUG[create_args_array]: Failed to allocate quote_types[0]. "
+                "node=%p, type=%d, token='%s', len=%d\n",
+                (void*)node, node->type, token ? token : "NULL", len);
+        // Critical fix: Free quote_types if inner allocation fails
+        free(quote_types);
+        return;
+    }
+    // Initialize quote types to 0 (unquoted)
+    i = 0;
+    while (i < len)
+    {
+        quote_types[0][i] = 0;
+        i++;
+    }
+    // Set NULL terminator
+    quote_types[0][len] = -1; // Sentinel value
+    quote_types[1] = NULL;
+    node->arg_quote_type = quote_types;
 }

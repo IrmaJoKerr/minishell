@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 21:58:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 12:54:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,9 +79,9 @@ Works with operators() for text segment tokenization.
 */
 void handle_string(char *input, t_vars *vars)
 {
-    char *token;
-    int moves;
-    t_tokentype token_type;
+    char 		*token;
+    int			moves;
+    t_tokentype	token_type;
     
     if (vars->pos > vars->start)
     {

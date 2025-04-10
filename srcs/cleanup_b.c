@@ -6,51 +6,39 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 23:25:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 15:58:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Recursively free the AST nodes.
-- Traverses the tree in post-order (left, right, current).
-- Frees all argument arrays associated with nodes.
-- Ensures complete cleanup of complex command structures.
-Works with cleanup_vars().
-
-Example: For "ls -la | grep .c > output.txt":
-- Recursively frees all nodes including command, pipe, and redirection
-- Frees all argument arrays like ["ls", "-la"] and ["grep", ".c"]
-*/
-void	cleanup_ast(t_node *node)
-{
-	if (!node)
-		return ;
-	cleanup_ast(node->left);
-	cleanup_ast(node->right);
-	if (node->args)
-		ft_free_2d(node->args, ft_arrlen(node->args));
-	if (node->arg_quote_type)
-		free(node->arg_quote_type);
-	free(node);
-}
-
-/*
 Free a single token node and its arguments.
 - Takes a node pointer and frees its arguments array.
+- Properly frees character-level quote type arrays.
 - Then frees the node itself.
-- Used for individual node cleanup without recursion.
 Works with cleanup_token_list().
 */
 void	free_token_node(t_node *node)
 {
+    int	i;
+    
     if (!node)
-        return;
+        return ;
     if (node->args)
         ft_free_2d(node->args, ft_arrlen(node->args));
+    
     if (node->arg_quote_type)
+    {
+        i = 0;
+        while (node->arg_quote_type[i])
+        {
+            free(node->arg_quote_type[i]);
+            i++;
+        }
         free(node->arg_quote_type);
+    }
+    // Free the node itself
     free(node);
 }
 

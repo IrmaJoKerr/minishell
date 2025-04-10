@@ -6,24 +6,14 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 02:06:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 20:28:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 
-/*
-Master redirection processing function.
-- Controls the overall redirection handling workflow.
-- Identifies commands and redirection operators.
-- Builds redirection nodes and links them properly.
-- Integrates redirections with pipe structures if present.
-Returns:
-- Root redirection node for the AST if found.
-- NULL if no valid redirections exist in the token stream.
-Works with proc_token_list.
-*/
+
 // t_node *proc_redir(t_vars *vars)
 // {
 //     if (!vars || !vars->head || !vars->pipes)
@@ -41,6 +31,17 @@ Works with proc_token_list.
     
 //     return (vars->pipes->redir_root);
 // }
+/*
+Master redirection processing function.
+- Controls the overall redirection handling workflow.
+- Identifies commands and redirection operators.
+- Builds redirection nodes and links them properly.
+- Integrates redirections with pipe structures if present.
+Returns:
+- Root redirection node for the AST if found.
+- NULL if no valid redirections exist in the token stream.
+Works with proc_token_list.
+*/
 t_node *proc_redir(t_vars *vars)
 {
     // Debug print for tracing
@@ -62,12 +63,7 @@ t_node *proc_redir(t_vars *vars)
     return vars->pipes->redir_root;
 }
 
-/*
-Resets redirection tracking state in the pipes structure.
-- Clears command and redirection node pointers.
-- Prepares pipes structure for new redirection processing.
-Works with proc_redir to clean state before processing.
-*/
+
 // void reset_redir_tracking(t_pipe *pipes)
 // {
 //     if (!pipes)
@@ -78,6 +74,12 @@ Works with proc_redir to clean state before processing.
 //     pipes->redir_root = NULL;
 // }
 // This helper function should also be implemented
+/*
+Resets redirection tracking state in the pipes structure.
+- Clears command and redirection node pointers.
+- Prepares pipes structure for new redirection processing.
+Works with proc_redir to clean state before processing.
+*/
 void reset_redir_tracking(t_pipe *pipes)
 {
     fprintf(stderr, "DEBUG: Resetting redirection tracking\n");
@@ -92,13 +94,7 @@ void reset_redir_tracking(t_pipe *pipes)
     pipes->cmd_redir = NULL;
 }
 
-/*
-Builds the redirection AST by connecting commands to redirection operators.
-- Traverses token list once, tracking commands and redirections.
-- Links redirection nodes to their target commands and targets.
-- Sets pipes->redir_root to the first valid redirection.
-Works with proc_redir for redirection structure building.
-*/
+
 // void build_redir_ast(t_vars *vars)
 // {
 //     t_node *current = vars->head;
@@ -138,6 +134,13 @@ Works with proc_redir for redirection structure building.
 //         current = current->next;
 //     }
 // }
+/*
+Builds the redirection AST by connecting commands to redirection operators.
+- Traverses token list once, tracking commands and redirections.
+- Links redirection nodes to their target commands and targets.
+- Sets pipes->redir_root to the first valid redirection.
+Works with proc_redir for redirection structure building.
+*/
 void build_redir_ast(t_vars *vars)
 {
     t_node *current = vars->head;
@@ -178,14 +181,7 @@ void build_redir_ast(t_vars *vars)
     }
 }
 
-/*
-Processes an individual redirection node.
-- Finds the target command for the redirection.
-- Links the redirection node to command and target.
-- Updates the redirection root if this is the first redirection.
-- Records debug information about the redirection.
-Works with build_redir_ast during AST construction.
-*/
+
 // void process_redir_node(t_node *redir_node, t_vars *vars)
 // {
 //     t_node *target_cmd;
@@ -214,6 +210,14 @@ Works with build_redir_ast during AST construction.
 //         }
 //     }
 // }
+/*
+Processes an individual redirection node.
+- Finds the target command for the redirection.
+- Links the redirection node to command and target.
+- Updates the redirection root if this is the first redirection.
+- Records debug information about the redirection.
+Works with build_redir_ast during AST construction.
+*/
 void process_redir_node(t_node *redir_node, t_vars *vars)
 {
     fprintf(stderr, "DEBUG: Processing redirection node, type: %d\n", 
@@ -241,13 +245,7 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
     }
 }
 
-/*
-Integrates redirection nodes with the pipe structure.
-- Updates pipe node references to point to redirection nodes.
-- Ensures pipes use redirection nodes instead of direct commands.
-- Makes pipe commands output to redirections correctly.
-Works with proc_redir when pipe nodes exist.
-*/
+
 // void integrate_redirections_with_pipes(t_vars *vars)
 // {
 //     t_node *current;
@@ -285,6 +283,13 @@ Works with proc_redir when pipe nodes exist.
     
 //     fprintf(stderr, "DEBUG: Completed pipe structure integration\n");
 // }
+/*
+Integrates redirection nodes with the pipe structure.
+- Updates pipe node references to point to redirection nodes.
+- Ensures pipes use redirection nodes instead of direct commands.
+- Makes pipe commands output to redirections correctly.
+Works with proc_redir when pipe nodes exist.
+*/
 void integrate_redirections_with_pipes(t_vars *vars)
 {
     t_node *current;
@@ -361,20 +366,13 @@ t_node	*get_redir_target(t_node *current, t_node *last_cmd)
         target = last_cmd;
         
     // Make sure we have a valid target
-    // if (!target)
-        //DBG_PRINTF(DEBUG_EXEC, "No valid redirection target found\n");
+    if (!target)
+        DBG_PRINTF(DEBUG_EXEC, "No valid redirection target found\n");
     
     return (target);
 }
 
-/*
-Updates pipe structure when commands are redirected.
-- Traverses pipe chain looking for references to the command.
-- Replaces command references with redirection node references.
-- Preserves pipe structure while incorporating redirections.
-- Handles both left and right side command replacements.
-Works with proc_redir_pt2().
-*/
+
 // void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
 // {
 // 	t_node	*pipe_node;
@@ -393,6 +391,13 @@ Works with proc_redir_pt2().
 // 			break ;
 // 	}
 // }
+/*
+Updates pipe structure when commands are redirected.
+- Traverses pipe chain looking for references to the command.
+- Replaces command references with redirection node references.
+- Preserves pipe structure while incorporating redirections.
+- Handles both left and right side command replacements.
+*/
 void upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
 {
     t_node *pipe_node;

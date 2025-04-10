@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 01:08:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 19:50:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,15 @@ Mode settings for the out_mode variable.
 #define OUT_MODE_NONE 0
 #define OUT_MODE_TRUNCATE 1
 #define OUT_MODE_APPEND 2
+
+/*
+Error code settings.
+*/
+# define ERR_DEFAULT 1
+# define ERR_SYNTAX 2
+# define ERR_ISDIRECTORY 2
+# define ERR_PERMISSIONS 126
+# define ERR_CMD_NOT_FOUND 127
 
 /*
 This enum stores the possible token types.
@@ -295,8 +304,9 @@ Append arguments to a node's argument array.
 In append_args.c
 */
 char		**dup_node_args(t_node *node, size_t len);
-int			*set_quote_type(t_node *node, size_t len, int quote_type);
-void		update_node_args(t_node *node, char **new_args, int *quote_types);
+int			*set_character_quote_types(char *arg_text, int quote_type);
+int			**set_quote_type(t_node *node, size_t len, int quote_type);
+void		update_node_args(t_node *node, char **new_args, int **quote_types);
 void		clean_new_args(char **new_args, size_t len);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 /*
@@ -377,11 +387,12 @@ t_node		*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
 Error handling.
 In errormsg.c
 */
-void		file_access_error(char *filename);
+void		shell_error(char *element, int error_code, t_vars *vars);
+// void		file_access_error(char *filename);
 void		not_found_error(char *filename);
 // void		use_errno_error(char *filename, int *error_code);
 // int			redirect_error(char *filename, t_vars *vars, int use_errno);
-int			print_error(const char *msg, t_vars *vars, int error_code);
+// int			print_error(const char *msg, t_vars *vars, int error_code);
 void		crit_error(t_vars *vars);
 
 /*
@@ -404,7 +415,7 @@ int			exec_external_cmd(t_node *node, char **envp, t_vars *vars);
 Expansion handling.
 In expansion.c
 */
-char		*chk_exitstatus(t_vars *vars);
+// char		*chk_exitstatus(t_vars *vars);
 char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
@@ -497,10 +508,10 @@ void		handle_input(char *input, t_vars *vars);
 Input verification functions.
 In input_verify.c
 */
-int			handle_adjacent_args(t_node *current, char *expanded_value, t_node *cmd_node, int is_adjacent);
+int			handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars);
 char 		*expand_value(char *var_name, t_vars *vars);
 void		process_expansions(t_vars *vars);
-void		process_arg_expansion(char **arg_ptr, int quote_type, t_vars *vars);
+// void 		process_arg_expansion(char **arg_ptr, int **quote_type_ptr, t_vars *vars);
 int			is_command_position(t_node *node, t_vars *vars);
 int			is_in_single_quotes(int pos, t_vars *vars);
 
@@ -551,6 +562,13 @@ char		*get_cmd_path(char *cmd, char **envp);
 char		**dup_env(char **envp);
 
 /*
+Pipe analysis functions.
+In pipe_analysis.c
+*/
+int			analyze_pipe_syntax(t_vars *vars);
+char		*complete_pipe_command(char *command, t_vars *vars);
+
+/*
 Pipes syntax checking functions.
 In pipes_syntax.c
 */
@@ -576,7 +594,7 @@ int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars);
 void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
 int			check_unfinished_pipe(t_vars *vars);
 char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
-
+int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
 void		process_quotes_in_redirect(t_node *redir_node);
 t_node		*find_linked_redirects(t_node *cmd_node, t_vars *vars);
 // int			make_pipes(t_pipe *pipes, int pipe_count);
@@ -660,7 +678,9 @@ Tokenizing functions.
 In tokenize.c
 */
 void 		set_token_type(t_vars *vars, char *input);
+size_t		count_nodes(t_node *head);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
+int			build_token_linklist_with_status(t_vars *vars, t_node *node);
 int 		is_adjacent_token(char *input, int pos);
 // int			join_with_cmd_arg(t_node *cmd_node, char *expanded_val);
 int			make_exp_token(char *input, int *i, t_vars *vars);

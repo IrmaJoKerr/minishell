@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 20:34:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 19:46:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int	setup_out_redir(t_node *node, t_vars *vars)
     vars->pipes->redirection_fd = open(file, flags, 0644);
     if (vars->pipes->redirection_fd == -1)
     {
-        file_access_error(file);
+        shell_error(file, ERR_PERMISSIONS, vars);
         return (0);
     }
     if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
@@ -268,7 +268,7 @@ int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
 	{
 		ft_putstr_fd("bleshell: command not found: ", 2);
 		ft_putendl_fd(node->args[0], 2);
-		vars->error_code = 127;
+		vars->error_code = 0;
 		return (vars->error_code);
 	}
 	return (exec_child_cmd(node, envp, vars, cmd_path));
@@ -413,7 +413,7 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
         ft_putstr_fd("bleshell: ", 2);
         ft_putstr_fd(node->args[0], 2);
         ft_putendl_fd(": command not found", 2);
-        return (vars->error_code = 127);
+        return (vars->error_code = 0);
     }
 
     // Fork and execute

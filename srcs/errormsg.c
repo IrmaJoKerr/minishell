@@ -6,23 +6,67 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 20:37:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 19:41:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Outputs a permission error message for redirection failures.
-- Formats message with filename for clarity.
-- Sends output to standard error (fd 2).
-Works with use_errno_error() and redirect_error().
+Handles file and command errors with simple, consistent messages
+- Updates vars->error_code with the provided error code
+- Prints formatted error message to stderr based on error type
+- Designed for all file and command error scenarios in minishell
+
+Error codes:
+- ERR_PERMISSIONS (126) - Permission denied
+- ERR_CMD_NOT_FOUND (127) - File or command not found
+- ERR_ISDIRECTORY (2) - Cannot execute directories 
+- ERR_SYNTAX (2) - Syntax error
 */
-void	file_access_error(char *filename)
+void shell_error(char *element, int error_code, t_vars *vars)
 {
-	ft_putstr_fd("bleshell: permission denied: ", 2);
-	ft_putendl_fd(filename, 2);
+    ft_putstr_fd("bleshell: ", 2);
+    if (error_code == ERR_PERMISSIONS)
+    {
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": Permission denied", 2);
+    }
+    else if (error_code == ERR_CMD_NOT_FOUND)
+    {
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": No such file or directory", 2);
+    }
+    else if (error_code == ERR_ISDIRECTORY)
+    {
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": Is a directory", 2);
+    }
+    else if (error_code == ERR_SYNTAX)
+    {
+        ft_putstr_fd("syntax error near unexpected token '", 2);
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd("'", 2);
+    }
+    if (vars)
+        vars->error_code = error_code;
 }
+
+// /*
+// Outputs a permission error message for redirection failures.
+// - Formats message with filename for clarity.
+// - Sends output to standard error (fd 2).
+// Works with use_errno_error() and redirect_error().
+// */
+// void	file_access_error(char *filename, int type)
+// {
+// 	if (type == ERR_DEFAULT)
+// 		ft_putstr_fd("bleshell: redirect: ", 2);
+// 	else
+// 		ft_putstr_fd("bleshell: cd: ", 2);
+// 	ft_putstr_fd("bleshell: permission denied: ", 2);
+// 	ft_putendl_fd(filename, 2);
+// }
 
 /*
 Outputs a not found error message for file access issues.
@@ -35,6 +79,16 @@ void	not_found_error(char *filename)
 	ft_putendl_fd(filename, 2);
 }
 
+/*
+Outputs a syntax error message for pipe syntax issues.
+- Indicates unexpected token '|' in the command.
+- Sends output to standard error (fd 2).
+*/
+void pipe_syntax_error(t_vars *vars)
+{
+	ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
+	vars->error_code = 2;
+}
 
 // /*
 // Outputs a system error message using errno value.
@@ -97,15 +151,15 @@ Example: For "cd /nonexistent":
 - print_error("No such file or directory", vars, 1)
 - Returns 1 for consistent error reporting
 */
-int	print_error(const char *msg, t_vars *vars, int error_code)
-{
-	ft_putstr_fd("bleshell: ", 2);
-	if (msg)
-		ft_putendl_fd((char *)msg, 2);
-	if (vars)
-		vars->error_code = error_code;
-	return (error_code);
-}
+// int	print_error(const char *msg, t_vars *vars, int error_code)
+// {
+// 	ft_putstr_fd("bleshell: ", 2);
+// 	if (msg)
+// 		ft_putendl_fd((char *)msg, 2);
+// 	if (vars)
+// 		vars->error_code = error_code;
+// 	return (error_code);
+// }
 
 /*
 Handles critical errors that require immediate program exit.

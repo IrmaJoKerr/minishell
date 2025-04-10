@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/08 23:20:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 16:09:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,72 +35,101 @@ Cleanup pipes struct variables.
 - Prevents memory leaks after pipeline processing.
 Works with cleanup_exit().
 */
-void	cleanup_pipes(t_pipe *pipes)
+// void	cleanup_pipes(t_pipe *pipes)
+// {
+// 	if (!pipes)
+// 		return ;
+// 	free(pipes->pipe_fds);
+// 	free(pipes->pids);
+// 	free(pipes->status);
+// 	if (pipes->heredoc_fd > 2)
+// 		close(pipes->heredoc_fd);
+// 	if (pipes->redirection_fd > 2)
+//         close(pipes->redirection_fd);
+// 	free(pipes);
+// }
+void cleanup_pipes(t_pipe *pipes)
 {
-	if (!pipes)
-		return ;
-	free(pipes->pipe_fds);
-	free(pipes->pids);
-	free(pipes->status);
-	if (pipes->heredoc_fd > 2)
-		close(pipes->heredoc_fd);
-	if (pipes->redirection_fd > 2)
+    if (!pipes)
+        return ;
+    if (pipes->pipe_fds)
+        free(pipes->pipe_fds);
+    if (pipes->pids)
+        free(pipes->pids);
+    if (pipes->status)
+        free(pipes->status);
+    if (pipes->heredoc_fd > 2)
+        close(pipes->heredoc_fd);
+    if (pipes->redirection_fd > 2)
         close(pipes->redirection_fd);
-	free(pipes);
+    if (pipes->saved_stdin > 2)
+        close(pipes->saved_stdin);
+    if (pipes->saved_stdout > 2)
+        close(pipes->saved_stdout);
+    free(pipes);
 }
 
 /*
 Cleans up the vars structure.
-- Frees environment variables array and its contents
-- Cleans up the AST from root
-- Handles separate cleanup if head is different from AST root
-- Resets all pointers to NULL and state variables to 0
-- Preserves any status codes for later use
-Works with cleanup_exit() and reset_shell().
+- If exists:
+	- Frees pipes structure and it's contents
+	- Frees env array
+	- Frees heredoc_lines array
+Works with cleanup_exit().
 */
 void	cleanup_vars(t_vars *vars)
 {
-	int	env_count;
+    int	env_count;
 
-	if (!vars)
-		return;
-	if (vars->env)
+    if (!vars)
 	{
-		env_count = ft_arrlen(vars->env);
-		ft_free_2d(vars->env, env_count);
-		vars->env = NULL;
+        return ;
 	}
-	if (vars->astroot)
-		cleanup_ast(vars->astroot);
-	if (vars->head && vars->head != vars->astroot)
-		cleanup_ast(vars->head);
-	vars->astroot = NULL;
-	vars->head = NULL;
-	vars->current = NULL;
-	vars->quote_depth = 0;
-	vars->error_code = 0;
+	if (vars->pipes)
+		cleanup_pipes(vars->pipes);
+    vars->pipes = NULL;
+    if (vars->env)
+    {
+        env_count = ft_arrlen(vars->env);
+        ft_free_2d(vars->env, env_count);
+        vars->env = NULL;
+    }
+    if (vars->heredoc_lines)
+    {
+        ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
+        vars->heredoc_lines = NULL;
+        vars->heredoc_count = 0;
+        vars->heredoc_index = 0;
+    }
 }
 
 /*
 Performs complete program cleanup before exit.
 - Saves command history to persistent storage
 - Cleans up token list and AST structures
-- Frees all variable and environment resources
-- Releases pipeline and file descriptor resources
+- Frees all vars,pipes, and env memory
 - Clears readline history from memory
 Works with builtin_exit().
 */
-void	cleanup_exit(t_vars *vars)
+void cleanup_exit(t_vars *vars)
 {
-	if (!vars)
-		return ;
-	save_history();
-	cleanup_token_list(vars);
+    if (!vars)
+        return ;
+    save_history();
+    if (vars->head)
+	{
+        cleanup_token_list(vars);
+	}
 	cleanup_vars(vars);
-	if (vars->pipes)
-		cleanup_pipes(vars->pipes);
-	vars->pipes = NULL;
-	rl_clear_history();
+	if (vars->partial_input)
+    {
+        free(vars->partial_input);
+        vars->partial_input = NULL;
+    }
+    vars->head = NULL;
+    vars->astroot = NULL;
+    vars->current = NULL;
+    rl_clear_history();
 }
 
 /*

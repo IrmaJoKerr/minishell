@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/07 11:31:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 17:01:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ int validate_quotes(char *input, t_vars *vars)
         }
         i++;
     } 
-    // If we're still in a quote at the end, quotes are incomplete
     return (in_quote == 0);
 }
 

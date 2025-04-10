@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 01:33:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 19:35:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,36 +67,36 @@ char	*reader(void)
 	return (line);
 }
 
-/*
-Sets up environment variables for the shell.
-- Duplicates environment array from envp.
-- Handles memory allocation errors.
-- Initializes environment-dependent shell variables.
-Works with init_shell().
+// /*
+// Sets up environment variables for the shell.
+// - Duplicates environment array from envp.
+// - Handles memory allocation errors.
+// - Initializes environment-dependent shell variables.
+// Works with init_shell().
 
-Example: When shell starts
-- Copies environment variables from system
-- Sets up SHLVL variable for shell nesting level
-- Reports errors if environment setup fails
-*/
-void	setup_env(t_vars *vars, char **envp)
-{
-	vars->env = dup_env(envp);
-	if (!vars->env)
-	{
-		ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
-		exit(1);
-	}
-	vars->shell_level = get_shell_level(vars);
-	if (vars->shell_level == -1)
-	{
-		ft_putstr_fd("bleshell: error: Failed to get shell level\n", 2);
-		exit(1);
-	}
-	vars->shell_level = incr_shell_level(vars);
-	if (!vars->shell_level)
-		ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
-}
+// Example: When shell starts
+// - Copies environment variables from system
+// - Sets up SHLVL variable for shell nesting level
+// - Reports errors if environment setup fails
+// */
+// void	setup_env(t_vars *vars, char **envp)
+// {
+// 	vars->env = dup_env(envp);
+// 	if (!vars->env)
+// 	{
+// 		ft_putstr_fd("bleshell: error: Failed to duplicate environment\n", 2);
+// 		exit(1);
+// 	}
+// 	vars->shell_level = get_shell_level(vars);
+// 	if (vars->shell_level == -1)
+// 	{
+// 		ft_putstr_fd("bleshell: error: Failed to get shell level\n", 2);
+// 		exit(1);
+// 	}
+// 	vars->shell_level = incr_shell_level(vars);
+// 	if (!vars->shell_level)
+// 		ft_putstr_fd("bleshell: warning: Failed to increment SHLVL\n", 2);
+// }
 
 
 
@@ -296,28 +296,81 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
-void	process_command(char *command, t_vars *vars)
+// void	process_command(char *command, t_vars *vars)
+// {
+//     // Store original command in vars->partial_input
+//     vars->partial_input = ft_strdup(command);
+//     if (!vars->partial_input)
+//         return ;
+//     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+//     if (!vars->partial_input)
+//         return ;
+//     if (!process_input_tokens(vars->partial_input, vars))
+//     {
+//         free(vars->partial_input);
+//         vars->partial_input = NULL;
+//         return ;
+//     }
+//     if (!process_pipe_syntax(vars->partial_input, vars))
+//     {
+//         free(vars->partial_input);
+//         vars->partial_input = NULL;
+//         return ;
+//     }
+//     build_and_execute(vars);
+//     free(vars->partial_input);
+//     vars->partial_input = NULL;
+// }
+void process_command(char *command, t_vars *vars)
 {
     // Store original command in vars->partial_input
     vars->partial_input = ft_strdup(command);
     if (!vars->partial_input)
         return ;
+    // Handle quote completion first
     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
     if (!vars->partial_input)
         return ;
+    // Tokenize the input
     if (!process_input_tokens(vars->partial_input, vars))
     {
         free(vars->partial_input);
         vars->partial_input = NULL;
         return ;
     }
-    if (!process_pipe_syntax(vars->partial_input, vars))
+    // Use new pipe analysis system 
+    int pipe_result = analyze_pipe_syntax(vars);
+    if (pipe_result == 1) // Syntax error
     {
+        // Error already reported by analyze_pipe_syntax
         free(vars->partial_input);
         vars->partial_input = NULL;
-        return ;
+        return;
     }
+    else if (pipe_result == 2) // Needs pipe completion
+    {
+        char *completed_cmd = complete_pipe_command(vars->partial_input, vars);
+        if (!completed_cmd)
+        {
+            free(vars->partial_input);
+            vars->partial_input = NULL;
+            return ;
+        }
+        
+        free(vars->partial_input);
+        vars->partial_input = completed_cmd;
+        // Re-tokenize with completed command
+        cleanup_token_list(vars);
+        if (!process_input_tokens(vars->partial_input, vars))
+        {
+            free(vars->partial_input);
+            vars->partial_input = NULL;
+            return ;
+        }
+    }
+    // Build and execute the command
     build_and_execute(vars);
+    // Clean up
     free(vars->partial_input);
     vars->partial_input = NULL;
 }
@@ -352,6 +405,8 @@ int	main(int argc, char **argv, char **envp)
         }
         handle_input(input, &vars);
         free(input);
+		reset_shell(&vars);
+		// Cleanup any remaining resources
     }
     return (0);
 }

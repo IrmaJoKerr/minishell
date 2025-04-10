@@ -6,28 +6,28 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 23:08:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 03:39:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-Retrieves the exit status from the pipes or vars.
-- Checks if pipes exists in vars structure.
-- Returns the last command code as a string.
-- Falls back to "0" if information not available.
-Returns:
-Dynamically allocated string containing the exit status.
-Works with handle_special_var().
-*/
-char	*chk_exitstatus(t_vars *vars)
-{
-	if (vars)
-		return (ft_itoa(vars->error_code));
-	else
-		return (ft_strdup("0"));
-}
+// /*
+// Retrieves the exit status from the pipes or vars.
+// - Checks if pipes exists in vars structure.
+// - Returns the last command code as a string.
+// - Falls back to "0" if information not available.
+// Returns:
+// Dynamically allocated string containing the exit status.
+// Works with handle_special_var().
+// */
+// char	*chk_exitstatus(t_vars *vars)
+// {
+// 	if (vars)
+// 		return (ft_itoa(vars->error_code));
+// 	else
+// 		return (ft_strdup("0"));
+// }
 
 /*
 Processes special shell variables like $? and $0.
@@ -43,15 +43,41 @@ Example: After a command exits with status 1:
 $? -> "1"
 $0 -> "bleshell"
 */
-char	*handle_special_var(const char *var_name, t_vars *vars)
+// char	*handle_special_var(const char *var_name, t_vars *vars)
+// {
+// 	if (!var_name || !*var_name)
+// 		return (ft_strdup(""));
+// 	if (!ft_strcmp(var_name, "?"))
+// 		return (ft_itoa(vars->error_code));
+// 	if (!ft_strcmp(var_name, "0"))
+// 		return (ft_strdup("bleshell"));
+// 	return (NULL);
+// }
+char *handle_special_var(const char *var_name, t_vars *vars)
 {
-	if (!var_name || !*var_name)
-		return (ft_strdup(""));
-	if (!ft_strcmp(var_name, "?"))
-		return (chk_exitstatus(vars));
-	if (!ft_strcmp(var_name, "0"))
-		return (ft_strdup("bleshell"));
-	return (NULL);
+    // If var_name or vars is NULL, return empty string (not NULL)
+    if (!var_name || !vars)
+        return (ft_strdup(""));
+        
+    // Special case for error code ($?)
+    if (ft_strcmp(var_name, "?") == 0)
+    {
+        fprintf(stderr, "DEBUG: Handling special var $? = %d\n", vars->error_code);
+        return (ft_itoa(vars->error_code));
+    }
+    
+    // Special case for shell name ($0)
+    if (ft_strcmp(var_name, "0") == 0)
+    {
+        fprintf(stderr, "DEBUG: Handling special var $0 = bleshell\n");
+        return (ft_strdup("bleshell"));
+    }
+    
+    // Empty variable name case
+    if (var_name[0] == '\0')
+        return (ft_strdup(""));
+        
+    return (NULL);
 }
 
 /*
@@ -166,7 +192,7 @@ char	*handle_expansion(char *input, int *pos, t_vars *vars)
     // Check for special case $?
     if (input[*pos] == '?') {
         (*pos)++;
-        var_value = chk_exitstatus(vars);
+        var_value = ft_itoa(vars->error_code);
         fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
         return (var_value);
     }
