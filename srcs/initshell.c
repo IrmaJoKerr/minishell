@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/09 22:34:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 22:58:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,17 @@ void	init_shell(t_vars *vars, char **envp)
 {
 	ft_memset(vars, 0, sizeof(t_vars));
 	vars->env = dup_env(envp);
-    if (!vars->env)
+	if (!vars->env)
 	{
-        crit_error(vars);
+		crit_error(vars);
 	}
 	get_shell_level(vars);
 	incr_shell_level(vars);
 	init_vars(vars);
 	vars->pipes = init_pipes();
-    if (!vars->pipes)
+	if (!vars->pipes)
 	{
-        crit_error(vars);
+		crit_error(vars);
 	}
 	vars->error_code = 0;
 	load_signals();
@@ -47,9 +47,9 @@ Reset position trackers and node pointers.
 */
 void init_vars(t_vars *vars)
 {
-    if (!vars)
+	if (!vars)
 	{
-        return ;
+		return ;
 	}
 	vars->partial_input = NULL;
 	vars->next_flag = 0;
@@ -58,18 +58,18 @@ void init_vars(t_vars *vars)
 	ft_memset(vars->quote_ctx, 0, sizeof(vars->quote_ctx));
 	vars->quote_depth = 0;
 	vars->find_start = NULL;
-    vars->find_tgt = NULL;
-    vars->find_mode = 0;
+	vars->find_tgt = NULL;
+	vars->find_mode = 0;
 	vars->current = NULL;
 	vars->head = NULL;
 	vars->astroot = NULL;
-    vars->curr_type = TYPE_NULL;
-    vars->prev_type = TYPE_NULL;
-    vars->pos = 0;
-    vars->start = 0;
+	vars->curr_type = TYPE_NULL;
+	vars->prev_type = TYPE_NULL;
+	vars->pos = 0;
+	vars->start = 0;
 	vars->heredoc_lines = NULL;
-    vars->heredoc_count = 0;
-    vars->heredoc_index = 0;
+	vars->heredoc_count = 0;
+	vars->heredoc_index = 0;
 }
 
 /*
@@ -78,26 +78,26 @@ Allocates and sets up the pipes state.
 */
 t_pipe *init_pipes(void)
 {
-    t_pipe *pipes;
-    
-    pipes = (t_pipe *)malloc(sizeof(t_pipe));
-    if (!pipes)
-        return (NULL);
-    ft_memset(pipes, 0, sizeof(t_pipe));
-    pipes->saved_stdin = -1;
-    pipes->saved_stdout = -1;
-    pipes->heredoc_fd = -1;
-    pipes->redirection_fd = -1;
-    pipes->last_cmd = NULL;
-    pipes->last_heredoc = NULL;
-    pipes->last_pipe = NULL;
-    pipes->pipe_root = NULL;
-    pipes->redir_root = NULL;
-    pipes->last_in_redir = NULL;
-    pipes->last_out_redir = NULL;
-    pipes->cmd_redir = NULL;
-    pipes->pipe_at_end = 0;
-    return (pipes);
+	t_pipe *pipes;
+	
+	pipes = (t_pipe *)malloc(sizeof(t_pipe));
+	if (!pipes)
+		return (NULL);
+	ft_memset(pipes, 0, sizeof(t_pipe));
+	pipes->saved_stdin = -1;
+	pipes->saved_stdout = -1;
+	pipes->heredoc_fd = -1;
+	pipes->redirection_fd = -1;
+	pipes->last_cmd = NULL;
+	pipes->last_heredoc = NULL;
+	pipes->last_pipe = NULL;
+	pipes->pipe_root = NULL;
+	pipes->redir_root = NULL;
+	pipes->last_in_redir = NULL;
+	pipes->last_out_redir = NULL;
+	pipes->cmd_redir = NULL;
+	pipes->pipe_at_end = 0;
+	return (pipes);
 }
 
 /*
@@ -109,17 +109,17 @@ void	reset_pipe_vars(t_vars *vars)
 	if (!vars || !vars->pipes)
 		return;
 	vars->pipes->pipe_count = 0;
-    vars->pipes->out_mode = OUT_MODE_NONE;
-    vars->pipes->current_redirect = NULL;
-    vars->pipes->last_cmd = NULL;
-    vars->pipes->last_heredoc = NULL;
-    vars->pipes->last_pipe = NULL;
-    vars->pipes->pipe_root = NULL;
-    vars->pipes->redir_root = NULL;
-    vars->pipes->last_in_redir = NULL;
-    vars->pipes->last_out_redir = NULL;
-    vars->pipes->cmd_redir = NULL;
-    vars->pipes->pipe_at_end = 0;
+	vars->pipes->out_mode = OUT_MODE_NONE;
+	vars->pipes->current_redirect = NULL;
+	vars->pipes->last_cmd = NULL;
+	vars->pipes->last_heredoc = NULL;
+	vars->pipes->last_pipe = NULL;
+	vars->pipes->pipe_root = NULL;
+	vars->pipes->redir_root = NULL;
+	vars->pipes->last_in_redir = NULL;
+	vars->pipes->last_out_redir = NULL;
+	vars->pipes->cmd_redir = NULL;
+	vars->pipes->pipe_at_end = 0;
 }
 
 /*
@@ -132,22 +132,22 @@ Reset the shell state.
 */
 void reset_shell(t_vars *vars)
 {
-    if (!vars)
-        return;
-    cleanup_token_list(vars);
-    if (vars->partial_input)
-        free(vars->partial_input);
-    if (vars->heredoc_lines)
-    {
-        ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
-        vars->heredoc_lines = NULL;
-        vars->heredoc_count = 0;
-        vars->heredoc_index = 0;
-    }
-    if (vars->pipes)
-    {
-        reset_redirect_fds(vars);
-        reset_pipe_vars(vars);
-    }
-    init_vars(vars);
+	if (!vars)
+		return;
+	cleanup_token_list(vars);
+	if (vars->partial_input)
+		free(vars->partial_input);
+	if (vars->heredoc_lines)
+	{
+		ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
+		vars->heredoc_lines = NULL;
+		vars->heredoc_count = 0;
+		vars->heredoc_index = 0;
+	}
+	if (vars->pipes)
+	{
+		reset_redirect_fds(vars);
+		reset_pipe_vars(vars);
+	}
+	init_vars(vars);
 }

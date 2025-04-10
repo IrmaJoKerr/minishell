@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/06 09:26:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 22:59:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,25 +44,23 @@ int	is_input_complete(t_vars *vars)
 	return (!expecting_command);
 }
 
-
-
 /*
 Combines original input with continuation input
 Returns a newly allocated string with both inputs joined
 */
 char *append_input(char *original, char *additional)
 {
-    char *temp;
-    char *result;
-    
-    // First join with a newline
-    temp = ft_strjoin(original, "\n");
-    if (!temp)
-        return (NULL);
-    
-    // Then add the additional input
-    result = ft_strjoin(temp, additional);
-    free(temp);
-    
-    return (result);
+	char *temp;
+	char *result;
+	
+	// First join with a newline
+	temp = ft_strjoin(original, "\n");
+	if (!temp)
+		return (NULL);
+	
+	// Then add the additional input
+	result = ft_strjoin(temp, additional);
+	free(temp);
+	
+	return (result);
 }

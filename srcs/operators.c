@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 12:54:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 23:09:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,30 +22,30 @@ Returns:
 */
 int	operators(char *input, t_vars *vars)
 {
-    int			moves;
-    t_tokentype	token_type;
-    
-    // Handle text before operator
-    if (vars->pos > vars->start)
-        handle_string(input, vars);
-    
-    // Get token type and moves value
-    token_type = get_token_at(input, vars->pos, &moves);
-    
-    // Store previous type before updating current
-    vars->prev_type = vars->curr_type;
-    vars->curr_type = token_type;  // Update current type
-    
-    // Process token based on its type
-    if (token_type != 0)
-    {
-        if (moves == 2)
-            return handle_double_operator(input, vars);
-        else if (moves == 1)
-            return handle_single_operator(input, vars);
-    }
-    
-    return vars->pos;
+	int			moves;
+	t_tokentype	token_type;
+	
+	// Handle text before operator
+	if (vars->pos > vars->start)
+		handle_string(input, vars);
+	
+	// Get token type and moves value
+	token_type = get_token_at(input, vars->pos, &moves);
+	
+	// Store previous type before updating current
+	vars->prev_type = vars->curr_type;
+	vars->curr_type = token_type;  // Update current type
+	
+	// Process token based on its type
+	if (token_type != 0)
+	{
+		if (moves == 2)
+			return handle_double_operator(input, vars);
+		else if (moves == 1)
+			return handle_single_operator(input, vars);
+	}
+	
+	return vars->pos;
 }
 
 /* 
@@ -54,18 +54,18 @@ Returns 1 if token is an operator, 0 otherwise.
 */
 int is_operator_token(t_tokentype type)
 {
-    if (type == TYPE_PIPE)
-        return (1);
-    if (type == TYPE_IN_REDIRECT)
-        return (1);
-    if (type == TYPE_OUT_REDIRECT)
-        return (1);
-    if (type == TYPE_APPEND_REDIRECT)
-        return (1);
-    if (type == TYPE_HEREDOC)
-        return (1);
-    
-    return (0);
+	if (type == TYPE_PIPE)
+		return (1);
+	if (type == TYPE_IN_REDIRECT)
+		return (1);
+	if (type == TYPE_OUT_REDIRECT)
+		return (1);
+	if (type == TYPE_APPEND_REDIRECT)
+		return (1);
+	if (type == TYPE_HEREDOC)
+		return (1);
+	
+	return (0);
 }
 
 /*
@@ -79,33 +79,33 @@ Works with operators() for text segment tokenization.
 */
 void handle_string(char *input, t_vars *vars)
 {
-    char 		*token;
-    int			moves;
-    t_tokentype	token_type;
-    
-    if (vars->pos > vars->start)
-    {
-        token = ft_substr(input, vars->start, vars->pos - vars->start);
-        if (!token)
-            return;
-        
-        // Determine token type based on the input
-        token_type = get_token_at(token, 0, &moves);
-        if (token_type == 0)
-        {
-            // Pass the token content to help determine type
-            set_token_type(vars, token);
-        }
-        else
-        {
-            vars->curr_type = token_type;
-        }
-        
-        maketoken_with_type(token, vars->curr_type, vars);
-        free(token);
-        
-        vars->start = vars->pos;
-    }
+	char 		*token;
+	int			moves;
+	t_tokentype	token_type;
+	
+	if (vars->pos > vars->start)
+	{
+		token = ft_substr(input, vars->start, vars->pos - vars->start);
+		if (!token)
+			return;
+		
+		// Determine token type based on the input
+		token_type = get_token_at(token, 0, &moves);
+		if (token_type == 0)
+		{
+			// Pass the token content to help determine type
+			set_token_type(vars, token);
+		}
+		else
+		{
+			vars->curr_type = token_type;
+		}
+		
+		maketoken_with_type(token, vars->curr_type, vars);
+		free(token);
+		
+		vars->start = vars->pos;
+	}
 }
 
 /* 
@@ -161,8 +161,8 @@ int	is_double_token(char *input, int pos, int *moves)
 		token_type = TYPE_EXIT_STATUS;
 	if (token_type != 0)
 	{
-        *moves = 2;
-    }
+		*moves = 2;
+	}
 	return (token_type);
 }
 
@@ -180,15 +180,15 @@ t_tokentype	get_token_at(char *input, int pos, int *moves)
 	token_type = is_double_token(input, pos, moves);
 	if (token_type != 0)
 	{
-        return token_type;
-    }
+		return token_type;
+	}
 	token_type = is_single_token(input, pos, moves);
 	if (token_type != 0)
 	{
-        return token_type;
-    }
+		return token_type;
+	}
 	*moves = 1;
-    return (0);
+	return (0);
 }
 
 /*
@@ -201,19 +201,19 @@ Returns:
 */
 int	handle_single_operator(char *input, t_vars *vars)
 {
-    char	*token;
+	char	*token;
 	
-    token = ft_substr(input, vars->pos, 1);
-    if (!token)
-        return (vars->pos);
-    maketoken_with_type(token, vars->curr_type, vars);
-    free(token);
-    vars->pos++;
-    vars->start = vars->pos;
-    vars->prev_type = vars->curr_type;
-    return (vars->pos);
+	token = ft_substr(input, vars->pos, 1);
+	if (!token)
+		return (vars->pos);
+	maketoken_with_type(token, vars->curr_type, vars);
+	free(token);
+	vars->pos++;
+	vars->start = vars->pos;
+	vars->prev_type = vars->curr_type;
+	return (vars->pos);
 }
- 
+
 /*
 Processes double-character operators (>>, <<).
 Creates token with the provided token type.
@@ -224,17 +224,17 @@ Returns:
 */
 int	handle_double_operator(char *input, t_vars *vars)
 {
-    char	*token;
-    int		moves;
-    
-    moves = 2;
-    token = ft_substr(input, vars->pos, moves);
-    if (!token)
-        return (vars->pos);
-    maketoken_with_type(token, vars->curr_type, vars);
-    free(token);
-    vars->pos += moves;
-    vars->start = vars->pos;
-    vars->prev_type = vars->curr_type;
-    return (vars->pos);
+	char	*token;
+	int		moves;
+	
+	moves = 2;
+	token = ft_substr(input, vars->pos, moves);
+	if (!token)
+		return (vars->pos);
+	maketoken_with_type(token, vars->curr_type, vars);
+	free(token);
+	vars->pos += moves;
+	vars->start = vars->pos;
+	vars->prev_type = vars->curr_type;
+	return (vars->pos);
 }

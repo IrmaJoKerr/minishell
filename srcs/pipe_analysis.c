@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 19:51:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 23:13:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,15 +23,15 @@ Works with analyze_pipe_syntax().
 */
 static int check_pipe_at_start(t_vars *vars)
 {
-    if (!vars || !vars->head)
-        return (0);
-    if (vars->head->type == TYPE_PIPE)
-    {
-        ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
-        vars->error_code = 2;
-        return (1);
-    }
-    return (0);
+	if (!vars || !vars->head)
+		return (0);
+	if (vars->head->type == TYPE_PIPE)
+	{
+		ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
+		vars->error_code = 2;
+		return (1);
+	}
+	return (0);
 }
 
 /*
@@ -45,32 +45,32 @@ Works with analyze_pipe_syntax().
 */
 static int check_consecutive_pipes(t_vars *vars)
 {
-    t_node *current;
-    int expecting_command;
+	t_node *current;
+	int expecting_command;
 
-    if (!vars || !vars->head)
-        return (0);
-    current = vars->head;
-    expecting_command = 0;
-    while (current)
-    {
-        if (current->type == TYPE_PIPE)
-        {
-            if (expecting_command)
-            {
-                ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
-                vars->error_code = 2;
-                return (1);
-            }
-            expecting_command = 1;
-        }
-        else if (current->type == TYPE_CMD || current->type == TYPE_ARGS)
-        {
-            expecting_command = 0;
-        }
-        current = current->next;
-    }
-    return (0);
+	if (!vars || !vars->head)
+		return (0);
+	current = vars->head;
+	expecting_command = 0;
+	while (current)
+	{
+		if (current->type == TYPE_PIPE)
+		{
+			if (expecting_command)
+			{
+				ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
+				vars->error_code = 2;
+				return (1);
+			}
+			expecting_command = 1;
+		}
+		else if (current->type == TYPE_CMD || current->type == TYPE_ARGS)
+		{
+			expecting_command = 0;
+		}
+		current = current->next;
+	}
+	return (0);
 }
 
 /*
@@ -84,31 +84,31 @@ Works with analyze_pipe_syntax().
 */
 static int check_pipe_completion_needed(t_vars *vars)
 {
-    t_node *current;
-    int expecting_command;
+	t_node *current;
+	int expecting_command;
 
-    if (!vars || !vars->head)
-        return (0);
-    
-    current = vars->head;
-    expecting_command = 0;
-    while (current)
-    {
-        if (current->type == TYPE_PIPE)
-        {
-            expecting_command = 1;
-        }
-        else if ((current->type == TYPE_CMD || current->type == TYPE_ARGS) && 
-                 expecting_command)
-        {
-            expecting_command = 0;
-        }
-        current = current->next;
-    }
-    // If we end with expecting_command=1, we need more input
-    if (expecting_command)
-        return (2);
-    return (0);
+	if (!vars || !vars->head)
+		return (0);
+	
+	current = vars->head;
+	expecting_command = 0;
+	while (current)
+	{
+		if (current->type == TYPE_PIPE)
+		{
+			expecting_command = 1;
+		}
+		else if ((current->type == TYPE_CMD || current->type == TYPE_ARGS) && 
+				 expecting_command)
+		{
+			expecting_command = 0;
+		}
+		current = current->next;
+	}
+	// If we end with expecting_command=1, we need more input
+	if (expecting_command)
+		return (2);
+	return (0);
 }
 
 /*
@@ -123,24 +123,24 @@ Works with process_command() to validate and prepare input.
 */
 int analyze_pipe_syntax(t_vars *vars)
 {
-    int result;
+	int result;
 
-    if (!vars || !vars->head)
-        return (0);
-    // Check for pipe at beginning (error)
-    result = check_pipe_at_start(vars);
-    if (result != 0)
-        return (result);
-    // Check for consecutive pipes (error)
-    result = check_consecutive_pipes(vars);
-    if (result != 0)
-        return (result);
-    // Check for pipe at end (needs completion)
-    result = check_pipe_completion_needed(vars);
-    if (result != 0)
-        return (result);
-    
-    return (0);
+	if (!vars || !vars->head)
+		return (0);
+	// Check for pipe at beginning (error)
+	result = check_pipe_at_start(vars);
+	if (result != 0)
+		return (result);
+	// Check for consecutive pipes (error)
+	result = check_consecutive_pipes(vars);
+	if (result != 0)
+		return (result);
+	// Check for pipe at end (needs completion)
+	result = check_pipe_completion_needed(vars);
+	if (result != 0)
+		return (result);
+	
+	return (0);
 }
 
 /*
@@ -154,28 +154,28 @@ Works with process_command() to handle unfinished pipes.
 */
 char *complete_pipe_command(char *command, t_vars *vars)
 {
-    char	*pipe_cmd;
-    char	*temp;
-    int		syntax_result;
-    
-    if (!command || !vars)
-        return (NULL);
-    // Check if pipe completion is needed using our new analyzer
-    syntax_result = analyze_pipe_syntax(vars);
-    if (syntax_result != 2)  // If not needing completion (0=valid, 1=error)
-        return (ft_strdup(command)); 
-    // Prepare working copies for pipe completion
-    pipe_cmd = ft_strdup(command);
-    if (!pipe_cmd)
-        return (NULL);
-    // Do the actual pipe completion
-    if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
-    {
-        free(pipe_cmd);
-        return (NULL);
-    }
-    // Return the completed command
-    temp = ft_strdup(pipe_cmd);
-    free(pipe_cmd);
-    return (temp);
+	char	*pipe_cmd;
+	char	*temp;
+	int		syntax_result;
+	
+	if (!command || !vars)
+		return (NULL);
+	// Check if pipe completion is needed using our new analyzer
+	syntax_result = analyze_pipe_syntax(vars);
+	if (syntax_result != 2)  // If not needing completion (0=valid, 1=error)
+		return (ft_strdup(command)); 
+	// Prepare working copies for pipe completion
+	pipe_cmd = ft_strdup(command);
+	if (!pipe_cmd)
+		return (NULL);
+	// Do the actual pipe completion
+	if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
+	{
+		free(pipe_cmd);
+		return (NULL);
+	}
+	// Return the completed command
+	temp = ft_strdup(pipe_cmd);
+	free(pipe_cmd);
+	return (temp);
 }

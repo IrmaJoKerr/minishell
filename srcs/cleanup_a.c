@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 16:09:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 22:42:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,38 +35,25 @@ Cleanup pipes struct variables.
 - Prevents memory leaks after pipeline processing.
 Works with cleanup_exit().
 */
-// void	cleanup_pipes(t_pipe *pipes)
-// {
-// 	if (!pipes)
-// 		return ;
-// 	free(pipes->pipe_fds);
-// 	free(pipes->pids);
-// 	free(pipes->status);
-// 	if (pipes->heredoc_fd > 2)
-// 		close(pipes->heredoc_fd);
-// 	if (pipes->redirection_fd > 2)
-//         close(pipes->redirection_fd);
-// 	free(pipes);
-// }
 void cleanup_pipes(t_pipe *pipes)
 {
-    if (!pipes)
-        return ;
-    if (pipes->pipe_fds)
-        free(pipes->pipe_fds);
-    if (pipes->pids)
-        free(pipes->pids);
-    if (pipes->status)
-        free(pipes->status);
-    if (pipes->heredoc_fd > 2)
-        close(pipes->heredoc_fd);
-    if (pipes->redirection_fd > 2)
-        close(pipes->redirection_fd);
-    if (pipes->saved_stdin > 2)
-        close(pipes->saved_stdin);
-    if (pipes->saved_stdout > 2)
-        close(pipes->saved_stdout);
-    free(pipes);
+	if (!pipes)
+		return ;
+	if (pipes->pipe_fds)
+		free(pipes->pipe_fds);
+	if (pipes->pids)
+		free(pipes->pids);
+	if (pipes->status)
+		free(pipes->status);
+	if (pipes->heredoc_fd > 2)
+		close(pipes->heredoc_fd);
+	if (pipes->redirection_fd > 2)
+		close(pipes->redirection_fd);
+	if (pipes->saved_stdin > 2)
+		close(pipes->saved_stdin);
+	if (pipes->saved_stdout > 2)
+		close(pipes->saved_stdout);
+	free(pipes);
 }
 
 /*
@@ -79,28 +66,28 @@ Works with cleanup_exit().
 */
 void	cleanup_vars(t_vars *vars)
 {
-    int	env_count;
+	int	env_count;
 
-    if (!vars)
+	if (!vars)
 	{
-        return ;
+		return ;
 	}
 	if (vars->pipes)
 		cleanup_pipes(vars->pipes);
-    vars->pipes = NULL;
-    if (vars->env)
-    {
-        env_count = ft_arrlen(vars->env);
-        ft_free_2d(vars->env, env_count);
-        vars->env = NULL;
-    }
-    if (vars->heredoc_lines)
-    {
-        ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
-        vars->heredoc_lines = NULL;
-        vars->heredoc_count = 0;
-        vars->heredoc_index = 0;
-    }
+	vars->pipes = NULL;
+	if (vars->env)
+	{
+		env_count = ft_arrlen(vars->env);
+		ft_free_2d(vars->env, env_count);
+		vars->env = NULL;
+	}
+	if (vars->heredoc_lines)
+	{
+		ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
+		vars->heredoc_lines = NULL;
+		vars->heredoc_count = 0;
+		vars->heredoc_index = 0;
+	}
 }
 
 /*
@@ -113,23 +100,23 @@ Works with builtin_exit().
 */
 void cleanup_exit(t_vars *vars)
 {
-    if (!vars)
-        return ;
-    save_history();
-    if (vars->head)
+	if (!vars)
+		return ;
+	save_history();
+	if (vars->head)
 	{
-        cleanup_token_list(vars);
+		cleanup_token_list(vars);
 	}
 	cleanup_vars(vars);
 	if (vars->partial_input)
-    {
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-    }
-    vars->head = NULL;
-    vars->astroot = NULL;
-    vars->current = NULL;
-    rl_clear_history();
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+	}
+	vars->head = NULL;
+	vars->astroot = NULL;
+	vars->current = NULL;
+	rl_clear_history();
 }
 
 /*

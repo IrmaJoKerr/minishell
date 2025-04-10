@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 15:58:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 22:42:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,25 @@ Works with cleanup_token_list().
 */
 void	free_token_node(t_node *node)
 {
-    int	i;
-    
-    if (!node)
-        return ;
-    if (node->args)
-        ft_free_2d(node->args, ft_arrlen(node->args));
-    
-    if (node->arg_quote_type)
-    {
-        i = 0;
-        while (node->arg_quote_type[i])
-        {
-            free(node->arg_quote_type[i]);
-            i++;
-        }
-        free(node->arg_quote_type);
-    }
-    // Free the node itself
-    free(node);
+	int	i;
+	
+	if (!node)
+		return ;
+	if (node->args)
+		ft_free_2d(node->args, ft_arrlen(node->args));
+	
+	if (node->arg_quote_type)
+	{
+		i = 0;
+		while (node->arg_quote_type[i])
+		{
+			free(node->arg_quote_type[i]);
+			i++;
+		}
+		free(node->arg_quote_type);
+	}
+	// Free the node itself
+	free(node);
 }
 
 /*

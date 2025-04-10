@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 19:46:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/10 22:46:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,20 +23,20 @@ Works with exec_child_cmd() and execute_pipes().
 */
 int handle_cmd_status(int status, t_vars *vars)
 {
-    int exit_code;
-    
+	int exit_code;
+	
 	exit_code = 0;
-    if (WIFEXITED(status))
-    {
-        exit_code = WEXITSTATUS(status);
-    }
-    else if (WIFSIGNALED(status))
-    {
-        exit_code = 128 + WTERMSIG(status);
-    }
-    if (vars)
-        vars->error_code = exit_code;
-    return exit_code;
+	if (WIFEXITED(status))
+	{
+		exit_code = WEXITSTATUS(status);
+	}
+	else if (WIFSIGNALED(status))
+	{
+		exit_code = 128 + WTERMSIG(status);
+	}
+	if (vars)
+		vars->error_code = exit_code;
+	return exit_code;
 }
 
 /*
@@ -50,29 +50,29 @@ Works with setup_redirection().
 */
 int	setup_out_redir(t_node *node, t_vars *vars)
 {
-    char	*file;
-    int		flags;
+	char	*file;
+	int		flags;
 	
 	if (!node->right || !node->right->args || !node->right->args[0])
-        return (0);
+		return (0);
 	flags = O_WRONLY | O_CREAT;
-    file = node->right->args[0];
-    if (vars->pipes->out_mode == OUT_MODE_APPEND)
-        flags |= O_APPEND;
-    else
-        flags |= O_TRUNC;
-    vars->pipes->redirection_fd = open(file, flags, 0644);
-    if (vars->pipes->redirection_fd == -1)
-    {
-        shell_error(file, ERR_PERMISSIONS, vars);
-        return (0);
-    }
-    if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
-    {
-        close(vars->pipes->redirection_fd);
-        return (0);
-    }
-    return (1);
+	file = node->right->args[0];
+	if (vars->pipes->out_mode == OUT_MODE_APPEND)
+		flags |= O_APPEND;
+	else
+		flags |= O_TRUNC;
+	vars->pipes->redirection_fd = open(file, flags, 0644);
+	if (vars->pipes->redirection_fd == -1)
+	{
+		shell_error(file, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
+	{
+		close(vars->pipes->redirection_fd);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -86,37 +86,37 @@ Works with setup_redirection().
 */
 int	setup_in_redir(t_node *node, t_vars *vars)
 {
-    char	*file;
+	char	*file;
 	int		i;
-    
-    if (!node->right || !node->right->args || !node->right->args[0])
-    {
-        return (0);
-    }
-    file = node->right->args[0];
-    vars->pipes->redirection_fd = open(file, O_RDONLY);
-    if (vars->pipes->redirection_fd == -1)
-    {
+	
+	if (!node->right || !node->right->args || !node->right->args[0])
+	{
+		return (0);
+	}
+	file = node->right->args[0];
+	vars->pipes->redirection_fd = open(file, O_RDONLY);
+	if (vars->pipes->redirection_fd == -1)
+	{
 		not_found_error(file);
-        if (vars->pipes->pids)
-        {
-            i = 0;
-            while (i < vars->pipes->pipe_count)
-            {
-                if (vars->pipes->pids[i] > 0)
-                    kill(vars->pipes->pids[i], SIGTERM);
-                i++;
-            }
-        }
-        vars->error_code = 1;
-        return (0);
-    }
-    if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
-    {
-        close(vars->pipes->redirection_fd);
-        return (0);
-    }
-    return (1);
+		if (vars->pipes->pids)
+		{
+			i = 0;
+			while (i < vars->pipes->pipe_count)
+			{
+				if (vars->pipes->pids[i] > 0)
+					kill(vars->pipes->pids[i], SIGTERM);
+				i++;
+			}
+		}
+		vars->error_code = 1;
+		return (0);
+	}
+	if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
+	{
+		close(vars->pipes->redirection_fd);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -130,54 +130,54 @@ Works with exec_redirect_cmd().
 */
 int setup_redirection(t_node *node, t_vars *vars)
 {
-    reset_redirect_fds(vars);
-    vars->pipes->current_redirect = node;
-    if (node->right && node->right->args)
-        process_arg_quotes(&node->right->args[0]);
-    fprintf(stderr, "DEBUG: Setting up redirection type=%d operator='%s' file='%s'\n",
-        node->type, 
-        node->args ? node->args[0] : "(null)",
-        (node->right && node->right->args) ? node->right->args[0] : "(null)");
-    if (node->type == TYPE_IN_REDIRECT)
-    {
-        if (!setup_in_redir(node, vars))
-        {
-            vars->error_code = 1;
-            return (0);
-        }
-    }
-    else if (node->type == TYPE_OUT_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-        if (!setup_out_redir(node, vars))
-        {
-            vars->error_code = 1;
-            return (0);
-        }
-    }
-    else if (node->type == TYPE_APPEND_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_APPEND;
-        if (!setup_out_redir(node, vars))
-        {
-            vars->error_code = 1;
-            return (0);
-        }
-    }
-    else if (node->type == TYPE_HEREDOC)
-    {
-        if (!node->right || !node->right->args || !node->right->args[0])
-        {
-            vars->error_code = 1;
-            return (0);
-        }
-        if (handle_heredoc(node, vars) == -1)
-        {
-            vars->error_code = 1;
-            return (0);
-        }
-    }
-    return (1);
+	reset_redirect_fds(vars);
+	vars->pipes->current_redirect = node;
+	if (node->right && node->right->args)
+		process_arg_quotes(&node->right->args[0]);
+	fprintf(stderr, "DEBUG: Setting up redirection type=%d operator='%s' file='%s'\n",
+		node->type, 
+		node->args ? node->args[0] : "(null)",
+		(node->right && node->right->args) ? node->right->args[0] : "(null)");
+	if (node->type == TYPE_IN_REDIRECT)
+	{
+		if (!setup_in_redir(node, vars))
+		{
+			vars->error_code = 1;
+			return (0);
+		}
+	}
+	else if (node->type == TYPE_OUT_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+		if (!setup_out_redir(node, vars))
+		{
+			vars->error_code = 1;
+			return (0);
+		}
+	}
+	else if (node->type == TYPE_APPEND_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_APPEND;
+		if (!setup_out_redir(node, vars))
+		{
+			vars->error_code = 1;
+			return (0);
+		}
+	}
+	else if (node->type == TYPE_HEREDOC)
+	{
+		if (!node->right || !node->right->args || !node->right->args[0])
+		{
+			vars->error_code = 1;
+			return (0);
+		}
+		if (handle_heredoc(node, vars) == -1)
+		{
+			vars->error_code = 1;
+			return (0);
+		}
+	}
+	return (1);
 }
 
 /*
@@ -281,102 +281,60 @@ Main command execution function.
 Returns:
 Exit code which is also stored in vars->error_code.
 */
-// int execute_cmd(t_node *node, char **envp, t_vars *vars)
-// {
-//     int result = 0;
-    
-//     if (!node) {
-//         DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
-//         return (vars->error_code = 1);
-//     }
-    
-//     DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-// 		node->type, node->args ? node->args[0] : "NULL");
-    
-//     // Handle different node types
-//     if (node->type == TYPE_PIPE) {
-//         // For pipe nodes, validate they have both left and right children
-//         if (!node->left || !node->right) {
-//             DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
-//             return (vars->error_code = 1);
-//         }
-//         result = execute_pipes(node, vars);
-//     } 
-//     else if (is_redirection(node->type))
-// 	{
-// 		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-// 			(void*)node->left, (void*)node->right);
-//   		if (node->left)
-// 	  	DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-// 				node->left->type, node->left->args ? node->left->args[0] : "NULL");
-//   		if (node->right)
-// 	  	DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-// 				node->right->type, node->right->args ? node->right->args[0] : "NULL");
-//   		result = exec_redirect_cmd(node, envp, vars);
-//     }
-//     else if (node->type == TYPE_CMD) {
-//         // For command nodes, execute them directly
-//         result = exec_std_cmd(node, envp, vars);
-//     }
-    
-//     // Ensure error code is set in vars
-//     vars->error_code = result;
-//     return result;
-// }
 int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int	result;
-    
+	int	result;
+	
 	result = 0;
-    if (!node)
+	if (!node)
 	{
-        DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
-        return (vars->error_code = 1);
-    }
-    DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-       node->type, node->args ? node->args[0] : "NULL");
-    //Handle different node types
-    if (node->type == TYPE_CMD)
+		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
+		return (vars->error_code = 1);
+	}
+	DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
+	   node->type, node->args ? node->args[0] : "NULL");
+	//Handle different node types
+	if (node->type == TYPE_CMD)
 	{
-        // Handle regular command
-        result = exec_std_cmd(node, envp, vars);
-    }
+		// Handle regular command
+		result = exec_std_cmd(node, envp, vars);
+	}
 	else if (is_redirection(node->type))
 	{
-        DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-           (void*)node->left, (void*)node->right);
-        if (node->left)
-           DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-               node->left->type, node->left->args ? node->left->args[0] : "NULL");
-        if (node->right)
-           DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-               node->right->type, node->right->args ? node->right->args[0] : "NULL");
-        // Add heredoc-specific debugging
-        if (node->type == TYPE_HEREDOC) {
-           DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
-               node->right && node->right->args ? node->right->args[0] : "NULL",
-               vars->pipes->heredoc_fd);
-        }
-        result = exec_redirect_cmd(node, envp, vars);
-    }
-    else if (node->type == TYPE_PIPE)
+		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
+		   (void*)node->left, (void*)node->right);
+		if (node->left)
+		   DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
+			   node->left->type, node->left->args ? node->left->args[0] : "NULL");
+		if (node->right)
+		   DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
+			   node->right->type, node->right->args ? node->right->args[0] : "NULL");
+		// Add heredoc-specific debugging
+		if (node->type == TYPE_HEREDOC) {
+		   DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
+			   node->right && node->right->args ? node->right->args[0] : "NULL",
+			   vars->pipes->heredoc_fd);
+		}
+		result = exec_redirect_cmd(node, envp, vars);
+	}
+	else if (node->type == TYPE_PIPE)
 	{
-        // For pipe nodes, validate they have both left and right children
-        if (!node->left || !node->right) {
-            //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
-            return (vars->error_code = 1);
-        }
-        result = execute_pipes(node, vars);
-    } 
-    else
+		// For pipe nodes, validate they have both left and right children
+		if (!node->left || !node->right) {
+			//DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
+			return (vars->error_code = 1);
+		}
+		result = execute_pipes(node, vars);
+	} 
+	else
 	{
-        // Unhandled node type
-        //DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
-        result = 1;
-    }
-    // Ensure error code is set in vars
-    vars->error_code = result;
-    return result;
+		// Unhandled node type
+		//DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
+		result = 1;
+	}
+	// Ensure error code is set in vars
+	vars->error_code = result;
+	return result;
 }
 
 /*
@@ -396,49 +354,49 @@ Example: For "ls -la"
 */
 int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    pid_t	pid;
-    int		status;
-    char	*cmd_path;
+	pid_t	pid;
+	int		status;
+	char	*cmd_path;
 
 	if (!node || !node->args || !node->args[0])
-    {
-        // Set error code consistently for invalid arguments case
-        vars->error_code = 1;
-        return vars->error_code;
-    }
-    // Get command path
-    cmd_path = get_cmd_path(node->args[0], envp);
-    if (!cmd_path)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(node->args[0], 2);
-        ft_putendl_fd(": command not found", 2);
-        return (vars->error_code = 0);
-    }
+	{
+		// Set error code consistently for invalid arguments case
+		vars->error_code = 1;
+		return vars->error_code;
+	}
+	// Get command path
+	cmd_path = get_cmd_path(node->args[0], envp);
+	if (!cmd_path)
+	{
+		ft_putstr_fd("bleshell: ", 2);
+		ft_putstr_fd(node->args[0], 2);
+		ft_putendl_fd(": command not found", 2);
+		return (vars->error_code = 0);
+	}
 
-    // Fork and execute
-    pid = fork();
-    if (pid < 0)
-    {
-        ft_putstr_fd("bleshell: fork failed\n", 2);
-        free(cmd_path);
-        return (vars->error_code = 1);
-    }
-    
-    // Child process
-    if (pid == 0)
-    {
-        execve(cmd_path, node->args, envp);
-        // If execve returns, an error occurred
-        perror("bleshell");
-        free(cmd_path);
-        exit(127);
-    }
-    
-    // Parent process
-    free(cmd_path);
-    waitpid(pid, &status, 0);
-    
-    // Handle exit status and update vars->error_code
-    return (handle_cmd_status(status, vars));
+	// Fork and execute
+	pid = fork();
+	if (pid < 0)
+	{
+		ft_putstr_fd("bleshell: fork failed\n", 2);
+		free(cmd_path);
+		return (vars->error_code = 1);
+	}
+	
+	// Child process
+	if (pid == 0)
+	{
+		execve(cmd_path, node->args, envp);
+		// If execve returns, an error occurred
+		perror("bleshell");
+		free(cmd_path);
+		exit(127);
+	}
+	
+	// Parent process
+	free(cmd_path);
+	waitpid(pid, &status, 0);
+	
+	// Handle exit status and update vars->error_code
+	return (handle_cmd_status(status, vars));
 }

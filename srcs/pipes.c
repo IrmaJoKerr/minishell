@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 20:34:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 00:56:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,65 +29,65 @@ Example: For "ls -l | grep txt"
 */
 int execute_pipes(t_node *pipe_node, t_vars *vars)
 {
-    int     pipe_fd[2];
-    pid_t   left_pid;
-    pid_t   right_pid;
-    int     status;
-    int     left_status = 0;
-    
-    if (pipe(pipe_fd) == -1) {
-        ft_putendl_fd("pipe: Creation failed", 2);
-        return 1;
-    }
-    
-    // Fork left process
-    left_pid = fork();
-    if (left_pid == 0) {
-        // Child process - left side
-        close(pipe_fd[0]);  // Close read end in left process
-        if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-            exit(1);
-        close(pipe_fd[1]);
-        
-        // Execute left command - will exit on its own
-        exit(execute_cmd(pipe_node->left, vars->env, vars));
-    }
-    else if (left_pid > 0) {
-        // Parent process
-        close(pipe_fd[1]);  // Close write end in parent
-        
-        // Fork right process
-        right_pid = fork();
-        if (right_pid == 0) {
-            // Child process - right side
-            if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
-                exit(1);
-            close(pipe_fd[0]);
-            
-            // Execute right command - will exit on its own
-            exit(execute_cmd(pipe_node->right, vars->env, vars));
-        }
-        else if (right_pid > 0) {
-            // Parent process - close pipe fully
-            close(pipe_fd[0]);
-            
-            // Wait for both processes independently
-            waitpid(left_pid, &left_status, 0);
-            waitpid(right_pid, &status, 0);
-            
-            // Return right command status, or left if right succeeded
-            if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-                return left_status;
-            else
-                return (handle_cmd_status(status, vars));
-        }
-    }
-    
-    // Error in fork
-    ft_putendl_fd("fork: Creation failed", 2);
-    close(pipe_fd[0]);
-    close(pipe_fd[1]);
-    return 1;
+	int     pipe_fd[2];
+	pid_t   left_pid;
+	pid_t   right_pid;
+	int     status;
+	int     left_status = 0;
+	
+	if (pipe(pipe_fd) == -1) {
+		ft_putendl_fd("pipe: Creation failed", 2);
+		return 1;
+	}
+	
+	// Fork left process
+	left_pid = fork();
+	if (left_pid == 0) {
+		// Child process - left side
+		close(pipe_fd[0]);  // Close read end in left process
+		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+			exit(1);
+		close(pipe_fd[1]);
+		
+		// Execute left command - will exit on its own
+		exit(execute_cmd(pipe_node->left, vars->env, vars));
+	}
+	else if (left_pid > 0) {
+		// Parent process
+		close(pipe_fd[1]);  // Close write end in parent
+		
+		// Fork right process
+		right_pid = fork();
+		if (right_pid == 0) {
+			// Child process - right side
+			if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+				exit(1);
+			close(pipe_fd[0]);
+			
+			// Execute right command - will exit on its own
+			exit(execute_cmd(pipe_node->right, vars->env, vars));
+		}
+		else if (right_pid > 0) {
+			// Parent process - close pipe fully
+			close(pipe_fd[0]);
+			
+			// Wait for both processes independently
+			waitpid(left_pid, &left_status, 0);
+			waitpid(right_pid, &status, 0);
+			
+			// Return right command status, or left if right succeeded
+			if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+				return left_status;
+			else
+				return (handle_cmd_status(status, vars));
+		}
+	}
+	
+	// Error in fork
+	ft_putendl_fd("fork: Creation failed", 2);
+	close(pipe_fd[0]);
+	close(pipe_fd[1]);
+	return 1;
 }
 
 /*
@@ -97,71 +97,70 @@ Determines if a redirection node relates to a specific command.
 Returns:
 - 1 if redirection relates to the command.
 - 0 otherwise.
-Works with setup_multi_redirects().
 */
-int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars)
+int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars) //Possible to reuse
 {
-    t_node *current;
-    t_node *prev_cmd = NULL;
-    t_node *next_cmd = NULL;
-    
-    if (!redir_node || !cmd_node || !vars || !vars->head)
-        return (0);
-    
-    /* Find the command positions */
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-        {
-            if (current == cmd_node)
-            {
-                /* We found our target command */
-                break;
-            }
-            prev_cmd = current;
-        }
-        current = current->next;
-    }
-    
-    /* Find next command after our target */
+	t_node *current;
+	t_node *prev_cmd = NULL;
+	t_node *next_cmd = NULL;
+	
+	if (!redir_node || !cmd_node || !vars || !vars->head)
+		return (0);
+	
+	/* Find the command positions */
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+		{
+			if (current == cmd_node)
+			{
+				/* We found our target command */
+				break;
+			}
+			prev_cmd = current;
+		}
+		current = current->next;
+	}
+	
+	/* Find next command after our target */
 	next_cmd = find_cmd(cmd_node->next, NULL, FIND_NEXT, vars);
-    
-    /* Check if redirection is between our command and the next one */
-    current = cmd_node->next;
-    while (current && current != next_cmd)
-    {
-        if (current == redir_node)
-            return (1);
-        current = current->next;
-    }
-    
-    /* Check if redirection is between previous command and our command */
-    if (prev_cmd)
-    {
-        current = prev_cmd->next;
-        while (current && current != cmd_node)
-        {
-            if (current == redir_node)
-                return (0); /* Belongs to previous command */
-            current = current->next;
-        }
-    }
-    
-    /* Redirection before first command belongs to first command */
-    if (!prev_cmd && cmd_node == vars->cmd_nodes[0])
-    {
-        current = vars->head;
-        while (current && current != cmd_node)
-        {
-            if (current == redir_node)
-                return (1);
-            current = current->next;
-        }
-    }
-    /* Check for special cases like consecutive commands without pipes */
-    /* Redirections after a command belong to it until another command is found */
-    return (0);
+	
+	/* Check if redirection is between our command and the next one */
+	current = cmd_node->next;
+	while (current && current != next_cmd)
+	{
+		if (current == redir_node)
+			return (1);
+		current = current->next;
+	}
+	
+	/* Check if redirection is between previous command and our command */
+	if (prev_cmd)
+	{
+		current = prev_cmd->next;
+		while (current && current != cmd_node)
+		{
+			if (current == redir_node)
+				return (0); /* Belongs to previous command */
+			current = current->next;
+		}
+	}
+	
+	/* Redirection before first command belongs to first command */
+	if (!prev_cmd && cmd_node == vars->cmd_nodes[0])
+	{
+		current = vars->head;
+		while (current && current != cmd_node)
+		{
+			if (current == redir_node)
+				return (1);
+			current = current->next;
+		}
+	}
+	/* Check for special cases like consecutive commands without pipes */
+	/* Redirections after a command belong to it until another command is found */
+	return (0);
 }
 
 /*
@@ -170,18 +169,18 @@ Mode: 1 = free pipe_cmd only, 2 = free result only, 3 = free both
 */
 void reset_done_pipes(char **pipe_cmd, char **result, int mode)
 {
-    // Clean up result string if needed
-    if ((mode == 2 || mode == 3) && result && *result)
-    {
-        free(*result);
-        *result = NULL;
-    }
-    // Clean up pipe command string if needed
-    if ((mode == 1 || mode == 3) && pipe_cmd && *pipe_cmd)
-    {
-        free(*pipe_cmd);
-        *pipe_cmd = NULL;
-    }
+	// Clean up result string if needed
+	if ((mode == 2 || mode == 3) && result && *result)
+	{
+		free(*result);
+		*result = NULL;
+	}
+	// Clean up pipe command string if needed
+	if ((mode == 1 || mode == 3) && pipe_cmd && *pipe_cmd)
+	{
+		free(*pipe_cmd);
+		*pipe_cmd = NULL;
+	}
 }
 
 /*
@@ -218,25 +217,25 @@ Works with handle_unfinished_pipes().
 */
 int check_unfinished_pipe(t_vars *vars)
 {
-    t_node *last_token;
-    t_node *current;
+	t_node *last_token;
+	t_node *current;
 
-    last_token = NULL;
-    current = vars->head;
-    while (current)
-    {
-        last_token = current;
-        current = current->next;
-    }
-    if (last_token && last_token->type == TYPE_PIPE)
-    {
-        if (vars->pipes)
-            vars->pipes->pipe_at_end = 1;
-        return (1);
-    }
-    if (vars->pipes && vars->pipes->pipe_at_end)
-        return (1);
-    return (0);
+	last_token = NULL;
+	current = vars->head;
+	while (current)
+	{
+		last_token = current;
+		current = current->next;
+	}
+	if (last_token && last_token->type == TYPE_PIPE)
+	{
+		if (vars->pipes)
+			vars->pipes->pipe_at_end = 1;
+		return (1);
+	}
+	if (vars->pipes && vars->pipes->pipe_at_end)
+		return (1);
+	return (0);
 }
 
 /*
@@ -249,49 +248,49 @@ Returns:
 */
 int handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
 {
-    char *addon_input;
-    char *tmp;
-    char *combined;
+	char *addon_input;
+	char *tmp;
+	char *combined;
 
-    addon_input = NULL;
-    tmp = NULL;
-    
-    // Get additional input
-    addon_input = readline("> ");
-    if (!addon_input)
-        return (-1);
-    // Process the additional input
-    tmp = ft_strtrim(addon_input, " \t\n");
-    free(addon_input);
-    addon_input = tmp;
-    // If empty input, try again
-    if (!addon_input || addon_input[0] == '\0')
-    {
-        free(addon_input);
-        return handle_unfinished_pipes(processed_cmd, vars);
-    }
-    // Combine original command with new input
-    tmp = ft_strjoin(*processed_cmd, " ");
-    if (!tmp)
-    {
-        free(addon_input);
-        return (-1);
-    }
-    combined = ft_strjoin(tmp, addon_input);
-    free(tmp);
-    free(addon_input);
-    if (!combined)
-        return (-1);
-    // Update the processed command
-    free(*processed_cmd);
-    *processed_cmd = combined;
-    // Re-tokenize with the new combined command
-    cleanup_token_list(vars);
-    improved_tokenize(*processed_cmd, vars);
-    // Check if we're done or need more input
-    if (analyze_pipe_syntax(vars) == 2)
-        return handle_unfinished_pipes(processed_cmd, vars);
-    return (1);
+	addon_input = NULL;
+	tmp = NULL;
+	
+	// Get additional input
+	addon_input = readline("> ");
+	if (!addon_input)
+		return (-1);
+	// Process the additional input
+	tmp = ft_strtrim(addon_input, " \t\n");
+	free(addon_input);
+	addon_input = tmp;
+	// If empty input, try again
+	if (!addon_input || addon_input[0] == '\0')
+	{
+		free(addon_input);
+		return handle_unfinished_pipes(processed_cmd, vars);
+	}
+	// Combine original command with new input
+	tmp = ft_strjoin(*processed_cmd, " ");
+	if (!tmp)
+	{
+		free(addon_input);
+		return (-1);
+	}
+	combined = ft_strjoin(tmp, addon_input);
+	free(tmp);
+	free(addon_input);
+	if (!combined)
+		return (-1);
+	// Update the processed command
+	free(*processed_cmd);
+	*processed_cmd = combined;
+	// Re-tokenize with the new combined command
+	cleanup_token_list(vars);
+	improved_tokenize(*processed_cmd, vars);
+	// Check if we're done or need more input
+	if (analyze_pipe_syntax(vars) == 2)
+		return handle_unfinished_pipes(processed_cmd, vars);
+	return (1);
 }
 
 /*
@@ -300,7 +299,6 @@ Handles pipe completion for commands needing continuation.
 - Prompts for additional input as needed.
 Returns:
 - Complete command string or NULL on error.
-Works with process_pipe_syntax().
 Example: For "ls |" (incomplete pipe)
 - Returns: "ls | grep hello" after user inputs "grep hello"
 */
@@ -329,53 +327,31 @@ char	*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk)
 	return (temp);
 }
 
-/*
-Sets up multiple redirections for a command.
-- Processes all input redirections first.
-- Then processes all output redirections.
-- Handles error reporting for failed redirections.
-Returns:
-1 on success, 0 on failure.
-Works with execute_pipeline() for handling multiple redirections.
-*/
-
-/*
-Process quotes in redirection node's filename
-Remove enclosing quotes from the filename
-*/
-void process_quotes_in_redirect(t_node *redir_node)
-{
-    if (!redir_node || !redir_node->args || !redir_node->args[0])
-        return;
-    
-    process_arg_quotes(&redir_node->args[0]);
-}
-
 /* 
 Sets up child process pipe redirections
 */
 void setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count)
 {
-    int i;
-    
-    /* Set up stdin from previous pipe (if not first command) */
-    if (cmd_idx > 0)
-    {
-        dup2(pipes->pipe_fds[(cmd_idx - 1) * 2], STDIN_FILENO);
-    }
-    
-    /* Set up stdout to next pipe (if not last command) */
-    if (cmd_idx < pipe_count)
-    {
-        dup2(pipes->pipe_fds[cmd_idx * 2 + 1], STDOUT_FILENO);
-    }
-    /* Close all pipe fds in child */
-    i = 0;
-    while (i < pipe_count * 2)
-    {
-        close(pipes->pipe_fds[i]);
-        i++;
-    }
+	int i;
+	
+	/* Set up stdin from previous pipe (if not first command) */
+	if (cmd_idx > 0)
+	{
+		dup2(pipes->pipe_fds[(cmd_idx - 1) * 2], STDIN_FILENO);
+	}
+	
+	/* Set up stdout to next pipe (if not last command) */
+	if (cmd_idx < pipe_count)
+	{
+		dup2(pipes->pipe_fds[cmd_idx * 2 + 1], STDOUT_FILENO);
+	}
+	/* Close all pipe fds in child */
+	i = 0;
+	while (i < pipe_count * 2)
+	{
+		close(pipes->pipe_fds[i]);
+		i++;
+	}
 }
 
 /* 
@@ -384,40 +360,40 @@ Returns 1 on success, 0 on failure
 */
 int fork_processes(t_pipe *pipes, t_vars *vars)
 {
-    int     i;
-    int     j;
-    pid_t   pid;
-    
-    i = 0;
-    while (i <= pipes->pipe_count)
-    {
-        pid = fork();
-        if (pid < 0)
-        {
-            j = 0;
-            while (j < i)
-            {
-                // Kill existing child processes
-                if (pipes->pids[j] > 0)
-                    kill(pipes->pids[j], SIGTERM);
-                j++;
-            }
-            return (0);
-        }
-        else if (pid == 0)
-        {
-            // Child process - set up pipes and execute command
-            setup_child_pipes(pipes, i, pipes->pipe_count);
-            // Execute the command
-            if (vars->cmd_nodes[i])
-                execute_cmd(vars->cmd_nodes[i], vars->env, vars);
-            exit(vars->error_code);
-        }
-        /* Parent process */
-        pipes->pids[i] = pid;
-        i++;
-    }
-    return (1);
+	int     i;
+	int     j;
+	pid_t   pid;
+	
+	i = 0;
+	while (i <= pipes->pipe_count)
+	{
+		pid = fork();
+		if (pid < 0)
+		{
+			j = 0;
+			while (j < i)
+			{
+				// Kill existing child processes
+				if (pipes->pids[j] > 0)
+					kill(pipes->pids[j], SIGTERM);
+				j++;
+			}
+			return (0);
+		}
+		else if (pid == 0)
+		{
+			// Child process - set up pipes and execute command
+			setup_child_pipes(pipes, i, pipes->pipe_count);
+			// Execute the command
+			if (vars->cmd_nodes[i])
+				execute_cmd(vars->cmd_nodes[i], vars->env, vars);
+			exit(vars->error_code);
+		}
+		/* Parent process */
+		pipes->pids[i] = pid;
+		i++;
+	}
+	return (1);
 }
 
 /* 
@@ -425,23 +401,23 @@ Counts pipe nodes in a command chain
 */
 int count_pipes(t_vars *vars)
 {
-    int     count;
-    t_node  *current;
-    
-    count = 0;
-    if (!vars || !vars->head)
-        return (0);
-        
-    current = vars->head;
-    
-    while (current)
-    {
-        if (current->type == TYPE_PIPE)
-            count++;
-        current = current->next;
-    }
-    
-    return (count);
+	int     count;
+	t_node  *current;
+	
+	count = 0;
+	if (!vars || !vars->head)
+		return (0);
+		
+	current = vars->head;
+	
+	while (current)
+	{
+		if (current->type == TYPE_PIPE)
+			count++;
+		current = current->next;
+	}
+	
+	return (count);
 }
 
 /*
@@ -449,17 +425,17 @@ Closes all pipe file descriptors in parent
 */
 void close_all_pipe_fds(t_pipe *pipes)
 {
-    int i;
-    int count;
-    
-    i = 0;
-    count = pipes->pipe_count * 2;
-    
-    while (i < count)
-    {
-        close(pipes->pipe_fds[i]);
-        i++;
-    }
+	int i;
+	int count;
+	
+	i = 0;
+	count = pipes->pipe_count * 2;
+	
+	while (i < count)
+	{
+		close(pipes->pipe_fds[i]);
+		i++;
+	}
 }
 
 /*
@@ -467,61 +443,17 @@ Waits for all child processes
 */
 int wait_for_processes(t_pipe *pipes, t_vars *vars)
 {
-    int i;
-    int last_status;
-    i = 0;
-    
-    while (i <= pipes->pipe_count)
-    {
-        waitpid(pipes->pids[i], &(pipes->status[i]), 0);
-        i++;
-    }
-    
-    /* Return status of last command */
-    last_status = handle_cmd_status(pipes->status[pipes->pipe_count], vars);
-    return (last_status);
-}
-
-/* 
-Initializes arrays in pipe structure based on pipe count
-Returns 1 on success, 0 on failure
-*/
-int init_pipe_arrays(t_pipe *pipes, int pipe_count)
-{
-    /* Free previous arrays if they exist */
-    if (pipes->pipe_fds)
-        free(pipes->pipe_fds);
-    if (pipes->pids)
-        free(pipes->pids);
-    if (pipes->status)
-        free(pipes->status);
-    
-    /* Allocate pipe file descriptors array (2 fds per pipe) */
-    pipes->pipe_fds = (int *)malloc(sizeof(int) * pipe_count * 2);
-    if (!pipes->pipe_fds)
-        return (0);
-        
-    /* Allocate process IDs array (cmd_count = pipe_count + 1) */
-    pipes->pids = (pid_t *)malloc(sizeof(pid_t) * (pipe_count + 1));
-    if (!pipes->pids)
-    {
-        free(pipes->pipe_fds);
-        pipes->pipe_fds = NULL;
-        return (0);
-    }
-        
-    /* Allocate status array and command node array */
-    pipes->status = (int *)malloc(sizeof(int) * (pipe_count + 1));
-    if (!pipes->status)
-    {
-        free(pipes->pipe_fds);
-        free(pipes->pids);
-        free(pipes->status);
-        pipes->pipe_fds = NULL;
-        pipes->pids = NULL;
-        pipes->status = NULL;
-        return (0);
-    }
-    
-    return (1);
+	int i;
+	int last_status;
+	i = 0;
+	
+	while (i <= pipes->pipe_count)
+	{
+		waitpid(pipes->pids[i], &(pipes->status[i]), 0);
+		i++;
+	}
+	
+	/* Return status of last command */
+	last_status = handle_cmd_status(pipes->status[pipes->pipe_count], vars);
+	return (last_status);
 }
