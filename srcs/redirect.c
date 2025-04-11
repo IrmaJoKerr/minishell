@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 01:07:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 04:24:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,12 @@ Returns:
 - 1 if file can be accessed with requested mode.
 - 0 if not.
 */
-int	chk_permissions(char *filename, int mode, t_vars *vars) //Possible to reuse
+int	chk_permissions(char *filename, int mode, t_vars *vars)
 {
 	fprintf(stderr, "DEBUG: Checking permissions for file: '%s', mode: %d\n", 
 			filename, mode);
 	if (mode == O_RDONLY)
 	{
-	
 		if (access(filename, F_OK | R_OK) == -1)
 		{
 			ft_putstr_fd("bleshell: ", 2);
@@ -39,7 +38,9 @@ int	chk_permissions(char *filename, int mode, t_vars *vars) //Possible to reuse
 			vars->error_code = 1;
 			return (0);
 		}
-	} else if (mode & O_WRONLY) {
+	}
+	else if (mode & O_WRONLY)
+	{
 		if (access(filename, F_OK) == 0)
 		{
 			if (access(filename, W_OK) == -1)
@@ -59,10 +60,13 @@ int	chk_permissions(char *filename, int mode, t_vars *vars) //Possible to reuse
 				*last_slash = '\0';
 				if (*dir_path == '\0')
 					strcpy(dir_path, ".");
-			} else {
+			}
+			else
+			{
 				strcpy(dir_path, ".");
 			}
-			if (access(dir_path, W_OK) == -1) {
+			if (access(dir_path, W_OK) == -1)
+			{
 				ft_putstr_fd("bleshell: ", 2);
 				ft_putstr_fd(filename, 2);
 				ft_putendl_fd(": Permission denied", 2);

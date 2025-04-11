@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 00:49:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 19:03:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,6 +269,71 @@ void process_command(char *command, t_vars *vars)
 	vars->partial_input = NULL;
 }
 
+void reset_terminal_after_heredoc(void)
+{
+    struct termios	term;
+    char			*tty_path;
+    int				fd;
+    
+    fprintf(stderr, "[DEBUG] Ensuring terminal is ready for next input\n");
+    if (!isatty(STDIN_FILENO))
+	{
+        tty_path = ttyname(STDOUT_FILENO);
+        if (tty_path)
+		{
+            fd = open(tty_path, O_RDONLY);
+            if (fd >= 0)
+			{
+                dup2(fd, STDIN_FILENO);
+                close(fd);
+            }
+        }
+    }
+    if (isatty(STDIN_FILENO))
+	{
+        tcgetattr(STDIN_FILENO, &term);
+        term.c_lflag |= (ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        rl_on_new_line();
+    }
+}
+
+// /*
+// Handles input state management for the shell.
+// - Tracks consecutive NULL returns from reader()
+// - Resets terminal state after heredoc
+// - Handles empty input
+// Returns:
+// 1 if we should continue the loop, 0 if we should process the input
+// */
+// int	input_state(char **input, int *null_count, t_vars *vars)
+// {
+//     char	*exit_args[2];
+    
+//     exit_args[0] = NULL;
+//     exit_args[1] = NULL;
+//     if (*input == NULL)
+//     {
+//         fprintf(stderr, "[DEBUG] NULL input from reader(): '(null)'\n");
+//         (*null_count)++;
+//         if (*null_count >= 2)
+//         {
+//             fprintf(stderr, "[DEBUG] Multiple NULL inputs, exiting\n");
+//             builtin_exit(exit_args, vars);
+//         }
+//         reset_terminal_after_heredoc();
+//         return (1);
+//     }
+//     *null_count = 0;
+//     if (*input[0] == '\0')
+//     {
+//         free(*input);
+//         *input = NULL;
+//         return (1);
+//     }
+//     return (0);
+// }
+
 /*
 Main shell loop that processes user commands and manages execution flow.
 - Reads input through reader() function.
@@ -291,7 +356,10 @@ int	main(int argc, char **argv, char **envp)
 	{
 		input = reader();
 		if (input == NULL)
+		{
+			fprintf(stderr, "[DEBUG] NULL input from reader(): '%s'\n", input);
 			builtin_exit(exit_args, &vars);
+		}
 		if (input[0] == '\0')
 		{
 			free(input);
@@ -300,7 +368,6 @@ int	main(int argc, char **argv, char **envp)
 		handle_input(input, &vars);
 		free(input);
 		reset_shell(&vars);
-		// Cleanup any remaining resources
 	}
 	return (0);
 }

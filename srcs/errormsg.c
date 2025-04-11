@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:43:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 18:14:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,13 @@ Outputs a not found error message for file access issues.
 - Formats message with filename for clarity.
 - Sends output to standard error (fd 2).
 */
-void	not_found_error(char *filename)
+void not_found_error(char *filename, t_vars *vars)
 {
-	ft_putstr_fd("No such file or directory: ", 2);
-	ft_putendl_fd(filename, 2);
+    ft_putstr_fd("bleshell: ", 2);
+    ft_putstr_fd(filename, 2);
+    ft_putendl_fd(": No such file or directory", 2);
+    if (vars)
+        vars->error_code = 1;
 }
 
 /*
@@ -85,9 +88,28 @@ Example: When environment variable duplication fails:
 - crit_error(vars)
 - Displays error message and exits with code 1
 */
+// void	crit_error(t_vars *vars)
+// {
+// 	ft_putstr_fd("bleshell: critical error: initialization failed\n", 2);
+// 	if (!vars)
+// 	{
+// 		exit(1);
+// 		return ;
+// 	}
+// 	if (vars->env)
+// 		free(vars->env);
+// 	if (vars->pipes)
+// 		cleanup_pipes(vars->pipes);
+// 	exit(1);
+// }
+
 void	crit_error(t_vars *vars)
 {
 	ft_putstr_fd("bleshell: critical error: initialization failed\n", 2);
+	if (vars && isatty(STDIN_FILENO) && vars->ori_term_saved)
+    {
+        tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
+    }
 	if (!vars)
 	{
 		exit(1);

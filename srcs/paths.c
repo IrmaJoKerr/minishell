@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:11:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 04:46:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,18 +127,44 @@ Example: For "ls" command
 - Returns "/bin/ls" (or similar) if found
 - Returns NULL with error message if not found
 */
+// char	*get_cmd_path(char *cmd, char **envp)
+// {
+// 	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
+// 				|| (cmd[1] == '.' && cmd[2] == '/'))))
+// 	{
+// 		if (access(cmd, X_OK) == 0)
+// 			return (ft_strdup(cmd));
+// 		ft_putstr_fd("Direct path access denied: ", 2);
+// 		ft_putendl_fd(cmd, 2);
+// 		return (NULL);
+// 	}
+// 	return (search_in_env(cmd, envp));
+// }
 char	*get_cmd_path(char *cmd, char **envp)
 {
-	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-				|| (cmd[1] == '.' && cmd[2] == '/'))))
-	{
-		if (access(cmd, X_OK) == 0)
-			return (ft_strdup(cmd));
-		ft_putstr_fd("Direct path access denied: ", 2);
-		ft_putendl_fd(cmd, 2);
-		return (NULL);
-	}
-	return (search_in_env(cmd, envp));
+    struct stat statbuf;
+    
+    if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
+                || (cmd[1] == '.' && cmd[2] == '/'))))
+    {
+        if (stat(cmd, &statbuf) == 0)
+        {
+            if (S_ISDIR(statbuf.st_mode))
+            {
+                shell_error(cmd, ERR_ISDIRECTORY, NULL);
+                return (NULL);
+            }
+            if (access(cmd, X_OK) == 0)
+                return (ft_strdup(cmd));
+            shell_error(cmd, ERR_PERMISSIONS, NULL);
+        }
+        else
+        {
+            shell_error(cmd, ERR_CMD_NOT_FOUND, NULL);
+        }
+        return (NULL);
+    }
+    return (search_in_env(cmd, envp));
 }
 
 /*

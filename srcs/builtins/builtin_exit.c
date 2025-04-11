@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/10 23:37:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 18:03:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,22 @@ static int checking(char **args)
 	return (cmdcode);
 }
 
+// int	builtin_exit(char **args, t_vars *vars)
+// {
+// 	int cmdcode;
+
+// 	cmdcode = 0;
+// 	if (args[1])
+// 		cmdcode = checking(args);
+// 	else
+// 		cmdcode = vars->error_code;
+// 	ft_putendl_fd("exit", STDOUT_FILENO);
+// 	cleanup_exit(vars);
+// 	exit(cmdcode);
+// 	return (0);
+// }
+
+/*Temporary testing debug version*/
 int	builtin_exit(char **args, t_vars *vars)
 {
 	int cmdcode;
@@ -70,7 +86,11 @@ int	builtin_exit(char **args, t_vars *vars)
 		cmdcode = checking(args);
 	else
 		cmdcode = vars->error_code;
-	ft_putendl_fd("exit", STDOUT_FILENO);
+	if (isatty(STDIN_FILENO) && vars->ori_term_saved)
+	{
+		tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
+	}
+	ft_putendl_fd("Builtin exit", STDOUT_FILENO);
 	cleanup_exit(vars);
 	exit(cmdcode);
 	return (0);

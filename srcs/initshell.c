@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:58:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 17:58:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,11 @@ void	init_shell(t_vars *vars, char **envp)
 	if (!vars->pipes)
 	{
 		crit_error(vars);
+	}
+	if (isatty(STDIN_FILENO))
+	{
+    	tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
+    	vars->ori_term_saved = 1;
 	}
 	vars->error_code = 0;
 	load_signals();

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 01:08:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 02:05:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include <readline/history.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
 
 extern volatile sig_atomic_t	g_signal_received;
 
@@ -147,6 +148,7 @@ typedef struct s_node
 	struct s_node	*prev;
 	struct s_node	*left;
 	struct s_node	*right;
+	struct s_node	*redir;
 }	t_node;
 
 /*
@@ -170,7 +172,6 @@ typedef struct s_pipe
 	int			redirection_fd; // Current redirection file descriptor
 	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
-	// t_node		*current;        // Current node being processed in the token list
 	t_node		*last_cmd;       // Last command node encountered during parsing
 	t_node		*last_heredoc;   // Last heredoc node encountered during parsing
 	t_node      *last_pipe;       // Last pipe node processed
@@ -179,12 +180,12 @@ typedef struct s_pipe
 	t_node      *last_in_redir;   // Last input redirection encountered
 	t_node      *last_out_redir;  // Last output redirection encountered
 	t_node		*cmd_redir;      // Command node being targeted for redirection
-	// t_node		*root;           // Root node of the AST (ADDED)
+	int			pipe_at_end;     // Flag indicating pipe at end (requires more input)
+	// t_node		*current;        // Current node being processed in the token list
 	// int			cmd_idx;         // Current index in the cmd_nodes array being processed
 	// int			syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
 	// int			serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
 	// int			pipe_at_front;   // Flag indicating pipe at beginning (syntax error)
-	int			pipe_at_end;     // Flag indicating pipe at end (requires more input)
 	// int			fd_write;        // File descriptor for writing (ADDED for heredoc)
 	// int			expand_vars;     // Flag for expanding variables (ADDED for heredoc)
 } t_pipe;
@@ -217,10 +218,16 @@ typedef struct s_vars
 	t_tokentype		prev_type;
 	int				pos;
 	int				start;
+	int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
+	int				heredoc_active; // Flag for heredoc status. is it active or not
+	int				heredoc_fd;     // File descriptor for heredoc
 	char			**heredoc_lines;   // Array of pending heredoc content lines
     int				heredoc_count;     // Number of stored lines
     int				heredoc_index;     // Current position in stored lines
+	char			*heredoc_delim;    // Delimiter for heredoc
 	int				shell_level;
+	struct termios	ori_term_settings;
+	int				ori_term_saved;
 	int				error_code;
 	t_pipe			*pipes;
 } t_vars;
@@ -362,7 +369,7 @@ Error handling.
 In errormsg.c
 */
 void		shell_error(char *element, int error_code, t_vars *vars);
-void		not_found_error(char *filename);
+void		not_found_error(char *filename, t_vars *vars);
 void		crit_error(t_vars *vars);
 
 /*
@@ -371,7 +378,9 @@ In execute.c
 */
 int			handle_cmd_status(int status, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
+void		end_pipe_processes(t_vars *vars);
 int			setup_in_redir(t_node *node, t_vars *vars);
+int			redir_mode_setup(t_node *node, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_child_cmd(t_node *node, char **envp,
@@ -405,10 +414,10 @@ int			write_to_heredoc(int fd, char *line,
 				t_vars *vars, int expand_vars);
 int			read_heredoc(int *fd, char *delimiter,
 				t_vars *vars, int expand_vars);
-int			handle_heredoc_err(t_node *node, t_vars *vars);
-int			cleanup_heredoc_fail(int *fd, t_vars *vars);
+int			handle_heredoc_err(t_vars *vars);
+// int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
-int			proc_heredoc(t_node *node, t_vars *vars);
+// int			proc_heredoc(t_node *node, t_vars *vars);
 
 /*
 History loading functions.
@@ -498,6 +507,7 @@ t_node		*find_command_end(t_node *start_node);
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
 void		process_command(char *command, t_vars *vars);
+void		reset_terminal_after_heredoc(void);
 int			main(int ac, char **av, char **envp);
 
 /*

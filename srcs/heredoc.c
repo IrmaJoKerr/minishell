@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:51:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 14:03:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ Returns:
 Works with handle_heredoc().
 
 Example: "EOF" -> 1 (expand variables)
-         "'EOF'" -> 0 (don't expand variables)
+		 "'EOF'" -> 0 (don't expand variables)
 */
 int	chk_expand_heredoc(char *delimiter)
 {
@@ -200,14 +200,12 @@ Example: Line "echo $HOME" with expand_vars=true
 */
 int write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
 {
-	char *expanded_line;
-	int write_result;
+	char	*expanded_line;
+	int		write_result;
 	
 	if (!line)
 		return (0);
-	
-	// Expand variables if needed
-	if (expand_vars)
+	if (expand_vars == 1)
 	{
 		expanded_line = expand_heredoc_line(line, vars);
 		if (!expanded_line)
@@ -219,14 +217,14 @@ int write_to_heredoc(int fd, char *line, t_vars *vars, int expand_vars)
 		if (!expanded_line)
 			return (0);
 	}
-	
 	// Write the line to the pipe with newline
 	write_result = write(fd, expanded_line, ft_strlen(expanded_line));
 	write(fd, "\n", 1);
-	
 	free(expanded_line);
-	
-	return (write_result != -1);
+	if (write_result == -1)
+		return (0);
+	else
+		return (1);
 }
 
 /*
@@ -246,97 +244,68 @@ Example: With delimiter "EOF"
 */
 int read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 {
-	char *line;
+	char	*line;
 	
-	//DBG_PRINTF(1, "Reading heredoc with delimiter: '%s'\n", delimiter);
-	
+	DBG_PRINTF(1, "Reading heredoc with delimiter: '%s'\n", delimiter);
 	// First check if we have stored lines from pasted content
 	if (vars->heredoc_lines && vars->heredoc_index < vars->heredoc_count)
 	{
-		//DBG_PRINTF(1, "Using stored heredoc content (%d lines)\n", 
-		//          vars->heredoc_count - vars->heredoc_index);
-				  
+		DBG_PRINTF(1, "Using stored heredoc content (%d lines)\n", 
+		         vars->heredoc_count - vars->heredoc_index);
 		while (vars->heredoc_index < vars->heredoc_count)
 		{
 			line = vars->heredoc_lines[vars->heredoc_index++];
-			
-			//DBG_PRINTF(1, "Checking heredoc line: '%s'\n", line);
-			
+			DBG_PRINTF(1, "Checking heredoc line: '%s'\n", line);
 			// Check if this line is the delimiter
 			if (ft_strcmp(line, delimiter) == 0)
 			{
-				//DBG_PRINTF(1, "Found delimiter in stored content\n");
+				DBG_PRINTF(1, "Found delimiter in pasted content\n");
 				return 1;
 			}
-			
 			// Not the delimiter, add to heredoc content
 			write_to_heredoc(fd[1], line, vars, expand_vars);
 		}
-		
-		//DBG_PRINTF(1, "Used all stored content, delimiter not found\n");
+		DBG_PRINTF(1, "Used all pasted content, delimiter not found\n");
 	}
-	
 	// If we get here, either:
 	// 1. There were no stored lines
 	// 2. We've used all stored lines but didn't find the delimiter
 	// So continue with interactive mode
-	
-	//DBG_PRINTF(1, "Entering interactive heredoc mode\n");
+	DBG_PRINTF(1, "Entering interactive heredoc mode\n");
 	while (1)
 	{
-		line = readline("> ");
+		line = readline(PROMPT);
 		if (!line)
 		{
-			//DBG_PRINTF(1, "EOF in heredoc\n");
+			DBG_PRINTF(1, "EOF in heredoc\n");
 			return 0;  // EOF
 		}
-		
 		if (ft_strcmp(line, delimiter) == 0)
 		{
-			//DBG_PRINTF(1, "Found delimiter: '%s'\n", line);
+			DBG_PRINTF(1, "Found delimiter: '%s'\n", line);
 			free(line);
 			return 1;
 		}
-		
 		write_to_heredoc(fd[1], line, vars, expand_vars);
 		free(line);
 	}
 }
 
-/*
-Creates pipe to handle heredoc redirection error cases.
-- Validates node has required arguments.
-- Sets error code appropriately.
-Returns:
--1 to indicate error condition.
-Works with handle_heredoc().
-*/
-int	handle_heredoc_err(t_node *node, t_vars *vars)
-{
-	if (!node || !node->args || !node->args[0])
-	{
-		vars->error_code = 1;
-		return (-1);
-	}
-	vars->error_code = 1;
-	return (-1);
-}
-
-/*
-Cleans up resources after heredoc failure.
-- Closes pipe file descriptors.
-- Sets error code.
-Returns:
--1 to indicate error condition.
-Works with handle_heredoc().
-*/
-int	cleanup_heredoc_fail(int *fd, t_vars *vars)
-{
-	close(fd[0]);
-	close(fd[1]);
-	vars->error_code = 1;
-	return (-1);
-}
+// /*
+// Cleans up resources after heredoc failure.
+// - Closes pipe file descriptors.
+// - Sets error code.
+// Returns:
+// -1 to indicate error condition.
+// Works with handle_heredoc().
+// */
+// int	cleanup_heredoc_fail(int *fd, t_vars *vars)
+// {
+// 	close(fd[0]);
+// 	close(fd[1]);
+// 	vars->error_code = 1;
+// 	return (-1);
+// }
 
 /*
 Creates a pipe for heredoc redirection.
@@ -353,71 +322,154 @@ Example: Node with delimiter "EOF"
 - Reads input lines until "EOF"
 - Returns read end of pipe for command input
 */
-int	handle_heredoc(t_node *node, t_vars *vars)
-{
-	int		fd[2];
-	char	*delimiter;
-	int		expand_vars;
+// int	handle_heredoc(t_node *node, t_vars *vars)
+// {
+// 	int		fd[2];
+// 	char	*delimiter;
+// 	int		expand_vars;
 	
-	if (!node->right || !node->right->args || !node->right->args[0])
-		return (handle_heredoc_err(node, vars));
-	delimiter = node->right->args[0];
-	// Check if heredoc content should have variables expanded
-	expand_vars = chk_expand_heredoc(delimiter);
-	// Create a pipe for the heredoc content
-	if (pipe(fd) == -1)
-		return (cleanup_heredoc_fail(fd, vars));
-	// Read content until delimiter and write to pipe
-	if (!read_heredoc(fd, delimiter, vars, expand_vars))
-		return (cleanup_heredoc_fail(fd, vars));
-	// Close write end, keep read end for command input
-	close(fd[1]);
-	// Save fd for redirecting command input
-	vars->pipes->heredoc_fd = fd[0];
-	// Redirect stdin to read from the pipe
-	if (dup2(fd[0], STDIN_FILENO) == -1)
-	{
-		close(fd[0]);
-		vars->error_code = 1;
-		return (-1);
-	}
+// 	if (!node->right || !node->right->args || !node->right->args[0])
+// 		return (handle_heredoc_err(node, vars));
+// 	delimiter = node->right->args[0];
+// 	// Check if heredoc content should have variables expanded
+// 	expand_vars = chk_expand_heredoc(delimiter);
+// 	// Create a pipe for the heredoc content
+// 	if (pipe(fd) == -1)
+// 		return (cleanup_heredoc_fail(fd, vars));
+// 	// Read content until delimiter and write to pipe
+// 	if (!read_heredoc(fd, delimiter, vars, expand_vars))
+// 		return (cleanup_heredoc_fail(fd, vars));
+// 	// Close write end, keep read end for command input
+// 	close(fd[1]);
+// 	// Save fd for redirecting command input
+// 	vars->pipes->heredoc_fd = fd[0];
+// 	// Redirect stdin to read from the pipe
+// 	if (dup2(fd[0], STDIN_FILENO) == -1)
+// 	{
+// 		close(fd[0]);
+// 		return (-1);
+// 	}
+// 	return (0);
+// }
+// int handle_heredoc(t_node *node, t_vars *vars)
+// {
+//     int     fd[2];
+//     char    *delimiter;
+//     int     expand_vars;
+//     // Early validation - return 0 (error) with proper error code set
+//     if (!node->right || !node->right->args || !node->right->args[0])
+//     {
+//         vars->error_code = 1;
+//         return (0);
+//     }
+//     delimiter = node->right->args[0];
+//     expand_vars = chk_expand_heredoc(delimiter);
+//     // Create pipe - return 0 (error) on failure
+//     if (pipe(fd) == -1)
+//     {
+//         vars->error_code = 1;
+//         return (0);
+//     }
+//     // Read content until delimiter - return 0 (error) on failure
+//     if (!read_heredoc(fd, delimiter, vars, expand_vars))
+//     {
+//         close(fd[0]);
+//         close(fd[1]);
+//         vars->error_code = 1;
+//         return (0);
+//     }
+//     // Close write end, keep read end for command input
+//     close(fd[1]);
+//     vars->pipes->heredoc_fd = fd[0];
+//     // Redirect stdin to read from the pipe
+//     if (dup2(fd[0], STDIN_FILENO) == -1)
+//     {
+//         close(fd[0]);
+//         vars->error_code = 1;
+//         return (0);
+//     }
+//     // Success
+//     return (1);
+// }
+
+
+/*
+Creates pipe to handle heredoc redirection error cases.
+- Validates node has required arguments.
+- Sets error code appropriately.
+Returns:
+-1 to indicate error condition.
+Works with handle_heredoc().
+*/
+int	handle_heredoc_err(t_vars *vars)
+{
+	vars->error_code = 1;
 	return (0);
 }
 
-/*
-Main function for heredoc redirection process.
-- Gets file descriptor with heredoc content.
-- Redirects stdin to read from this descriptor.
-- Ensures proper cleanup of file descriptors.
-Returns:
-1 on successful redirection setup.
-0 on any error.
-Works with setup_redirection().
-
-Example: For shell command "cat << EOF"
-- Input: "cat << EOF"
-- Shell prompts for input with "> "
-- User enters multiple lines: "Hello", "World", "EOF"
-- handle_heredoc() captures "Hello" and "World" into a pipe
-- proc_heredoc() redirects stdin to read from this pipe
-- When "cat" executes, it reads "Hello\nWorld\n" from stdin
-- Output: "Hello" and "World" appear on screen
-This creates the effect of an inline document for commands
-that read from stdin.
-*/
-int	proc_heredoc(t_node *node, t_vars *vars)
+int handle_heredoc(t_node *node, t_vars *vars)
 {
-	int	fd;
+    int     fd[2];
+    char    *delimiter;
+    int     expand_vars;
+	int		result;
 
-	fd = handle_heredoc(node, vars);
-	if (fd == -1)
-		return (0);
-	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		close(fd);
-		vars->error_code = 1;
-		return (0);
-	}
-	close(fd);
-	return (1);
+	result = 1;
+    if (!node->right || !node->right->args || !node->right->args[0])
+    	result = handle_heredoc_err(vars);
+    delimiter = node->right->args[0];
+    expand_vars = chk_expand_heredoc(delimiter);
+    if (pipe(fd) == -1)
+    	result = handle_heredoc_err(vars);
+    if (!read_heredoc(fd, delimiter, vars, expand_vars))
+    {
+        close(fd[0]);
+        result = handle_heredoc_err(vars);
+    }
+    close(fd[1]);
+    vars->pipes->heredoc_fd = fd[0];
+    if (dup2(fd[0], STDIN_FILENO) == -1)
+    {
+        close(fd[0]);
+        result = handle_heredoc_err(vars);
+    }
+    return (result);
 }
+
+// /*
+// Main function for heredoc redirection process.
+// - Gets file descriptor with heredoc content.
+// - Redirects stdin to read from this descriptor.
+// - Ensures proper cleanup of file descriptors.
+// Returns:
+// 1 on successful redirection setup.
+// 0 on any error.
+// Works with setup_redirection().
+
+// Example: For shell command "cat << EOF"
+// - Input: "cat << EOF"
+// - Shell prompts for input with "> "
+// - User enters multiple lines: "Hello", "World", "EOF"
+// - handle_heredoc() captures "Hello" and "World" into a pipe
+// - proc_heredoc() redirects stdin to read from this pipe
+// - When "cat" executes, it reads "Hello\nWorld\n" from stdin
+// - Output: "Hello" and "World" appear on screen
+// This creates the effect of an inline document for commands
+// that read from stdin.
+// */
+// int	proc_heredoc(t_node *node, t_vars *vars)
+// {
+// 	int	fd;
+
+// 	fd = handle_heredoc(node, vars);
+// 	if (fd == -1)
+// 		return (0);
+// 	if (dup2(fd, STDIN_FILENO) == -1)
+// 	{
+// 		close(fd);
+// 		vars->error_code = 1;
+// 		return (0);
+// 	}
+// 	close(fd);
+// 	return (1);
+// }

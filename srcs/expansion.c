@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 00:49:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/11 04:07:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,48 +123,111 @@ Example: Input: "$HOME/file" at position 0
 - Extracts "HOME" as variable name
 - Returns value (e.g., "/Users/username")
 */
+// char	*handle_expansion(char *input, int *pos, t_vars *vars)
+// {
+// 	char	*var_name;
+// 	char	*var_value;
+
+// 	// Skip the $ symbol
+// 	(*pos)++;
+// 	// Check if we're at the end of input or at whitespace (lonely $)
+// 	if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
+// 	{
+// 		fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
+// 		return (ft_strdup("$"));
+// 	}
+// 	// Check for special case $?
+// 	if (input[*pos] == '?')
+// 	{
+// 		(*pos)++;
+// 		var_value = ft_itoa(vars->error_code);
+// 		fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
+// 		return (var_value);
+// 	}
+// 	// Extract variable name
+// 	var_name = get_var_name(input, pos);
+// 	if (!var_name || !*var_name)
+// 	{
+// 		fprintf(stderr, "DEBUG: Empty var name, returning literal $\n");
+// 		free(var_name); // Free if allocated but empty
+// 		return (ft_strdup("$"));
+// 	}
+// 	// Try to handle as special variable first
+// 	var_value = handle_special_var(var_name, vars);
+// 	if (var_value)
+// 	{
+// 		fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
+// 				var_name, var_value);
+// 		free(var_name);
+// 		return var_value;
+// 	}
+// 	// Try to handle as environment variable
+// 	var_value = get_env_val(var_name, vars->env);
+// 	fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
+// 			var_name, var_value ? var_value : "");
+// 	free(var_name);
+// 	return (var_value ? var_value : ft_strdup(""));
+// }
+/*
+Processes environment variable expansion.
+- Checks for $ character at current position.
+- Extracts variable name following the $.
+- Handles special vars or environment vars.
+- Updates position to after the expanded variable.
+Returns:
+Newly allocated string with expanded value.
+Empty string if variable not found.
+*/
 char	*handle_expansion(char *input, int *pos, t_vars *vars)
 {
-	char	*var_name;
-	char	*var_value;
+    char	*var_name;
+    char	*var_value;
 
-	// Skip the $ symbol
-	(*pos)++;
-	// Check if we're at the end of input or at whitespace (lonely $)
-	if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
-	{
-		fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
-		return (ft_strdup("$"));
-	}
-	// Check for special case $?
-	if (input[*pos] == '?') {
-		(*pos)++;
-		var_value = ft_itoa(vars->error_code);
-		fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
-		return (var_value);
-	}
-	// Extract variable name
-	var_name = get_var_name(input, pos);
-	if (!var_name || !*var_name) {
-		fprintf(stderr, "DEBUG: Empty var name, returning literal $\n");
-		free(var_name); // Free if allocated but empty
-		return (ft_strdup("$"));
-	}
-	// Try to handle as special variable first
-	var_value = handle_special_var(var_name, vars);
-	if (var_value)
-	{
-		fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
-				var_name, var_value);
-		free(var_name);
-		return var_value;
-	}
-	// Try to handle as environment variable
-	var_value = get_env_val(var_name, vars->env);
-	fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
-			var_name, var_value ? var_value : "");
-	free(var_name);
-	return (var_value ? var_value : ft_strdup(""));
+    // Skip the $ symbol
+    (*pos)++;
+    // Check if we're at the end of input or at whitespace (lonely $)
+    if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
+    {
+        fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
+        return (ft_strdup("$"));
+    }
+    // Check for special case $?
+    if (input[*pos] == '?')
+    {
+        (*pos)++;
+        var_value = ft_itoa(vars->error_code);
+        fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
+        return (var_value);
+    }
+    // Extract variable name
+    var_name = get_var_name(input, pos);
+    // Handle empty variable name
+    if (!var_name || !*var_name)
+    {
+        fprintf(stderr, "DEBUG: Empty var name, returning literal $\n");
+        if (var_name)
+            free(var_name);
+        return (ft_strdup("$"));
+    }
+    // Try to handle as special variable first
+    var_value = handle_special_var(var_name, vars);
+    if (var_value)
+    {
+        fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
+                var_name, var_value);
+        free(var_name);
+        return (var_value);
+    }
+    // Try to handle as environment variable
+    var_value = get_env_val(var_name, vars->env);
+    fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
+            var_name, var_value ? var_value : "");
+    free(var_name);
+    // Return the environment variable value or empty string if not found
+    if (var_value)
+        return (var_value);
+    else
+        return (ft_strdup(""));
 }
 
 /*
