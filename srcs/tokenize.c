@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 00:41:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 19:24:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,6 @@ int is_adjacent_token(char *input, int pos)
 	// Check if previous character is not whitespace
 	if (ft_isspace(input[pos - 1]))
 		return (0);
-	
 	// It's adjacent if previous char is not whitespace or operator
 	return (1);
 }
@@ -122,36 +121,354 @@ Creates an expansion token from input
 - Doesn't perform expansion - just identifies tokens
 Returns 1 if expansion token was created, 0 otherwise
 */
+// int make_exp_token(char *input, int *i, t_vars *vars)
+// {
+// 	char		*token;
+// 	t_tokentype	type;
+	
+// 	vars->start = *i;
+// 	if (input[*i] == '$' && input[*i + 1] == '?') 
+// 	{
+// 		token = ft_substr(input, vars->start, 2);
+// 		if (!token)
+// 			return (0); 
+// 		type = TYPE_EXIT_STATUS;
+// 		(*i) += 2;
+// 	}
+// 	else if (input[*i] == '$')
+// 	{
+// 		(*i)++;
+// 		while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+// 			(*i)++; 
+// 		token = ft_substr(input, vars->start, *i - vars->start);
+// 		if (!token)
+// 			return (0);
+// 		type = TYPE_EXPANSION;
+// 	}
+// 	else
+// 		return (0);
+// 	maketoken_with_type(token, type, vars);
+// 	free(token);
+// 	vars->start = *i;
+// 	return (1);
+// }
+// int make_exp_token(char *input, int *i, t_vars *vars)
+// {
+//     char        *token;
+//     t_tokentype type;
+//     int         is_adjacent;
+//     t_node      *cmd_node;
+    
+//     vars->start = *i;
+//     is_adjacent = is_adjacent_token(input, *i);
+    
+//     fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adjacent=%d\n",
+//             *i, input[*i], input + *i, is_adjacent);
+    
+//     // Extract the expansion token
+//     if (input[*i] == '$' && input[*i + 1] == '?') 
+//     {
+//         token = ft_substr(input, vars->start, 2);
+//         if (!token)
+//             return (0);
+//         type = TYPE_EXIT_STATUS;
+//         (*i) += 2;
+//         fprintf(stderr, "DEBUG[make_exp_token]: Extracted exit status '$?', new pos=%d\n", *i);
+//     }
+//     else if (input[*i] == '$')
+//     {
+//         int var_start = *i;
+//         (*i)++;
+//         while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+//             (*i)++; 
+//         token = ft_substr(input, vars->start, *i - vars->start);
+//         if (!token)
+//             return (0);
+//         type = TYPE_EXPANSION;
+//         fprintf(stderr, "DEBUG[make_exp_token]: Extracted variable '%s', length=%d, new pos=%d\n", 
+//                 token, *i - var_start, *i);
+//     }
+//     else
+//         return (0);
+    
+//     fprintf(stderr, "DEBUG[make_exp_token]: Creating token type=%d for '%s'\n", 
+//             type, token);
+    
+//     // Check for adjacency - if adjacent to a previous command node, 
+//     // try to join with the last argument of that command
+//     if (is_adjacent)
+//     {
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         fprintf(stderr, "DEBUG[make_exp_token]: Checking for adjacency, cmd_node=%p\n", 
+//                 (void*)cmd_node);
+                
+//         if (cmd_node && cmd_node->args)
+//         {
+//             // For now, just create the expansion token normally
+//             // We'll handle actual joining in process_expansions
+//             fprintf(stderr, "DEBUG[make_exp_token]: Marking expansion as adjacent to command '%s'\n",
+//                     cmd_node->args[0]);
+//             // We could add a flag to the token to indicate it's adjacent
+//             // For now we'll rely on process_expansions to check adjacency
+//         }
+//     }
+    
+//     // Check what node is current before adding this token
+//     fprintf(stderr, "DEBUG[make_exp_token]: Current node before: %s (type=%d)\n",
+//         (vars->current && vars->current->args && vars->current->args[0]) ? 
+//         vars->current->args[0] : "NULL",
+//         vars->current ? (int)vars->current->type : -1);
+
+//     maketoken_with_type(token, type, vars);
+    
+//     // Check what node is current after adding this token
+//     fprintf(stderr, "DEBUG[make_exp_token]: Current node after: %s (type=%d)\n",
+//         (vars->current && vars->current->args && vars->current->args[0]) ? 
+//         vars->current->args[0] : "NULL",
+//         vars->current ? (int)vars->current->type : -1);
+
+//     free(token);
+//     vars->start = *i;
+//     return (1);
+// }
+// int make_exp_token(char *input, int *i, t_vars *vars)
+// {
+//     char        *token;
+//     int         is_adjacent;
+//     char        *expanded_value = NULL;
+//     char        *var_name = NULL;
+    
+//     vars->start = *i;
+//     is_adjacent = is_adjacent_token(input, *i);
+    
+//     fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adjacent=%d\n",
+//             *i, input[*i], input + *i, is_adjacent);
+    
+//     // Extract the expansion token
+//     if (input[*i] == '$' && input[*i + 1] == '?') 
+//     {
+//         token = ft_substr(input, vars->start, 2);
+//         if (!token)
+//             return (0);
+//         var_name = ft_strdup("?");
+//         (*i) += 2;
+//         fprintf(stderr, "DEBUG[make_exp_token]: Extracted exit status '$?', new pos=%d\n", *i);
+//     }
+//     else if (input[*i] == '$')
+//     {
+//         int var_start = *i + 1; // Skip the $ character
+//         (*i)++;
+//         while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+//             (*i)++; 
+        
+//         token = ft_substr(input, vars->start, *i - vars->start);
+//         if (!token)
+//             return (0);
+        
+//         var_name = ft_substr(input, var_start, *i - var_start);
+//     }
+//     else
+//         return (0);
+    
+//     // Expand the variable immediately
+//     expanded_value = expand_value(var_name, vars);
+//     free(var_name);
+    
+//     fprintf(stderr, "DEBUG[make_exp_token]: Expanded '%s' to '%s', adjacent=%d\n", 
+//             token, expanded_value, is_adjacent);
+    
+//     // Handle adjacency during tokenization
+//     if (is_adjacent && vars->current && 
+//         (vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
+//     {
+//         // Check if current node has arguments to join with
+//         if (vars->current->args && vars->current->args[0])
+//         {
+//             // Find the last argument
+//             int arg_idx = 0;
+//             while (vars->current->args[arg_idx + 1])
+//                 arg_idx++;
+            
+//             // Join with last argument
+//             fprintf(stderr, "DEBUG[make_exp_token]: Joining '%s' with '%s'\n", 
+//                    vars->current->args[arg_idx], expanded_value);
+                   
+//             char *joined = ft_strjoin(vars->current->args[arg_idx], expanded_value);
+//             free(vars->current->args[arg_idx]);
+//             vars->current->args[arg_idx] = joined;
+            
+//             // Handle quote types if needed
+//             if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
+//             {
+//                 // Update quote types for joined string
+//                 int old_len = 0;
+//                 while (vars->current->arg_quote_type[arg_idx][old_len] != -1)
+//                     old_len++;
+                
+//                 int new_len = ft_strlen(expanded_value);
+//                 int *new_quote_types = malloc(sizeof(int) * (old_len + new_len + 1));
+                
+//                 // Copy existing quote types
+//                 int j = 0;
+//                 while (j < old_len)
+//                 {
+//                     new_quote_types[j] = vars->current->arg_quote_type[arg_idx][j];
+//                     j++;
+//                 }
+                
+//                 // Set quote types for expanded portion to 0 (unquoted)
+//                 while (j < old_len + new_len)
+//                 {
+//                     new_quote_types[j] = 0;
+//                     j++;
+//                 }
+//                 new_quote_types[j] = -1; // End sentinel
+                
+//                 free(vars->current->arg_quote_type[arg_idx]);
+//                 vars->current->arg_quote_type[arg_idx] = new_quote_types;
+//             }
+            
+//             free(expanded_value);
+//             free(token);
+//             return (1);
+//         }
+//     }
+
+//     // If not joined, create a new argument token
+//     t_node *exp_node = initnode(TYPE_ARGS, expanded_value);
+//     if (!exp_node)
+//     {
+//         free(expanded_value);
+//         free(token);
+//         return (0);
+//     }
+    
+//     // Link the new token into the list
+//     build_token_linklist_with_status(vars, exp_node);
+    
+//     free(expanded_value);
+//     free(token);
+//     return (1);
+// }
 int make_exp_token(char *input, int *i, t_vars *vars)
 {
-	char		*token;
-	t_tokentype	type;
-	
-	vars->start = *i;
-	if (input[*i] == '$' && input[*i + 1] == '?') 
-	{
-		token = ft_substr(input, vars->start, 2);
-		if (!token)
-			return (0); 
-		type = TYPE_EXIT_STATUS;
-		(*i) += 2;
-	}
-	else if (input[*i] == '$')
-	{
-		(*i)++;
-		while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-			(*i)++; 
-		token = ft_substr(input, vars->start, *i - vars->start);
-		if (!token)
-			return (0);
-		type = TYPE_EXPANSION;
-	}
-	else
-		return (0);
-	maketoken_with_type(token, type, vars);
-	free(token);
-	vars->start = *i;
-	return (1);
+    char        *token;
+    int         is_adjacent;
+    char        *expanded_value = NULL;
+    char        *var_name = NULL;
+    
+    vars->start = *i;
+    is_adjacent = is_adjacent_token(input, *i);
+    
+    fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adjacent=%d\n",
+            *i, input[*i], input + *i, is_adjacent);
+    
+    // Extract the expansion token
+    if (input[*i] == '$' && input[*i + 1] == '?') 
+    {
+        token = ft_substr(input, vars->start, 2);
+        if (!token)
+            return (0);
+        var_name = ft_strdup("?");
+        (*i) += 2;
+        fprintf(stderr, "DEBUG[make_exp_token]: Extracted exit status '$?', new pos=%d\n", *i);
+    }
+    else if (input[*i] == '$')
+    {
+        int var_start = *i + 1; // Skip the $ character
+        (*i)++;
+        while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+            (*i)++; 
+        
+        token = ft_substr(input, vars->start, *i - vars->start);
+        if (!token)
+            return (0);
+        
+        var_name = ft_substr(input, var_start, *i - var_start);
+    }
+    else
+        return (0);
+    
+    // Expand the variable immediately
+    expanded_value = expand_value(var_name, vars);
+    free(var_name);
+    
+    fprintf(stderr, "DEBUG[make_exp_token]: Expanded '%s' to '%s', adjacent=%d\n", 
+            token, expanded_value, is_adjacent);
+    
+    // Handle adjacency during tokenization
+    if (is_adjacent && vars->current && 
+        (vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
+    {
+        // Check if current node has arguments to join with
+        if (vars->current->args && vars->current->args[0])
+        {
+            // Find the last argument
+            int arg_idx = 0;
+            while (vars->current->args[arg_idx + 1])
+                arg_idx++;
+            
+            // Join with last argument
+            fprintf(stderr, "DEBUG[make_exp_token]: Joining '%s' with '%s'\n", 
+                   vars->current->args[arg_idx], expanded_value);
+                   
+            char *joined = ft_strjoin(vars->current->args[arg_idx], expanded_value);
+            free(vars->current->args[arg_idx]);
+            vars->current->args[arg_idx] = joined;
+            
+            // Handle quote types if needed
+            if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
+            {
+                // Update quote types for joined string
+                int old_len = 0;
+                while (vars->current->arg_quote_type[arg_idx][old_len] != -1)
+                    old_len++;
+                
+                int new_len = ft_strlen(expanded_value);
+                int *new_quote_types = malloc(sizeof(int) * (old_len + new_len + 1));
+                
+                // Copy existing quote types
+                int j = 0;
+                while (j < old_len)
+                {
+                    new_quote_types[j] = vars->current->arg_quote_type[arg_idx][j];
+                    j++;
+                }
+                
+                // Set quote types for expanded portion to 0 (unquoted)
+                while (j < old_len + new_len)
+                {
+                    new_quote_types[j] = 0;
+                    j++;
+                }
+                new_quote_types[j] = -1; // End sentinel
+                
+                free(vars->current->arg_quote_type[arg_idx]);
+                vars->current->arg_quote_type[arg_idx] = new_quote_types;
+            }
+            
+            free(expanded_value);
+            free(token);
+            vars->start = *i;  // Update start position for next token
+            return (1);        // Return success - we're done!
+        }
+    }
+
+    // Only create a new token if we didn't join with an existing one
+    t_node *exp_node = initnode(TYPE_ARGS, expanded_value);
+    if (!exp_node)
+    {
+        free(expanded_value);
+        free(token);
+        return (0);
+    }
+    
+    // Link the new token into the list
+    build_token_linklist_with_status(vars, exp_node);
+    
+    free(token);
+    vars->start = *i;  // Update start position
+    return (1);
 }
 
 /*
@@ -423,7 +740,7 @@ int process_operator_char(char *input, int *i, t_vars *vars)
 	return (1);
 }
 
-/*
+/* DEPRECATED
 Processes redirection operators in the input.
 - Handles <, >, << and >> operators.
 - Creates tokens for the operators.
@@ -434,19 +751,19 @@ Example: For input "cat > file.txt"
 - Creates redirect token
 - Updates position past '>'
 */
-int	handle_redirection(char *input, int *pos, t_vars *vars)
-{
-	int	result;
+// int	handle_redirection(char *input, int *pos, t_vars *vars)
+// {
+// 	int	result;
 	
-	if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
-	{
-		vars->pos = *pos;
-		result = operators(input, vars);
-		*pos = vars->pos;
-		return (result);
-	}
-	return (0);
-}
+// 	if (input[*pos] == '<' || input[*pos] == '>' || input[*pos] == '|')
+// 	{
+// 		vars->pos = *pos;
+// 		result = operators(input, vars);
+// 		*pos = vars->pos;
+// 		return (result);
+// 	}
+// 	return (0);
+// }
 
 /*
 Process any accumulated text before a special character.
@@ -482,11 +799,31 @@ Handle variable expansion in the input.
 Processes $ characters for variable substitution.
 Sets next_flag if processing should continue from the loop.
 */
+// static void imp_tok_expan(char *input, t_vars *vars)
+// {
+// 	handle_text(input, vars);
+// 	if (make_exp_token(input, &vars->pos, vars))
+// 		vars->next_flag = 1;
+// }
 static void imp_tok_expan(char *input, t_vars *vars)
 {
-	handle_text(input, vars);
-	if (make_exp_token(input, &vars->pos, vars))
-		vars->next_flag = 1;
+    fprintf(stderr, "DEBUG[imp_tok_expan]: ENTER with pos=%d, start=%d, char='%c', text='%.10s...'\n", 
+            vars->pos, vars->start, input[vars->pos], input + vars->pos);
+    
+    // Check if we have any text accumulated from start to pos
+    if (vars->pos > vars->start) {
+        fprintf(stderr, "DEBUG[imp_tok_expan]: Accumulated text from %d to %d: '%.*s'\n", 
+                vars->start, vars->pos, vars->pos - vars->start, 
+                input + vars->start);
+    }
+    
+    handle_text(input, vars);
+    
+    if (make_exp_token(input, &vars->pos, vars))
+        vars->next_flag = 1;
+        
+    fprintf(stderr, "DEBUG[imp_tok_expan]: EXIT with pos=%d, start=%d, next_flag=%d\n", 
+            vars->pos, vars->start, vars->next_flag);
 }
 
 /*
@@ -531,6 +868,8 @@ int improved_tokenize(char *input, t_vars *vars)
 	{
 		vars->next_flag = 0;
 		token_type = get_token_at(input, vars->pos, &moves);
+		fprintf(stderr, "DEBUG[tokenize]: At pos %d, char '%c', token_type=%d, moves=%d\n", 
+			vars->pos, input[vars->pos], token_type, moves);
 		if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
 			imp_tok_quote(input, vars);
 		if (!vars->next_flag && input[vars->pos] == '$' && !vars->quote_depth)
@@ -578,40 +917,121 @@ Example: When adding command node
 - Otherwise links to previous token
 - Updates current pointer
 */
+// int build_token_linklist_with_status(t_vars *vars, t_node *node)
+// {
+// 	t_node *cmd_node;
+	
+// 	if (!vars || !node) 
+// 		return 0;
+// 	if (!vars->head)
+// 	{
+// 		vars->head = node;
+// 		vars->current = node;
+// 		return 0;
+// 	}
+// 	if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
+// 	{
+// 		node->type = TYPE_CMD;
+// 	}
+// 	if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
+// 	{
+// 		cmd_node = vars->current;
+// 		append_arg(cmd_node, node->args[0], 0);
+// 		if (node->args)
+// 		{
+// 			free(node->args[0]);
+// 			free(node->args);
+// 		}
+// 		node->args = NULL;
+// 		free_token_node(node);
+// 		return 1;  // Indicate that the node was freed
+// 	}
+// 	else
+// 	{
+// 		token_link(node, vars);
+// 		return 0;  // Node was not freed
+// 	}
+// }
 int build_token_linklist_with_status(t_vars *vars, t_node *node)
 {
-	t_node *cmd_node;
-	
-	if (!vars || !node) 
-		return 0;
-	if (!vars->head)
-	{
-		vars->head = node;
-		vars->current = node;
-		return 0;
-	}
-	if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
-	{
-		node->type = TYPE_CMD;
-	}
-	if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
-	{
-		cmd_node = vars->current;
-		append_arg(cmd_node, node->args[0], 0);
-		if (node->args)
-		{
-			free(node->args[0]);
-			free(node->args);
-		}
-		node->args = NULL;
-		free_token_node(node);
-		return 1;  // Indicate that the node was freed
-	}
-	else
-	{
-		token_link(node, vars);
-		return 0;  // Node was not freed
-	}
+    t_node *cmd_node;
+    
+    if (!vars || !node) 
+        return 0;
+        
+    // Case 1: First node becomes the head
+    if (!vars->head)
+    {
+        vars->head = node;
+        vars->current = node;
+        return 0;
+    }
+    
+    // Case 2: Heredoc operator (<<) handling
+    if (node->type == TYPE_HEREDOC)
+    {
+        // Find the command this heredoc belongs to (could be current or previous)
+        cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+        
+        // Store the command relationship if needed
+        if (cmd_node)
+            fprintf(stderr, "DEBUG: Heredoc belongs to command '%s'\n", 
+                   cmd_node->args[0]);
+        
+        // Add the heredoc node to the list
+        token_link(node, vars);
+        
+        // Set flag for expecting delimiter in next token
+        vars->heredoc_active = 1;
+        return 0;
+    }
+    
+    // Case 3: Heredoc delimiter handling
+    if (vars->heredoc_active && vars->current && vars->current->type == TYPE_HEREDOC)
+    {
+        // Store the delimiter for later processing
+        if (node->args && node->args[0])
+        {
+            // Free any existing delimiter
+            if (vars->heredoc_delim)
+                free(vars->heredoc_delim);
+                
+            vars->heredoc_delim = ft_strdup(node->args[0]);
+            fprintf(stderr, "DEBUG: Set heredoc delimiter to '%s'\n", vars->heredoc_delim);
+        }
+        
+        // Reset the heredoc flag
+        vars->heredoc_active = 0;
+        
+        // Link the delimiter node
+        token_link(node, vars);
+        return 0;
+    }
+    
+    // Existing functionality continues below...
+    if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
+    {
+        node->type = TYPE_CMD;
+    }
+    
+    if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
+    {
+        cmd_node = vars->current;
+        append_arg(cmd_node, node->args[0], 0);
+        if (node->args)
+        {
+            free(node->args[0]);
+            free(node->args);
+        }
+        node->args = NULL;
+        free_token_node(node);
+        return 1;  // Indicate that the node was freed
+    }
+    else
+    {
+        token_link(node, vars);
+        return 0;  // Node was not freed
+    }
 }
 
 /* Debug function */

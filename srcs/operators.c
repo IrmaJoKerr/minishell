@@ -6,13 +6,13 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:09:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 16:38:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
+/* DEPRECATED
 Processes operators and surrounding text in command input.
 - Handles text before operators by creating string/command tokens.
 - Detects and processes both single and double operators.
@@ -20,33 +20,33 @@ Processes operators and surrounding text in command input.
 Returns:
 - New position index after operator processing.
 */
-int	operators(char *input, t_vars *vars)
-{
-	int			moves;
-	t_tokentype	token_type;
+// int	operators(char *input, t_vars *vars)
+// {
+// 	int			moves;
+// 	t_tokentype	token_type;
 	
-	// Handle text before operator
-	if (vars->pos > vars->start)
-		handle_string(input, vars);
+// 	// Handle text before operator
+// 	if (vars->pos > vars->start)
+// 		handle_string(input, vars);
 	
-	// Get token type and moves value
-	token_type = get_token_at(input, vars->pos, &moves);
+// 	// Get token type and moves value
+// 	token_type = get_token_at(input, vars->pos, &moves);
 	
-	// Store previous type before updating current
-	vars->prev_type = vars->curr_type;
-	vars->curr_type = token_type;  // Update current type
+// 	// Store previous type before updating current
+// 	vars->prev_type = vars->curr_type;
+// 	vars->curr_type = token_type;  // Update current type
 	
-	// Process token based on its type
-	if (token_type != 0)
-	{
-		if (moves == 2)
-			return handle_double_operator(input, vars);
-		else if (moves == 1)
-			return handle_single_operator(input, vars);
-	}
+// 	// Process token based on its type
+// 	if (token_type != 0)
+// 	{
+// 		if (moves == 2)
+// 			return handle_double_operator(input, vars);
+// 		else if (moves == 1)
+// 			return handle_single_operator(input, vars);
+// 	}
 	
-	return vars->pos;
-}
+// 	return vars->pos;
+// }
 
 /* 
 Checks if a token is an operator (pipe or redirection).

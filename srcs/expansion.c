@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 04:07:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 19:13:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,4 +250,57 @@ void debug_cmd_args(t_node *node)
 		i++;
 	}
 	//DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
+}
+
+char *expand_quoted_argument(char *arg, int *quote_types, t_vars *vars)
+{
+    char *result = ft_strdup("");
+    int i = 0;
+    
+    while (arg[i])
+    {
+        // Only expand variables in double quotes or unquoted
+        if (arg[i] == '$' && quote_types[i] != TYPE_SINGLE_QUOTE)
+        {
+            int start = i;
+            char *var_name;
+            char *expanded;
+            
+            // Handle $?
+            if (arg[i+1] == '?')
+            {
+                var_name = ft_strdup("?");
+                i += 2; // Skip $?
+            }
+            else
+            {
+                i++; // Skip $
+                start = i;
+                while (arg[i] && (ft_isalnum(arg[i]) || arg[i] == '_'))
+                    i++;
+                
+                var_name = ft_substr(arg, start, i - start);
+            }
+            
+            expanded = expand_value(var_name, vars);
+            free(var_name);
+            
+            // Append expanded value to result
+            char *temp = ft_strjoin(result, expanded);
+            free(result);
+            result = temp;
+            free(expanded);
+        }
+        else
+        {
+            // Append regular character
+            char c[2] = {arg[i], '\0'};
+            char *temp = ft_strjoin(result, c);
+            free(result);
+            result = temp;
+            i++;
+        }
+    }
+    
+    return result;
 }

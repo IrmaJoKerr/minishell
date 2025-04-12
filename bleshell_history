@@ -1,0 +1,7 @@
+echo hello'$HOME'
+echo hello'$?'
+echo hello'$?"
+'
+echo hello$?
+$?
+$HOME

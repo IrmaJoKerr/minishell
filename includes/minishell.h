@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/12 02:05:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 19:13:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -399,6 +399,7 @@ char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
 void 		debug_cmd_args(t_node *node);
+char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
 
 /*
 Heredoc main handling.
@@ -485,6 +486,7 @@ Input verification functions.
 In input_verify.c
 */
 int			handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars);
+int 		is_adjacent_in_original_input(t_node *expansion_node, char *arg);
 char 		*expand_value(char *var_name, t_vars *vars);
 void		process_expansions(t_vars *vars);
 int			is_command_position(t_node *node, t_vars *vars);
