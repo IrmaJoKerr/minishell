@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/12 21:24:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/14 07:06:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,117 +92,117 @@ Returns 1 if processed successfully, 0 otherwise
 // 	fprintf(stderr, "DEBUG[handle_adjacent_args]: EXIT\n");
 // 	return (1);
 // }
-int handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars)
-{
-    t_node *cmd_node;
-    int join_with_prev = 0;
-    int last_arg_idx = 0;
-    char *joined;
+// int handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars)
+// {
+//     t_node *cmd_node;
+//     int join_with_prev = 0;
+//     int last_arg_idx = 0;
+//     char *joined;
     
-    fprintf(stderr, "DEBUG[handle_adjacent_args]: ENTER with expansion_node=%p, expanded_value='%s'\n", 
-            (void*)expansion_node, expanded_value ? expanded_value : "NULL");
+//     fprintf(stderr, "DEBUG[handle_adjacent_args]: ENTER with expansion_node=%p, expanded_value='%s'\n", 
+//             (void*)expansion_node, expanded_value ? expanded_value : "NULL");
     
-    if (!expansion_node || !expanded_value || !vars)
-        return (0);
+//     if (!expansion_node || !expanded_value || !vars)
+//         return (0);
     
-    // Find the command node this expansion belongs to
-    cmd_node = find_cmd(vars->head, expansion_node, FIND_PREV, vars);
-    if (!cmd_node)
-    {
-        fprintf(stderr, "DEBUG[handle_adjacent_args]: No command found for expansion\n");
-        free(expanded_value);
-        return (0);
-    }
+//     // Find the command node this expansion belongs to
+//     cmd_node = find_cmd(vars->head, expansion_node, FIND_PREV, vars);
+//     if (!cmd_node)
+//     {
+//         fprintf(stderr, "DEBUG[handle_adjacent_args]: No command found for expansion\n");
+//         free(expanded_value);
+//         return (0);
+//     }
     
-    // Find the index of the last argument
-    if (cmd_node->args)
-    {
-        while (cmd_node->args[last_arg_idx + 1])
-            last_arg_idx++;
+//     // Find the index of the last argument
+//     if (cmd_node->args)
+//     {
+//         while (cmd_node->args[last_arg_idx + 1])
+//             last_arg_idx++;
         
-        // Check if this expansion should be joined with the previous argument
-        // 1. Previous token is an ARGS token
-        // 2. OR if the expansion node immediately follows the command's last argument
-        if (expansion_node->prev && expansion_node->prev->type == TYPE_ARGS)
-            join_with_prev = 1;
-        else if (last_arg_idx > 0 && 
-                 is_adjacent_in_original_input(expansion_node, cmd_node->args[last_arg_idx]))
-            join_with_prev = 1;
-    }
+//         // Check if this expansion should be joined with the previous argument
+//         // 1. Previous token is an ARGS token
+//         // 2. OR if the expansion node immediately follows the command's last argument
+//         if (expansion_node->prev && expansion_node->prev->type == TYPE_ARGS)
+//             join_with_prev = 1;
+//         else if (last_arg_idx > 0 && 
+//                  is_adjacent_in_original_input(expansion_node, cmd_node->args[last_arg_idx]))
+//             join_with_prev = 1;
+//     }
     
-    fprintf(stderr, "DEBUG[handle_adjacent_args]: cmd_node='%s', join_with_prev=%d, last_arg_idx=%d\n",
-        cmd_node->args[0], join_with_prev, last_arg_idx);
+//     fprintf(stderr, "DEBUG[handle_adjacent_args]: cmd_node='%s', join_with_prev=%d, last_arg_idx=%d\n",
+//         cmd_node->args[0], join_with_prev, last_arg_idx);
     
-    if (join_with_prev && last_arg_idx >= 0)
-    {
-        // Join with last argument
-        fprintf(stderr, "DEBUG[handle_adjacent_args]: Joining with arg: '%s'\n", 
-                cmd_node->args[last_arg_idx]);
+//     if (join_with_prev && last_arg_idx >= 0)
+//     {
+//         // Join with last argument
+//         fprintf(stderr, "DEBUG[handle_adjacent_args]: Joining with arg: '%s'\n", 
+//                 cmd_node->args[last_arg_idx]);
                 
-        joined = ft_strjoin(cmd_node->args[last_arg_idx], expanded_value);
-        if (joined)
-        {
-            free(cmd_node->args[last_arg_idx]);
-            cmd_node->args[last_arg_idx] = joined;
-            free(expanded_value);
-        }
-    }
-    else
-    {
-        // Add as new argument to the command
-        fprintf(stderr, "DEBUG[handle_adjacent_args]: Adding as new argument to '%s'\n", 
-                cmd_node->args[0]);
+//         joined = ft_strjoin(cmd_node->args[last_arg_idx], expanded_value);
+//         if (joined)
+//         {
+//             free(cmd_node->args[last_arg_idx]);
+//             cmd_node->args[last_arg_idx] = joined;
+//             free(expanded_value);
+//         }
+//     }
+//     else
+//     {
+//         // Add as new argument to the command
+//         fprintf(stderr, "DEBUG[handle_adjacent_args]: Adding as new argument to '%s'\n", 
+//                 cmd_node->args[0]);
                 
-        append_arg(cmd_node, expanded_value, 0);
-        free(expanded_value);
-    }
+//         append_arg(cmd_node, expanded_value, 0);
+//         free(expanded_value);
+//     }
     
-    // Remove the expansion node from the token list
-    fprintf(stderr, "DEBUG[handle_adjacent_args]: Cleaning up expansion node\n");
+//     // Remove the expansion node from the token list
+//     fprintf(stderr, "DEBUG[handle_adjacent_args]: Cleaning up expansion node\n");
     
-    if (expansion_node->prev)
-        expansion_node->prev->next = expansion_node->next;
-    if (expansion_node->next)
-        expansion_node->next->prev = expansion_node->prev;
+//     if (expansion_node->prev)
+//         expansion_node->prev->next = expansion_node->next;
+//     if (expansion_node->next)
+//         expansion_node->next->prev = expansion_node->prev;
         
-    if (expansion_node == vars->head)
-        vars->head = expansion_node->next;
+//     if (expansion_node == vars->head)
+//         vars->head = expansion_node->next;
     
-    fprintf(stderr, "DEBUG[handle_adjacent_args]: calling free_token_node\n");
-    free_token_node(expansion_node);
+//     fprintf(stderr, "DEBUG[handle_adjacent_args]: calling free_token_node\n");
+//     free_token_node(expansion_node);
     
-    fprintf(stderr, "DEBUG[handle_adjacent_args]: EXIT\n");
-    return (1);
-}
+//     fprintf(stderr, "DEBUG[handle_adjacent_args]: EXIT\n");
+//     return (1);
+// }
 
-/*
- * Checks if tokens were adjacent in the original input
- * This is needed because tokenization splits adjacent text and expansion
- */
-int is_adjacent_in_original_input(t_node *expansion_node, char *arg)
-{
-    // For now, we'll assume they are adjacent if:
-    // 1. Expansion node has a meaningful prev token relationship
-    // 2. And the prev token was the command that holds this arg
+// /*
+//  * Checks if tokens were adjacent in the original input
+//  * This is needed because tokenization splits adjacent text and expansion
+//  */
+// int is_adjacent_in_original_input(t_node *expansion_node, char *arg)
+// {
+//     // For now, we'll assume they are adjacent if:
+//     // 1. Expansion node has a meaningful prev token relationship
+//     // 2. And the prev token was the command that holds this arg
     
-    if (!expansion_node || !expansion_node->prev || !arg)
-        return (0);
+//     if (!expansion_node || !expansion_node->prev || !arg)
+//         return (0);
     
-    // If expansion directly follows command (TYPE_CMD) and 
-    // it's not the first argument, likely adjacent to last arg
-    if (expansion_node->prev->type == TYPE_CMD && 
-        expansion_node->prev->args && 
-        expansion_node->prev->args[0] && 
-        expansion_node->prev->args[1])
-        return (1);
+//     // If expansion directly follows command (TYPE_CMD) and 
+//     // it's not the first argument, likely adjacent to last arg
+//     if (expansion_node->prev->type == TYPE_CMD && 
+//         expansion_node->prev->args && 
+//         expansion_node->prev->args[0] && 
+//         expansion_node->prev->args[1])
+//         return (1);
         
-    fprintf(stderr, "DEBUG[is_adjacent_in_original_input]: Checking expansion node follows cmd\n");
+//     fprintf(stderr, "DEBUG[is_adjacent_in_original_input]: Checking expansion node follows cmd\n");
     
-    // More sophisticated check would need to access the original input string
-    // and look at string positions from tokenization, but may not be available here
+//     // More sophisticated check would need to access the original input string
+//     // and look at string positions from tokenization, but may not be available here
     
-    return (0);
-}
+//     return (0);
+// }
 
 /*
 Expands a variable name to its value

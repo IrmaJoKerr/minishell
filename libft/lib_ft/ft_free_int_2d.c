@@ -1,30 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_free_2d.c                                       :+:      :+:    :+:   */
+/*   ft_free_int_2d.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/15 05:28:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/13 00:34:27 by bleow            ###   ########.fr       */
+/*   Created: 2025/04/13 00:24:49 by bleow             #+#    #+#             */
+/*   Updated: 2025/04/13 00:37:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 /*
-The ft_free_2d() function is a cleanup function to free a 2d char array.
+The ft_free_2d_int() function is a cleanup function to free a 2D int array.
+It iterates through the array, freeing each element, and then frees the array
+itself.
 */
-
 #include "libft.h"
 
-void	ft_free_2d(char **array, size_t len)
+void	ft_free_int_2d(int **array, size_t len)
 {
-	size_t	j;
+	size_t	i;
 
-	j = 0;
-	while (j < len)
+	i = 0;
+	while (i < len)
 	{
-		ft_safefree((void **)&array[j]);
-		j++;
+		if (array[i])
+			free(array[i]);
+		i++;
 	}
-	ft_safefree((void **)&array);
+	free(array);
 }

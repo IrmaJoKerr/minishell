@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/12 19:13:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/14 08:40:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,7 @@ typedef struct s_vars
 	int				cmd_count;
 	t_quote_context	quote_ctx[32];
 	int				quote_depth;
+	int				adj_state[3];
 	t_node			*find_start;
 	t_node			*find_tgt;
 	int				find_mode;
@@ -310,12 +311,16 @@ void		modify_env(char ***env, int changes, char *var);
 Append arguments to a node's argument array.
 In append_args.c
 */
+
 char		**dup_node_args(t_node *node, size_t len);
+int			**dup_quote_types(t_node *node, size_t len);
 int			*set_character_quote_types(char *arg_text, int quote_type);
 int			**set_quote_type(t_node *node, size_t len, int quote_type);
 void		update_node_args(t_node *node, char **new_args, int **quote_types);
-void		clean_new_args(char **new_args, size_t len);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
+void		check_token_adjacency(char *input, int pos, t_vars *vars);
+int			process_adjacency(int *i, t_vars *vars);
+void		reset_adjacency_state(t_vars *vars);
 
 /*
 Argument handling.
@@ -399,7 +404,7 @@ char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
 void 		debug_cmd_args(t_node *node);
-char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
+// char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
 
 /*
 Heredoc main handling.
@@ -485,8 +490,8 @@ void		handle_input(char *input, t_vars *vars);
 Input verification functions.
 In input_verify.c
 */
-int			handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars);
-int 		is_adjacent_in_original_input(t_node *expansion_node, char *arg);
+// int			handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars);
+// int 		is_adjacent_in_original_input(t_node *expansion_node, char *arg);
 char 		*expand_value(char *var_name, t_vars *vars);
 void		process_expansions(t_vars *vars);
 int			is_command_position(t_node *node, t_vars *vars);
@@ -516,6 +521,7 @@ int			main(int ac, char **av, char **envp);
 Operator handling.
 In operators.c
 */
+int			is_operator_char(char c);
 int			operators(char *input, t_vars *vars);
 void		handle_string(char *input, t_vars *vars);
 int			is_operator_token(t_tokentype type);
@@ -628,6 +634,7 @@ int 		is_adjacent_token(char *input, int pos);
 int			make_exp_token(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
+void		handle_right_adjacent(char *input, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
 void		token_link(t_node *node, t_vars *vars);
 void		build_token_linklist(t_vars *vars, t_node *node);

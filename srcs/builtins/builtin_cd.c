@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/10 23:37:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/13 01:52:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,21 +32,18 @@ int	builtin_cd(char **args, t_vars *vars)
 		printf("cd: ft_strdup error\n");
 		return (1);
 	}
-
 	cmdcode = handle_cd_path(args, vars);
 	if (cmdcode != 0)
 	{
 		free(oldpwd);
 		return (cmdcode);
 	}
-
 	cmdcode = update_env_pwd(vars, oldpwd);
 	if (cmdcode != 0)
 	{
 		free(oldpwd);
 		return (1);
 	}
-
 	free(oldpwd);
 	vars->error_code = cmdcode;
 	return (cmdcode);
@@ -102,7 +99,6 @@ int	handle_cd_path(char **args, t_vars *vars)
 	{
 		return (handle_cd_special(args, vars));
 	}
-
 	cmdcode = chdir(args[1]);
 	if (cmdcode != 0)
 	{
@@ -132,7 +128,6 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 	}
 	modify_env(&vars->env, 1, tmp);
 	free(tmp);
-
 	result = getcwd(cwd, sizeof(cwd));
 	if (result == NULL)
 	{

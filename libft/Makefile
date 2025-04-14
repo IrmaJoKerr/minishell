@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/23 18:10:33 by bleow             #+#    #+#              #
-#    Updated: 2025/03/13 09:54:05 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/14 08:21:12 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,10 @@ CFILES = \
 	lib_ft/ft_atoierr.c \
 	lib_ft/ft_bzero.c \
 	lib_ft/ft_calloc.c \
+	lib_ft/ft_free_int_2d.c \
 	lib_ft/ft_free_2d.c \
+	lib_ft/ft_free_void_2d.c \
+	lib_ft/ft_is_operator.c \
 	lib_ft/ft_isalnum.c \
 	lib_ft/ft_isalpha.c \
 	lib_ft/ft_isascii.c \

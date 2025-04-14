@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/11 18:03:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/13 01:53:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ int	builtin_exit(char **args, t_vars *vars)
 	{
 		tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
 	}
-	ft_putendl_fd("Builtin exit", STDOUT_FILENO);
+	ft_putendl_fd("exit", STDOUT_FILENO);
 	cleanup_exit(vars);
 	exit(cmdcode);
 	return (0);

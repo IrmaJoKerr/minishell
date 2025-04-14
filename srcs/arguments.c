@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:36:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:38:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/12 23:45:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ Also allocates character-level quote type arrays for each argument.
 */
 void create_args_array(t_node *node, char *token)
 {
-	char **args;
-	int **quote_types;
-	int i;
-	int len;
+	char	**args;
+	int		**quote_types;
+	int		i;
+	int		len;
 	
 	// Allocate arguments array
 	args = malloc(sizeof(char *) * 2);
@@ -54,7 +54,7 @@ void create_args_array(t_node *node, char *token)
 				(void*)node, node->type, token ? token : "NULL", len);
 		// Critical fix: Free quote_types if inner allocation fails
 		free(quote_types);
-		return;
+		return ;
 	}
 	// Initialize quote types to 0 (unquoted)
 	i = 0;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 17:58:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/14 07:52:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,15 +53,16 @@ Reset position trackers and node pointers.
 void init_vars(t_vars *vars)
 {
 	if (!vars)
-	{
 		return ;
-	}
 	vars->partial_input = NULL;
 	vars->next_flag = 0;
 	ft_memset(vars->cmd_nodes, 0, sizeof(vars->cmd_nodes));
 	vars->cmd_count = 0;
 	ft_memset(vars->quote_ctx, 0, sizeof(vars->quote_ctx));
 	vars->quote_depth = 0;
+	vars->adj_state[0] = 0;
+	vars->adj_state[1] = 0;
+	vars->adj_state[2] = -1;
 	vars->find_start = NULL;
 	vars->find_tgt = NULL;
 	vars->find_mode = 0;
@@ -75,6 +76,7 @@ void init_vars(t_vars *vars)
 	vars->heredoc_lines = NULL;
 	vars->heredoc_count = 0;
 	vars->heredoc_index = 0;
+	
 }
 
 /*

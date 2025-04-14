@@ -1,30 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_free_2d.c                                       :+:      :+:    :+:   */
+/*   ft_is_operator.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/15 05:28:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/13 00:34:27 by bleow            ###   ########.fr       */
+/*   Created: 2025/04/14 08:17:47 by bleow             #+#    #+#             */
+/*   Updated: 2025/04/14 08:20:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 /*
-The ft_free_2d() function is a cleanup function to free a 2d char array.
+The ft_is_operator function checks if the given character is a valid operator
 */
 
 #include "libft.h"
 
-void	ft_free_2d(char **array, size_t len)
+int	ft_is_operator(char c)
 {
-	size_t	j;
-
-	j = 0;
-	while (j < len)
-	{
-		ft_safefree((void **)&array[j]);
-		j++;
-	}
-	ft_safefree((void **)&array);
+	if (c == '|' || c == '<' || c == '>')
+		return (1);
+	else
+    	return (0);
 }

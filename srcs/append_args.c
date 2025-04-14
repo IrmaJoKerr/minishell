@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 11:24:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/14 08:21:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 Copy all arguments from the original node to a newly allocated array
 Returns NULL on failure
 */
-char **dup_node_args(t_node *node, size_t len)
+char	**dup_node_args(t_node *node,	size_t len)
 {
 	char	**new_args;
 	size_t	i;
@@ -30,14 +30,45 @@ char **dup_node_args(t_node *node, size_t len)
 		new_args[i] = ft_strdup(node->args[i]);
 		if (!new_args[i])
 		{
-			while (i > 0)
-				free(new_args[--i]);
-			free(new_args);
-			return (NULL);
-		}
+            ft_free_2d(new_args, i);
+            return (NULL);
+        }
 		i++;
 	}
 	return (new_args);
+}
+
+int **dup_quote_types(t_node *node, size_t len)
+{
+    size_t i;
+    int **new_quote_types;
+    size_t qlen;
+    
+    new_quote_types = malloc(sizeof(int*) * (len + 2));
+    if (!new_quote_types)
+        return (NULL);
+    i = 0;
+    while (i < len)
+    {
+        if (node->arg_quote_type && node->arg_quote_type[i])
+        {
+            qlen = ft_strlen(node->args[i]);
+            new_quote_types[i] = malloc(sizeof(int) * (qlen + 1));
+            if (!new_quote_types[i])
+            {
+                ft_free_int_2d(new_quote_types, i);
+                return (NULL);
+            }
+            ft_memcpy(new_quote_types[i], node->arg_quote_type[i], sizeof(int) * qlen);
+            new_quote_types[i][qlen] = -1; // Sentinel value
+        }
+        else
+        {
+            new_quote_types[i] = NULL;
+        }
+        i++;
+    }
+    return new_quote_types;
 }
 
 /*
@@ -96,8 +127,8 @@ Returns :
 */
 int	**set_quote_type(t_node *node, size_t len, int quote_type)
 {
-	int **quote_types;
-	size_t i;
+	int		**quote_types;
+	size_t	i;
 
 	quote_types = malloc(sizeof(int*) * (len + 2));
 	if (!quote_types)
@@ -112,21 +143,13 @@ int	**set_quote_type(t_node *node, size_t len, int quote_type)
 			quote_types[i] = NULL;  // NULL for uninitialized quote types
 		i++;
 	}
-	
 	// Create a new quote type array for the new argument
 	quote_types[len] = malloc(sizeof(int));
 	if (!quote_types[len])
-	{
-		// Clean up previously allocated arrays
-		i = 0;
-		while (i < len)
-		{
-			free(quote_types[i]);
-			i++;
-		}
-		free(quote_types);
-		return (NULL);
-	}
+    {
+        ft_free_int_2d(quote_types, i);
+        return (NULL);
+    }
 	quote_types[len][0] = quote_type;  // Set the quote type
 	quote_types[len + 1] = NULL;  // NULL terminate the array
 	return (quote_types);
@@ -142,174 +165,215 @@ void	update_node_args(t_node *node, char **new_args, int **quote_types)
 }
 
 /*
-Helper function to clean up allocated memory for new arguments
-*/
-void	clean_new_args(char **new_args, size_t len)
-{
-	free(new_args[len]);
-	free(new_args);
-}
-
-/*
 Appends an argument to a node's argument array
-Updates both the args array and arg_quote_type array with character-level tracking
+Updates both the args array and arg_quote_type array with 
+character-level tracking.
+Example: 
+String: "Hello"'world'!
+Args: ["Hello", "world"]
+Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 */
+// void append_arg(t_node *node, char *new_arg, int quote_type)
+// {
+//     char **new_args;
+//     int **new_quote_types;
+//     size_t len;
+//     size_t new_arg_len;
+//     size_t i;
+//     size_t qlen;
+    
+//     fprintf(stderr, "DEBUG [append_arg]: ENTER with arg='%s', quote_type=%d, node=%p\n", 
+//             new_arg ? new_arg : "NULL", quote_type, (void*)node);
+//     if (!node || !new_arg || !node->args)
+//         return ;
+//     len = 0;
+//     while (node->args[len])
+//         len++;
+//     fprintf(stderr, "DEBUG [append_arg]: Found %zu existing arguments\n", len);
+//     new_args = malloc(sizeof(char *) * (len + 2));
+//     if (!new_args)
+//         return ;
+//     i = 0;
+//     while (i < len)
+//     {
+//         new_args[i] = ft_strdup(node->args[i]);
+//         if (!new_args[i])
+//         {
+//             ft_free_2d(new_args, i);  // Using ft_free_2d here
+//             return ;
+//         }
+//         i++;
+//     }
+//     new_args[len] = ft_strdup(new_arg);
+//     if (!new_args[len])
+//     {
+//         ft_free_2d(new_args, len);  // Using ft_free_2d here
+//         return ;
+//     }
+//     new_args[len + 1] = NULL;
+//     new_quote_types = malloc(sizeof(int*) * (len + 2));
+//     if (!new_quote_types)
+//     {
+//         ft_free_2d(new_args, len + 1);  // Using ft_free_2d here
+//         return ;
+//     }
+//     i = 0;
+//     while (i < len)
+//     {
+//         if (node->arg_quote_type && node->arg_quote_type[i])
+//         {
+//             qlen = ft_strlen(node->args[i]);
+//             new_quote_types[i] = malloc(sizeof(int) * (qlen + 1));
+//             if (!new_quote_types[i])
+//             {
+//                 ft_free_int_2d(new_quote_types, i);  // Using ft_free_int_2d here
+//                 ft_free_2d(new_args, len + 1);       // Using ft_free_2d here
+//                 return;
+//             }
+//             ft_memcpy(new_quote_types[i], node->arg_quote_type[i], sizeof(int) * qlen);
+//             new_quote_types[i][qlen] = -1; // Sentinel value
+//         }
+//         else
+//         {
+//             new_quote_types[i] = NULL;
+//         }
+//         i++;
+//     }
+//     new_arg_len = ft_strlen(new_arg);
+//     new_quote_types[len] = malloc(sizeof(int) * (new_arg_len + 1));
+//     if (!new_quote_types[len])
+//     {
+//         ft_free_int_2d(new_quote_types, len);  // Using ft_free_int_2d here
+//         ft_free_2d(new_args, len + 1);         // Using ft_free_2d here
+//         return ;
+//     }
+//     i = 0;
+//     while (i < new_arg_len)
+//     {
+//         new_quote_types[len][i] = quote_type;
+//         i++;
+//     }
+//     new_quote_types[len][new_arg_len] = -1;
+//     new_quote_types[len + 1] = NULL;
+//     // Free original arrays
+//     ft_free_2d(node->args, len);  // Using ft_free_2d here
+//     if (node->arg_quote_type)
+//         ft_free_int_2d(node->arg_quote_type, len);  // Using ft_free_int_2d here
+    
+//     // Update node
+//     node->args = new_args;
+//     node->arg_quote_type = new_quote_types;
+//     fprintf(stderr, "DEBUG [append_arg]: EXIT successful - updated node with %zu+1 args\n", len);
+// }
 void append_arg(t_node *node, char *new_arg, int quote_type)
 {
-    char **new_args;
-    int **new_quote_types;
-    size_t len;
-    size_t new_arg_len;
-    size_t i;
-    size_t j;
-    size_t qlen;
+    char	**new_args;
+    int		**new_quote_types;
+    size_t	len;
     
     fprintf(stderr, "DEBUG [append_arg]: ENTER with arg='%s', quote_type=%d, node=%p\n", 
-            new_arg ? new_arg : "NULL", quote_type, (void*)node);
+            new_arg ? new_arg : "NULL", quote_type, (void*)node); 
     if (!node || !new_arg || !node->args)
-        return;
-    
-    len = 0;
-    while (node->args[len])
-        len++;
+        return ;
+    len = ft_arrlen(node->args);
     fprintf(stderr, "DEBUG [append_arg]: Found %zu existing arguments\n", len);
-    
-    new_args = malloc(sizeof(char *) * (len + 2));
+    // Duplicate existing arguments
+    new_args = dup_node_args(node, len);
     if (!new_args)
-        return;
-    
-    i = 0;
-    while (i < len)
-    {
-        new_args[i] = ft_strdup(node->args[i]);
-        if (!new_args[i])
-        {
-            j = 0;
-            while (j < i)
-            {
-                free(new_args[j]);
-                j++;
-            }
-            free(new_args);
-            return;
-        }
-        i++;
-    }
-    
+        return ;
+    // Add new argument
     new_args[len] = ft_strdup(new_arg);
     if (!new_args[len])
     {
-        i = 0;
-        while (i < len)
-        {
-            free(new_args[i]);
-            i++;
-        }
-        free(new_args);
-        return;
+        ft_free_2d(new_args, len);
+        return ;
     }
     new_args[len + 1] = NULL;
-    
-    new_quote_types = malloc(sizeof(int*) * (len + 2));
+    // Duplicate quote types
+    new_quote_types = dup_quote_types(node, len);
     if (!new_quote_types)
     {
-        i = 0;
-        while (i <= len)
-        {
-            free(new_args[i]);
-            i++;
-        }
-        free(new_args);
-        return;
+        ft_free_2d(new_args, len + 1);
+        return ;
     }
-    
-    i = 0;
-    while (i < len)
-    {
-        if (node->arg_quote_type && node->arg_quote_type[i])
-        {
-            qlen = ft_strlen(node->args[i]);
-            new_quote_types[i] = malloc(sizeof(int) * (qlen + 1));
-            if (!new_quote_types[i])
-            {
-                j = 0;
-                while (j < i)
-                {
-                    free(new_quote_types[j]);
-                    j++;
-                }
-                j = 0;
-                while (j <= len)
-                {
-                    free(new_args[j]);
-                    j++;
-                }
-                free(new_quote_types);
-                free(new_args);
-                return;
-            }
-            ft_memcpy(new_quote_types[i], node->arg_quote_type[i], sizeof(int) * qlen);
-            new_quote_types[i][qlen] = -1; // Sentinel value
-        }
-        else
-        {
-            new_quote_types[i] = NULL;
-        }
-        i++;
-    }
-    
-    new_arg_len = ft_strlen(new_arg);
-    new_quote_types[len] = malloc(sizeof(int) * (new_arg_len + 1));
+    // Set quote type for new argument
+    new_quote_types[len] = set_character_quote_types(new_arg, quote_type);
     if (!new_quote_types[len])
     {
-        i = 0;
-        while (i < len)
-        {
-            if (new_quote_types[i])
-                free(new_quote_types[i]);
-            i++;
-        }
-        i = 0;
-        while (i <= len)
-        {
-            free(new_args[i]);
-            i++;
-        }
-        free(new_quote_types);
-        free(new_args);
-        return;
+        ft_free_int_2d(new_quote_types, len);
+        ft_free_2d(new_args, len + 1);
+        return ;
     }
-    
-    i = 0;
-    while (i < new_arg_len)
-    {
-        new_quote_types[len][i] = quote_type;
-        i++;
-    }
-    new_quote_types[len][new_arg_len] = -1;
     new_quote_types[len + 1] = NULL;
-    
-    i = 0;
-    while (i < len)
-    {
-        free(node->args[i]);
-        i++;
-    }
-    free(node->args);
-    
+    // Free original arrays
+    ft_free_2d(node->args, len);
     if (node->arg_quote_type)
-    {
-        i = 0;
-        while (i < len)
-        {
-            if (node->arg_quote_type[i])
-                free(node->arg_quote_type[i]);
-            i++;
-        }
-        free(node->arg_quote_type);
-    }
-    
+        ft_free_int_2d(node->arg_quote_type, len);
+    // Update node
     node->args = new_args;
     node->arg_quote_type = new_quote_types;
     fprintf(stderr, "DEBUG [append_arg]: EXIT successful - updated node with %zu+1 args\n", len);
+}
+
+/*
+ * Checks both left and right adjacency at a position
+ * Updates adjacency state directly in vars->adj_state
+ */
+void check_token_adjacency(char *input, int pos, t_vars *vars)
+{
+    // Left adjacency (current implementation)
+    vars->adj_state[0] = (pos > 0 && !ft_isspace(input[pos-1]) && 
+                   !ft_is_operator(input[pos-1]));
+    
+    // Right adjacency (new check)
+    vars->adj_state[1] = (input[pos+1] && !ft_isspace(input[pos+1]) && 
+                   !ft_is_operator(input[pos+1]));
+    
+    // Guard value
+    vars->adj_state[2] = -1;
+}
+
+/*
+ * Processes adjacency state and updates vars->start appropriately
+ * Returns:
+ * - 2 if bidirectional adjacency (both left and right)
+ * - 1 if right-adjacent only (don't update start)
+ * - -1 if left-adjacent only
+ * - 0 if no adjacency
+ */
+int process_adjacency(int *i, t_vars *vars)
+{
+    int result;
+    
+    // Determine result based on adjacency combination
+    if (vars->adj_state[0] && vars->adj_state[1])
+        result = 2;       // Both left and right adjacency
+    else if (vars->adj_state[1])
+        result = 1;       // Right adjacency only
+    else if (vars->adj_state[0])
+        result = -1;      // Left adjacency only
+    else
+        result = 0;       // No adjacency
+    
+    // Only update start position if no right adjacency
+    if (!vars->adj_state[1])
+    {
+        vars->start = *i;
+    }
+    
+    // Log the determined adjacency state
+    fprintf(stderr, "DEBUG: Adjacency state: left=%d, right=%d (result=%d)\n",
+            vars->adj_state[0], vars->adj_state[1], result);
+            
+    return result;
+}
+
+/*
+ * Resets adjacency state to defaults
+ */
+void reset_adjacency_state(t_vars *vars)
+{
+    vars->adj_state[0] = 0;  // left adjacency
+    vars->adj_state[1] = 0;  // right adjacency
+    vars->adj_state[2] = -1; // guard value
 }
