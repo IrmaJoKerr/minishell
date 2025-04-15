@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:40:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:42:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 09:10:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,9 @@ t_node	*init_find_cmd(t_node *start, t_vars *vars)
 
 /*
 Handles command node processing based on the current mode.
-Returns a node if we found what we're looking for, NULL to continue searching.
+Returns:
+- A node if we found what we're looking for
+- NULL to continue searching.
 */
 t_node *mode_action(t_node *current, t_node **last_cmd, t_vars *vars)
 {

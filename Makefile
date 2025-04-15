@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/11 00:40:37 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/15 06:22:47 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,6 +46,7 @@ MINISHELL_SRCS = \
 			srcs/input_handlers.c \
 			srcs/input_verify.c \
 			srcs/lexer.c \
+			srcs/make_exp_token.c \
 			srcs/minishell.c \
 			srcs/operators.c \
 			srcs/paths.c \

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 08:21:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 09:13:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,34 +316,33 @@ void append_arg(t_node *node, char *new_arg, int quote_type)
 }
 
 /*
- * Checks both left and right adjacency at a position
- * Updates adjacency state directly in vars->adj_state
- */
-void check_token_adjacency(char *input, int pos, t_vars *vars)
+Checks both left and right adjacency at a position
+Updates adjacency state directly in vars->adj_state
+*/
+void	check_token_adj(char *input, t_vars *vars)
 {
-    // Left adjacency (current implementation)
-    vars->adj_state[0] = (pos > 0 && !ft_isspace(input[pos-1]) && 
-                   !ft_is_operator(input[pos-1]));
-    
-    // Right adjacency (new check)
-    vars->adj_state[1] = (input[pos+1] && !ft_isspace(input[pos+1]) && 
-                   !ft_is_operator(input[pos+1]));
-    
-    // Guard value
-    vars->adj_state[2] = -1;
+	// Left adjacency - using vars->pos directly
+	vars->adj_state[0] = (vars->pos > 0 && !ft_isspace(input[vars->pos-1])
+	 	&& !ft_is_operator(input[vars->pos-1]));
+	// Right adjacency - using vars->pos directly
+	vars->adj_state[1] = (input[vars->pos+1]
+		&& !ft_isspace(input[vars->pos+1])
+		&& !ft_is_operator(input[vars->pos+1]));
+	// Guard value
+	vars->adj_state[2] = -1;
 }
 
 /*
- * Processes adjacency state and updates vars->start appropriately
- * Returns:
- * - 2 if bidirectional adjacency (both left and right)
- * - 1 if right-adjacent only (don't update start)
- * - -1 if left-adjacent only
- * - 0 if no adjacency
- */
-int process_adjacency(int *i, t_vars *vars)
+Processes adjacency state and updates vars->start appropriately
+Returns:
+ - 2 if bidirectional adjacency (both left and right)
+ - 1 if right-adjacent only (don't update start)
+ - (-1) if left-adjacent only
+ - 0 if no adjacency
+*/
+int	process_adj(int *i, t_vars *vars)
 {
-    int result;
+    int	result;
     
     // Determine result based on adjacency combination
     if (vars->adj_state[0] && vars->adj_state[1])
@@ -354,18 +353,15 @@ int process_adjacency(int *i, t_vars *vars)
         result = -1;      // Left adjacency only
     else
         result = 0;       // No adjacency
-    
     // Only update start position if no right adjacency
     if (!vars->adj_state[1])
     {
         vars->start = *i;
     }
-    
     // Log the determined adjacency state
     fprintf(stderr, "DEBUG: Adjacency state: left=%d, right=%d (result=%d)\n",
             vars->adj_state[0], vars->adj_state[1], result);
-            
-    return result;
+    return (result);
 }
 
 /*

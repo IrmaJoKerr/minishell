@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 08:40:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 09:18:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -318,8 +318,8 @@ int			*set_character_quote_types(char *arg_text, int quote_type);
 int			**set_quote_type(t_node *node, size_t len, int quote_type);
 void		update_node_args(t_node *node, char **new_args, int **quote_types);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
-void		check_token_adjacency(char *input, int pos, t_vars *vars);
-int			process_adjacency(int *i, t_vars *vars);
+void		check_token_adj(char *input, t_vars *vars);
+int			process_adj(int *i, t_vars *vars);
 void		reset_adjacency_state(t_vars *vars);
 
 /*
@@ -503,6 +503,30 @@ In lexer.c
 void		skip_whitespace(char *str, t_vars *vars);
 
 /*
+Make_exp_token functions.
+In make_exp_token.c
+*/
+int			get_expn_name(char *input, t_vars *vars, char **token
+				,char **var_name);
+int			get_var_token(char *input, t_vars *vars, char **token
+				,char **var_name);
+int			addon_quo_type_arr(int *dest, int *src, int new_len);
+int			sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
+				,char *token);
+int			make_exp_token(char *input, t_vars *vars);
+
+/*
+Make_exp_token utility functions.
+In make_exp_token_utils.c
+*/
+int			new_exp_token(t_vars *vars, char *expanded_val, char *token);
+int			proc_join_args(t_vars *vars, char *expanded_val);
+int			handle_tok_join(char *input, t_vars *vars, char *expanded_val
+					,char *token);
+void		process_right_adj(char *input, t_vars *vars);
+int			update_quote_types(t_vars *vars, int arg_idx, char *expanded_val);
+
+/*
 Minishell program entry point functions.
 In minishell.c
 */
@@ -629,15 +653,14 @@ In tokenize.c
 void 		set_token_type(t_vars *vars, char *input);
 size_t		count_nodes(t_node *head); //DEBUG FUNCTION
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
-int			build_token_linklist_with_status(t_vars *vars, t_node *node);
+int			build_token_linklist(t_vars *vars, t_node *node);
 int 		is_adjacent_token(char *input, int pos);
-int			make_exp_token(char *input, int *i, t_vars *vars);
+// int			make_exp_token(char *input, int *i, t_vars *vars);
 int			process_quote_char(char *input, int *i, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
-void		handle_right_adjacent(char *input, t_vars *vars);
+void		handle_right_adj(char *input, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
 void		token_link(t_node *node, t_vars *vars);
-void		build_token_linklist(t_vars *vars, t_node *node);
 void 		debug_token_list(t_vars *vars);
 
 /*

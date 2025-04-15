@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 20:19:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 09:34:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,18 @@ Sets appropriate token type based on position and context
 Determines if current token should be a command or argument
 Updates vars->curr_type accordingly
 */
-void set_token_type(t_vars *vars, char *input)
+void	set_token_type(t_vars *vars, char *input)
 {
 	int			moves;
 	t_tokentype	special_type;
 	// Save previous type
 	special_type = 0;
 	vars->prev_type = vars->curr_type;
-	// Check for variable expansion
 	if (input && input[0] == '$')
 	{
 		vars->curr_type = TYPE_EXPANSION;
 		return;
 	}
-	// Check for special token types
 	if (input && *input)
 	{
 		special_type = get_token_at(input, 0, &moves);
@@ -40,7 +38,6 @@ void set_token_type(t_vars *vars, char *input)
 			return ;
 		}
 	}
-	// Default to position-based command/argument detection
 	if (!vars->head || vars->prev_type == TYPE_PIPE)
 		vars->curr_type = TYPE_CMD;
 	else
@@ -59,35 +56,65 @@ size_t count_nodes(t_node *head)
 	return count;
 }
 
+// void maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
+// {
+// 	t_node	*node;
+// 	int		node_freed;
+	
+// 	node = initnode(type, token);
+// 	if (!node)
+// 		return ;
+// 	// Check if node was freed by build_token_linklist
+// 	node_freed = build_token_linklist(vars, node);
+// 	// Only try to free if it wasn't already freed
+// 	if (!node_freed)
+// 	{
+// 		if (node != vars->head && node != vars->current)
+// 		{
+// 			fprintf(stderr, "DEBUG[maketoken_with_type]: Freeing orphaned node not in list. "
+// 					"node=%p, type=%d, content='%s'\n",
+// 					(void*)node, node->type, 
+// 					(node->args && node->args[0]) ? node->args[0] : "NULL");
+// 			free_token_node(node);
+// 		}
+// 	}
+// }
 void maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
 {
-	t_node *node;
-	int node_freed;
-	
-	node = initnode(type, token);
-	if (!node)
-		return;
-	
-	// Check if node was freed by build_token_linklist_with_status
-	node_freed = build_token_linklist_with_status(vars, node);
-	
-	// Only try to free if it wasn't already freed
-	if (!node_freed)
-	{
-		// Additional checks for orphaned nodes
-		size_t original_count = count_nodes(vars->head);
-		if (count_nodes(vars->head) == original_count)
-		{
-			if (node != vars->head && node != vars->current)
-			{
-				fprintf(stderr, "DEBUG[maketoken_with_type]: Freeing orphaned node not in list. "
-					  "node=%p, type=%d, content='%s'\n",
-					  (void*)node, node->type, 
-					  (node->args && node->args[0]) ? node->args[0] : "NULL");
-				free_token_node(node);
-			}
-		}
-	}
+    t_node *node;
+	t_node *check;
+    int node_freed;
+	int found_in_list;
+
+	found_in_list = 0;
+	check = vars->head;
+    
+    node = initnode(type, token);
+    if (!node)
+        return ;
+    node_freed = build_token_linklist(vars, node);
+    if (!node_freed) 
+    {
+        if (node != vars->head && node != vars->current)
+        {
+            found_in_list = 0;
+            check = vars->head;
+            while (check && !found_in_list)
+            {
+                if (check == node)
+                    found_in_list = 1;
+                check = check->next;
+            }
+            if (!found_in_list)
+            {
+                fprintf(stderr, "DEBUG[maketoken_with_type]: Freeing orphaned node not in list. "
+                        "node=%p, type=%d, content='%s'\n",
+                        (void*)node, node->type, 
+                        (node->args && node->args[0]) ? node->args[0] : "NULL");
+                free_token_node(node);
+            }
+        }
+    }
 }
 
 int is_adjacent_token(char *input, int pos) // POSSIBLE CANDIDATE FOR DEPRECATION
@@ -129,7 +156,7 @@ Returns 1 if expansion token was created, 0 otherwise
 //     vars->start = *i;
     
 //     // Get complete adjacency information
-//     check_token_adjacency(input, *i, vars);
+//     check_token_adj(input, *i, vars);
     
 //     fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adj_left=%d, adj_right=%d\n",
 //             *i, input[*i], input + *i, vars->adj_state[0], vars->adj_state[1]);
@@ -247,7 +274,7 @@ Returns 1 if expansion token was created, 0 otherwise
 //     }
     
 //     // Link the new token into the list
-//     build_token_linklist_with_status(vars, exp_node);
+//     build_token_linklist(vars, exp_node);
     
 //     free(token);
     
@@ -274,7 +301,7 @@ Returns 1 if expansion token was created, 0 otherwise
 //                 *i - initial_pos, *i - initial_pos, input + initial_pos);
         
 //         // Join adjacent text with current token
-//         handle_right_adjacent(input, vars);
+//         handle_right_adj(input, vars);
         
 //         // Update start position to avoid duplicate processing
 //         vars->start = *i;
@@ -287,201 +314,7 @@ Returns 1 if expansion token was created, 0 otherwise
 //     process_adjacency(i, vars);
 //     return (1);
 // }
-int make_exp_token(char *input, int *i, t_vars *vars)
-{
-    char        *token;
-    char        *expanded_value = NULL;
-    char        *var_name = NULL;
-    
-    vars->start = *i;
-    
-    // Get complete adjacency information
-    check_token_adjacency(input, *i, vars);
-    
-    fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adj_left=%d, adj_right=%d\n",
-            *i, input[*i], input + *i, vars->adj_state[0], vars->adj_state[1]);
-    
-    // Extract the expansion token
-    if (input[*i] == '$' && input[*i + 1] == '?') 
-    {
-        token = ft_substr(input, vars->start, 2);
-        if (!token)
-            return (0);
-        var_name = ft_strdup("?");
-        (*i) += 2;
-        fprintf(stderr, "DEBUG[make_exp_token]: Extracted exit status '$?', new pos=%d\n", *i);
-    }
-    else if (input[*i] == '$')
-    {
-        int var_start = *i + 1; // Skip the $ character
-        (*i)++;
-        while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-            (*i)++; 
-        
-        token = ft_substr(input, vars->start, *i - vars->start);
-        if (!token)
-            return (0);
-        
-        var_name = ft_substr(input, var_start, *i - var_start);
-    }
-    else
-        return (0);
-    
-    // Expand the variable immediately
-    expanded_value = expand_value(var_name, vars);
-    free(var_name);
-    
-    fprintf(stderr, "DEBUG[make_exp_token]: Expanded '%s' to '%s', adj_left=%d, adj_right=%d\n", 
-            token, expanded_value, vars->adj_state[0], vars->adj_state[1]);
-    
-    // Handle left adjacency (joining with previous token)
-    if (vars->adj_state[0] && vars->current && 
-        (vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
-    {
-        // Check if current node has arguments to join with
-        if (vars->current->args && vars->current->args[0])
-        {
-            // Find the last argument
-            int arg_idx = 0;
-            while (vars->current->args[arg_idx + 1])
-                arg_idx++;
-            
-            // Join with last argument
-            fprintf(stderr, "DEBUG[make_exp_token]: Joining '%s' with '%s'\n", 
-                   vars->current->args[arg_idx], expanded_value);
-                   
-            char *joined = ft_strjoin(vars->current->args[arg_idx], expanded_value);
-            free(vars->current->args[arg_idx]);
-            vars->current->args[arg_idx] = joined;
-            
-            // Handle quote types if needed
-            if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
-            {
-                // Update quote types for joined string
-                int old_len = 0;
-                while (vars->current->arg_quote_type[arg_idx][old_len] != -1)
-                    old_len++;
-                
-                int new_len = ft_strlen(expanded_value);
-                int *new_quote_types = malloc(sizeof(int) * (old_len + new_len + 1));
-                
-                // Copy existing quote types
-                int j = 0;
-                while (j < old_len)
-                {
-                    new_quote_types[j] = vars->current->arg_quote_type[arg_idx][j];
-                    j++;
-                }
-                
-                // Set quote types for expanded portion to 0 (unquoted)
-                while (j < old_len + new_len)
-                {
-                    new_quote_types[j] = 0;
-                    j++;
-                }
-                new_quote_types[j] = -1; // End sentinel
-                
-                free(vars->current->arg_quote_type[arg_idx]);
-                vars->current->arg_quote_type[arg_idx] = new_quote_types;
-            }
-            
-            free(expanded_value);
-            free(token);
-            
-            // Add right adjacency handling BEFORE returning
-            if (vars->adj_state[1]) 
-            {
-                fprintf(stderr, "DEBUG[make_exp_token]: Right adjacency also detected after left joining\n");
-                
-                // Save current position as start position
-                vars->start = *i;
-                
-                // Save initial position to track how many characters we consume
-                int initial_pos = *i;
-                
-                // Consume adjacent characters
-                while (input[*i] && !ft_isspace(input[*i]) && 
-                       !ft_is_operator(input[*i]) && 
-                       input[*i] != '\'' && input[*i] != '"' &&
-                       input[*i] != '$')
-                    (*i)++;
-                    
-                fprintf(stderr, "DEBUG[make_exp_token]: Consumed %d adjacent characters: '%.*s'\n",
-                        *i - initial_pos, *i - initial_pos, input + initial_pos);
-                
-                // Join adjacent text with current token
-                handle_right_adjacent(input, vars);
-                vars->start = *i;
-                
-                fprintf(stderr, "DEBUG[make_exp_token]: After right adjacency handling in left section - updated start=%d\n", vars->start);
-            }
-            
-            // Let process_adjacency determine if we should update vars->start
-            process_adjacency(i, vars);
-            return (1);
-        }
-    }
-    
-    // Create a new token if no joining happened
-    t_tokentype token_type = TYPE_ARGS;
 
-    // If this would be the first token, make it a command
-    if (!vars->head)
-    {
-        token_type = TYPE_CMD;
-        fprintf(stderr, "DEBUG[make_exp_token]: Creating as command token since it's standalone\n");
-    }
-    
-    // Create a new token
-    t_node *exp_node = initnode(token_type, expanded_value);
-    if (!exp_node)
-    {
-        free(expanded_value);
-        free(token);
-        return (0);
-    }
-    
-    // Link the new token into the list
-    build_token_linklist_with_status(vars, exp_node);
-    
-    free(token);
-    
-    // Add this block to handle right adjacency
-    if (vars->adj_state[1] && vars->current)
-    {
-        fprintf(stderr, "DEBUG[make_exp_token]: Right adjacency detected! current=%p\n", 
-                (void*)vars->current);
-        
-        // Save the current position as start position
-        vars->start = *i;
-        
-        // Save initial position to track how many characters we consume
-        int initial_pos = *i;
-        
-        // Consume adjacent characters
-        while (input[*i] && !ft_isspace(input[*i]) && 
-               !ft_is_operator(input[*i]) && 
-               input[*i] != '\'' && input[*i] != '"' &&
-               input[*i] != '$')
-            (*i)++;
-        
-        fprintf(stderr, "DEBUG[make_exp_token]: Consumed %d adjacent characters: '%.*s'\n",
-                *i - initial_pos, *i - initial_pos, input + initial_pos);
-        
-        // Join adjacent text with current token
-        handle_right_adjacent(input, vars);
-        
-        // Update start position to avoid duplicate processing
-        vars->start = *i;
-        
-        fprintf(stderr, "DEBUG[make_exp_token]: After right adjacency handling - updated start=%d\n", 
-                vars->start);
-    }
-    
-    // Let process_adjacency determine if we should update vars->start
-    process_adjacency(i, vars);
-    return (1);
-}
 
 /*
 Process quoted text during tokenization
@@ -973,7 +806,7 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     char    *joined;
     
     // Get complete adjacency information
-    check_token_adjacency(input, *i, vars);
+    check_token_adj(input, vars);
     quote_char = input[*i];
     
     // Determine quote type based on quote character
@@ -1186,7 +1019,7 @@ int process_quote_char(char *input, int *i, t_vars *vars)
                 free(content);
                 
                 // Let process_adjacency determine if we should update vars->start
-                process_adjacency(i, vars);
+                process_adj(i, vars);
                 return (1);
             }
         }
@@ -1211,7 +1044,7 @@ int process_quote_char(char *input, int *i, t_vars *vars)
     free(content);
     
     // Let process_adjacency determine if we should update vars->start
-    process_adjacency(i, vars);
+    process_adj(i, vars);
     return (1);
 }
 
@@ -1299,7 +1132,7 @@ static void handle_text(char *input, t_vars *vars)
  * Handles right adjacency for a token
  * Extracts text between vars->start and vars->pos and joins it with current token's argument
  */
-// void	handle_right_adjacent(char *input, t_vars *vars)
+// void	handle_right_adj(char *input, t_vars *vars)
 // {
 //     char	*adjacent_text;
 //     char	*joined;
@@ -1321,70 +1154,70 @@ static void handle_text(char *input, t_vars *vars)
 //     }
 //     free(adjacent_text);
 // }
-// void handle_right_adjacent(char *input, t_vars *vars)
+// void handle_right_adj(char *input, t_vars *vars)
 // {
-//     fprintf(stderr, "DEBUG[handle_right_adjacent]: ENTER - pos=%d, start=%d\n",
+//     fprintf(stderr, "DEBUG[handle_right_adj]: ENTER - pos=%d, start=%d\n",
 //             vars->pos, vars->start);
     
 //     if (vars->pos <= vars->start)
 //     {
-//         fprintf(stderr, "DEBUG[handle_right_adjacent]: No text to extract (pos <= start)\n");
+//         fprintf(stderr, "DEBUG[handle_right_adj]: No text to extract (pos <= start)\n");
 //         return;
 //     }
     
 //     char *adjacent_text = ft_substr(input, vars->start, vars->pos - vars->start);
 //     if (!adjacent_text)
 //     {
-//         fprintf(stderr, "DEBUG[handle_right_adjacent]: Failed to extract text\n");
+//         fprintf(stderr, "DEBUG[handle_right_adj]: Failed to extract text\n");
 //         return;
 //     }
     
-//     fprintf(stderr, "DEBUG[handle_right_adjacent]: Extracted '%s'\n", adjacent_text);
+//     fprintf(stderr, "DEBUG[handle_right_adj]: Extracted '%s'\n", adjacent_text);
     
 //     if (vars->current && vars->current->args && vars->current->args[0])
 //     {
-//         fprintf(stderr, "DEBUG[handle_right_adjacent]: Current token arg='%s'\n",
+//         fprintf(stderr, "DEBUG[handle_right_adj]: Current token arg='%s'\n",
 //                 vars->current->args[0]);
         
 //         char *joined = ft_strjoin(vars->current->args[0], adjacent_text);
 //         if (joined)
 //         {
-//             fprintf(stderr, "DEBUG[handle_right_adjacent]: Joined result='%s'\n", joined);
+//             fprintf(stderr, "DEBUG[handle_right_adj]: Joined result='%s'\n", joined);
 //             free(vars->current->args[0]);
 //             vars->current->args[0] = joined;
 //         }
 //         else
 //         {
-//             fprintf(stderr, "DEBUG[handle_right_adjacent]: Join failed\n");
+//             fprintf(stderr, "DEBUG[handle_right_adj]: Join failed\n");
 //         }
 //     }
 //     else
 //     {
-//         fprintf(stderr, "DEBUG[handle_right_adjacent]: No valid current token to join with\n");
+//         fprintf(stderr, "DEBUG[handle_right_adj]: No valid current token to join with\n");
 //     }
     
 //     free(adjacent_text);
-//     fprintf(stderr, "DEBUG[handle_right_adjacent]: EXIT\n");
+//     fprintf(stderr, "DEBUG[handle_right_adj]: EXIT\n");
 // }
-void handle_right_adjacent(char *input, t_vars *vars)
+void handle_right_adj(char *input, t_vars *vars)
 {
-    fprintf(stderr, "DEBUG[handle_right_adjacent]: ENTER - pos=%d, start=%d\n",
+    fprintf(stderr, "DEBUG[handle_right_adj]: ENTER - pos=%d, start=%d\n",
             vars->pos, vars->start);
     
     if (vars->pos <= vars->start)
     {
-        fprintf(stderr, "DEBUG[handle_right_adjacent]: No text to extract (pos <= start)\n");
+        fprintf(stderr, "DEBUG[handle_right_adj]: No text to extract (pos <= start)\n");
         return;
     }
     
     char *adjacent_text = ft_substr(input, vars->start, vars->pos - vars->start);
     if (!adjacent_text)
     {
-        fprintf(stderr, "DEBUG[handle_right_adjacent]: Failed to extract text\n");
+        fprintf(stderr, "DEBUG[handle_right_adj]: Failed to extract text\n");
         return;
     }
     
-    fprintf(stderr, "DEBUG[handle_right_adjacent]: Extracted '%s'\n", adjacent_text);
+    fprintf(stderr, "DEBUG[handle_right_adj]: Extracted '%s'\n", adjacent_text);
     
     if (vars->current && vars->current->args && vars->current->args[0])
     {
@@ -1393,29 +1226,29 @@ void handle_right_adjacent(char *input, t_vars *vars)
         while (vars->current->args[arg_idx + 1])
             arg_idx++;
         
-        fprintf(stderr, "DEBUG[handle_right_adjacent]: Current token last arg='%s'\n",
+        fprintf(stderr, "DEBUG[handle_right_adj]: Current token last arg='%s'\n",
                 vars->current->args[arg_idx]);
         
         // Join with the last argument, not the first
         char *joined = ft_strjoin(vars->current->args[arg_idx], adjacent_text);
         if (joined)
         {
-            fprintf(stderr, "DEBUG[handle_right_adjacent]: Joined result='%s'\n", joined);
+            fprintf(stderr, "DEBUG[handle_right_adj]: Joined result='%s'\n", joined);
             free(vars->current->args[arg_idx]);
             vars->current->args[arg_idx] = joined;
         }
         else
         {
-            fprintf(stderr, "DEBUG[handle_right_adjacent]: Join failed\n");
+            fprintf(stderr, "DEBUG[handle_right_adj]: Join failed\n");
         }
     }
     else
     {
-        fprintf(stderr, "DEBUG[handle_right_adjacent]: No valid current token to join with\n");
+        fprintf(stderr, "DEBUG[handle_right_adj]: No valid current token to join with\n");
     }
     
     free(adjacent_text);
-    fprintf(stderr, "DEBUG[handle_right_adjacent]: EXIT\n");
+    fprintf(stderr, "DEBUG[handle_right_adj]: EXIT\n");
 }
 /*
 Handle quoted text in the input.
@@ -1463,10 +1296,10 @@ static void imp_tok_quote(char *input, t_vars *vars)
 				fprintf(stderr, "DEBUG[imp_tok_quote]: Consumed %d adjacent characters: '%.*s'\n",
                     vars->pos - initial_pos, vars->pos - initial_pos, input + initial_pos);
                 
-            fprintf(stderr, "DEBUG[imp_tok_quote]: Before handle_right_adjacent - pos=%d, start=%d\n",
+            fprintf(stderr, "DEBUG[imp_tok_quote]: Before handle_right_adj - pos=%d, start=%d\n",
                     vars->pos, vars->start);
             
-            handle_right_adjacent(input, vars);
+            handle_right_adj(input, vars);
              // Add this line to prevent duplicate processing
             vars->start = vars->pos;
             
@@ -1511,7 +1344,7 @@ static void imp_tok_expan(char *input, t_vars *vars)
     
     handle_text(input, vars);
     
-    if (make_exp_token(input, &vars->pos, vars))
+    if (make_exp_token(input, vars))
         vars->next_flag = 1;
         
     fprintf(stderr, "DEBUG[imp_tok_expan]: EXIT with pos=%d, start=%d, next_flag=%d\n", 
@@ -1609,7 +1442,7 @@ Example: When adding command node
 - Otherwise links to previous token
 - Updates current pointer
 */
-// int build_token_linklist_with_status(t_vars *vars, t_node *node)
+// int build_token_linklist(t_vars *vars, t_node *node)
 // {
 // 	t_node *cmd_node;
 	
@@ -1644,7 +1477,7 @@ Example: When adding command node
 // 		return 0;  // Node was not freed
 // 	}
 // }
-int build_token_linklist_with_status(t_vars *vars, t_node *node)
+int build_token_linklist(t_vars *vars, t_node *node)
 {
     t_node *cmd_node;
     
