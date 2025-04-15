@@ -1,4 +1,0 @@
-echo $HOME$USER
-echo hello_"$HOME"_world
-echo hello"$HOME"world"$USER"test
-echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
