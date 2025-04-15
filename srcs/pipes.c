@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 14:53:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 18:14:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ int execute_pipes(t_node *pipe_node, t_vars *vars)
 	return 1;
 }
 
-/*
+/* //Possible to reuse
 Determines if a redirection node relates to a specific command.
 - Checks relative position of redirection and command in token list.
 - Considers commands before and after redirection.
@@ -163,80 +163,80 @@ int is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars) //Poss
 	return (0);
 }
 
-/*
-Clean up memory after pipe completion processing
-Mode: 1 = free pipe_cmd only, 2 = free result only, 3 = free both
-*/
-void reset_done_pipes(char **pipe_cmd, char **result, int mode)
-{
-	// Clean up result string if needed
-	if ((mode == 2 || mode == 3) && result && *result)
-	{
-		free(*result);
-		*result = NULL;
-	}
-	// Clean up pipe command string if needed
-	if ((mode == 1 || mode == 3) && pipe_cmd && *pipe_cmd)
-	{
-		free(*pipe_cmd);
-		*pipe_cmd = NULL;
-	}
-}
+// /*
+// Clean up memory after pipe completion processing
+// Mode: 1 = free pipe_cmd only, 2 = free result only, 3 = free both
+// */
+// void reset_done_pipes(char **pipe_cmd, char **result, int mode)
+// {
+// 	// Clean up result string if needed
+// 	if ((mode == 2 || mode == 3) && result && *result)
+// 	{
+// 		free(*result);
+// 		*result = NULL;
+// 	}
+// 	// Clean up pipe command string if needed
+// 	if ((mode == 1 || mode == 3) && pipe_cmd && *pipe_cmd)
+// 	{
+// 		free(*pipe_cmd);
+// 		*pipe_cmd = NULL;
+// 	}
+// }
 
-/*
-Prepares and validates a command for pipe completion processing.
-- Creates working copies of command string.
-- Checks if command needs completion based on syntax flag.
-- Creates AST structure for processing.
-Returns:
-- 1 on successful preparation.
-- 0 if no completion needed (early return case).
-- -1 on preparation errors.
-Works with handle_pipe_completion().
-*/
-int	prep_pipe_complete(char *cmd, char **result, char **pipe_cmd)
-{
-	*result = ft_strdup(cmd);
-	if (!*result)
-		return (-1);
-	*pipe_cmd = ft_strdup(*result);
-	if (!*pipe_cmd)
-	{
-		free(*result);
-		return (-1);
-	}
-	return (1);
-}
+// /*
+// Prepares and validates a command for pipe completion processing.
+// - Creates working copies of command string.
+// - Checks if command needs completion based on syntax flag.
+// - Creates AST structure for processing.
+// Returns:
+// - 1 on successful preparation.
+// - 0 if no completion needed (early return case).
+// - -1 on preparation errors.
+// Works with handle_pipe_completion().
+// */
+// int	prep_pipe_complete(char *cmd, char **result, char **pipe_cmd)
+// {
+// 	*result = ft_strdup(cmd);
+// 	if (!*result)
+// 		return (-1);
+// 	*pipe_cmd = ft_strdup(*result);
+// 	if (!*pipe_cmd)
+// 	{
+// 		free(*result);
+// 		return (-1);
+// 	}
+// 	return (1);
+// }
 
-/*
-Check if there's an unfinished pipe at the end of input.
-Returns:
-- 1 if there's an unfinished pipe needing completion
-- 0 if there's no unfinished pipe
-Works with handle_unfinished_pipes().
-*/
-int check_unfinished_pipe(t_vars *vars)
-{
-	t_node *last_token;
-	t_node *current;
+// /*
+// Check if there's an unfinished pipe at the end of input.
+// Returns:
+// - 1 if there's an unfinished pipe needing completion
+// - 0 if there's no unfinished pipe
+// Works with handle_unfinished_pipes().
+// */
+// int check_unfinished_pipe(t_vars *vars)
+// {
+// 	t_node *last_token;
+// 	t_node *current;
 
-	last_token = NULL;
-	current = vars->head;
-	while (current)
-	{
-		last_token = current;
-		current = current->next;
-	}
-	if (last_token && last_token->type == TYPE_PIPE)
-	{
-		if (vars->pipes)
-			vars->pipes->pipe_at_end = 1;
-		return (1);
-	}
-	if (vars->pipes && vars->pipes->pipe_at_end)
-		return (1);
-	return (0);
-}
+// 	last_token = NULL;
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		last_token = current;
+// 		current = current->next;
+// 	}
+// 	if (last_token && last_token->type == TYPE_PIPE)
+// 	{
+// 		if (vars->pipes)
+// 			vars->pipes->pipe_at_end = 1;
+// 		return (1);
+// 	}
+// 	if (vars->pipes && vars->pipes->pipe_at_end)
+// 		return (1);
+// 	return (0);
+// }
 
 /*
 Check for unfinished pipes in input and handle them.
@@ -293,41 +293,41 @@ int handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
 	return (1);
 }
 
-/*
-Handles pipe completion for commands needing continuation.
-- Processes commands with trailing pipes.
-- Prompts for additional input as needed.
-Returns:
-- Complete command string or NULL on error.
-Example: For "ls |" (incomplete pipe)
-- Returns: "ls | grep hello" after user inputs "grep hello"
-*/
-char	*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk)
-{
-	char	*pipe_cmd;
-	char	*result;
-	char	*temp;
-	int		prep_status;
+// /*
+// Handles pipe completion for commands needing continuation.
+// - Processes commands with trailing pipes.
+// - Prompts for additional input as needed.
+// Returns:
+// - Complete command string or NULL on error.
+// Example: For "ls |" (incomplete pipe)
+// - Returns: "ls | grep hello" after user inputs "grep hello"
+// */
+// char	*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk)
+// {
+// 	char	*pipe_cmd;
+// 	char	*result;
+// 	char	*temp;
+// 	int		prep_status;
 
-	if (!syntax_chk || is_input_complete(vars))
-		return (ft_strdup(cmd));
-	prep_status = prep_pipe_complete(cmd, &result, &pipe_cmd);
-	if (prep_status < 0)
-		return (NULL);
-	if (prep_status == 0)
-		return (ft_strdup(cmd));
-	if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
-	{
-		reset_done_pipes(&pipe_cmd, &result, 3);
-		return (NULL);
-	}
-	reset_done_pipes(NULL, &result, 2);
-	temp = ft_strdup(pipe_cmd);
-	free(pipe_cmd);
-	return (temp);
-}
+// 	if (!syntax_chk || is_input_complete(vars))
+// 		return (ft_strdup(cmd));
+// 	prep_status = prep_pipe_complete(cmd, &result, &pipe_cmd);
+// 	if (prep_status < 0)
+// 		return (NULL);
+// 	if (prep_status == 0)
+// 		return (ft_strdup(cmd));
+// 	if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
+// 	{
+// 		reset_done_pipes(&pipe_cmd, &result, 3);
+// 		return (NULL);
+// 	}
+// 	reset_done_pipes(NULL, &result, 2);
+// 	temp = ft_strdup(pipe_cmd);
+// 	free(pipe_cmd);
+// 	return (temp);
+// }
 
-/* 
+/* //Possible to reuse
 Sets up child process pipe redirections
 */
 void setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count)
@@ -396,7 +396,7 @@ int fork_processes(t_pipe *pipes, t_vars *vars)
 	return (1);
 }
 
-/* 
+/* //Possible to reuse for redirections
 Counts pipe nodes in a command chain
 */
 int count_pipes(t_vars *vars)
@@ -420,25 +420,25 @@ int count_pipes(t_vars *vars)
 	return (count);
 }
 
-/*
-Closes all pipe file descriptors in parent
-*/
-void close_all_pipe_fds(t_pipe *pipes)
-{
-	int i;
-	int count;
+// /*
+// Closes all pipe file descriptors in parent
+// */
+// void close_all_pipe_fds(t_pipe *pipes)
+// {
+// 	int i;
+// 	int count;
 	
-	i = 0;
-	count = pipes->pipe_count * 2;
+// 	i = 0;
+// 	count = pipes->pipe_count * 2;
 	
-	while (i < count)
-	{
-		close(pipes->pipe_fds[i]);
-		i++;
-	}
-}
+// 	while (i < count)
+// 	{
+// 		close(pipes->pipe_fds[i]);
+// 		i++;
+// 	}
+// }
 
-/*
+/* //Possible to reuse for redirections
 Waits for all child processes
 */
 int wait_for_processes(t_pipe *pipes, t_vars *vars)

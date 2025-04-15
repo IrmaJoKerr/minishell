@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 15:53:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 18:14:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,14 +313,15 @@ In append_args.c
 */
 
 char		**dup_node_args(t_node *node, size_t len);
+int			*copy_int_arr(int *original, size_t length);
 int			**dup_quote_types(t_node *node, size_t len);
-int			*set_character_quote_types(char *arg_text, int quote_type);
-int			**set_quote_type(t_node *node, size_t len, int quote_type);
-void		update_node_args(t_node *node, char **new_args, int **quote_types);
+int			*set_char_quote_types(char *arg_text, int quote_type);
+int			**resize_quotype_arr(t_node *node, char *new_arg, int quote_type
+					,char **new_args);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 void		check_token_adj(char *input, t_vars *vars);
 int			process_adj(int *i, t_vars *vars);
-void		reset_adjacency_state(t_vars *vars);
+void		reset_adjacency_state(t_vars *vars); //CANDIDATE FOR DEPRECATION
 
 /*
 Argument handling.
@@ -573,16 +574,16 @@ Pipes main functions.
 In pipes.c
 */
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
-int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars); //Possible to reuse
-void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
-int			check_unfinished_pipe(t_vars *vars);
-char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
+int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars); //Possible to reuse for redirections
+// void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
+// int			check_unfinished_pipe(t_vars *vars);
+// char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
-void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count);
-int			fork_processes(t_pipe *pipes, t_vars *vars);
-int			count_pipes(t_vars *vars);
-void 		close_all_pipe_fds(t_pipe *pipes);
-int			wait_for_processes(t_pipe *pipes, t_vars *vars);
+void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count); //Possible to reuse for redirections
+int			fork_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
+int			count_pipes(t_vars *vars); //Possible to reuse for redirections
+// void 		close_all_pipe_fds(t_pipe *pipes);
+int			wait_for_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
 
 /*
 Pipeline processing functions.

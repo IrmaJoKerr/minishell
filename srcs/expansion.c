@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 07:07:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 18:06:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,66 +116,6 @@ Processes environment variable expansion.
 - Updates position to after the expanded variable.
 Returns:
 Newly allocated string with expanded value.
-NULL if not a variable or on allocation failure.
-
-Example: Input: "$HOME/file" at position 0
-- Recognizes $ character
-- Extracts "HOME" as variable name
-- Returns value (e.g., "/Users/username")
-*/
-// char	*handle_expansion(char *input, int *pos, t_vars *vars)
-// {
-// 	char	*var_name;
-// 	char	*var_value;
-
-// 	// Skip the $ symbol
-// 	(*pos)++;
-// 	// Check if we're at the end of input or at whitespace (lonely $)
-// 	if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
-// 	{
-// 		fprintf(stderr, "DEBUG: Lone $ detected, returning literal $\n");
-// 		return (ft_strdup("$"));
-// 	}
-// 	// Check for special case $?
-// 	if (input[*pos] == '?')
-// 	{
-// 		(*pos)++;
-// 		var_value = ft_itoa(vars->error_code);
-// 		fprintf(stderr, "DEBUG: Expanded $? to '%s'\n", var_value);
-// 		return (var_value);
-// 	}
-// 	// Extract variable name
-// 	var_name = get_var_name(input, pos);
-// 	if (!var_name || !*var_name)
-// 	{
-// 		fprintf(stderr, "DEBUG: Empty var name, returning literal $\n");
-// 		free(var_name); // Free if allocated but empty
-// 		return (ft_strdup("$"));
-// 	}
-// 	// Try to handle as special variable first
-// 	var_value = handle_special_var(var_name, vars);
-// 	if (var_value)
-// 	{
-// 		fprintf(stderr, "DEBUG: Expanded special var $%s to '%s'\n", 
-// 				var_name, var_value);
-// 		free(var_name);
-// 		return var_value;
-// 	}
-// 	// Try to handle as environment variable
-// 	var_value = get_env_val(var_name, vars->env);
-// 	fprintf(stderr, "DEBUG: handle_expansion() Expanded env var $%s to '%s'\n", 
-// 			var_name, var_value ? var_value : "");
-// 	free(var_name);
-// 	return (var_value ? var_value : ft_strdup(""));
-// }
-/*
-Processes environment variable expansion.
-- Checks for $ character at current position.
-- Extracts variable name following the $.
-- Handles special vars or environment vars.
-- Updates position to after the expanded variable.
-Returns:
-Newly allocated string with expanded value.
 Empty string if variable not found.
 */
 char	*handle_expansion(char *input, int *pos, t_vars *vars)
@@ -241,66 +181,13 @@ void debug_cmd_args(t_node *node)
 	if (!node || !node->args)
 		return;
 	
-	//DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
+	DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
 	while (node->args[i])
 	{
-		//DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %d)\n", 
-		//          i, node->args[i], 
-		//          node->arg_quote_type ? node->arg_quote_type[i] : -1);
+		DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %d)\n", 
+		          i, node->args[i], 
+		          node->arg_quote_type ? node->arg_quote_type[i] : -1);
 		i++;
 	}
-	//DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
+	DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
 }
-
-// char *expand_quoted_argument(char *arg, int *quote_types, t_vars *vars)
-// {
-//     char *result = ft_strdup("");
-//     int i = 0;
-    
-//     while (arg[i])
-//     {
-//         // Only expand variables in double quotes or unquoted
-//         if (arg[i] == '$' && quote_types[i] != TYPE_SINGLE_QUOTE)
-//         {
-//             int start = i;
-//             char *var_name;
-//             char *expanded;
-            
-//             // Handle $?
-//             if (arg[i+1] == '?')
-//             {
-//                 var_name = ft_strdup("?");
-//                 i += 2; // Skip $?
-//             }
-//             else
-//             {
-//                 i++; // Skip $
-//                 start = i;
-//                 while (arg[i] && (ft_isalnum(arg[i]) || arg[i] == '_'))
-//                     i++;
-                
-//                 var_name = ft_substr(arg, start, i - start);
-//             }
-            
-//             expanded = expand_value(var_name, vars);
-//             free(var_name);
-            
-//             // Append expanded value to result
-//             char *temp = ft_strjoin(result, expanded);
-//             free(result);
-//             result = temp;
-//             free(expanded);
-//         }
-//         else
-//         {
-//             // Append regular character
-//             char c[2] = {arg[i], '\0'};
-//             char *temp = ft_strjoin(result, c);
-//             free(result);
-//             result = temp;
-//             i++;
-//         }
-//     }
-    
-//     return result;
-// }

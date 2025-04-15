@@ -6,15 +6,17 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 16:32:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 17:53:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Copy all arguments from the original node to a newly allocated array
-Returns NULL on failure
+Copies all arguments from the original node to a newly allocated array.
+Returns:
+- A newly allocated array containing copies of the arguments.
+- NULL on error.
 */
 char	**dup_node_args(t_node *node,	size_t len)
 {
@@ -30,77 +32,104 @@ char	**dup_node_args(t_node *node,	size_t len)
 		new_args[i] = ft_strdup(node->args[i]);
 		if (!new_args[i])
 		{
-            ft_free_2d(new_args, i);
-            return (NULL);
-        }
+			ft_free_2d(new_args, i);
+			return (NULL);
+		}
 		i++;
 	}
 	return (new_args);
 }
 
-int **dup_quote_types(t_node *node, size_t len)
+/*
+Duplicates an integer array used for tracking quote types.
+The resulting array will have length+1 elements, with the
+last one set to -1 as a guard value.
+Returns:
+- A newly allocated array with copied values and guard value (-1).
+- NULL on error.
+*/
+int	*copy_int_arr(int *original, size_t length)
 {
-    size_t i;
-    int **new_quote_types;
-    size_t qlen;
-    
-    new_quote_types = malloc(sizeof(int*) * (len + 2));
-    if (!new_quote_types)
-        return (NULL);
-    i = 0;
-    while (i < len)
-    {
-        if (node->arg_quote_type && node->arg_quote_type[i])
-        {
-            qlen = ft_strlen(node->args[i]);
-            new_quote_types[i] = malloc(sizeof(int) * (qlen + 1));
-            if (!new_quote_types[i])
-            {
-                ft_free_int_2d(new_quote_types, i);
-                return (NULL);
-            }
-            ft_memcpy(new_quote_types[i], node->arg_quote_type[i], sizeof(int) * qlen);
-            new_quote_types[i][qlen] = -1; // Sentinel value
-        }
-        else
-        {
-            new_quote_types[i] = NULL;
-        }
-        i++;
-    }
-    return new_quote_types;
+	int	*new_types;
+	
+	new_types = malloc(sizeof(int) * (length + 1));
+	if (!new_types)
+		return (NULL);
+	ft_memcpy(new_types, original, sizeof(int) * length);
+	new_types[length] = -1;
+	return (new_types);
+}
+
+/*
+Duplicates the entire quote type tracking structure for all arguments.
+This function creates a deep copy of the argument quote type tracking
+structure, maintaining the same quote types for each character of 
+each argument.
+Returns:
+- A newly allocated 2D array of quote types
+- NULL (with proper cleanup of any partial allocations) on error.
+*/
+int	**dup_quote_types(t_node *node, size_t len)
+{
+	size_t	i;
+	size_t	qlen;
+	int		**new_quote_types;
+	
+	new_quote_types = malloc(sizeof(int*) * (len + 2));
+	if (!new_quote_types)
+		return (NULL);
+	i = 0;
+	while (i < len)
+	{
+		if (node->arg_quote_type && node->arg_quote_type[i])
+		{
+			qlen = ft_strlen(node->args[i]);
+			new_quote_types[i] = copy_int_arr(node->arg_quote_type[i], qlen);
+			if (!new_quote_types[i])
+			{
+				ft_free_int_2d(new_quote_types, i);
+				return (NULL);
+			}
+		}
+		else
+			new_quote_types[i] = NULL;
+		i++;
+	}
+	return new_quote_types;
 }
 
 /*
 Creates a character-level quote type array for a new argument.
-- Takes the node, argument text, and default quote type.
-- Creates an array with each character set to the given quote type.
+- Single quotes are represented by 4, double quotes by 5.
+- The last element is set to -1 as a guard value.
+Used to maintain information about what kind of quote (if any) surrounded
+each character in the shell command arguments.
 Returns:
 - Pointer to the new quote_types array on success
 - NULL on failure
 */
-int *set_character_quote_types(char *arg_text, int quote_type)
+int *set_char_quote_types(char *arg_text, int quote_type)
 {
 	int		*char_quote_types;
 	size_t	len;
 	size_t	i;
 	
-	fprintf(stderr, "DEBUG [set_character_quote_types]: ENTER with arg='%s', quote_type=%d\n", 
+	fprintf(stderr, "DEBUG [set_char_quote_types]: ENTER with arg='%s', quote_type=%d\n", 
 			arg_text ? arg_text : "NULL", quote_type);
 	if (!arg_text)
 	{
-		fprintf(stderr, "DEBUG [set_character_quote_types]: NULL arg_text, returning NULL\n");
-		return NULL;
+		fprintf(stderr, "DEBUG [set_char_quote_types]: NULL arg_text, returning NULL\n");
+		return (NULL);
 	}
 	len = ft_strlen(arg_text);
-	fprintf(stderr, "DEBUG [set_character_quote_types]: arg length=%zu\n", len);
+	fprintf(stderr, "DEBUG [set_char_quote_types]: arg length=%zu\n", len);
 	char_quote_types = malloc(sizeof(int) * (len + 1));
 	if (!char_quote_types)
 	{
-		fprintf(stderr, "DEBUG [set_character_quote_types]: Failed to allocate quote types\n");
-		return NULL;
+		fprintf(stderr, "DEBUG [set_char_quote_types]: Failed to allocate quote types\n");
+		return (NULL);
 	}
-	fprintf(stderr, "DEBUG [set_character_quote_types]: Allocated quote types array with %zu+1 slots\n", len);
+	fprintf(stderr, "DEBUG [set_char_quote_types]: Allocated quote types array with %zu+1 slots\n", len);
 	i = 0;
 	while (i < len)
 	{
@@ -108,138 +137,136 @@ int *set_character_quote_types(char *arg_text, int quote_type)
 		i++;
 	}
 	char_quote_types[len] = -1;
-	fprintf(stderr, "DEBUG [set_character_quote_types]: Set all %zu characters to type %d\n", 
+	fprintf(stderr, "DEBUG [set_char_quote_types]: Set all %zu characters to type %d\n", 
 			len, quote_type);
-	fprintf(stderr, "DEBUG [set_character_quote_types]: First elements: ");
+	fprintf(stderr, "DEBUG [set_char_quote_types]: First elements: ");
 	for (i = 0; i < len && i < 5; i++)
 	{
 		fprintf(stderr, "[%zu]=%d ", i, char_quote_types[i]);
 	}
 	fprintf(stderr, "...[%zu]=%d\n", len, char_quote_types[len]);
-	return char_quote_types;
+	return (char_quote_types);
 }
 
 /*
-Creates a new quote types array with the original values and new quote type
-Returns :
-- Pointer to the new quote_types array on success
-- NULL on failure
+Creates a new quote types array with the new argument's quote type information.
+This function expands the quote types array when adding a new argument.
+Returns:
+- A newly allocated 2D array of quote types with the new entry.
+- NULL (with proper cleanup of all related memory) on error.
 */
-int	**set_quote_type(t_node *node, size_t len, int quote_type)
+int **resize_quotype_arr(t_node *node, char *new_arg, int quote_type
+				,char **new_args)
 {
-	int		**quote_types;
-	size_t	i;
-
-	quote_types = malloc(sizeof(int*) * (len + 2));
-	if (!quote_types)
+	int		**new_quote_types;
+	size_t	len;
+	
+	if (!node || !node->args || !new_args)
 		return (NULL);
-	i = 0;
-	while (i < len)
+	len = ft_arrlen(node->args);
+	new_quote_types = dup_quote_types(node, len);
+	if (!new_quote_types)
 	{
-		if (node->arg_quote_type)
-			quote_types[i] = node->arg_quote_type[i];
-		else
-			quote_types[i] = NULL;
-		i++;
+		ft_free_2d(new_args, len + 1);
+		return (NULL);
 	}
-	quote_types[len] = malloc(sizeof(int));
-	if (!quote_types[len])
-    {
-        ft_free_int_2d(quote_types, i);
-        return (NULL);
-    }
-	quote_types[len][0] = quote_type;
-	quote_types[len + 1] = NULL;
-	return (quote_types);
-}
-
-/*
-Updates node with new arguments and quote types arrays
-*/
-void	update_node_args(t_node *node, char **new_args, int **quote_types)
-{
-	node->args = new_args;
-	node->arg_quote_type = quote_types;
+	new_quote_types[len] = set_char_quote_types(new_arg, quote_type);
+	if (!new_quote_types[len])
+	{
+		ft_free_int_2d(new_quote_types, len);
+		ft_free_2d(new_args, len + 1);
+		return (NULL);
+	}
+	new_quote_types[len + 1] = NULL;
+	return (new_quote_types);
 }
 
 /*
 Appends an argument to a node's argument array
-Updates both the args array and arg_quote_type array with 
-character-level tracking.
+This function expands both the args and arg_quote_type arrays, adding the
+new argument and its corresponding character-level quote information.
 Example: 
 String: "Hello"'world'!
 Args: ["Hello", "world"]
 Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 */
-void append_arg(t_node *node, char *new_arg, int quote_type)
+void	append_arg(t_node *node, char *new_arg, int quote_type)
 {
-    char	**new_args;
-    int		**new_quote_types;
-    size_t	len;
-    
-    fprintf(stderr, "DEBUG [append_arg]: ENTER with arg='%s', quote_type=%d, node=%p\n", 
-            new_arg ? new_arg : "NULL", quote_type, (void*)node); 
-    if (!node || !new_arg || !node->args)
-        return ;
-    len = ft_arrlen(node->args);
-    fprintf(stderr, "DEBUG [append_arg]: Found %zu existing arguments\n", len);
-    // Duplicate existing arguments
-    new_args = dup_node_args(node, len);
-    if (!new_args)
-        return ;
-    // Add new argument
-    new_args[len] = ft_strdup(new_arg);
-    if (!new_args[len])
-    {
-        ft_free_2d(new_args, len);
-        return ;
-    }
-    new_args[len + 1] = NULL;
-    // Duplicate quote types
-    new_quote_types = dup_quote_types(node, len);
-    if (!new_quote_types)
-    {
-        ft_free_2d(new_args, len + 1);
-        return ;
-    }
-    // Set quote type for new argument
-    new_quote_types[len] = set_character_quote_types(new_arg, quote_type);
-    if (!new_quote_types[len])
-    {
-        ft_free_int_2d(new_quote_types, len);
-        ft_free_2d(new_args, len + 1);
-        return ;
-    }
-    new_quote_types[len + 1] = NULL;
-    // Free original arrays
-    ft_free_2d(node->args, len);
-    if (node->arg_quote_type)
-        ft_free_int_2d(node->arg_quote_type, len);
-    // Update node
-    node->args = new_args;
-    node->arg_quote_type = new_quote_types;
-    fprintf(stderr, "DEBUG [append_arg]: EXIT successful - updated node with %zu+1 args\n", len);
+	char    **new_args;
+	int     **new_quote_types;
+	size_t  len;
+	
+	fprintf(stderr, "DEBUG [append_arg]: ENTER with arg='%s', quote_type=%d, node=%p\n", 
+			new_arg ? new_arg : "NULL", quote_type, (void*)node); 
+	if (!node || !new_arg || !node->args)
+		return;
+	len = ft_arrlen(node->args);
+	fprintf(stderr, "DEBUG [append_arg]: Found %zu existing arguments\n", len);
+	new_args = dup_node_args(node, len);
+	if (!new_args)
+		return ;
+	new_args[len] = ft_strdup(new_arg);
+	if (!new_args[len])
+	{
+		ft_free_2d(new_args, len);
+		return ;
+	}
+	new_args[len + 1] = NULL;
+	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
+	if (!new_quote_types)
+		return;
+	ft_free_2d(node->args, len);
+	if (node->arg_quote_type)
+		ft_free_int_2d(node->arg_quote_type, len);
+	node->args = new_args;
+	node->arg_quote_type = new_quote_types;
+	fprintf(stderr, "DEBUG [append_arg]: EXIT successful - updated node with %zu+1 args\n", len);
 }
 
 /*
-Checks both left and right adjacency at a position
-Updates adjacency state directly in vars->adj_state
+Checks both left and right adjacency at the current token position.
+Adjacency means the token is connected to another token without whitespace
+or operators between them.
+Looks for space AND operator characters to determine adjacency.
+Updates adjacency state directly in vars->adj_state array:
+  - vars->adj_state[0]: Left adjacency (previous character)
+  - vars->adj_state[1]: Right adjacency (next character)
+  - vars->adj_state[2]: Guard value (-1)
+Examples:
+- "hello world"   -> at 'world', adjacency is [0,0]
+- "hello'world'"  -> at 'world', adjacency is [1,0]
+- "'hello'world"  -> at 'hello', adjacency is [0,1]
+- "he'llo'wo"     -> at 'llo', adjacency is [1,1]
 */
-void	check_token_adj(char *input, t_vars *vars)
+void check_token_adj(char *input, t_vars *vars)
 {
-	// Left adjacency - using vars->pos directly
-	vars->adj_state[0] = (vars->pos > 0 && !ft_isspace(input[vars->pos-1])
-	 	&& !ft_is_operator(input[vars->pos-1]));
-	// Right adjacency - using vars->pos directly
-	vars->adj_state[1] = (input[vars->pos+1]
-		&& !ft_isspace(input[vars->pos+1])
-		&& !ft_is_operator(input[vars->pos+1]));
-	// Guard value
+	int		has_left_adj;
+	int		has_right_adj;
+	char	left_char;
+	char	right_char;
+	
+	has_left_adj = 0;
+	has_right_adj = 0;
+	if (vars->pos > 0)
+	{
+		char left_char = input[vars->pos - 1];
+		has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
+	}
+	if (input[vars->pos + 1])
+	{
+		right_char = input[vars->pos + 1];
+		has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
+	}
+	vars->adj_state[0] = has_left_adj;
+	vars->adj_state[1] = has_right_adj;
 	vars->adj_state[2] = -1;
 }
 
 /*
-Processes adjacency state and updates vars->start appropriately
+Processes adjacency state and updates vars->start appropriately.
+If i is not NULL and there's no right adjacency, updates 
+vars->start with *i.
+This tracks token boundaries during parsing.
 Returns:
  - 2 if bidirectional adjacency (both left and right)
  - 1 if right-adjacent only (don't update start)
@@ -248,32 +275,36 @@ Returns:
 */
 int	process_adj(int *i, t_vars *vars)
 {
-    int	result;
-    
-    if (vars->adj_state[0] && vars->adj_state[1])
-        result = 2;
-    else if (vars->adj_state[1])
-        result = 1;
-    else if (vars->adj_state[0])
-        result = -1;
-    else
-        result = 0;
-    if (i != NULL && !vars->adj_state[1])
-    {
-        vars->start = *i;
-    }
-    // Log the determined adjacency state
-    fprintf(stderr, "DEBUG: Adjacency state: left=%d, right=%d (result=%d)\n",
-            vars->adj_state[0], vars->adj_state[1], result);
-    return (result);
+	int	result;
+	
+	if (vars->adj_state[0] && vars->adj_state[1])
+		result = 2;
+	else if (vars->adj_state[1])
+		result = 1;
+	else if (vars->adj_state[0])
+		result = -1;
+	else
+		result = 0;
+	if (i != NULL && !vars->adj_state[1])
+	{
+		vars->start = *i;
+	}
+	fprintf(stderr, "DEBUG: Adjacency state: left=%d, right=%d (result=%d)\n",
+			vars->adj_state[0], vars->adj_state[1], result);
+	return (result);
 }
 
-/*
- * Resets adjacency state to defaults
- */
-void reset_adjacency_state(t_vars *vars)
+/* CANDIDATE FOR DEPRECATION
+Resets adjacency state variables to their default values.
+Sets:
+- vars->adj_state[0] = 0: No left adjacency
+- vars->adj_state[1] = 0: No right adjacency
+- vars->adj_state[2] = -1: Guard value
+Called after processing a token to prepare for the next one.
+*/
+void	reset_adjacency_state(t_vars *vars)
 {
-    vars->adj_state[0] = 0;  // left adjacency
-    vars->adj_state[1] = 0;  // right adjacency
-    vars->adj_state[2] = -1; // guard value
+	vars->adj_state[0] = 0;
+	vars->adj_state[1] = 0;
+	vars->adj_state[2] = -1;
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 14:44:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 18:20:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,19 +153,16 @@ void build_and_execute(t_vars *vars)
 	t_node *root;
 	
 	if (!vars || !vars->head)
-		return;
+		return ;
 
-	//DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+	DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
 	
 	// Use proc_token_list instead of process_token_list
 	root = proc_token_list(vars);
-	
-	// Only update astroot if we got a valid root node
 	if (root)
 	{
 		vars->astroot = root;
-		//DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
-		// Execute the command tree
+		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
 		execute_cmd(vars->astroot, vars->env, vars);
 	}
 	else
@@ -208,6 +205,8 @@ Example: When user types a complex command
 */
 void process_command(char *command, t_vars *vars)
 {
+	int	pipe_result;
+	
 	// Store original command in vars->partial_input
 	vars->partial_input = ft_strdup(command);
 	if (!vars->partial_input)
@@ -224,13 +223,13 @@ void process_command(char *command, t_vars *vars)
 		return ;
 	}
 	// Use new pipe analysis system 
-	int pipe_result = analyze_pipe_syntax(vars);
+	pipe_result = analyze_pipe_syntax(vars);
 	if (pipe_result == 1) // Syntax error
 	{
 		// Error already reported by analyze_pipe_syntax
 		free(vars->partial_input);
 		vars->partial_input = NULL;
-		return;
+		return ;
 	}
 	else if (pipe_result == 2) // Needs pipe completion
 	{
@@ -241,7 +240,6 @@ void process_command(char *command, t_vars *vars)
 			vars->partial_input = NULL;
 			return ;
 		}
-		
 		free(vars->partial_input);
 		vars->partial_input = completed_cmd;
 		// Re-tokenize with completed command

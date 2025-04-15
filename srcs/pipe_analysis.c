@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:13:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 18:20:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Returns:
 - 0 if no error detected or no tokens exist.
 Works with analyze_pipe_syntax().
 */
-static int check_pipe_at_start(t_vars *vars)
+static int	check_pipe_at_start(t_vars *vars)
 {
 	if (!vars || !vars->head)
 		return (0);
@@ -43,7 +43,7 @@ Returns:
 - 0 if no errors detected.
 Works with analyze_pipe_syntax().
 */
-static int check_consecutive_pipes(t_vars *vars)
+static int	check_consecutive_pipes(t_vars *vars)
 {
 	t_node *current;
 	int expecting_command;
@@ -84,8 +84,8 @@ Works with analyze_pipe_syntax().
 */
 static int check_pipe_completion_needed(t_vars *vars)
 {
-	t_node *current;
-	int expecting_command;
+	t_node	*current;
+	int		expecting_command;
 
 	if (!vars || !vars->head)
 		return (0);
