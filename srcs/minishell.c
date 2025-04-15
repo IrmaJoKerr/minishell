@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 19:03:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 14:44:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,22 +183,13 @@ Example: For input "echo "hello
 - Detects unclosed quotes and prompts for completion
 - Returns completed command string with proper quotes
 */
-int process_input_tokens(char *command, t_vars *vars)
+int	process_input_tokens(char *command, t_vars *vars)
 {
-	/* Skip processing if command is NULL or empty */
 	if (!command || !*command)
 		return (0);
-	
-	/* Initialize the token list */
 	cleanup_token_list(vars);
-	
-	/* Tokenize the input with improved quote handling */
 	if (!improved_tokenize(command, vars))
-	{
 		return (0);
-	}
-	process_expansions(vars);
-	
 	return (1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 00:56:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 14:53:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,8 +285,8 @@ int handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
 	free(*processed_cmd);
 	*processed_cmd = combined;
 	// Re-tokenize with the new combined command
-	cleanup_token_list(vars);
-	improved_tokenize(*processed_cmd, vars);
+	if (!process_input_tokens(*processed_cmd, vars))
+    	return (-1);
 	// Check if we're done or need more input
 	if (analyze_pipe_syntax(vars) == 2)
 		return handle_unfinished_pipes(processed_cmd, vars);

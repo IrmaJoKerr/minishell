@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 09:18:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 15:53:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -490,11 +490,7 @@ void		handle_input(char *input, t_vars *vars);
 Input verification functions.
 In input_verify.c
 */
-// int			handle_adjacent_args(t_node *expansion_node, char *expanded_value, t_vars *vars);
-// int 		is_adjacent_in_original_input(t_node *expansion_node, char *arg);
 char 		*expand_value(char *var_name, t_vars *vars);
-void		process_expansions(t_vars *vars);
-int			is_command_position(t_node *node, t_vars *vars);
 
 /*
 Lexer functions.
@@ -599,6 +595,21 @@ void		process_addon_pipes(t_vars *vars);
 t_node		*proc_pipes(t_vars *vars);
 
 /*
+Process quote characters.
+In process_quote_char.c
+*/
+char		*expand_quoted_var(char *expanded, char *content, int *pos
+				,t_vars *vars);
+char 		*append_basic_strs(char *expanded, char *content, int *pos);
+char 		*expand_quoted_str(char *content, t_vars *vars);
+char		*append_substr(char *dest, char *src, int start, int len);
+char		*get_quoted_str(char *input, t_vars *vars, int *quote_type);
+t_node		*process_quoted_str(char **content_ptr, int quote_type
+				,t_vars *vars);
+int			merge_quoted_token(char *input, char *content, t_vars *vars);
+int			process_quote_char(char *input, t_vars *vars);
+
+/*
 Redirection processing functions.
 In process_redirect.c
 */
@@ -651,12 +662,11 @@ Tokenizing functions.
 In tokenize.c
 */
 void 		set_token_type(t_vars *vars, char *input);
-size_t		count_nodes(t_node *head); //DEBUG FUNCTION
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 int			build_token_linklist(t_vars *vars, t_node *node);
 int 		is_adjacent_token(char *input, int pos);
 // int			make_exp_token(char *input, int *i, t_vars *vars);
-int			process_quote_char(char *input, int *i, t_vars *vars);
+
 int			process_operator_char(char *input, int *i, t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);

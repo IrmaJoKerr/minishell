@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 09:20:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 16:10:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,12 +68,14 @@ Returns:
 */
 int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 {
+	int	arg_idx;
 	if (!vars->current->args || !vars->current->args[0])
 		return (0);
-	int arg_idx = proc_join_args(vars, expanded_val);
+	arg_idx = proc_join_args(vars, expanded_val);
 	if (arg_idx == -1)
 		return (0);
-	if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
+	if (vars->current->arg_quote_type
+		&& vars->current->arg_quote_type[arg_idx])
 	{
 		if (!update_quote_types(vars, arg_idx, expanded_val))
 			return (0);
