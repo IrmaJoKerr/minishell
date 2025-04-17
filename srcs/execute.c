@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/16 22:54:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 22:52:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,30 +122,36 @@ Works with setup_redirection().
 */
 int	setup_in_redir(t_node *node, t_vars *vars)
 {
+	fprintf(stderr, "[DEBUG] Calling reset_redirect_fds \n");
     char	*file;
     
     if (!node->right || !node->right->args || !node->right->args[0])
     {
+		fprintf(stderr, "[DEBUG] setup_in_redir: No file specified for input redirection\n");
         return (0);
     }
     file = node->right->args[0];
     if (!chk_permissions(file, O_RDONLY, vars))
     {
+		fprintf(stderr, "[DEBUG] setup_in_redir: Permission check failed for file '%s'\n", file);
         end_pipe_processes(vars);
         return (0);
     }
     vars->pipes->redirection_fd = open(file, O_RDONLY);
     if (vars->pipes->redirection_fd == -1)
     {
+		fprintf(stderr, "[DEBUG] setup_in_redir: Failed to open file '%s'\n", file);
         not_found_error(file, vars);
         end_pipe_processes(vars);
         return (0);
     }
     if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
     {
+		fprintf(stderr, "[DEBUG] setup_in_redir: Failed to redirect stdin to file '%s'\n", file);
         close(vars->pipes->redirection_fd);
         return (0);
     }
+	fprintf(stderr, "[DEBUG] setup_in_redir:Returning 1 before exit\n");
     return (1);
 }
 
@@ -203,7 +209,7 @@ int setup_redirection(t_node *node, t_vars *vars)
 	fprintf(stderr, "[DEBUG] Setting up redirection type=%d operator='%s' file='%s'\n",
 		node->type, node->args[0], node->right ? node->right->args[0] : "NULL");
 
-    reset_redirect_fds(vars);
+    // reset_redirect_fds(vars);
     vars->pipes->current_redirect = node;
     if (node->right && node->right->args)
         process_arg_quotes(&node->right->args[0]);
@@ -250,6 +256,9 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     // Store original file descriptors directly in the pipes structure
     vars->pipes->saved_stdin = dup(STDIN_FILENO);
     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+	fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
+        vars->pipes->saved_stdin, vars->pipes->saved_stdout,
+        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
     // Apply all redirections in chain
     current_node = node;
     while (current_node && is_redirection(current_node->type))
@@ -269,10 +278,13 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     // Execute the command with all redirections applied
     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Executing command with redirections\n");
     result = execute_cmd(cmd_node, envp, vars);
-    // Restore original file descriptors using existing function
+    // Restoration sequence
+    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Command completed, restoring FDs and terminal\n");
     reset_redirect_fds(vars);
-	if (node->type == TYPE_HEREDOC)
-        reset_terminal_after_heredoc();
+    reset_terminal_after_heredoc();
+    
+    fprintf(stderr, "[DEBUG] exec_redirect_cmd: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
+        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
     return (result);
 }
 

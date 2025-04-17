@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 04:32:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 22:49:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,20 +111,37 @@ Works with execute_cmd() to clean up after command execution.
 */
 void reset_redirect_fds(t_vars *vars)
 {
+	fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring stdin from fd=%d, stdout from fd=%d\n", 
+        vars->pipes ? vars->pipes->saved_stdin : -999,
+        vars->pipes ? vars->pipes->saved_stdout : -999);
+	fprintf(stderr, "[DEBUG] reset_redirect_fds: Current STDIN isatty=%d, STDOUT isatty=%d\n",
+        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
 	if (!vars || !vars->pipes)
 		return;
 	if (vars->pipes->saved_stdin > 2)
-	{
-		dup2(vars->pipes->saved_stdin, STDIN_FILENO);
-		close(vars->pipes->saved_stdin);
-		vars->pipes->saved_stdin = -1;
-	}
-	if (vars->pipes->saved_stdout > 2)
-	{
-		dup2(vars->pipes->saved_stdout, STDOUT_FILENO);
-		close(vars->pipes->saved_stdout);
-		vars->pipes->saved_stdout = -1;
-	}
+    {
+        fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring STDIN from fd=%d to fd=%d\n", 
+            vars->pipes->saved_stdin, STDIN_FILENO);
+        int result = dup2(vars->pipes->saved_stdin, STDIN_FILENO);
+        fprintf(stderr, "[DEBUG] reset_redirect_fds: dup2 result for STDIN=%d\n", result);
+        close(vars->pipes->saved_stdin);
+        vars->pipes->saved_stdin = -1;
+    }
+    
+    if (vars->pipes->saved_stdout > 2)
+    {
+        fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring STDOUT from fd=%d to fd=%d\n", 
+            vars->pipes->saved_stdout, STDOUT_FILENO);
+        int result = dup2(vars->pipes->saved_stdout, STDOUT_FILENO);
+        fprintf(stderr, "[DEBUG] reset_redirect_fds: dup2 result for STDOUT=%d\n", result);
+        if (result == -1)
+        {
+            fprintf(stderr, "[ERROR] reset_redirect_fds: Failed to restore stdout: %s\n", 
+                strerror(errno));
+        }
+        close(vars->pipes->saved_stdout);
+        vars->pipes->saved_stdout = -1;
+    }
 	// if (vars->pipes->heredoc_fd > 2)
 	// {
 	// 	close(vars->pipes->heredoc_fd);
@@ -146,4 +163,6 @@ void reset_redirect_fds(t_vars *vars)
 	vars->pipes->last_in_redir = NULL;
 	vars->pipes->last_out_redir = NULL;
 	vars->pipes->cmd_redir = NULL;
+	fprintf(stderr, "[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
+        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
 }

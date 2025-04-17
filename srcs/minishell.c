@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/16 22:56:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 22:47:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,32 +260,85 @@ void process_command(char *command, t_vars *vars)
 	vars->partial_input = NULL;
 }
 
+// void reset_terminal_after_heredoc(void)
+// {
+//     struct termios	term;
+//     char			*tty_path;
+//     int				fd;
+    
+//     fprintf(stderr, "[DEBUG] Ensuring terminal is ready for next input\n");
+//     if (!isatty(STDIN_FILENO))
+// 	{
+//         tty_path = ttyname(STDOUT_FILENO);
+//         if (tty_path)
+// 		{
+//             fd = open(tty_path, O_RDONLY);
+//             if (fd >= 0)
+// 			{
+//                 dup2(fd, STDIN_FILENO);
+//                 close(fd);
+//             }
+//         }
+//     }
+//     if (isatty(STDIN_FILENO))
+// 	{
+//         tcgetattr(STDIN_FILENO, &term);
+//         term.c_lflag |= (ICANON | ECHO);
+//         tcsetattr(STDIN_FILENO, TCSANOW, &term);
+//         rl_on_new_line();
+//     }
+// }
 void reset_terminal_after_heredoc(void)
 {
-    struct termios	term;
-    char			*tty_path;
-    int				fd;
+    struct termios term;
+    char *tty_path;
+    int fd;
     
-    fprintf(stderr, "[DEBUG] Ensuring terminal is ready for next input\n");
-    if (!isatty(STDIN_FILENO))
-	{
+    fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: Starting terminal reset\n");
+    fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDIN_FILENO=%d isatty=%d\n", 
+            STDIN_FILENO, isatty(STDIN_FILENO));
+    fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDOUT_FILENO=%d isatty=%d\n", 
+            STDOUT_FILENO, isatty(STDOUT_FILENO));
+    
+    if (!isatty(STDIN_FILENO)) {
         tty_path = ttyname(STDOUT_FILENO);
-        if (tty_path)
-		{
+        fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDIN not a tty, using STDOUT tty_path=%s\n", 
+                tty_path ? tty_path : "NULL");
+        if (tty_path) {
             fd = open(tty_path, O_RDONLY);
-            if (fd >= 0)
-			{
+            fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: Opened tty fd=%d\n", fd);
+            if (fd >= 0) {
                 dup2(fd, STDIN_FILENO);
                 close(fd);
+                fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDIN restored to tty\n");
             }
         }
     }
-    if (isatty(STDIN_FILENO))
-	{
-        tcgetattr(STDIN_FILENO, &term);
+    
+    // Add similar check for STDOUT
+    if (!isatty(STDOUT_FILENO)) {
+        tty_path = ttyname(STDERR_FILENO); // Use STDERR to get tty path
+        fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDOUT not a tty, using STDERR tty_path=%s\n", 
+                tty_path ? tty_path : "NULL");
+        if (tty_path) {
+            fd = open(tty_path, O_WRONLY);
+            fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: Opened tty for STDOUT fd=%d\n", fd);
+            if (fd >= 0) {
+                dup2(fd, STDOUT_FILENO);
+                close(fd);
+                fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: STDOUT restored to tty\n");
+            }
+        }
+    }
+    
+    if (isatty(STDIN_FILENO)) {
+        int result = tcgetattr(STDIN_FILENO, &term);
+        fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: tcgetattr result=%d\n", result);
         term.c_lflag |= (ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        result = tcsetattr(STDIN_FILENO, TCSANOW, &term);
+        fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: tcsetattr result=%d\n", result);
         rl_on_new_line();
+        fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: Terminal reset complete\n");
     }
 }
 

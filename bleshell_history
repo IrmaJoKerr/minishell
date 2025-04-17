@@ -1,5 +1,0 @@
-cat << END
-This is a test: $HOME
-END
-
-cat << END
