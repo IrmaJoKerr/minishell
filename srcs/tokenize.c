@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 14:48:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/16 16:04:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,10 +404,10 @@ int	build_token_linklist(t_vars *vars, t_node *node)
         if (node->args && node->args[0])
         {
             // Free any existing delimiter
-            if (vars->heredoc_delim)
-                free(vars->heredoc_delim);
-            vars->heredoc_delim = ft_strdup(node->args[0]);
-            fprintf(stderr, "DEBUG: Set heredoc delimiter to '%s'\n", vars->heredoc_delim);
+            if (vars->pipes->heredoc_delim)
+                free(vars->pipes->heredoc_delim);
+            vars->pipes->heredoc_delim = ft_strdup(node->args[0]);
+            fprintf(stderr, "DEBUG: Set heredoc delimiter to '%s'\n", vars->pipes->heredoc_delim);
         }
         // Reset the heredoc flag
         vars->heredoc_active = 0;

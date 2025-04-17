@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 07:52:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 21:17:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,38 +73,66 @@ void init_vars(t_vars *vars)
 	vars->prev_type = TYPE_NULL;
 	vars->pos = 0;
 	vars->start = 0;
-	vars->heredoc_lines = NULL;
-	vars->heredoc_count = 0;
-	vars->heredoc_index = 0;
-	
+	vars->heredoc_mode = 0;
+	vars->heredoc_active = 0;
 }
 
 /*
 Initialise pipes structure.
 Allocates and sets up the pipes state.
 */
+// t_pipe *init_pipes(void)
+// {
+// 	t_pipe *pipes;
+	
+// 	pipes = (t_pipe *)malloc(sizeof(t_pipe));
+// 	if (!pipes)
+// 		return (NULL);
+// 	ft_memset(pipes, 0, sizeof(t_pipe));
+// 	pipes->saved_stdin = -1;
+// 	pipes->saved_stdout = -1;
+// 	pipes->heredoc_fd = -1;
+// 	pipes->redirection_fd = -1;
+// 	pipes->last_cmd = NULL;
+// 	pipes->last_heredoc = NULL;
+// 	pipes->last_pipe = NULL;
+// 	pipes->pipe_root = NULL;
+// 	pipes->redir_root = NULL;
+// 	pipes->last_in_redir = NULL;
+// 	pipes->last_out_redir = NULL;
+// 	pipes->cmd_redir = NULL;
+// 	pipes->pipe_at_end = 0;
+// 	return (pipes);
+// }
+/*
+Initialise pipes structure.
+Allocates and sets up the pipes state.
+*/
 t_pipe *init_pipes(void)
 {
-	t_pipe *pipes;
-	
-	pipes = (t_pipe *)malloc(sizeof(t_pipe));
-	if (!pipes)
-		return (NULL);
-	ft_memset(pipes, 0, sizeof(t_pipe));
-	pipes->saved_stdin = -1;
-	pipes->saved_stdout = -1;
-	pipes->heredoc_fd = -1;
-	pipes->redirection_fd = -1;
-	pipes->last_cmd = NULL;
-	pipes->last_heredoc = NULL;
-	pipes->last_pipe = NULL;
-	pipes->pipe_root = NULL;
-	pipes->redir_root = NULL;
-	pipes->last_in_redir = NULL;
-	pipes->last_out_redir = NULL;
-	pipes->cmd_redir = NULL;
-	pipes->pipe_at_end = 0;
-	return (pipes);
+    t_pipe *pipes;
+    
+    pipes = (t_pipe *)malloc(sizeof(t_pipe));
+    if (!pipes)
+        return (NULL);
+    ft_memset(pipes, 0, sizeof(t_pipe));
+    pipes->saved_stdin = -1;
+    pipes->saved_stdout = -1;
+    pipes->heredoc_fd = init_heredoc_pipe();
+	pipes->hd_fd_write = -1;     // Initialize write fd to -1 (invalid)
+    pipes->heredoc_delim = NULL; // Ensure delimiter ptr is NULL
+    pipes->hd_expand = 0;        // Default: no expansion
+    pipes->redirection_fd = -1;
+    pipes->last_cmd = NULL;
+    pipes->last_heredoc = NULL;
+    pipes->last_pipe = NULL;
+    pipes->pipe_root = NULL;
+    pipes->redir_root = NULL;
+    pipes->last_in_redir = NULL;
+    pipes->last_out_redir = NULL;
+    pipes->cmd_redir = NULL;
+    pipes->pipe_at_end = 0;
+    return (pipes);
 }
 
 /*
@@ -144,17 +172,31 @@ void reset_shell(t_vars *vars)
 	cleanup_token_list(vars);
 	if (vars->partial_input)
 		free(vars->partial_input);
-	if (vars->heredoc_lines)
-	{
-		ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
-		vars->heredoc_lines = NULL;
-		vars->heredoc_count = 0;
-		vars->heredoc_index = 0;
-	}
+	vars->partial_input = NULL;
 	if (vars->pipes)
 	{
 		reset_redirect_fds(vars);
 		reset_pipe_vars(vars);
 	}
 	init_vars(vars);
+}
+
+/*
+Initializes a heredoc pipe.
+Creates a pipe and returns the read end fd, closing the write end.
+Returns -1 on failure.
+*/
+int	init_heredoc_pipe(void)
+{
+    int	fd[2];
+    
+    if (pipe(fd) == -1)
+	{
+        fprintf(stderr, "[DBG_HEREDOC] Initial heredoc pipe creation failed: %s\n", 
+                strerror(errno));
+        return (-1);
+    }
+    fprintf(stderr, "[DBG_HEREDOC] Created initial heredoc pipe: read_fd=%d\n", fd[0]);
+    close(fd[1]);  // Close write end until needed
+    return (fd[0]);
 }

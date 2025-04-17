@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:25:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 22:16:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Validates if all quotes in a command are properly closed
 Returns true if all quotes are balanced, false otherwise
 Also updates quote_ctx and quote_depth in vars
 */
-int validate_quotes(char *input, t_vars *vars)
+int	validate_quotes(char *input, t_vars *vars)
 {
 	int i;
 	char in_quote;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 14:03:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 21:28:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,6 +184,107 @@ int	chk_expand_heredoc(char *delimiter)
 	return (1);
 }
 
+void setup_heredoc_pipe(t_vars *vars)
+{
+    int fd[2];
+    
+    // Clean up previous heredoc pipe if it exists
+    if (vars->pipes->heredoc_fd > 0)
+    {
+        close(vars->pipes->heredoc_fd);
+        vars->pipes->heredoc_fd = -1;
+    }
+    
+    if (vars->pipes->hd_fd_write > 0)  // Also close write end if open
+    {
+        close(vars->pipes->hd_fd_write);
+        vars->pipes->hd_fd_write = -1;
+    }
+    
+    // Create a new pipe
+    if (pipe(fd) == -1)
+    {
+        DBG_PRINTF(1, "Failed to create heredoc pipe: %s\n", strerror(errno));
+        return;
+    }
+    
+    // Store the ends in separate variables
+    vars->pipes->heredoc_fd = fd[0];  // Read end
+    vars->pipes->hd_fd_write = fd[1];    // Write end
+    
+    DBG_PRINTF(1, "Heredoc pipe created: read_fd=%d, write_fd=%d\n", 
+              fd[0], fd[1]);
+}
+
+int store_heredoc_content(char *input, int start_pos, char *delimiter, t_vars *vars)
+{
+    int i = start_pos;
+    int line_start;
+    int line_end;
+    char *line;
+    int found_delimiter = 0;
+    int fd;
+    
+    // Open temporary file for writing
+    fprintf(stderr, "[DBG_HEREDOC] Opening temporary file for heredoc content\n");
+    fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd == -1)
+    {
+        fprintf(stderr, "[DBG_HEREDOC] Failed to open temp file: %s\n", strerror(errno));
+        return (0);
+    }
+    
+    // Process lines and write to temp file
+    while (input[i])
+    {
+        line_start = i;
+        // Find end of this line
+        while (input[i] && input[i] != '\n')
+            i++;
+        line_end = i;
+        
+        // Check if this line is the delimiter
+        if (ft_strlen(delimiter) == (size_t)(line_end - line_start) &&
+            !ft_strncmp(&input[line_start], delimiter, line_end - line_start))
+        {
+            fprintf(stderr, "[DBG_HEREDOC] Found delimiter '%s' at position %d\n", 
+                  delimiter, line_start);
+            found_delimiter = 1;
+            break;
+        }
+        
+        // Extract this line
+        line = ft_substr(input, line_start, line_end - line_start);
+        if (line)
+        {
+            // Write to file with optional variable expansion
+            fprintf(stderr, "[DBG_HEREDOC] Writing line to temp file: '%s'\n", line);
+            write_to_heredoc(fd, line, vars, !is_quoted_delimiter(delimiter));
+            free(line);
+        }
+        
+        if (input[i] == '\n')
+            i++;
+    }
+    
+    // Close the file when done writing
+    fprintf(stderr, "[DBG_HEREDOC] Closing temp file\n");
+    close(fd);
+    
+    if (found_delimiter)
+    {
+        fprintf(stderr, "[DBG_HEREDOC] Content stored in temp file, setting heredoc_mode=1\n");
+        vars->heredoc_mode = 1; // Mark as multiline mode
+        return (1);
+    }
+    else
+    {
+        fprintf(stderr, "[DBG_HEREDOC] No delimiter found\n");
+        // File left in place but we'll overwrite it next time
+        return (0);
+    }
+}
+
 /*
 Writes line to heredoc pipe with variable expansion.
 - Handles newline addition to each input line.
@@ -244,52 +345,112 @@ Example: With delimiter "EOF"
 */
 int read_heredoc(int *fd, char *delimiter, t_vars *vars, int expand_vars)
 {
-	char	*line;
-	
-	DBG_PRINTF(1, "Reading heredoc with delimiter: '%s'\n", delimiter);
-	// First check if we have stored lines from pasted content
-	if (vars->heredoc_lines && vars->heredoc_index < vars->heredoc_count)
-	{
-		DBG_PRINTF(1, "Using stored heredoc content (%d lines)\n", 
-		         vars->heredoc_count - vars->heredoc_index);
-		while (vars->heredoc_index < vars->heredoc_count)
-		{
-			line = vars->heredoc_lines[vars->heredoc_index++];
-			DBG_PRINTF(1, "Checking heredoc line: '%s'\n", line);
-			// Check if this line is the delimiter
-			if (ft_strcmp(line, delimiter) == 0)
-			{
-				DBG_PRINTF(1, "Found delimiter in pasted content\n");
-				return 1;
-			}
-			// Not the delimiter, add to heredoc content
-			write_to_heredoc(fd[1], line, vars, expand_vars);
-		}
-		DBG_PRINTF(1, "Used all pasted content, delimiter not found\n");
-	}
-	// If we get here, either:
-	// 1. There were no stored lines
-	// 2. We've used all stored lines but didn't find the delimiter
-	// So continue with interactive mode
-	DBG_PRINTF(1, "Entering interactive heredoc mode\n");
-	while (1)
-	{
-		line = readline(PROMPT);
-		if (!line)
-		{
-			DBG_PRINTF(1, "EOF in heredoc\n");
-			return 0;  // EOF
-		}
-		if (ft_strcmp(line, delimiter) == 0)
-		{
-			DBG_PRINTF(1, "Found delimiter: '%s'\n", line);
-			free(line);
-			return 1;
-		}
-		write_to_heredoc(fd[1], line, vars, expand_vars);
-		free(line);
-	}
+    DBG_PRINTF(1, "Reading heredoc with delimiter: '%s'\n", delimiter);
+    
+    // First check if we already have a heredoc pipe set up
+    if (vars->pipes->heredoc_fd > 0)
+    {
+        DBG_PRINTF(1, "Using existing heredoc pipe (fd=%d)\n", vars->pipes->heredoc_fd);
+        // Just pass along the existing file descriptor
+        fd[0] = vars->pipes->heredoc_fd;
+        vars->pipes->heredoc_fd = -1; // Transfer ownership
+        return (1);
+    }
+    
+    // Otherwise, create a new pipe and collect input interactively
+    if (pipe(fd) == -1)
+        return (handle_heredoc_err(vars));
+        
+    DBG_PRINTF(1, "Entering interactive heredoc mode\n");
+    
+    // Your existing interactive heredoc code...
+    while (1)
+    {
+        char *line = readline(PROMPT);
+        if (!line)
+        {
+            DBG_PRINTF(1, "EOF in heredoc\n");
+            close(fd[1]);
+            return 0;
+        }
+        
+        if (ft_strcmp(line, delimiter) == 0)
+        {
+            free(line);
+            close(fd[1]);
+            return 1;
+        }
+        
+        write_to_heredoc(fd[1], line, vars, expand_vars);
+        free(line);
+    }
 }
+
+// // After successful heredoc processing, cleanup the storage
+// void cleanup_heredoc_storage(t_vars *vars)
+// {
+//     if (vars->heredoc_lines) {
+//         for (int i = 0; i < vars->heredoc_count; i++)
+//             free(vars->heredoc_lines[i]);
+//         free(vars->heredoc_lines);
+//         vars->heredoc_lines = NULL;
+//     }
+//     vars->heredoc_count = 0;
+//     vars->heredoc_index = 0;
+// }
+
+// // In tokenize.c where you detect heredoc content
+// // After you recognize the heredoc token but before you parse its content:
+// void store_heredoc_content(char *input, int start_pos, char *delimiter, t_vars *vars)
+// {
+//     // Count the lines
+//     int line_count = 0;
+//     int i = start_pos;
+//     int line_start;
+//     int line_end;
+    
+//     // First count the lines (excluding delimiter line)
+//     while (input[i]) {
+//         line_start = i;
+//         // Find end of this line
+//         while (input[i] && input[i] != '\n')
+//             i++;
+//         line_end = i;
+        
+//         // Check if this line is the delimiter
+//         if (line_end - line_start == (int)ft_strlen(delimiter) && 
+//             !ft_strncmp(&input[line_start], delimiter, line_end - line_start))
+//             break;
+            
+//         line_count++;
+//         if (input[i] == '\n')
+//             i++;
+//     }
+    
+//     // Now allocate the array
+//     vars->heredoc_lines = ft_calloc(line_count + 1, sizeof(char *));
+//     vars->heredoc_count = line_count;
+//     vars->heredoc_index = 0;
+    
+//     // Fill the array with heredoc lines
+//     i = start_pos;
+//     int line_idx = 0;
+//     while (input[i] && line_idx < line_count) {
+//         line_start = i;
+//         // Find end of this line
+//         while (input[i] && input[i] != '\n')
+//             i++;
+//         line_end = i;
+        
+//         // Store this line
+//         vars->heredoc_lines[line_idx++] = ft_substr(input, line_start, line_end - line_start);
+        
+//         if (input[i] == '\n')
+//             i++;
+//     }
+    
+//     DBG_PRINTF(1, "Stored %d lines of heredoc content\n", line_count);
+// }
 
 // /*
 // Cleans up resources after heredoc failure.
@@ -407,33 +568,222 @@ int	handle_heredoc_err(t_vars *vars)
 	return (0);
 }
 
+// int handle_heredoc(t_node *node, t_vars *vars)
+// {
+//     int     fd[2];
+//     char    *delimiter;
+//     int     expand_vars;
+// 	int		result;
+
+// 	result = 1;
+//     if (!node->right || !node->right->args || !node->right->args[0])
+//     	result = handle_heredoc_err(vars);
+//     delimiter = node->right->args[0];
+//     expand_vars = chk_expand_heredoc(delimiter);
+//     if (pipe(fd) == -1)
+//     	result = handle_heredoc_err(vars);
+//     if (!read_heredoc(fd, delimiter, vars, expand_vars))
+//     {
+//         close(fd[0]);
+//         result = handle_heredoc_err(vars);
+//     }
+//     close(fd[1]);
+//     vars->pipes->heredoc_fd = fd[0];
+//     if (dup2(fd[0], STDIN_FILENO) == -1)
+//     {
+//         close(fd[0]);
+//         result = handle_heredoc_err(vars);
+//     }
+//     return (result);
+// }
 int handle_heredoc(t_node *node, t_vars *vars)
 {
-    int     fd[2];
-    char    *delimiter;
-    int     expand_vars;
-	int		result;
+    fprintf(stderr, "[DBG_HEREDOC] Setting up heredoc for command\n");
+    
+    // Process heredoc content if needed
+    if (!process_heredoc(node, vars))
+        return (0);
+    
+    // Connect the pipe to stdin
+    if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1) {
+        fprintf(stderr, "[DBG_HEREDOC] Failed to redirect stdin: %s\n", strerror(errno));
+        close(vars->pipes->heredoc_fd);
+        return (0);
+    }
+    
+    // Close the read end as it's now duplicated to stdin
+    close(vars->pipes->heredoc_fd);
+    vars->pipes->heredoc_fd = -1;  // Mark as used
+    
+    fprintf(stderr, "[DBG_HEREDOC] Heredoc connected to stdin\n");
+    return (1);
+}
 
-	result = 1;
-    if (!node->right || !node->right->args || !node->right->args[0])
-    	result = handle_heredoc_err(vars);
-    delimiter = node->right->args[0];
-    expand_vars = chk_expand_heredoc(delimiter);
-    if (pipe(fd) == -1)
-    	result = handle_heredoc_err(vars);
-    if (!read_heredoc(fd, delimiter, vars, expand_vars))
-    {
-        close(fd[0]);
-        result = handle_heredoc_err(vars);
+/*
+Resets the heredoc pipe infrastructure.
+Closes existing pipe if any and creates a fresh one.
+Returns the write end fd or -1 on error.
+*/
+int	reset_heredoc_pipe(t_vars *vars)
+{
+    int	fd[2];
+    
+    fprintf(stderr, "[DBG_HEREDOC] Resetting heredoc pipe\n");
+    
+    // Close existing pipe if any
+    if (vars->pipes->heredoc_fd > 0) {
+        fprintf(stderr, "[DBG_HEREDOC] Closing existing heredoc fd=%d\n", 
+                vars->pipes->heredoc_fd);
+        close(vars->pipes->heredoc_fd);
     }
-    close(fd[1]);
+    
+    // Create a fresh pipe
+    if (pipe(fd) == -1) {
+        fprintf(stderr, "[DBG_HEREDOC] Pipe creation failed: %s\n", strerror(errno));
+        vars->pipes->heredoc_fd = -1;
+        return (-1);
+    }
+    
+    fprintf(stderr, "[DBG_HEREDOC] Created new heredoc pipe: read_fd=%d, write_fd=%d\n", 
+            fd[0], fd[1]);
+    
+    // Store read end for later use
     vars->pipes->heredoc_fd = fd[0];
-    if (dup2(fd[0], STDIN_FILENO) == -1)
+    
+    // Return write end for immediate use
+    return (fd[1]);
+}
+
+/*
+Processes a heredoc from stored lines or interactive input.
+Returns 1 on success, 0 on failure.
+*/
+// int	process_heredoc(t_node *node, t_vars *vars)
+// {
+//     char	*delimiter;
+//     int		write_fd;
+//     int		expand_vars;
+    
+//     fprintf(stderr, "[DBG_HEREDOC] Processing heredoc for node: %p\n", (void*)node);
+//     // Validate node structure
+//     if (!node || !node->right || !node->right->args || !node->right->args[0])
+//     {
+//         fprintf(stderr, "[DBG_HEREDOC] Invalid node structure\n");
+//         return (0);
+//     }
+//     // Get delimiter from right node
+//     delimiter = node->right->args[0];
+//     // Determine if variables should be expanded
+//     expand_vars = !is_quoted_delimiter(delimiter);
+//     fprintf(stderr, "[DBG_HEREDOC] Delimiter: '%s', expand_vars: %d\n", 
+//             delimiter, expand_vars);
+//     // Reset the heredoc pipe to get a fresh write end
+//     write_fd = reset_heredoc_pipe(vars);
+//     if (write_fd == -1)
+//         return (0);
+//     // Always use interactive mode to read from terminal
+//     fprintf(stderr, "[DBG_HEREDOC] Reading heredoc input from terminal\n");
+//     char *line;
+//     while (1)
+// 	{
+//         line = readline("heredoc> ");
+//         if (!line || ft_strcmp(line, delimiter) == 0)
+// 		{
+//             free(line);
+//             break ;
+//         }
+//         write_to_heredoc(write_fd, line, vars, expand_vars);
+//         free(line);
+//     }
+//     // Close write end when done
+//     close(write_fd);
+//     fprintf(stderr, "[DBG_HEREDOC] Heredoc content ready on fd=%d\n", 
+//             vars->pipes->heredoc_fd);
+//     return (1);
+// }
+int process_heredoc(t_node *node, t_vars *vars)
+{
+    char *delimiter;
+    int expand_vars;
+    
+    fprintf(stderr, "[DBG_HEREDOC] heredoc_mode at start of process_heredoc: %d\n", vars->heredoc_mode);
+    fprintf(stderr, "[DBG_HEREDOC] Processing heredoc for node: %p, mode=%d\n", 
+            (void*)node, vars->heredoc_mode);
+    
+    // Validate node structure
+    if (!node || !node->right || !node->right->args || !node->right->args[0])
     {
-        close(fd[0]);
-        result = handle_heredoc_err(vars);
+        fprintf(stderr, "[DBG_HEREDOC] Invalid node structure\n");
+        return (0);
     }
-    return (result);
+    
+    // Get delimiter from right node
+    delimiter = node->right->args[0];
+    
+    // Determine if variables should be expanded
+    expand_vars = !is_quoted_delimiter(delimiter);
+    fprintf(stderr, "[DBG_HEREDOC] Delimiter: '%s', expand_vars: %d\n", 
+            delimiter, expand_vars);
+    
+    // Check heredoc_mode early to decide processing approach
+    if (vars->heredoc_mode == 1)
+    {
+        // Content already in temp file, just open it for reading
+        fprintf(stderr, "[DBG_HEREDOC] Using stored heredoc content from temp file\n");
+        int fd = open(TMP_BUF, O_RDONLY);
+        if (fd == -1) {
+            fprintf(stderr, "[DBG_HEREDOC] WARNING: Failed to open temp file: %s\n", 
+                    strerror(errno));
+            return (0);
+        }
+        // Store the file descriptor for redirection
+        vars->pipes->heredoc_fd = fd;
+    }
+    else
+    {
+        // Interactive mode - read from terminal
+        fprintf(stderr, "[DBG_HEREDOC] Reading heredoc input from terminal\n");
+        
+        // Open temp file for writing
+        int fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+        if (fd == -1)
+        {
+            fprintf(stderr, "[DBG_HEREDOC] Failed to create temp file: %s\n", 
+                    strerror(errno));
+            return (0);
+        }
+        
+        // Read lines until delimiter is found
+        char *line;
+        while (1)
+        {
+            line = readline("heredoc> ");
+            if (!line || ft_strcmp(line, delimiter) == 0)
+            {
+                free(line);
+                break;
+            }
+            write_to_heredoc(fd, line, vars, expand_vars);
+            free(line);
+        }
+        
+        // Close write end
+        close(fd);
+        
+        // Open the file for reading
+        fd = open(TMP_BUF, O_RDONLY);
+        if (fd == -1)
+        {
+            fprintf(stderr, "[DBG_HEREDOC] Failed to open temp file for reading: %s\n", 
+                    strerror(errno));
+            return (0);
+        }
+        vars->pipes->heredoc_fd = fd;
+    }
+    
+    fprintf(stderr, "[DBG_HEREDOC] Heredoc content ready on fd=%d\n", 
+            vars->pipes->heredoc_fd);
+    return (1);
 }
 
 // /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 18:20:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/16 22:56:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,8 @@ void build_and_execute(t_vars *vars)
 	{
 		vars->astroot = root;
 		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
+		// Add in build_and_execute before execution
+		fprintf(stderr, "[DBG_HEREDOC] heredoc_mode before execution: %d\n", vars->heredoc_mode);
 		execute_cmd(vars->astroot, vars->env, vars);
 	}
 	else

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/12 23:35:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 04:32:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,10 +125,15 @@ void reset_redirect_fds(t_vars *vars)
 		close(vars->pipes->saved_stdout);
 		vars->pipes->saved_stdout = -1;
 	}
-	if (vars->pipes->heredoc_fd > 2)
+	// if (vars->pipes->heredoc_fd > 2)
+	// {
+	// 	close(vars->pipes->heredoc_fd);
+	// 	vars->pipes->heredoc_fd = -1;
+	// }
+	if (vars->pipes->heredoc_fd > 0 && vars->heredoc_mode != 1)
 	{
-		close(vars->pipes->heredoc_fd);
-		vars->pipes->heredoc_fd = -1;
+    	close(vars->pipes->heredoc_fd);
+    	vars->pipes->heredoc_fd = -1;
 	}
 	if (vars->pipes->redirection_fd > 2)
 	{

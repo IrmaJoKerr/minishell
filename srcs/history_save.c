@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:54:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 10:33:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,12 @@ void	save_history(void)
 	int			history_count;
 	int			excess_lines;
 	int			start_idx;
-
+    struct stat	st = {0};
+	
+    if (stat("temp", &st) == -1)
+	{
+        mkdir("temp", 0755);
+    }
 	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
 		return ;

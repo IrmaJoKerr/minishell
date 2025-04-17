@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 18:06:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/15 23:20:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,18 +176,18 @@ Displays command arguments after expansion.
 */
 void debug_cmd_args(t_node *node)
 {
-	int i = 0;
-	
-	if (!node || !node->args)
-		return;
-	
-	DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
-	while (node->args[i])
-	{
-		DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %d)\n", 
-		          i, node->args[i], 
-		          node->arg_quote_type ? node->arg_quote_type[i] : -1);
-		i++;
-	}
-	DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
+    int i = 0;
+    
+    if (!node || !node->args)
+        return;
+    
+    DBG_PRINTF(DEBUG_EXPAND, "=== Command arguments after expansion ===\n");
+    while (node->args[i])
+    {
+        DBG_PRINTF(DEBUG_EXPAND, "args[%d] = '%s' (quote_type: %p)\n", 
+                  i, node->args[i], 
+                  (void*)(node->arg_quote_type ? node->arg_quote_type[i] : NULL));
+        i++;
+    }
+    DBG_PRINTF(DEBUG_EXPAND, "========================================\n");
 }

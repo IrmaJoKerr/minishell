@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:42:05 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/17 21:24:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,14 +45,40 @@ void cleanup_pipes(t_pipe *pipes)
 		free(pipes->pids);
 	if (pipes->status)
 		free(pipes->status);
-	if (pipes->heredoc_fd > 2)
-		close(pipes->heredoc_fd);
-	if (pipes->redirection_fd > 2)
-		close(pipes->redirection_fd);
 	if (pipes->saved_stdin > 2)
 		close(pipes->saved_stdin);
 	if (pipes->saved_stdout > 2)
 		close(pipes->saved_stdout);
+	// Close heredoc pipe if open
+    // if (pipes->heredoc_fd > 0)
+	// {
+    //     fprintf(stderr, "[DBG_HEREDOC] Closing heredoc pipe fd=%d during cleanup\n",
+    //             pipes->heredoc_fd);
+    //     close(pipes->heredoc_fd);
+    // }
+	if (pipes->heredoc_fd > 0)
+    {
+        fprintf(stderr, "[DBG_HEREDOC] Closing heredoc pipe fd=%d during cleanup\n",
+                pipes->heredoc_fd);
+        close(pipes->heredoc_fd);
+    }
+    
+    // Close heredoc pipe write end if open
+    if (pipes->hd_fd_write > 0 && pipes->hd_fd_write != pipes->heredoc_fd)
+    {
+        fprintf(stderr, "[DBG_HEREDOC] Closing heredoc write fd=%d during cleanup\n",
+                pipes->hd_fd_write);
+        close(pipes->hd_fd_write);
+    }
+    
+    // Free heredoc delimiter if allocated
+    if (pipes->heredoc_delim)
+    {
+        free(pipes->heredoc_delim);
+        pipes->heredoc_delim = NULL;
+    }
+	if (pipes->redirection_fd > 2)
+		close(pipes->redirection_fd);
 	free(pipes);
 }
 
@@ -61,7 +87,6 @@ Cleans up the vars structure.
 - If exists:
 	- Frees pipes structure and it's contents
 	- Frees env array
-	- Frees heredoc_lines array
 Works with cleanup_exit().
 */
 void	cleanup_vars(t_vars *vars)
@@ -80,13 +105,6 @@ void	cleanup_vars(t_vars *vars)
 		env_count = ft_arrlen(vars->env);
 		ft_free_2d(vars->env, env_count);
 		vars->env = NULL;
-	}
-	if (vars->heredoc_lines)
-	{
-		ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
-		vars->heredoc_lines = NULL;
-		vars->heredoc_count = 0;
-		vars->heredoc_index = 0;
 	}
 }
 

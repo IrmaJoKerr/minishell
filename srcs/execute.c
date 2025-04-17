@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 18:03:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/16 22:54:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -390,6 +390,7 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 			fprintf(stderr, "[DEBUG] No further redirections found in chain\n");
 		if (node->type == TYPE_HEREDOC)
 		{
+			
 		   DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
 			   node->right && node->right->args ? node->right->args[0] : "NULL",
 			   vars->pipes->heredoc_fd);

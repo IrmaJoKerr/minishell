@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 14:21:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/16 00:40:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,6 @@ Creates string token for text preceding an operator.
 - Updates token tracking in vars structure.
 Returns:
 - Current position (unchanged).
-Works with operators() for text segment tokenization.
 */
 void handle_string(char *input, t_vars *vars)
 {

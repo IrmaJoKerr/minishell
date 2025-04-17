@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/15 11:57:13 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/17 10:29:14 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ SANITIZE_FLAGS = -fsanitize=address,undefined
 
 LIBFT_DIR = libft
 MINISHELL_DIR = srcs
+TEMP_DIR = temp
 INCLUDE_DIRS = includes $(LIBFT_DIR)/includes
 INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 
@@ -80,6 +81,7 @@ MINISHELL_BI_OBJS_DIR = $(MINISHELL_OBJS_DIR)/builtins
 $(MINISHELL_OBJS_DIR):
 	@mkdir -p $(MINISHELL_OBJS_DIR)
 	@mkdir -p $(MINISHELL_BI_OBJS_DIR)
+	@mkdir -p $(TEMP_DIR)
 
 $(MINISHELL_OBJS_DIR)/%.o: srcs/%.c | $(MINISHELL_OBJS_DIR)
 	@echo "Compiling BleShell $<"
@@ -107,19 +109,20 @@ $(LIBFT_DIR)/libft.a:
 clean:
 	@echo "Cleaning up..."
 	rm -rf objects
+	rm -rf temp
 	$(MAKE) -C $(LIBFT_DIR) clean
 
 fclean: clean
 	@echo "Performing full clean..."
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_DIR) fclean
-	@if [ -f bleshell_history ]; then \
+	@if [ -f $(TEMP_DIR)/bleshell_history ]; then \
 		echo "Removing history file..."; \
-		rm -f bleshell_history; \
+		rm -f $(TEMP_DIR)/bleshell_history; \
 	fi
-	@if [ -f bleshell_history_tmp ]; then \
+	@if [ -f $(TEMP_DIR)/bleshell_history_tmp ]; then \
 		echo "Removing temporary history file..."; \
-		rm -f bleshell_history_tmp; \
+		rm -f $(TEMP_DIR)/bleshell_history_tmp; \
 	fi
 
 re: fclean all
