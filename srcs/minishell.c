@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 19:04:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 19:24:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -324,6 +324,69 @@ Example: When user types a complex command
 // 	vars->partial_input = NULL;
 // 	fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
 // }
+// void process_command(char *command, t_vars *vars)
+// {
+//     fprintf(stderr, "[DEBUG] process_command() called\n");
+    
+//     int pipe_result;
+    
+//     // Reset error state at the beginning of each command
+//     vars->error_code = 0;
+    
+//     // Reset pipes structure state
+//     if (vars->pipes) 
+//     {
+//         reset_redir_tracking(vars->pipes);
+//         vars->pipes->pipe_root = NULL;
+//         vars->pipes->redir_root = NULL;
+//     }
+    
+//     // Store original command in vars->partial_input
+//     vars->partial_input = ft_strdup(command);
+//     if (!vars->partial_input)
+//         return;
+//     // Handle quote completion first
+//     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+//     if (!vars->partial_input)
+//         return;
+//     // Tokenize the input
+//     if (!process_input_tokens(vars->partial_input, vars))
+//     {
+//         free(vars->partial_input);
+//         vars->partial_input = NULL;
+//         return;
+//     }
+//     // Use new pipe analysis system 
+//     pipe_result = analyze_pipe_syntax(vars);
+//     if (pipe_result == 1) // Syntax error
+//     {
+//         // Error already reported by analyze_pipe_syntax
+        
+//         // IMPORTANT: Reset all state variables that might be corrupted
+//         cleanup_token_list(vars);  // Make sure token list is clean
+//         vars->error_code = 2;      // Set appropriate error code
+        
+//         // Reset pipes structure to ensure clean state for next command
+//         if (vars->pipes)
+//             reset_redir_tracking(vars->pipes);
+        
+//         // Clear partial input and return
+//         free(vars->partial_input);
+//         vars->partial_input = NULL;
+//         return;
+//     }
+//     else if (pipe_result == 2) // Needs pipe completion
+//     {
+//         // Existing code for pipe completion...
+//     }
+    
+//     // Build and execute the command
+//     build_and_execute(vars);
+//     // Clean up
+//     free(vars->partial_input);
+//     vars->partial_input = NULL;
+//     fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
+// }
 void process_command(char *command, t_vars *vars)
 {
     fprintf(stderr, "[DEBUG] process_command() called\n");
@@ -333,22 +396,16 @@ void process_command(char *command, t_vars *vars)
     // Reset error state at the beginning of each command
     vars->error_code = 0;
     
-    // Reset pipes structure state
-    if (vars->pipes) 
-    {
-        reset_redir_tracking(vars->pipes);
-        vars->pipes->pipe_root = NULL;
-        vars->pipes->redir_root = NULL;
-    }
-    
     // Store original command in vars->partial_input
     vars->partial_input = ft_strdup(command);
     if (!vars->partial_input)
         return;
+        
     // Handle quote completion first
     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
     if (!vars->partial_input)
         return;
+        
     // Tokenize the input
     if (!process_input_tokens(vars->partial_input, vars))
     {
@@ -356,32 +413,45 @@ void process_command(char *command, t_vars *vars)
         vars->partial_input = NULL;
         return;
     }
-    // Use new pipe analysis system 
+    
+    // Use pipe analysis system 
     pipe_result = analyze_pipe_syntax(vars);
-    if (pipe_result == 1) // Syntax error
+    
+    // Key part: handle pipe completion if needed
+    if (pipe_result == 2) // Needs pipe completion
     {
-        // Error already reported by analyze_pipe_syntax
+        char *completed_cmd = complete_pipe_command(vars->partial_input, vars);
+        if (!completed_cmd)
+        {
+            free(vars->partial_input);
+            vars->partial_input = NULL;
+            return;
+        }
+        free(vars->partial_input);
+        vars->partial_input = completed_cmd;
         
-        // IMPORTANT: Reset all state variables that might be corrupted
-        cleanup_token_list(vars);  // Make sure token list is clean
-        vars->error_code = 2;      // Set appropriate error code
-        
-        // Reset pipes structure to ensure clean state for next command
-        if (vars->pipes)
-            reset_redir_tracking(vars->pipes);
-        
-        // Clear partial input and return
+        // Re-tokenize with completed command
+        cleanup_token_list(vars);
+        if (!process_input_tokens(vars->partial_input, vars))
+        {
+            free(vars->partial_input);
+            vars->partial_input = NULL;
+            return;
+        }
+    }
+    else if (pipe_result == 1) // Syntax error
+    {
+        // Error handling code
+        cleanup_token_list(vars);
+        vars->error_code = 2;
         free(vars->partial_input);
         vars->partial_input = NULL;
         return;
     }
-    else if (pipe_result == 2) // Needs pipe completion
-    {
-        // Existing code for pipe completion...
-    }
     
     // Build and execute the command
     build_and_execute(vars);
+    
     // Clean up
     free(vars->partial_input);
     vars->partial_input = NULL;
