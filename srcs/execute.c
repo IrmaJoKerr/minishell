@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 22:40:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 00:19:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,66 +261,33 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	return (result);
 }
 
-// /*
-// Executes a child process for external commands.
-// - Forks a child process.
-// - In child: executes the external command.
-// - In parent: waits for child and processes exit status.
-// Returns:
-// Exit code from the command execution.
-// Works with execute_cmd().
-// */
-// int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
-// {
-// 	pid_t	pid;
-// 	int		status;
-
-// 	pid = fork();
-// 	if (pid == 0)
-// 	{
-// 		if (execve(cmd_path, node->args, envp) == -1)
-// 		{
-// 			perror("bleshell: exec");
-// 			exit(1);
-// 		}
-// 	}
-// 	else if (pid < 0)
-// 	{
-// 		perror("bleshell: fork");
-// 		free(cmd_path);
-// 		return (1);
-// 	}
-// 	else
-// 	{
-// 		waitpid(pid, &status, 0);
-// 		free(cmd_path);
-// 		return (handle_cmd_status(status, vars));
-// 	}
-// 	return (0);
-// }
-
-// int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
-// {
-// 	char	*cmd_path;
-// 	int		i;
-
-// 	if (!node->args || !node->args[0])
-// 		return (1);
-// 	i = 0;
-// 	while (node->args[i])
-// 		i++;
-// 	if (is_builtin(node->args[0]))
-// 		return (execute_builtin(node->args[0], node->args, vars));
-// 	cmd_path = get_cmd_path(node->args[0], envp);
-// 	if (!cmd_path)
-// 	{
-// 		ft_putstr_fd("bleshell: command not found: ", 2);
-// 		ft_putendl_fd(node->args[0], 2);
-// 		vars->error_code = 0;
-// 		return (vars->error_code);
-// 	}
-// 	return (exec_child_cmd(node, envp, vars, cmd_path));
-// }
+/*
+Executes a single command node.
+- Handles both builtin and external commands.
+- Manages empty command error cases.
+- Updates error code appropriately.
+Returns:
+- Command execution result code.
+Works with execute_cmd().
+*/
+int	exec_cmd_node(t_node *node, char **envp, t_vars *vars)
+{
+	int	result;
+	
+	if (node->args && node->args[0])
+	{
+		if (is_builtin(node->args[0]))
+			result = execute_builtin(node->args[0], node->args, vars);
+		else
+			result = exec_external_cmd(node, envp, vars);
+	}
+	else
+	{
+		vars->error_code = 1;
+		result = 1;
+	}
+	return (result);
+}
 
 /*
 Main command execution function.
@@ -335,65 +302,19 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	
 	result = 0;
 	if (!node)
-	{
-		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: NULL node\n");
 		return (vars->error_code = 1);
-	}
-	DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Node type=%d, content='%s'\n", 
-	   node->type, node->args ? node->args[0] : "NULL");
-	//Handle different node types
 	if (node->type == TYPE_CMD)
-	{
-		if (node->args && node->args[0])
-		{
-			if (is_builtin(node->args[0]))
-				result = execute_builtin(node->args[0], node->args, vars);
-			else
-				result = exec_external_cmd(node, envp, vars);
-		}
-		else
-   	 	{
-			vars->error_code = 1;
-			result = 1;
-		}
-	}
+		result = exec_cmd_node(node, envp, vars);
 	else if (is_redirection(node->type))
-	{
-		DBG_PRINTF(DEBUG_EXEC, "Executing redirection - left child: %p, right child: %p\n",
-		   	(void*)node->left, (void*)node->right);
-		if (node->left)
-		   	DBG_PRINTF(DEBUG_EXEC, "Left child type=%d content=%s\n", 
-			   	node->left->type, node->left->args ? node->left->args[0] : "NULL");
-		if (node->right)
-		   	DBG_PRINTF(DEBUG_EXEC, "Right child type=%d content=%s\n", 
-			   	node->right->type, node->right->args ? node->right->args[0] : "NULL");
-		// Add this debug print to see if multiple redirections are detected
-		fprintf(stderr, "[DEBUG] Before handling redirect: checking for additional redirections\n");
-		if (node->next)
-			fprintf(stderr, "[DEBUG] Found next redirection node: type=%d\n", node->next->type);
-		else
-			fprintf(stderr, "[DEBUG] No further redirections found in chain\n");
-		if (node->type == TYPE_HEREDOC)
-		{
-			
-		   DBG_PRINTF(DEBUG_EXEC, "Executing heredoc with delimiter: '%s', heredoc_fd=%d\n",
-			   node->right && node->right->args ? node->right->args[0] : "NULL",
-			   vars->pipes->heredoc_fd);
-		}
 		result = exec_redirect_cmd(node, envp, vars);
-	}
 	else if (node->type == TYPE_PIPE)
 	{
 		if (!node->left || !node->right)
-		{
 			return (vars->error_code = 1);
-		}
 		result = execute_pipes(node, vars);
-	} 
-	else
-	{
-		result = 1;
 	}
+	else
+		result = 1;
 	vars->error_code = result;
 	return (result);
 }
@@ -413,53 +334,151 @@ Example: For "ls -la"
 - Executes in child process
 - Returns exit code (0 for success)
 */
+// int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+// 	pid_t	pid;
+// 	int		status;
+// 	char	*cmd_path;
+
+// 	if (!node || !node->args || !node->args[0])
+// 	{
+// 		vars->error_code = 1;
+// 		return vars->error_code;
+// 	}
+// 	cmd_path = get_cmd_path(node->args[0], envp);
+// 	if (!cmd_path)
+// 	{
+// 		ft_putstr_fd("bleshell: ", 2);
+// 		ft_putstr_fd(node->args[0], 2);
+// 		ft_putendl_fd(": command not found", 2);
+// 		return (vars->error_code = 0);
+// 	}
+// 	fprintf(stderr, "[DEBUG] exec_external_cmd: Before fork, pid=%d\n", getpid());
+// 	pid = fork();
+// 	if (pid < 0)
+// 	{
+// 		ft_putstr_fd("bleshell: fork failed\n", 2);
+// 		free(cmd_path);
+// 		return (vars->error_code = 1);
+// 	}
+// 	if (pid == 0)
+// 	{
+// 		fprintf(stderr, "[DEBUG] exec_external_cmd: Child process pid=%d\n", getpid());
+// 		execve(cmd_path, node->args, envp);
+// 		perror("bleshell");
+// 		free(cmd_path);
+// 		exit(127);
+// 	}
+// 	fprintf(stderr, "[DEBUG] exec_external_cmd: Parent process pid=%d, waiting for child=%d\n", 
+// 			getpid(), pid);
+// 	free(cmd_path);
+// 	waitpid(pid, &status, 0);
+// 	fprintf(stderr, "[DEBUG] exec_external_cmd: Child %d exited with status=%d, WIFEXITED=%d\n",
+// 			pid, status, WIFEXITED(status));
+// 	return (handle_cmd_status(status, vars));
+// }
+// int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+//     pid_t	pid;
+//     int		status;
+//     char	*cmd_path;
+//     int		error_code;
+
+//     if (!node || !node->args || !node->args[0])
+//     {
+//         vars->error_code = 1;
+//         return vars->error_code;
+//     }
+//     cmd_path = get_cmd_path(node->args[0], envp);
+//     if (!cmd_path)
+//     {
+//         shell_error(node->args[0], ERR_CMD_NOT_FOUND, vars);
+//         return vars->error_code;
+//     }
+//     pid = fork();
+//     if (pid < 0)
+//     {
+//         free(cmd_path);
+//         return (vars->error_code = 1);
+//     }
+//     if (pid == 0)
+//     {
+//         execve(cmd_path, node->args, envp);
+//         if (errno == EACCES)
+//             error_code = ERR_PERMISSIONS;
+//         else if (errno == ENOENT)
+//             error_code = ERR_CMD_NOT_FOUND;
+//         else if (errno == EISDIR)
+//             error_code = ERR_ISDIRECTORY;
+//         else
+//             error_code = ERR_CMD_NOT_FOUND;
+//         shell_error(cmd_path, error_code, NULL);
+//         free(cmd_path);
+//         exit(127);
+//     }
+//     free(cmd_path);
+//     waitpid(pid, &status, 0);
+//     return (handle_cmd_status(status, vars));
+// }
+/*
+Handles command execution in the child process.
+- Attempts to execute the command with execve
+- On failure, determines appropriate error type from errno
+- Reports errors using shell_error
+- Cleans up resources and exits with code 127
+Note: This function never returns (it either executes or exits)
+*/
+static void	exec_child(char *cmd_path, char **args, char **envp)
+{
+    int	error_code;
+    
+    execve(cmd_path, args, envp);
+    if (errno == EACCES)
+        error_code = ERR_PERMISSIONS;
+    else if (errno == ENOENT)
+        error_code = ERR_CMD_NOT_FOUND;
+    else if (errno == EISDIR)
+        error_code = ERR_ISDIRECTORY;
+    else
+        error_code = ERR_CMD_NOT_FOUND;
+    shell_error(cmd_path, error_code, NULL);
+    free(cmd_path);
+    exit(127);
+}
+
+/*
+Executes an external command (non-builtin).
+- Finds the command path in the PATH environment.
+- Forks a child process to execute the command.
+- In parent: waits for child and handles the exit status.
+- Properly updates vars->error_code with the command result.
+Returns:
+Exit code from the command execution.
+Works with execute_cmd().
+
+Example: For "ls -la"
+- Locates path to ls executable (/bin/ls)
+- Executes in child process
+- Returns exit code (0 for success)
+*/
 int exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 {
-	pid_t   pid;
-	int     status;
-	char    *cmd_path;
+    pid_t pid;
+    int   status;
+    char  *cmd_path;
 
-	if (!node || !node->args || !node->args[0])
-	{
-		vars->error_code = 1;
-		return vars->error_code;
-	}
-
-	cmd_path = get_cmd_path(node->args[0], envp);
-	if (!cmd_path)
-	{
-		ft_putstr_fd("bleshell: ", 2);
-		ft_putstr_fd(node->args[0], 2);
-		ft_putendl_fd(": command not found", 2);
-		return (vars->error_code = 0);
-	}
-
-	fprintf(stderr, "[DEBUG] exec_external_cmd: Before fork, pid=%d\n", getpid());
-	pid = fork();
-
-	if (pid < 0)
-	{
-		ft_putstr_fd("bleshell: fork failed\n", 2);
-		free(cmd_path);
-		return (vars->error_code = 1);
-	}
-	
-	if (pid == 0) // Child process
-	{
-		fprintf(stderr, "[DEBUG] exec_external_cmd: Child process pid=%d\n", getpid());
-		execve(cmd_path, node->args, envp);
-		perror("bleshell");
-		free(cmd_path);
-		exit(127); // Only exit in child
-	}
-	
-	// Parent process
-	fprintf(stderr, "[DEBUG] exec_external_cmd: Parent process pid=%d, waiting for child=%d\n", 
-			getpid(), pid);
-	free(cmd_path);
-	waitpid(pid, &status, 0);
-	fprintf(stderr, "[DEBUG] exec_external_cmd: Child %d exited with status=%d, WIFEXITED=%d\n",
-			pid, status, WIFEXITED(status));
-	
-	return (handle_cmd_status(status, vars)); // Ensure this doesn't interpret 0 as exit
+    cmd_path = get_cmd_path(node, envp, vars);
+    if (!cmd_path)
+        return (vars->error_code);
+    pid = fork();
+    if (pid < 0)
+    {
+        free(cmd_path);
+        return (vars->error_code = 1);
+    }
+    if (pid == 0)
+        exec_child(cmd_path, node->args, envp);
+    free(cmd_path);
+    waitpid(pid, &status, 0);
+    return (handle_cmd_status(status, vars));
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 22:38:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 00:18:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -395,10 +395,7 @@ int			setup_redirection(t_node *node, t_vars *vars);
 int			proc_redir_chain(t_node *start_node, t_node *cmd_node
 					,t_vars *vars);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
-// int			exec_child_cmd(t_node *node, char **envp,
-// 				t_vars *vars, char *cmd_path);
-// void		debug_print_cmd_args(t_node *node);
-// int			exec_std_cmd(t_node *node, char **envp, t_vars *vars);
+int			exec_cmd_node(t_node *node, char **envp, t_vars *vars);
 int			execute_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_external_cmd(t_node *node, char **envp, t_vars *vars);
 
@@ -600,7 +597,7 @@ In paths.c
 char		**get_path_env(char **envp);
 char		*try_path(char *path, char *cmd);
 char		*search_in_env(char *cmd, char **envp);
-char		*get_cmd_path(char *cmd, char **envp);
+char		*get_cmd_path(t_node *node, char **envp, t_vars *vars);
 char		**dup_env(char **envp);
 
 /*
@@ -666,7 +663,7 @@ void		integrate_redirections_with_pipes(t_vars *vars);
 void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
-int			is_valid_redir_node(t_node *current); //Possible to reuse
+// int			is_valid_redir_node(t_node *current); //Possible to reuse
 
 /*
 Quote handling.
@@ -711,8 +708,6 @@ void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
 int			build_token_linklist(t_vars *vars, t_node *node);
 int 		is_adjacent_token(char *input, int pos);
-// int			make_exp_token(char *input, int *i, t_vars *vars);
-
 int			process_operator_char(char *input, int *i, t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
