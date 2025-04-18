@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:50:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 22:40:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,61 +40,87 @@ int	handle_cmd_status(int status, t_vars *vars)
 }
 
 /*
-Handles redirection setup for output files.
-- Opens file for writing in truncate or append mode.
-- Redirects stdout to the opened file.
+Handles redirection setup for input files.
+- Opens file for reading.
+- Redirects stdin to read from the file.
 - Properly handles and reports errors.
 Returns:
 1 on success, 0 on failure.
 Works with setup_redirection().
 */
-int setup_out_redir(t_node *node, t_vars *vars)
+int	setup_in_redir(t_node *node, t_vars *vars)
 {
-    char *file;
-    int flags;
-    
-    fprintf(stderr, "[DEBUG] setup_out_redir: Setting up output redirection to file '%s'\n", 
-           node->right && node->right->args ? node->right->args[0] : "NULL");
-    
-    if (!node->right || !node->right->args || !node->right->args[0])
-        return (0);
-    
-    flags = O_WRONLY | O_CREAT;
-    file = node->right->args[0];
-    
-    if (vars->pipes->out_mode == OUT_MODE_APPEND)
-        flags |= O_APPEND;
-    else
-        flags |= O_TRUNC;
-    
-    fprintf(stderr, "[DEBUG] setup_out_redir: Opening file with flags=%d\n", flags);
-    
-    if (!chk_permissions(file, flags, vars))
-        return (0);
-    
-    vars->pipes->redirection_fd = open(file, flags, 0644);
-    fprintf(stderr, "[DEBUG] setup_out_redir: File '%s' opened with fd=%d\n", 
-           file, vars->pipes->redirection_fd);
-    
-    if (vars->pipes->redirection_fd == -1)
-    {
-        shell_error(file, ERR_PERMISSIONS, vars);
-        return (0);
-    }
-    
-    fprintf(stderr, "[DEBUG] setup_out_redir: Redirecting stdout (fd=%d) to file (fd=%d)\n", 
-           STDOUT_FILENO, vars->pipes->redirection_fd);
-    
-    if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
-    {
-        close(vars->pipes->redirection_fd);
-        return (0);
-    }
-    
-    fprintf(stderr, "[DEBUG] setup_out_redir: Redirection complete\n");
-    return (1);
+	char	*file;
+	
+	if (!node->right || !node->right->args || !node->right->args[0])
+		return (0);
+	file = node->right->args[0];
+	if (!chk_permissions(file, O_RDONLY, vars))
+	{
+		end_pipe_processes(vars);
+		return (0);
+	}
+	vars->pipes->redirection_fd = open(file, O_RDONLY);
+	if (vars->pipes->redirection_fd == -1)
+	{
+		not_found_error(file, vars);
+		end_pipe_processes(vars);
+		return (0);
+	}
+	if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
+	{
+		close(vars->pipes->redirection_fd);
+		return (0);
+	}
+	return (1);
 }
 
+/*
+Handles redirection setup for output files.
+- Opens file for writing in truncate or append mode.
+- Redirects stdout to the opened file.
+- Properly handles and reports errors.
+Returns:
+- 1 on success.
+- 0 on failure.
+Works with setup_redirection().
+*/
+int	setup_out_redir(t_node *node, t_vars *vars)
+{
+	char	*file;
+	int		flags;
+	
+	if (!node->right || !node->right->args || !node->right->args[0])
+		return (0);
+	flags = O_WRONLY | O_CREAT;
+	file = node->right->args[0];
+	if (vars->pipes->out_mode == OUT_MODE_APPEND)
+		flags |= O_APPEND;
+	else
+		flags |= O_TRUNC;
+	if (!chk_permissions(file, flags, vars))
+		return (0);
+	vars->pipes->redirection_fd = open(file, flags, 0644);
+	if (vars->pipes->redirection_fd == -1)
+	{
+		shell_error(file, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
+	{
+		close(vars->pipes->redirection_fd);
+		return (0);
+	}
+	return (1);
+}
+
+/*
+Terminates all active child processes in a pipeline.
+- Safely iterates through the PID array.
+- Sends SIGTERM to each valid child process.
+- Prevents orphaned processes during error conditions.
+Works with setup_in_redir() and other error handling paths.
+*/
 void	end_pipe_processes(t_vars *vars)
 {
 	int	i;
@@ -112,51 +138,6 @@ void	end_pipe_processes(t_vars *vars)
 }
 
 /*
-Handles redirection setup for input files.
-- Opens file for reading.
-- Redirects stdin to read from the file.
-- Properly handles and reports errors.
-Returns:
-1 on success, 0 on failure.
-Works with setup_redirection().
-*/
-int	setup_in_redir(t_node *node, t_vars *vars)
-{
-	fprintf(stderr, "[DEBUG] Calling reset_redirect_fds \n");
-    char	*file;
-    
-    if (!node->right || !node->right->args || !node->right->args[0])
-    {
-		fprintf(stderr, "[DEBUG] setup_in_redir: No file specified for input redirection\n");
-        return (0);
-    }
-    file = node->right->args[0];
-    if (!chk_permissions(file, O_RDONLY, vars))
-    {
-		fprintf(stderr, "[DEBUG] setup_in_redir: Permission check failed for file '%s'\n", file);
-        end_pipe_processes(vars);
-        return (0);
-    }
-    vars->pipes->redirection_fd = open(file, O_RDONLY);
-    if (vars->pipes->redirection_fd == -1)
-    {
-		fprintf(stderr, "[DEBUG] setup_in_redir: Failed to open file '%s'\n", file);
-        not_found_error(file, vars);
-        end_pipe_processes(vars);
-        return (0);
-    }
-    if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
-    {
-		fprintf(stderr, "[DEBUG] setup_in_redir: Failed to redirect stdin to file '%s'\n", file);
-        close(vars->pipes->redirection_fd);
-        return (0);
-    }
-	fprintf(stderr, "[DEBUG] setup_in_redir:Returning 1 before exit\n");
-    return (1);
-}
-
-
-/*
 Sets up a specific type of redirection based on node type.
 - Handles input, output, append, and heredoc redirections.
 - Updates mode flags and calls appropriate setup functions.
@@ -167,31 +148,30 @@ Works with setup_redirection().
 */
 int redir_mode_setup(t_node *node, t_vars *vars)
 {
-    int	result;
-    
-    if (node->type == TYPE_IN_REDIRECT)
-        result = setup_in_redir(node, vars);
-    else if (node->type == TYPE_OUT_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-        result = setup_out_redir(node, vars);
-    }
-    else if (node->type == TYPE_APPEND_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_APPEND;
-        result = setup_out_redir(node, vars);
-    }
-    else if (node->type == TYPE_HEREDOC)
-    {
-        result = handle_heredoc(node, vars);
-    }
-    else
-        result = 0;
-    if (!result)
-        vars->error_code = 1;
-    return (result);
+	int	result;
+	
+	if (node->type == TYPE_IN_REDIRECT)
+		result = setup_in_redir(node, vars);
+	else if (node->type == TYPE_OUT_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+		result = setup_out_redir(node, vars);
+	}
+	else if (node->type == TYPE_APPEND_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_APPEND;
+		result = setup_out_redir(node, vars);
+	}
+	else if (node->type == TYPE_HEREDOC)
+	{
+		result = handle_heredoc(node, vars);
+	}
+	else
+		result = 0;
+	if (!result)
+		vars->error_code = 1;
+	return (result);
 }
-
 
 /*
 Sets up appropriate redirection based on node type.
@@ -199,28 +179,56 @@ Sets up appropriate redirection based on node type.
 - Creates or opens files with appropriate permissions.
 - Redirects stdin/stdout as needed.
 Returns:
-1 on success, 0 on failure.
+- 1 on success.
+- 0 on failure.
 Works with exec_redirect_cmd().
 */
-int setup_redirection(t_node *node, t_vars *vars)
+int	setup_redirection(t_node *node, t_vars *vars)
 {
-    int	result;
+	int	result;
 	
-	fprintf(stderr, "[DEBUG] Setting up redirection type=%d operator='%s' file='%s'\n",
-		node->type, node->args[0], node->right ? node->right->args[0] : "NULL");
+	vars->pipes->current_redirect = node;
+	if (node->right && node->right->args)
+		process_arg_quotes(&node->right->args[0]);
+	result = redir_mode_setup(node, vars);
+	return (result);
+}
 
-    // reset_redirect_fds(vars);
-    vars->pipes->current_redirect = node;
-    if (node->right && node->right->args)
-        process_arg_quotes(&node->right->args[0]);
-    fprintf(stderr, "DEBUG: Setting up redirection type=%d operator='%s' file='%s'\n",
-            node->type, 
-            node->args ? node->args[0] : "(null)",
-            (node->right && node->right->args) ? node->right->args[0] : "(null)");
-    // Use our new redir_mode_setup function that has consistent return values
-    result = redir_mode_setup(node, vars);
-    // Return result directly (1 for success, 0 for failure with error code already set)
-    return (result);
+/*
+Processes a chain of redirections for a command node.
+- Sets up each redirection in the chain.
+- Navigates through connected redirections.
+- Handles errors and cleanup if a redirection fails.
+Returns:
+- 1 on success (all redirections processed)
+- 0 on failure (at least one redirection failed)
+Works with exec_redirect_cmd().
+*/
+int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+{
+	t_node	*current_node;
+	
+	current_node = start_node;
+	while (current_node && is_redirection(current_node->type))
+	{
+		vars->pipes->current_redirect = current_node;
+		if (!setup_redirection(current_node, vars))
+		{
+			reset_redirect_fds(vars);
+			return (0);
+		}
+		if (current_node->redir)
+			current_node = current_node->redir;
+		else
+		{
+			t_node *next_redir = get_next_redir(current_node, cmd_node);
+			if (next_redir)
+				current_node = next_redir;
+			else
+				break ;
+		}
+	}
+	return (1);
 }
 
 /*
@@ -230,208 +238,89 @@ Executes a command with redirection.
 - Executes the command with redirection in place.
 - Restores original file descriptors afterward.
 Returns:
-Result of command execution.
+- Result of command execution.
 Works with execute_cmd().
 */
-// int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+{
+	int		result;
+	t_node	*cmd_node;
+
+	if (!node->left || !node->right)
+		return (1);
+	cmd_node = node->left;
+	while (cmd_node && is_redirection(cmd_node->type))
+		cmd_node = cmd_node->left;
+	vars->pipes->saved_stdin = dup(STDIN_FILENO);
+	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+	if (!proc_redir_chain(node, cmd_node, vars))
+		return (1);
+	result = execute_cmd(cmd_node, envp, vars);
+	reset_redirect_fds(vars);
+	reset_terminal_after_heredoc();
+	return (result);
+}
+
+// /*
+// Executes a child process for external commands.
+// - Forks a child process.
+// - In child: executes the external command.
+// - In parent: waits for child and processes exit status.
+// Returns:
+// Exit code from the command execution.
+// Works with execute_cmd().
+// */
+// int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
 // {
-//     int		result;
-//     t_node	*cmd_node;
-//     t_node	*current_node;
+// 	pid_t	pid;
+// 	int		status;
 
-//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting with node type=%d\n", node->type);
-//     if (!node->left || !node->right)
-//         return (1);
-//     // Find the actual command node (leftmost non-redirection node)
-//     cmd_node = node->left;
-//     while (cmd_node && is_redirection(cmd_node->type))
+// 	pid = fork();
+// 	if (pid == 0)
 // 	{
-//         cmd_node = cmd_node->left;
+// 		if (execve(cmd_path, node->args, envp) == -1)
+// 		{
+// 			perror("bleshell: exec");
+// 			exit(1);
+// 		}
 // 	}
-// 	if (cmd_node)
-// 		fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found command node type=%d\n", 
-// 				cmd_node->type);
+// 	else if (pid < 0)
+// 	{
+// 		perror("bleshell: fork");
+// 		free(cmd_path);
+// 		return (1);
+// 	}
 // 	else
-// 		fprintf(stderr, "[DEBUG] exec_redirect_cmd: No command node found\n");
-//     // Store original file descriptors directly in the pipes structure
-//     vars->pipes->saved_stdin = dup(STDIN_FILENO);
-//     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-// 	fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
-//         vars->pipes->saved_stdin, vars->pipes->saved_stdout,
-//         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
-//     // Apply all redirections in chain
-//     current_node = node;
-//     while (current_node && is_redirection(current_node->type))
-//     {
-//         fprintf(stderr, "[DEBUG] exec_redirect_cmd: Setting up redirection node type=%d\n", 
-//                 current_node->type);
-//         // Store current node in pipes structure
-//         vars->pipes->current_redirect = current_node;
-//         if (!setup_redirection(current_node, vars))
-//         {
-//             // Use existing reset function instead of manual restore
-//             reset_redirect_fds(vars);
-//             return (1);
-//         }
-//         current_node = current_node->next;
-//     }
-//     // Execute the command with all redirections applied
-//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Executing command with redirections\n");
-//     result = execute_cmd(cmd_node, envp, vars);
-//     // Restoration sequence
-//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Command completed, restoring FDs and terminal\n");
-//     reset_redirect_fds(vars);
-//     reset_terminal_after_heredoc();
-    
-//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
-//         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
-//     return (result);
+// 	{
+// 		waitpid(pid, &status, 0);
+// 		free(cmd_path);
+// 		return (handle_cmd_status(status, vars));
+// 	}
+// 	return (0);
 // }
-int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
-{
-    int     result;
-    t_node  *cmd_node;
-    t_node  *current_node;
 
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting with node type=%d\n", node->type);
-    if (!node->left || !node->right)
-        return (1);
-        
-    // Find the actual command node (leftmost non-redirection node)
-    cmd_node = node->left;
-    while (cmd_node && is_redirection(cmd_node->type))
-    {
-        cmd_node = cmd_node->left;
-    }
-    
-    if (cmd_node)
-        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found command node type=%d\n", 
-                cmd_node->type);
-    else
-        fprintf(stderr, "[DEBUG] exec_redirect_cmd: No command node found\n");
-        
-    // Store original file descriptors directly in the pipes structure
-    vars->pipes->saved_stdin = dup(STDIN_FILENO);
-    vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
-        vars->pipes->saved_stdin, vars->pipes->saved_stdout,
-        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
-        
-    // Apply all redirections in chain
-    current_node = node;
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting redirection chain with node type=%d\n", 
-            current_node->type);
-            
-    while (current_node && is_redirection(current_node->type))
-    {
-        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Processing redirection node type=%d\n", 
-                current_node->type);
-                
-        // Store current node in pipes structure
-        vars->pipes->current_redirect = current_node;
-        
-        if (!setup_redirection(current_node, vars))
-        {
-            // Use existing reset function instead of manual restore
-            reset_redirect_fds(vars);
-            return (1);
-        }
-        
-        // Use redir field instead of next to traverse redirection chain
-        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Next redirection node is %s\n", 
-                current_node->redir ? "available" : "NULL");
-        
-        if (current_node->redir)
-            current_node = current_node->redir;
-        else {
-            // If no redir link exists, try to find the next redirection for this command
-            t_node *next_redir = get_next_redir(current_node, cmd_node);
-            if (next_redir) {
-                fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found next redirection using get_next_redir\n");
-                current_node = next_redir;
-            } else {
-                break;
-            }
-        }
-    }
-    
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: All redirections processed\n");
-    
-    // Execute the command with all redirections applied
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Executing command with redirections\n");
-    result = execute_cmd(cmd_node, envp, vars);
-    
-    // Restoration sequence
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Command completed, restoring FDs and terminal\n");
-    reset_redirect_fds(vars);
-    reset_terminal_after_heredoc();
-    
-    fprintf(stderr, "[DEBUG] exec_redirect_cmd: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
-        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
-        
-    return (result);
-}
+// int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+// 	char	*cmd_path;
+// 	int		i;
 
-/*
-Executes a child process for external commands.
-- Forks a child process.
-- In child: executes the external command.
-- In parent: waits for child and processes exit status.
-Returns:
-Exit code from the command execution.
-Works with execute_cmd().
-*/
-int	exec_child_cmd(t_node *node, char **envp, t_vars *vars, char *cmd_path)
-{
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid == 0)
-	{
-		if (execve(cmd_path, node->args, envp) == -1)
-		{
-			perror("bleshell: exec");
-			exit(1);
-		}
-	}
-	else if (pid < 0)
-	{
-		perror("bleshell: fork");
-		free(cmd_path);
-		return (1);
-	}
-	else
-	{
-		waitpid(pid, &status, 0);
-		free(cmd_path);
-		return (handle_cmd_status(status, vars));
-	}
-	return (0);
-}
-
-int	exec_std_cmd(t_node *node, char **envp, t_vars *vars)
-{
-	char	*cmd_path;
-	int		i;
-
-	if (!node->args || !node->args[0])
-		return (1);
-	i = 0;
-	while (node->args[i])
-		i++;
-	if (is_builtin(node->args[0]))
-		return (execute_builtin(node->args[0], node->args, vars));
-	cmd_path = get_cmd_path(node->args[0], envp);
-	if (!cmd_path)
-	{
-		ft_putstr_fd("bleshell: command not found: ", 2);
-		ft_putendl_fd(node->args[0], 2);
-		vars->error_code = 0;
-		return (vars->error_code);
-	}
-	return (exec_child_cmd(node, envp, vars, cmd_path));
-}
+// 	if (!node->args || !node->args[0])
+// 		return (1);
+// 	i = 0;
+// 	while (node->args[i])
+// 		i++;
+// 	if (is_builtin(node->args[0]))
+// 		return (execute_builtin(node->args[0], node->args, vars));
+// 	cmd_path = get_cmd_path(node->args[0], envp);
+// 	if (!cmd_path)
+// 	{
+// 		ft_putstr_fd("bleshell: command not found: ", 2);
+// 		ft_putendl_fd(node->args[0], 2);
+// 		vars->error_code = 0;
+// 		return (vars->error_code);
+// 	}
+// 	return (exec_child_cmd(node, envp, vars, cmd_path));
+// }
 
 /*
 Main command execution function.
@@ -456,17 +345,17 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	if (node->type == TYPE_CMD)
 	{
 		if (node->args && node->args[0])
-    	{
-        	if (is_builtin(node->args[0]))
-            	result = execute_builtin(node->args[0], node->args, vars);
-        	else
-            	result = exec_external_cmd(node, envp, vars);
-    	}
-    	else
+		{
+			if (is_builtin(node->args[0]))
+				result = execute_builtin(node->args[0], node->args, vars);
+			else
+				result = exec_external_cmd(node, envp, vars);
+		}
+		else
    	 	{
-        	vars->error_code = 1;
-        	result = 1;
-    	}
+			vars->error_code = 1;
+			result = 1;
+		}
 	}
 	else if (is_redirection(node->type))
 	{
@@ -495,21 +384,16 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	}
 	else if (node->type == TYPE_PIPE)
 	{
-		// For pipe nodes, validate they have both left and right children
 		if (!node->left || !node->right)
 		{
-			DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Invalid pipe node (missing child)\n");
 			return (vars->error_code = 1);
 		}
 		result = execute_pipes(node, vars);
 	} 
 	else
 	{
-		// Unhandled node type
-		DBG_PRINTF(DEBUG_EXEC, "execute_cmd: Unhandled node type %d\n", node->type);
 		result = 1;
 	}
-	// Ensure error code is set in vars
 	vars->error_code = result;
 	return (result);
 }
@@ -531,51 +415,51 @@ Example: For "ls -la"
 */
 int exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    pid_t   pid;
-    int     status;
-    char    *cmd_path;
+	pid_t   pid;
+	int     status;
+	char    *cmd_path;
 
-    if (!node || !node->args || !node->args[0])
-    {
-        vars->error_code = 1;
-        return vars->error_code;
-    }
+	if (!node || !node->args || !node->args[0])
+	{
+		vars->error_code = 1;
+		return vars->error_code;
+	}
 
-    cmd_path = get_cmd_path(node->args[0], envp);
-    if (!cmd_path)
-    {
-        ft_putstr_fd("bleshell: ", 2);
-        ft_putstr_fd(node->args[0], 2);
-        ft_putendl_fd(": command not found", 2);
-        return (vars->error_code = 0);
-    }
+	cmd_path = get_cmd_path(node->args[0], envp);
+	if (!cmd_path)
+	{
+		ft_putstr_fd("bleshell: ", 2);
+		ft_putstr_fd(node->args[0], 2);
+		ft_putendl_fd(": command not found", 2);
+		return (vars->error_code = 0);
+	}
 
-    fprintf(stderr, "[DEBUG] exec_external_cmd: Before fork, pid=%d\n", getpid());
-    pid = fork();
+	fprintf(stderr, "[DEBUG] exec_external_cmd: Before fork, pid=%d\n", getpid());
+	pid = fork();
 
-    if (pid < 0)
-    {
-        ft_putstr_fd("bleshell: fork failed\n", 2);
-        free(cmd_path);
-        return (vars->error_code = 1);
-    }
-    
-    if (pid == 0) // Child process
-    {
-        fprintf(stderr, "[DEBUG] exec_external_cmd: Child process pid=%d\n", getpid());
-        execve(cmd_path, node->args, envp);
-        perror("bleshell");
-        free(cmd_path);
-        exit(127); // Only exit in child
-    }
-    
-    // Parent process
-    fprintf(stderr, "[DEBUG] exec_external_cmd: Parent process pid=%d, waiting for child=%d\n", 
-            getpid(), pid);
-    free(cmd_path);
-    waitpid(pid, &status, 0);
-    fprintf(stderr, "[DEBUG] exec_external_cmd: Child %d exited with status=%d, WIFEXITED=%d\n",
-            pid, status, WIFEXITED(status));
-    
-    return (handle_cmd_status(status, vars)); // Ensure this doesn't interpret 0 as exit
+	if (pid < 0)
+	{
+		ft_putstr_fd("bleshell: fork failed\n", 2);
+		free(cmd_path);
+		return (vars->error_code = 1);
+	}
+	
+	if (pid == 0) // Child process
+	{
+		fprintf(stderr, "[DEBUG] exec_external_cmd: Child process pid=%d\n", getpid());
+		execve(cmd_path, node->args, envp);
+		perror("bleshell");
+		free(cmd_path);
+		exit(127); // Only exit in child
+	}
+	
+	// Parent process
+	fprintf(stderr, "[DEBUG] exec_external_cmd: Parent process pid=%d, waiting for child=%d\n", 
+			getpid(), pid);
+	free(cmd_path);
+	waitpid(pid, &status, 0);
+	fprintf(stderr, "[DEBUG] exec_external_cmd: Child %d exited with status=%d, WIFEXITED=%d\n",
+			pid, status, WIFEXITED(status));
+	
+	return (handle_cmd_status(status, vars)); // Ensure this doesn't interpret 0 as exit
 }

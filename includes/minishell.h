@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:48:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 22:38:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,7 +364,6 @@ In cleanup_b.c
 */
 void		free_token_node(t_node *node);
 
-
 /*
 Master command finder function.
 In cmd_finder.c
@@ -388,16 +387,18 @@ Execution functions.
 In execute.c
 */
 int			handle_cmd_status(int status, t_vars *vars);
+int			setup_in_redir(t_node *node, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
 void		end_pipe_processes(t_vars *vars);
-int			setup_in_redir(t_node *node, t_vars *vars);
 int			redir_mode_setup(t_node *node, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars);
+int			proc_redir_chain(t_node *start_node, t_node *cmd_node
+					,t_vars *vars);
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
-int			exec_child_cmd(t_node *node, char **envp,
-				t_vars *vars, char *cmd_path);
+// int			exec_child_cmd(t_node *node, char **envp,
+// 				t_vars *vars, char *cmd_path);
 // void		debug_print_cmd_args(t_node *node);
-int			exec_std_cmd(t_node *node, char **envp, t_vars *vars);
+// int			exec_std_cmd(t_node *node, char **envp, t_vars *vars);
 int			execute_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_external_cmd(t_node *node, char **envp, t_vars *vars);
 
