@@ -6,15 +6,19 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:40:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 09:10:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 21:42:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Initializes the command node search.
-- Sets the starting point for the search.
+Initializes the command node search based on search mode.
+- For FIND_ALL mode: Resets command count and returns the head of
+  the token list.
+- For other modes: Returns the provided start node.
+Returns:
+- The appropriate starting node for the search.
 */
 t_node	*init_find_cmd(t_node *start, t_vars *vars)
 {
@@ -78,11 +82,11 @@ void	reset_find_cmd(t_vars *vars, t_node *start, t_node *target, int mode)
 /*
 Core command finding function with multiple modes.
 Modes:
-- FIND_LAST: Find last command in the list (from head to end)
-- FIND_PREV: Find last command before a specific node
-- FIND_NEXT: Find next command after a specific node
-- FIND_ALL: Returns first command node and populates vars->cmd_nodes 
-   with all commands
+- FIND_LAST: Find last command in the list (from head to end).
+- FIND_PREV: Find last command before a specific node.
+- FIND_NEXT: Find next command after a specific node.
+- FIND_ALL: Returns first command node and populates vars->cmd_nodes
+  with all commands.
 Returns:
 - The found command node.
 - NULL if not found

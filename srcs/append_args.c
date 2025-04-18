@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 23:18:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 20:39:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,22 +114,12 @@ int *set_char_quote_types(char *arg_text, int quote_type)
 	size_t	len;
 	size_t	i;
 	
-	fprintf(stderr, "DEBUG [set_char_quote_types]: ENTER with arg='%s', quote_type=%d\n", 
-			arg_text ? arg_text : "NULL", quote_type);
 	if (!arg_text)
-	{
-		fprintf(stderr, "DEBUG [set_char_quote_types]: NULL arg_text, returning NULL\n");
 		return (NULL);
-	}
 	len = ft_strlen(arg_text);
-	fprintf(stderr, "DEBUG [set_char_quote_types]: arg length=%zu\n", len);
 	char_quote_types = malloc(sizeof(int) * (len + 1));
 	if (!char_quote_types)
-	{
-		fprintf(stderr, "DEBUG [set_char_quote_types]: Failed to allocate quote types\n");
 		return (NULL);
-	}
-	fprintf(stderr, "DEBUG [set_char_quote_types]: Allocated quote types array with %zu+1 slots\n", len);
 	i = 0;
 	while (i < len)
 	{
@@ -137,14 +127,6 @@ int *set_char_quote_types(char *arg_text, int quote_type)
 		i++;
 	}
 	char_quote_types[len] = -1;
-	fprintf(stderr, "DEBUG [set_char_quote_types]: Set all %zu characters to type %d\n", 
-			len, quote_type);
-	fprintf(stderr, "DEBUG [set_char_quote_types]: First elements: ");
-	for (i = 0; i < len && i < 5; i++)
-	{
-		fprintf(stderr, "[%zu]=%d ", i, char_quote_types[i]);
-	}
-	fprintf(stderr, "...[%zu]=%d\n", len, char_quote_types[len]);
 	return (char_quote_types);
 }
 
@@ -155,7 +137,7 @@ Returns:
 - A newly allocated 2D array of quote types with the new entry.
 - NULL (with proper cleanup of all related memory) on error.
 */
-int **resize_quotype_arr(t_node *node, char *new_arg, int quote_type
+int	**resize_quotype_arr(t_node *node, char *new_arg, int quote_type
 				,char **new_args)
 {
 	int		**new_quote_types;
@@ -192,16 +174,13 @@ Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 */
 void	append_arg(t_node *node, char *new_arg, int quote_type)
 {
-	char    **new_args;
-	int     **new_quote_types;
-	size_t  len;
+	char	**new_args;
+	int		**new_quote_types;
+	size_t	len;
 	
-	fprintf(stderr, "DEBUG [append_arg]: ENTER with arg='%s', quote_type=%d, node=%p\n", 
-			new_arg ? new_arg : "NULL", quote_type, (void*)node); 
 	if (!node || !new_arg || !node->args)
-		return;
+		return ;
 	len = ft_arrlen(node->args);
-	fprintf(stderr, "DEBUG [append_arg]: Found %zu existing arguments\n", len);
 	new_args = dup_node_args(node, len);
 	if (!new_args)
 		return ;
@@ -214,13 +193,12 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 	new_args[len + 1] = NULL;
 	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
 	if (!new_quote_types)
-		return;
+		return ;
 	ft_free_2d(node->args, len);
 	if (node->arg_quote_type)
 		ft_free_int_2d(node->arg_quote_type, len);
 	node->args = new_args;
 	node->arg_quote_type = new_quote_types;
-	fprintf(stderr, "DEBUG [append_arg]: EXIT successful - updated node with %zu+1 args\n", len);
 }
 
 /*
@@ -289,22 +267,5 @@ int	process_adj(int *i, t_vars *vars)
 	{
 		vars->start = *i;
 	}
-	fprintf(stderr, "DEBUG: Adjacency state: left=%d, right=%d (result=%d)\n",
-			vars->adj_state[0], vars->adj_state[1], result);
 	return (result);
-}
-
-/* CANDIDATE FOR DEPRECATION
-Resets adjacency state variables to their default values.
-Sets:
-- vars->adj_state[0] = 0: No left adjacency
-- vars->adj_state[1] = 0: No right adjacency
-- vars->adj_state[2] = -1: Guard value
-Called after processing a token to prepare for the next one.
-*/
-void	reset_adjacency_state(t_vars *vars)
-{
-	vars->adj_state[0] = 0;
-	vars->adj_state[1] = 0;
-	vars->adj_state[2] = -1;
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 12:41:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 21:50:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@ Handles command execution status and updates error code.
 - For normal exits, stores the exit code (0-255) directly.
 - For signals, adds 128 to the signal number (POSIX standard).
 Returns:
-The final error code stored in vars->error_code.
+- The final error code stored in vars->error_code.
 Works with exec_child_cmd() and execute_pipes().
 */
-int handle_cmd_status(int status, t_vars *vars)
+int	handle_cmd_status(int status, t_vars *vars)
 {
-	int exit_code;
+	int	exit_code;
 	
 	exit_code = 0;
 	if (WIFEXITED(status))
@@ -36,7 +36,7 @@ int handle_cmd_status(int status, t_vars *vars)
 	}
 	if (vars)
 		vars->error_code = exit_code;
-	return exit_code;
+	return (exit_code);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:33:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:39:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 21:42:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,8 @@ Executes the appropriate builtin command function.
 - Passes arguments and environment to the specific builtin.
 - Each builtin handles its own error messages and reporting.
 Returns:
-The exit status from the executed builtin.
-1 if command is invalid (should never happen).
+- The exit status from the executed builtin.
+- 1 if command is invalid (should never happen).
 Works with handle_builtin_cmd().
 
 Example: For "cd /home"

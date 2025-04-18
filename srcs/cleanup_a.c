@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 21:24:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 21:46:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,34 +49,15 @@ void cleanup_pipes(t_pipe *pipes)
 		close(pipes->saved_stdin);
 	if (pipes->saved_stdout > 2)
 		close(pipes->saved_stdout);
-	// Close heredoc pipe if open
-    // if (pipes->heredoc_fd > 0)
-	// {
-    //     fprintf(stderr, "[DBG_HEREDOC] Closing heredoc pipe fd=%d during cleanup\n",
-    //             pipes->heredoc_fd);
-    //     close(pipes->heredoc_fd);
-    // }
 	if (pipes->heredoc_fd > 0)
-    {
-        fprintf(stderr, "[DBG_HEREDOC] Closing heredoc pipe fd=%d during cleanup\n",
-                pipes->heredoc_fd);
-        close(pipes->heredoc_fd);
-    }
-    
-    // Close heredoc pipe write end if open
-    if (pipes->hd_fd_write > 0 && pipes->hd_fd_write != pipes->heredoc_fd)
-    {
-        fprintf(stderr, "[DBG_HEREDOC] Closing heredoc write fd=%d during cleanup\n",
-                pipes->hd_fd_write);
-        close(pipes->hd_fd_write);
-    }
-    
-    // Free heredoc delimiter if allocated
-    if (pipes->heredoc_delim)
-    {
-        free(pipes->heredoc_delim);
-        pipes->heredoc_delim = NULL;
-    }
+		close(pipes->heredoc_fd);
+	if (pipes->hd_fd_write > 0 && pipes->hd_fd_write != pipes->heredoc_fd)
+		close(pipes->hd_fd_write);
+	if (pipes->heredoc_delim)
+	{
+		free(pipes->heredoc_delim);
+		pipes->heredoc_delim = NULL;
+	}
 	if (pipes->redirection_fd > 2)
 		close(pipes->redirection_fd);
 	free(pipes);
@@ -138,16 +119,27 @@ void cleanup_exit(t_vars *vars)
 }
 
 /*
-Clean up file descriptors after command execution.
-- Closes input and output file descriptors.
-- Avoids closing standard descriptors (0, 1, 2).
-- Prevents descriptor leaks after redirections.
-Works with exec_redirect_cmd().
+Clean up the token list by freeing all nodes.
+- Traverses the linked list of tokens.
+- Frees each node and its arguments.
+- Resets head and current pointers in vars.
+- Called when processing a new command line.
+Works with cleanup_exit().
 */
-void	cleanup_fds(int fd_in, int fd_out)
+void	cleanup_token_list(t_vars *vars)
 {
-	if (fd_in > 2 && fd_in != STDIN_FILENO)
-		close(fd_in);
-	if (fd_out > 2 && fd_out != STDOUT_FILENO)
-		close(fd_out);
+	t_node	*current;
+	t_node	*next;
+
+	if (!vars || !vars->head)
+		return ;
+	current = vars->head;
+	while (current)
+	{
+		next = current->next;
+		free_token_node(current);
+		current = next;
+	}
+	vars->head = NULL;
+	vars->current = NULL;
 }

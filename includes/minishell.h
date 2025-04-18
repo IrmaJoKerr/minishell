@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 16:06:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 21:48:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,12 +200,6 @@ typedef struct s_pipe
 	t_node      *last_out_redir;  // Last output redirection encountered
 	t_node		*cmd_redir;      // Command node being targeted for redirection
 	int			pipe_at_end;     // Flag indicating pipe at end (requires more input)
-	// t_node		*current;        // Current node being processed in the token list
-	// int			cmd_idx;         // Current index in the cmd_nodes array being processed
-	// int			syntax_error;    // Syntax error code (0: none, 1: error, 2: incomplete)
-	// int			serial_pipes;    // Counter for detecting consecutive pipes (syntax error)
-	// int			pipe_at_front;   // Flag indicating pipe at beginning (syntax error)
-	// int			expand_vars;     // Flag for expanding variables (ADDED for heredoc)
 } t_pipe;
 
 /*
@@ -239,10 +233,6 @@ typedef struct s_vars
 	int				start;
 	int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
 	int				heredoc_active; // Flag for heredoc status. is it active or not
-	// int				heredoc_fd;     // File descriptor for heredoc
-	// char			**heredoc_lines;   // Array of pending heredoc content lines
-    // int				heredoc_count;     // Number of stored lines
-    // int				heredoc_index;     // Current position in stored lines
 	int				shell_level;
 	struct termios	ori_term_settings;
 	int				ori_term_saved;
@@ -338,13 +328,12 @@ int			**resize_quotype_arr(t_node *node, char *new_arg, int quote_type
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 void		check_token_adj(char *input, t_vars *vars);
 int			process_adj(int *i, t_vars *vars);
-void		reset_adjacency_state(t_vars *vars); //CANDIDATE FOR DEPRECATION
 
 /*
 Argument handling.
 In arguments.c
 */
-void		create_args_array(t_node *node, char *token);
+
 
 /*
 AST token processing and AST tree building.
@@ -367,14 +356,14 @@ void		cleanup_env_error(char **env, int n);
 void		cleanup_pipes(t_pipe *pipes);
 void		cleanup_vars(t_vars *vars);
 void		cleanup_exit(t_vars *vars);
-void		cleanup_fds(int fd_in, int fd_out);
+void		cleanup_token_list(t_vars *vars);
 
 /*
 Group B of cleanup functions.
 In cleanup_b.c
 */
 void		free_token_node(t_node *node);
-void		cleanup_token_list(t_vars *vars);
+
 
 /*
 Master command finder function.
@@ -543,6 +532,17 @@ In lexer.c
 void		skip_whitespace(char *str, t_vars *vars);
 
 /*
+Make_exp_token utility functions.
+In make_exp_token_utils.c
+*/
+int			new_exp_token(t_vars *vars, char *expanded_val, char *token);
+int			proc_join_args(t_vars *vars, char *expanded_val);
+int			handle_tok_join(char *input, t_vars *vars, char *expanded_val
+					,char *token);
+void		process_right_adj(char *input, t_vars *vars);
+int			update_quote_types(t_vars *vars, int arg_idx, char *expanded_val);
+
+/*
 Make_exp_token functions.
 In make_exp_token.c
 */
@@ -556,15 +556,12 @@ int			sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
 int			make_exp_token(char *input, t_vars *vars);
 
 /*
-Make_exp_token utility functions.
-In make_exp_token_utils.c
+Node array creation functions.
+In make_node_arrays.c
 */
-int			new_exp_token(t_vars *vars, char *expanded_val, char *token);
-int			proc_join_args(t_vars *vars, char *expanded_val);
-int			handle_tok_join(char *input, t_vars *vars, char *expanded_val
-					,char *token);
-void		process_right_adj(char *input, t_vars *vars);
-int			update_quote_types(t_vars *vars, int arg_idx, char *expanded_val);
+char		**setup_args(char *token);
+int			**setup_quotes(int len);
+void		make_node_arrays(t_node *node, char *token);
 
 /*
 Minishell program entry point functions.
