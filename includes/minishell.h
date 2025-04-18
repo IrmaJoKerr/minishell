@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 21:50:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 16:06:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -373,7 +373,6 @@ void		cleanup_fds(int fd_in, int fd_out);
 Group B of cleanup functions.
 In cleanup_b.c
 */
-void		cleanup_ast(t_node *node);
 void		free_token_node(t_node *node);
 void		cleanup_token_list(t_vars *vars);
 
@@ -652,13 +651,16 @@ char		*get_quoted_str(char *input, t_vars *vars, int *quote_type);
 t_node		*process_quoted_str(char **content_ptr, int quote_type
 				,t_vars *vars);
 int			merge_quoted_token(char *input, char *content, t_vars *vars);
-int			process_quote_char(char *input, t_vars *vars);
+int 		process_quote_char(char *input, t_vars *vars, int is_redir_target);
+int			validate_redirection_targets(t_vars *vars);
+t_node		*find_last_redir(t_vars *vars);
 
 /*
 Redirection processing functions.
 In process_redirect.c
 */
 t_node		*proc_redir(t_vars *vars);
+int			count_tokens(t_node *head);
 void		reset_redir_tracking(t_pipe *pipes);
 void		build_redir_ast(t_vars *vars);
 void 		process_redir_node(t_node *redir_node, t_vars *vars);
@@ -683,8 +685,9 @@ In redirect.c
 int			chk_permissions(char *filename, int mode, t_vars *vars); //Possible to reuse
 int			is_redirection(t_tokentype type);
 void		reset_redirect_fds(t_vars *vars);
-int			output_redirect(t_node *node, int *fd_out,
-				int append, t_vars *vars);
+// int			output_redirect(t_node *node, int *fd_out,
+// 				int append, t_vars *vars);
+t_node		*get_next_redir(t_node *current, t_node *cmd);
 
 /*
 Shell level handling.

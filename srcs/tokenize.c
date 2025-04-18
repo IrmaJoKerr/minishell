@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/16 16:04:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 13:21:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,31 +230,59 @@ void handle_right_adj(char *input, t_vars *vars)
     fprintf(stderr, "DEBUG[handle_right_adj]: EXIT\n");
 }
 
-static	void imp_tok_quote(char *input, t_vars *vars)
-{
-	int	saved_pos;
+// static	void imp_tok_quote(char *input, t_vars *vars)
+// {
+// 	int	saved_pos;
 	
-    fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, start=%d, char='%c'\n", 
-        vars->pos, vars->start, input[vars->pos]);
-    handle_text(input, vars);
-    // Save current position to restore if process_quote_char fails
-    saved_pos = vars->pos;
+//     fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, start=%d, char='%c'\n", 
+//         vars->pos, vars->start, input[vars->pos]);
+//     handle_text(input, vars);
+//     // Save current position to restore if process_quote_char fails
+//     saved_pos = vars->pos;
     
-    if (process_quote_char(input, vars))
-    {
-        fprintf(stderr, "DEBUG[imp_tok_quote]: After process_quote - pos=%d, start=%d\n", 
-            vars->pos, vars->start);
-        fprintf(stderr, "DEBUG[imp_tok_quote]: Adjacency state: left=%d, right=%d\n",
-            vars->adj_state[0], vars->adj_state[1]);
+//     if (process_quote_char(input, vars))
+//     {
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: After process_quote - pos=%d, start=%d\n", 
+//             vars->pos, vars->start);
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: Adjacency state: left=%d, right=%d\n",
+//             vars->adj_state[0], vars->adj_state[1]);
+//         vars->next_flag = 1;
+//         // Right adjacency handling now happens in process_quote_char
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: process_quote_char returned 0 (failed)\n");
+//         vars->pos = saved_pos; // Restore position on failure
+//     }
+//     fprintf(stderr, "DEBUG[imp_tok_quote]: EXIT - next_flag=%d\n", vars->next_flag);
+// }
+static void imp_tok_quote(char *input, t_vars *vars)
+{
+    fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, char='%c', prev_type=%d\n", 
+        vars->pos, input[vars->pos], vars->prev_type);
+    // In imp_tok_quote()
+	fprintf(stderr, "DEBUG: imp_tok_quote: Previous token type=%d, pos=%d\n",
+        vars->prev_type, vars->pos);
+    // Check if this quoted string follows a redirection operator
+    int is_redir_target = 0;
+    if (vars->prev_type == TYPE_IN_REDIRECT || vars->prev_type == TYPE_OUT_REDIRECT ||
+        vars->prev_type == TYPE_APPEND_REDIRECT || vars->prev_type == TYPE_HEREDOC) {
+        is_redir_target = 1;
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote follows redirection operator\n");
+    }
+    
+    handle_text(input, vars);
+    int saved_pos = vars->pos;
+    
+    if (process_quote_char(input, vars, is_redir_target))
+	{
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processed successfully\n");
         vars->next_flag = 1;
-        // Right adjacency handling now happens in process_quote_char
+    } else
+	{
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processing failed\n");
+        vars->pos = saved_pos;
     }
-    else
-    {
-        fprintf(stderr, "DEBUG[imp_tok_quote]: process_quote_char returned 0 (failed)\n");
-        vars->pos = saved_pos; // Restore position on failure
-    }
-    fprintf(stderr, "DEBUG[imp_tok_quote]: EXIT - next_flag=%d\n", vars->next_flag);
 }
 
 static void imp_tok_expan(char *input, t_vars *vars)

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/11 18:14:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 17:15:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,32 +24,60 @@ Error codes:
 - ERR_ISDIRECTORY (2) - Cannot execute directories 
 - ERR_SYNTAX (2) - Syntax error
 */
+// void shell_error(char *element, int error_code, t_vars *vars)
+// {
+// 	ft_putstr_fd("bleshell: ", 2);
+// 	if (error_code == ERR_PERMISSIONS)
+// 	{
+// 		ft_putstr_fd(element, 2);
+// 		ft_putendl_fd(": Permission denied", 2);
+// 	}
+// 	else if (error_code == ERR_CMD_NOT_FOUND)
+// 	{
+// 		ft_putstr_fd(element, 2);
+// 		ft_putendl_fd(": No such file or directory", 2);
+// 	}
+// 	else if (error_code == ERR_SYNTAX)
+// 	{
+// 		ft_putstr_fd("syntax error near unexpected token '", 2);
+// 		ft_putstr_fd(element, 2);
+// 		ft_putendl_fd("'", 2);
+// 	}
+// 	else if (error_code == ERR_ISDIRECTORY)
+// 	{
+// 		ft_putstr_fd(element, 2);
+// 		ft_putendl_fd(": Is a directory", 2);
+// 	}
+// 	if (vars)
+// 		vars->error_code = error_code;
+// }
+
 void shell_error(char *element, int error_code, t_vars *vars)
 {
-	ft_putstr_fd("bleshell: ", 2);
-	if (error_code == ERR_PERMISSIONS)
-	{
-		ft_putstr_fd(element, 2);
-		ft_putendl_fd(": Permission denied", 2);
-	}
-	else if (error_code == ERR_CMD_NOT_FOUND)
-	{
-		ft_putstr_fd(element, 2);
-		ft_putendl_fd(": No such file or directory", 2);
-	}
-	else if (error_code == ERR_ISDIRECTORY)
-	{
-		ft_putstr_fd(element, 2);
-		ft_putendl_fd(": Is a directory", 2);
-	}
-	else if (error_code == ERR_SYNTAX)
-	{
-		ft_putstr_fd("syntax error near unexpected token '", 2);
-		ft_putstr_fd(element, 2);
-		ft_putendl_fd("'", 2);
-	}
-	if (vars)
-		vars->error_code = error_code;
+    ft_putstr_fd("bleshell: ", 2);
+    if (error_code == ERR_PERMISSIONS)
+    {
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": Permission denied", 2);
+    }
+    else if (error_code == ERR_CMD_NOT_FOUND)
+    {
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": No such file or directory", 2);
+    }
+    else if (error_code == ERR_ISDIRECTORY && ft_strncmp(element, "syntax error", 12) != 0)
+    {
+        // Only treat as directory error if the element is not a syntax error message
+        ft_putstr_fd(element, 2);
+        ft_putendl_fd(": Is a directory", 2);
+    }
+    else if (error_code == ERR_SYNTAX)
+    {
+        // For syntax errors, just output the element which already contains the full message
+        ft_putendl_fd(element, 2);
+    }
+    if (vars)
+        vars->error_code = error_code;
 }
 
 /*

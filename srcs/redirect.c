@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 22:49:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 00:57:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,4 +165,20 @@ void reset_redirect_fds(t_vars *vars)
 	vars->pipes->cmd_redir = NULL;
 	fprintf(stderr, "[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+}
+
+t_node *get_next_redir(t_node *current, t_node *cmd)
+{
+    t_node *next = current->next;
+    
+    while (next)
+    {
+        if (is_redirection(next->type) && 
+            get_redir_target(next, NULL) == cmd)
+        {
+            return next;
+        }
+        next = next->next;
+    }
+    return NULL;
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 22:52:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 12:41:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,51 +233,134 @@ Returns:
 Result of command execution.
 Works with execute_cmd().
 */
+// int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+//     int		result;
+//     t_node	*cmd_node;
+//     t_node	*current_node;
+
+//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting with node type=%d\n", node->type);
+//     if (!node->left || !node->right)
+//         return (1);
+//     // Find the actual command node (leftmost non-redirection node)
+//     cmd_node = node->left;
+//     while (cmd_node && is_redirection(cmd_node->type))
+// 	{
+//         cmd_node = cmd_node->left;
+// 	}
+// 	if (cmd_node)
+// 		fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found command node type=%d\n", 
+// 				cmd_node->type);
+// 	else
+// 		fprintf(stderr, "[DEBUG] exec_redirect_cmd: No command node found\n");
+//     // Store original file descriptors directly in the pipes structure
+//     vars->pipes->saved_stdin = dup(STDIN_FILENO);
+//     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+// 	fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
+//         vars->pipes->saved_stdin, vars->pipes->saved_stdout,
+//         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+//     // Apply all redirections in chain
+//     current_node = node;
+//     while (current_node && is_redirection(current_node->type))
+//     {
+//         fprintf(stderr, "[DEBUG] exec_redirect_cmd: Setting up redirection node type=%d\n", 
+//                 current_node->type);
+//         // Store current node in pipes structure
+//         vars->pipes->current_redirect = current_node;
+//         if (!setup_redirection(current_node, vars))
+//         {
+//             // Use existing reset function instead of manual restore
+//             reset_redirect_fds(vars);
+//             return (1);
+//         }
+//         current_node = current_node->next;
+//     }
+//     // Execute the command with all redirections applied
+//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Executing command with redirections\n");
+//     result = execute_cmd(cmd_node, envp, vars);
+//     // Restoration sequence
+//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Command completed, restoring FDs and terminal\n");
+//     reset_redirect_fds(vars);
+//     reset_terminal_after_heredoc();
+    
+//     fprintf(stderr, "[DEBUG] exec_redirect_cmd: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
+//         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+//     return (result);
+// }
 int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int		result;
-    t_node	*cmd_node;
-    t_node	*current_node;
+    int     result;
+    t_node  *cmd_node;
+    t_node  *current_node;
 
     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting with node type=%d\n", node->type);
     if (!node->left || !node->right)
         return (1);
+        
     // Find the actual command node (leftmost non-redirection node)
     cmd_node = node->left;
     while (cmd_node && is_redirection(cmd_node->type))
-	{
+    {
         cmd_node = cmd_node->left;
-	}
-	if (cmd_node)
-		fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found command node type=%d\n", 
-				cmd_node->type);
-	else
-		fprintf(stderr, "[DEBUG] exec_redirect_cmd: No command node found\n");
+    }
+    
+    if (cmd_node)
+        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found command node type=%d\n", 
+                cmd_node->type);
+    else
+        fprintf(stderr, "[DEBUG] exec_redirect_cmd: No command node found\n");
+        
     // Store original file descriptors directly in the pipes structure
     vars->pipes->saved_stdin = dup(STDIN_FILENO);
     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-	fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
+    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Saved stdin=%d, stdout=%d, STDIN isatty=%d, STDOUT isatty=%d\n",
         vars->pipes->saved_stdin, vars->pipes->saved_stdout,
         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+        
     // Apply all redirections in chain
     current_node = node;
+    fprintf(stderr, "[DEBUG] exec_redirect_cmd: Starting redirection chain with node type=%d\n", 
+            current_node->type);
+            
     while (current_node && is_redirection(current_node->type))
     {
-        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Setting up redirection node type=%d\n", 
+        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Processing redirection node type=%d\n", 
                 current_node->type);
+                
         // Store current node in pipes structure
         vars->pipes->current_redirect = current_node;
+        
         if (!setup_redirection(current_node, vars))
         {
             // Use existing reset function instead of manual restore
             reset_redirect_fds(vars);
             return (1);
         }
-        current_node = current_node->next;
+        
+        // Use redir field instead of next to traverse redirection chain
+        fprintf(stderr, "[DEBUG] exec_redirect_cmd: Next redirection node is %s\n", 
+                current_node->redir ? "available" : "NULL");
+        
+        if (current_node->redir)
+            current_node = current_node->redir;
+        else {
+            // If no redir link exists, try to find the next redirection for this command
+            t_node *next_redir = get_next_redir(current_node, cmd_node);
+            if (next_redir) {
+                fprintf(stderr, "[DEBUG] exec_redirect_cmd: Found next redirection using get_next_redir\n");
+                current_node = next_redir;
+            } else {
+                break;
+            }
+        }
     }
+    
+    fprintf(stderr, "[DEBUG] exec_redirect_cmd: All redirections processed\n");
+    
     // Execute the command with all redirections applied
     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Executing command with redirections\n");
     result = execute_cmd(cmd_node, envp, vars);
+    
     // Restoration sequence
     fprintf(stderr, "[DEBUG] exec_redirect_cmd: Command completed, restoring FDs and terminal\n");
     reset_redirect_fds(vars);
@@ -285,6 +368,7 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     
     fprintf(stderr, "[DEBUG] exec_redirect_cmd: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
         isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+        
     return (result);
 }
 

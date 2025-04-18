@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 21:50:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 18:48:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,7 +225,8 @@ void process_command_with_heredoc(char *cmd_line, t_vars *vars)
     vars->heredoc_mode = 1;
     
     // Process the command line normally
-    process_single_command(cmd_line, vars);
+    // process_single_command(cmd_line, vars);
+	process_command(cmd_line, vars);
     
     // Reset heredoc state after command completes
     vars->heredoc_mode = 0;
@@ -409,7 +410,8 @@ void read_and_process_from_tmp_buf(t_vars *vars)
                 if (bufPos > 0) {
                     fprintf(stderr, "[DEBUG] read_and_process: Processing command: '%s'\n", buffer);
                     add_history(buffer);
-                    process_single_command(buffer, vars);
+                    // process_single_command(buffer, vars);
+					process_command(buffer, vars);
                 }
                 bufPos = 0;
             }
@@ -426,7 +428,8 @@ void read_and_process_from_tmp_buf(t_vars *vars)
         buffer[bufPos] = '\0';
         fprintf(stderr, "[DEBUG] read_and_process: Processing final command: '%s'\n", buffer);
         add_history(buffer);
-        process_single_command(buffer, vars);
+        // process_single_command(buffer, vars);
+		process_command(buffer, vars);
     }
     
     free(buffer);
@@ -650,11 +653,78 @@ Parameters:
 
 Returns: void
 */
+// void handle_input(char *input, t_vars *vars)
+// {
+//     char *completed_input;
+//     t_inmode mode;
+    
+//     if (!input || !*input)
+//         return;
+    
+//     fprintf(stderr, "[DEBUG] handle_input: Processing input (len=%zu)\n", ft_strlen(input));
+    
+//     // Check if this is multiline input (contains newlines)
+//     if (ft_strchr(input, '\n'))
+//     {
+//         fprintf(stderr, "[DEBUG] handle_input: Detected multiline input\n");
+        
+//         // Process the multiline input with unified approach
+//         if (!process_multiline_input(input, vars))
+//         {
+//             fprintf(stderr, "[DEBUG] handle_input: Failed to process multiline input\n");
+//             return;
+//         }
+        
+//         // Exit early as multiline input has been fully processed
+//         return;
+//     }
+    
+//     fprintf(stderr, "[DEBUG] handle_input: Processing single-line input\n");
+    
+//     // Continue with normal single-line processing
+//     vars->partial_input = ft_strdup(input);
+//     if (!vars->partial_input)
+//         return;
+    
+//     // Check if we're in heredoc continuation mode
+//     if (vars->heredoc_active)
+//     {
+//         fprintf(stderr, "[DEBUG] handle_input: Continuing heredoc input\n");
+//         process_heredoc_continuation(vars->partial_input, vars);
+//         clear_partial_input(vars);
+//         return;
+//     }
+    
+//     // Check input state (quote completion, pipe completion, heredoc, normal)
+//     mode = check_input_state(vars->partial_input, vars);
+//     fprintf(stderr, "[DEBUG] handle_input: Input mode: %d\n", mode);
+    
+//     // Complete input based on detected mode
+//     completed_input = complete_input(vars->partial_input, mode, vars);
+//     if (!completed_input)
+//     {
+//         clear_partial_input(vars);
+//         return;
+//     }
+    
+//     if (completed_input != vars->partial_input)
+//     {
+//         free(vars->partial_input);
+//         vars->partial_input = completed_input;
+//     }
+    
+//     // Process tokens and execute
+//     if (!process_input_tokens(vars->partial_input, vars))
+//     {
+//         clear_partial_input(vars);
+//         return;
+//     }
+    
+//     build_and_execute(vars);
+//     clear_partial_input(vars);
+// }
 void handle_input(char *input, t_vars *vars)
 {
-    char *completed_input;
-    t_inmode mode;
-    
     if (!input || !*input)
         return;
     
@@ -678,47 +748,8 @@ void handle_input(char *input, t_vars *vars)
     
     fprintf(stderr, "[DEBUG] handle_input: Processing single-line input\n");
     
-    // Continue with normal single-line processing
-    vars->partial_input = ft_strdup(input);
-    if (!vars->partial_input)
-        return;
-    
-    // Check if we're in heredoc continuation mode
-    if (vars->heredoc_active)
-    {
-        fprintf(stderr, "[DEBUG] handle_input: Continuing heredoc input\n");
-        process_heredoc_continuation(vars->partial_input, vars);
-        clear_partial_input(vars);
-        return;
-    }
-    
-    // Check input state (quote completion, pipe completion, heredoc, normal)
-    mode = check_input_state(vars->partial_input, vars);
-    fprintf(stderr, "[DEBUG] handle_input: Input mode: %d\n", mode);
-    
-    // Complete input based on detected mode
-    completed_input = complete_input(vars->partial_input, mode, vars);
-    if (!completed_input)
-    {
-        clear_partial_input(vars);
-        return;
-    }
-    
-    if (completed_input != vars->partial_input)
-    {
-        free(vars->partial_input);
-        vars->partial_input = completed_input;
-    }
-    
-    // Process tokens and execute
-    if (!process_input_tokens(vars->partial_input, vars))
-    {
-        clear_partial_input(vars);
-        return;
-    }
-    
-    build_and_execute(vars);
-    clear_partial_input(vars);
+    // For single-line input, use process_command which has proper pipe handling
+    process_command(input, vars);
 }
 
 /*
@@ -841,7 +872,8 @@ void process_heredoc_continuation(char *input, t_vars *vars)
         // Process the original command
         if (vars->partial_input)
         {
-            process_single_command(vars->partial_input, vars);
+            // process_single_command(vars->partial_input, vars);
+			process_command(vars->partial_input, vars);
         }
         
         // Reset heredoc state

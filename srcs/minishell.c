@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 22:47:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 19:04:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,28 +148,71 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
+// void build_and_execute(t_vars *vars)
+// {
+// 	t_node *root;
+	
+// 	if (!vars || !vars->head)
+// 		return ;
+
+// 	DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+	
+// 	// Use proc_token_list instead of process_token_list
+// 	root = proc_token_list(vars);
+// 	if (root)
+// 	{
+// 		vars->astroot = root;
+// 		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
+// 		// Add in build_and_execute before execution
+// 		fprintf(stderr, "[DBG_HEREDOC] heredoc_mode before execution: %d\n", vars->heredoc_mode);
+// 		execute_cmd(vars->astroot, vars->env, vars);
+// 	}
+// 	else
+// 	{
+// 		//DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
+// 	}
+// }
+
 void build_and_execute(t_vars *vars)
 {
-	t_node *root;
 	
-	if (!vars || !vars->head)
-		return ;
-
-	DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
+	fprintf(stderr, "[build_and_execute:%d] Building AST from token list\n", __LINE__);
+    
+	
+    // Add validation here - check each redirection node for a target
+    // t_node *current = vars->head;
+    // while (current)
+	// {
+        // if (is_redirection(current->type) && !current->right)
+		// {
+        //     // Error: Redirection has no target
+        //     fprintf(stderr, "DEBUG: Redirection without target detected at %p, type=%d\n", 
+        //             (void*)current, current->type);
+        //     shell_error("syntax error near unexpected token `newline'", ERR_SYNTAX, vars);
+        //     vars->error_code = 2;
+        //     return vars->error_code;
+        // }
+		// Validate token list before building AST
+		if (!validate_redirection_targets(vars))
+		{
+			fprintf(stderr, "[build_and_execute:%d] Redirection validation failed, skipping execution\n", __LINE__);
+			return ;
+		}
+        // current = current->next;
+    // }
 	
 	// Use proc_token_list instead of process_token_list
-	root = proc_token_list(vars);
-	if (root)
+	vars->astroot = proc_token_list(vars);
+	if (vars->astroot)
 	{
-		vars->astroot = root;
-		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
+		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", vars->astroot->type);
 		// Add in build_and_execute before execution
 		fprintf(stderr, "[DBG_HEREDOC] heredoc_mode before execution: %d\n", vars->heredoc_mode);
 		execute_cmd(vars->astroot, vars->env, vars);
 	}
 	else
 	{
-		//DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
+		DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
 	}
 }
 
@@ -205,59 +248,144 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
+// void process_command(char *command, t_vars *vars)
+// {
+// 	fprintf(stderr, "[DEBUG] process_command() called\n");
+    
+// 	int	pipe_result;
+	
+// 	// Store original command in vars->partial_input
+// 	vars->partial_input = ft_strdup(command);
+// 	if (!vars->partial_input)
+// 		return ;
+// 	// Handle quote completion first
+// 	vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+// 	if (!vars->partial_input)
+// 		return ;
+// 	// Tokenize the input
+// 	if (!process_input_tokens(vars->partial_input, vars))
+// 	{
+// 		free(vars->partial_input);
+// 		vars->partial_input = NULL;
+// 		return ;
+// 	}
+// 	// // Use new pipe analysis system 
+// 	// pipe_result = analyze_pipe_syntax(vars);
+// 	// if (pipe_result == 1) // Syntax error
+// 	// {
+// 	// 	// Error already reported by analyze_pipe_syntax
+// 	// 	free(vars->partial_input);
+// 	// 	vars->partial_input = NULL;
+// 	// 	return ;
+// 	// }
+// 	// Use new pipe analysis system 
+//     pipe_result = analyze_pipe_syntax(vars);
+//     if (pipe_result == 1) // Syntax error
+//     {
+//         // Error already reported by analyze_pipe_syntax
+        
+//         // IMPORTANT: Reset all state variables that might be corrupted
+//         cleanup_token_list(vars);  // Make sure token list is clean
+//         vars->error_code = 2;      // Set appropriate error code
+        
+//         // Reset any other state variables that might be affected
+//         // For example, ensure redirection tracking is reset
+//         // vars->redir_state = 0;     // If you have such a variable
+        
+//         // Clear partial input and return
+//         free(vars->partial_input);
+//         vars->partial_input = NULL;
+//         return;
+//     }
+// 	else if (pipe_result == 2) // Needs pipe completion
+// 	{
+// 		char *completed_cmd = complete_pipe_command(vars->partial_input, vars);
+// 		if (!completed_cmd)
+// 		{
+// 			free(vars->partial_input);
+// 			vars->partial_input = NULL;
+// 			return ;
+// 		}
+// 		free(vars->partial_input);
+// 		vars->partial_input = completed_cmd;
+// 		// Re-tokenize with completed command
+// 		cleanup_token_list(vars);
+// 		if (!process_input_tokens(vars->partial_input, vars))
+// 		{
+// 			free(vars->partial_input);
+// 			vars->partial_input = NULL;
+// 			return ;
+// 		}
+// 	}
+// 	// Build and execute the command
+// 	build_and_execute(vars);
+// 	// Clean up
+// 	free(vars->partial_input);
+// 	vars->partial_input = NULL;
+// 	fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
+// }
 void process_command(char *command, t_vars *vars)
 {
-	int	pipe_result;
-	
-	// Store original command in vars->partial_input
-	vars->partial_input = ft_strdup(command);
-	if (!vars->partial_input)
-		return ;
-	// Handle quote completion first
-	vars->partial_input = handle_quote_completion(vars->partial_input, vars);
-	if (!vars->partial_input)
-		return ;
-	// Tokenize the input
-	if (!process_input_tokens(vars->partial_input, vars))
-	{
-		free(vars->partial_input);
-		vars->partial_input = NULL;
-		return ;
-	}
-	// Use new pipe analysis system 
-	pipe_result = analyze_pipe_syntax(vars);
-	if (pipe_result == 1) // Syntax error
-	{
-		// Error already reported by analyze_pipe_syntax
-		free(vars->partial_input);
-		vars->partial_input = NULL;
-		return ;
-	}
-	else if (pipe_result == 2) // Needs pipe completion
-	{
-		char *completed_cmd = complete_pipe_command(vars->partial_input, vars);
-		if (!completed_cmd)
-		{
-			free(vars->partial_input);
-			vars->partial_input = NULL;
-			return ;
-		}
-		free(vars->partial_input);
-		vars->partial_input = completed_cmd;
-		// Re-tokenize with completed command
-		cleanup_token_list(vars);
-		if (!process_input_tokens(vars->partial_input, vars))
-		{
-			free(vars->partial_input);
-			vars->partial_input = NULL;
-			return ;
-		}
-	}
-	// Build and execute the command
-	build_and_execute(vars);
-	// Clean up
-	free(vars->partial_input);
-	vars->partial_input = NULL;
+    fprintf(stderr, "[DEBUG] process_command() called\n");
+    
+    int pipe_result;
+    
+    // Reset error state at the beginning of each command
+    vars->error_code = 0;
+    
+    // Reset pipes structure state
+    if (vars->pipes) 
+    {
+        reset_redir_tracking(vars->pipes);
+        vars->pipes->pipe_root = NULL;
+        vars->pipes->redir_root = NULL;
+    }
+    
+    // Store original command in vars->partial_input
+    vars->partial_input = ft_strdup(command);
+    if (!vars->partial_input)
+        return;
+    // Handle quote completion first
+    vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+    if (!vars->partial_input)
+        return;
+    // Tokenize the input
+    if (!process_input_tokens(vars->partial_input, vars))
+    {
+        free(vars->partial_input);
+        vars->partial_input = NULL;
+        return;
+    }
+    // Use new pipe analysis system 
+    pipe_result = analyze_pipe_syntax(vars);
+    if (pipe_result == 1) // Syntax error
+    {
+        // Error already reported by analyze_pipe_syntax
+        
+        // IMPORTANT: Reset all state variables that might be corrupted
+        cleanup_token_list(vars);  // Make sure token list is clean
+        vars->error_code = 2;      // Set appropriate error code
+        
+        // Reset pipes structure to ensure clean state for next command
+        if (vars->pipes)
+            reset_redir_tracking(vars->pipes);
+        
+        // Clear partial input and return
+        free(vars->partial_input);
+        vars->partial_input = NULL;
+        return;
+    }
+    else if (pipe_result == 2) // Needs pipe completion
+    {
+        // Existing code for pipe completion...
+    }
+    
+    // Build and execute the command
+    build_and_execute(vars);
+    // Clean up
+    free(vars->partial_input);
+    vars->partial_input = NULL;
+    fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
 }
 
 // void reset_terminal_after_heredoc(void)

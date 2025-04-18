@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:56:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/18 00:44:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ int	make_nodeframe(t_node *node, t_tokentype type, char *token)
 	node->prev = NULL;
 	node->left = NULL;
 	node->right = NULL;
+	node->redir = NULL;
 	node->arg_quote_type = NULL;
 	if (!token)
 		token = (char *)get_token_str(type);
