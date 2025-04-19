@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 14:42:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 03:09:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,6 @@ char	*expand_value(char *var_name, t_vars *vars)
 		var_name ? var_name : "NULL", (void*)vars);
 	if (!var_name)
 		return (ft_strdup(""));
-		
-	// Handle different expansion types
 	if (var_name[0] == '\0')
 	{
 		// Lone $ character
@@ -37,6 +35,12 @@ char	*expand_value(char *var_name, t_vars *vars)
 		// Special case for $?
 		expanded_value = ft_itoa(vars->error_code);
 		fprintf(stderr, "DEBUG: Handling $?, expanded to '%s'\n", expanded_value);
+	}
+	else if (ft_strcmp(var_name, "0") == 0)
+	{
+		// Special case for $?
+		expanded_value = ft_strdup("bleshell");
+		fprintf(stderr, "DEBUG: Handling $0, expanded to '%s'\n", expanded_value);
 	}
 	else
 	{

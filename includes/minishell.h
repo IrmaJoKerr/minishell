@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 00:18:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 12:48:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -407,7 +407,7 @@ char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
-void 		debug_cmd_args(t_node *node);
+void 		debug_cmd_args(t_node *node); //DEBUG FUNCTION
 // char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
 
 /*
@@ -426,12 +426,15 @@ int			read_heredoc(int *fd, char *delimiter
 				,t_vars *vars, int expand_vars);
 // void		cleanup_heredoc_storage(t_vars *vars);
 void		setup_heredoc_pipe(t_vars *vars);
+int 		process_heredoc_delimiter(char **delimiter);
 int			store_heredoc_content(char *input, int start_pos, char *delimiter
 				,t_vars *vars);
 int			handle_heredoc_err(t_vars *vars);
 // int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			reset_heredoc_pipe(t_vars *vars);
+int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
+char 		*get_heredoc_delimiter(char *input, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
 // int			proc_heredoc(t_node *node, t_vars *vars);
 
@@ -495,11 +498,11 @@ Input processing functions.
 In input_handlers.c
 */
 // void		proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars);
-void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
+// void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
 char		*complete_input(char *input, t_inmode mode, t_vars *vars);
 int         has_heredoc_operator(char *input);
 char        *process_heredoc_line(char *line, t_vars *vars);
-void 		process_single_command(char *input, t_vars *vars);
+// void 		process_single_command(char *input, t_vars *vars);
 void		process_command_with_heredoc(char *cmd_line, t_vars *vars);
 char 		*read_entire_file(const char *filename);
 void		read_and_process_from_tmp_buf(t_vars *vars);
@@ -511,7 +514,7 @@ void		process_heredoc_continuation(char *input, t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
 void		setup_heredoc_mode(char *input, t_vars *vars);
 // void		write_heredoc_line(int fd, char *line, t_vars *vars);
-int			is_quoted_delimiter(char *delimiter);
+int			is_quoted_delimiter(t_node *node, t_vars *vars);
 char		*extract_heredoc_delimiter(char *input, t_vars *vars);
 int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
@@ -580,10 +583,9 @@ int			main(int ac, char **av, char **envp);
 Operator handling.
 In operators.c
 */
-int			is_operator_char(char c);
-int			operators(char *input, t_vars *vars);
-void		handle_string(char *input, t_vars *vars);
+
 int			is_operator_token(t_tokentype type);
+void		handle_string(char *input, t_vars *vars);
 int			is_single_token(char *input, int pos, int *moves);
 int			is_double_token(char *input, int pos, int *moves);
 t_tokentype	get_token_at(char *input, int pos, int *moves);
@@ -612,16 +614,16 @@ Pipes main functions.
 In pipes.c
 */
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
-int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars); //Possible to reuse for redirections
+// int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars); //Possible to reuse for redirections
 // void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
 // int			check_unfinished_pipe(t_vars *vars);
 // char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
-void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count); //Possible to reuse for redirections
-int			fork_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
-int			count_pipes(t_vars *vars); //Possible to reuse for redirections
+// void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count); //Possible to reuse for redirections
+// int			fork_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
+// int			count_pipes(t_vars *vars); //Possible to reuse for redirections
 // void 		close_all_pipe_fds(t_pipe *pipes);
-int			wait_for_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
+// int			wait_for_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
 
 /*
 Pipeline processing functions.

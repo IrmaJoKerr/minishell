@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 18:48:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 12:08:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,26 +46,26 @@
 // 	process_command(cmdarr[0], vars);
 // }
 
-/* FLAG FOR REUSE. CAN BE USED FOR PASTED INPUT
-Processes multiple command lines from command array
-Adds commands to history and processes them
-*/
-void	proc_multiline_input(char **cmdarr, int line_count, t_vars *vars)
-{
-	int	i;
+// /* FLAG FOR REUSE. CAN BE USED FOR PASTED INPUT
+// Processes multiple command lines from command array
+// Adds commands to history and processes them
+// */
+// void	proc_multiline_input(char **cmdarr, int line_count, t_vars *vars)
+// {
+// 	int	i;
 	
-	i = 0;
-	while (i < line_count)
-	{
-		if (*cmdarr[i])
-		{
-			DBG_PRINTF(1, "Processing command: '%s'\n", cmdarr[i]);
-			add_history(cmdarr[i]);
-			process_command(cmdarr[i], vars);
-		}
-		i++;
-	}
-}
+// 	i = 0;
+// 	while (i < line_count)
+// 	{
+// 		if (*cmdarr[i])
+// 		{
+// 			DBG_PRINTF(1, "Processing command: '%s'\n", cmdarr[i]);
+// 			add_history(cmdarr[i]);
+// 			process_command(cmdarr[i], vars);
+// 		}
+// 		i++;
+// 	}
+// }
 
 /*
 Handles user input and processes commands
@@ -191,19 +191,37 @@ Returns:
 - Processed line with variables expanded (newly allocated)
 - Original line duplicated if no expansion needed
 */
+// char *process_heredoc_line(char *line, t_vars *vars)
+// {
+//     // If we don't have a line, return NULL
+//     if (!line)
+//         return NULL;
+        
+//     // Handle variable expansion for heredoc content
+//     if (vars->pipes->heredoc_delim
+// 		&& !is_quoted_delimiter(vars->pipes->heredoc_delim))
+// 	{
+//         return expand_heredoc_line(line, vars);
+// 	}
+//     // No expansion needed, just duplicate the line
+//     return ft_strdup(line);
+// }
+// Updated process_heredoc_line to use hd_expand directly
 char *process_heredoc_line(char *line, t_vars *vars)
 {
     // If we don't have a line, return NULL
     if (!line)
         return NULL;
         
-    // Handle variable expansion for heredoc content
-    if (vars->pipes->heredoc_delim
-		&& !is_quoted_delimiter(vars->pipes->heredoc_delim))
-	{
+    // Handle variable expansion based on the flag
+    if (vars->pipes->hd_expand)
+    {
+        fprintf(stderr, "[DEBUG] process_heredoc_line: Expanding variables in: '%s'\n", line);
         return expand_heredoc_line(line, vars);
-	}
-    // No expansion needed, just duplicate the line
+    }
+    
+    // No expansion needed
+    fprintf(stderr, "[DEBUG] process_heredoc_line: No expansion for: '%s'\n", line);
     return ft_strdup(line);
 }
 
@@ -240,67 +258,67 @@ void process_command_with_heredoc(char *cmd_line, t_vars *vars)
     fprintf(stderr, "[DEBUG] process_cmd_heredoc: Command processed, heredoc state reset\n");
 }
 
-/*
-Non-recursive helper that processes a single command line.
-Contains the core of handle_input without the multiline detection.
+// /*
+// Non-recursive helper that processes a single command line.
+// Contains the core of handle_input without the multiline detection.
 
-Parameters:
-- input: Single line of input to process
-- vars: Program state variables
+// Parameters:
+// - input: Single line of input to process
+// - vars: Program state variables
 
-Returns: void
-*/
-void process_single_command(char *input, t_vars *vars)
-{
-    char *completed_input;
-    t_inmode mode;
+// Returns: void
+// */
+// void process_single_command(char *input, t_vars *vars)
+// {
+//     char *completed_input;
+//     t_inmode mode;
     
-    fprintf(stderr, "[DEBUG] process_single_command: Processing '%s'\n", input);
+//     fprintf(stderr, "[DEBUG] process_single_command: Processing '%s'\n", input);
     
-    if (!input || !*input)
-        return;
+//     if (!input || !*input)
+//         return;
     
-    // Duplicate input to partial_input
-    vars->partial_input = ft_strdup(input);
-    if (!vars->partial_input)
-        return;
+//     // Duplicate input to partial_input
+//     vars->partial_input = ft_strdup(input);
+//     if (!vars->partial_input)
+//         return;
     
-    // Check if we're in heredoc continuation
-    if (vars->heredoc_active)
-    {
-        fprintf(stderr, "[DEBUG] process_single_command: Continuing heredoc input\n");
-        process_heredoc_continuation(vars->partial_input, vars);
-        clear_partial_input(vars);
-        return;
-    }
+//     // Check if we're in heredoc continuation
+//     if (vars->heredoc_active)
+//     {
+//         fprintf(stderr, "[DEBUG] process_single_command: Continuing heredoc input\n");
+//         process_heredoc_continuation(vars->partial_input, vars);
+//         clear_partial_input(vars);
+//         return;
+//     }
     
-    // Check input state and complete as needed
-    mode = check_input_state(vars->partial_input, vars);
-    fprintf(stderr, "[DEBUG] process_single_command: Input mode: %d\n", mode);
+//     // Check input state and complete as needed
+//     mode = check_input_state(vars->partial_input, vars);
+//     fprintf(stderr, "[DEBUG] process_single_command: Input mode: %d\n", mode);
     
-    completed_input = complete_input(vars->partial_input, mode, vars);
-    if (!completed_input)
-    {
-        clear_partial_input(vars);
-        return;
-    }
+//     completed_input = complete_input(vars->partial_input, mode, vars);
+//     if (!completed_input)
+//     {
+//         clear_partial_input(vars);
+//         return;
+//     }
     
-    if (completed_input != vars->partial_input)
-    {
-        free(vars->partial_input);
-        vars->partial_input = completed_input;
-    }
+//     if (completed_input != vars->partial_input)
+//     {
+//         free(vars->partial_input);
+//         vars->partial_input = completed_input;
+//     }
     
-    // Process tokens and execute
-    if (!process_input_tokens(vars->partial_input, vars))
-    {
-        clear_partial_input(vars);
-        return;
-    }
+//     // Process tokens and execute
+//     if (!process_input_tokens(vars->partial_input, vars))
+//     {
+//         clear_partial_input(vars);
+//         return;
+//     }
     
-    build_and_execute(vars);
-    clear_partial_input(vars);
-}
+//     build_and_execute(vars);
+//     clear_partial_input(vars);
+// }
 
 /*
 Helper function to read an entire file into memory.
@@ -470,18 +488,16 @@ int process_multiline_input(char *input, t_vars *vars)
     {
         fprintf(stderr, "[DEBUG] process_multiline_input: First line contains heredoc operator\n");
         
-        // Extract the delimiter
-        heredoc_delimiter = extract_heredoc_delimiter(lines[0], vars);
+        // Extract and process the delimiter using our unified function
+        heredoc_delimiter = get_heredoc_delimiter(lines[0], vars);
         if (heredoc_delimiter)
         {
             fprintf(stderr, "[DEBUG] process_multiline_input: Found heredoc delimiter: '%s'\n", 
                     heredoc_delimiter);
             heredoc_found = 1;
             
-            // Store the delimiter for future reference
-            if (vars->pipes->heredoc_delim)
-                free(vars->pipes->heredoc_delim);
-            vars->pipes->heredoc_delim = ft_strdup(heredoc_delimiter);
+            // Note: No need to store the delimiter and expansion flag here
+            // as get_heredoc_delimiter already did that
         }
     }
     
@@ -505,20 +521,21 @@ int process_multiline_input(char *input, t_vars *vars)
     
     while (lines[i])
     {
-        // For heredoc mode, check if this line is the delimiter
-        if (heredoc_found && i > 0 && ft_strcmp(lines[i], heredoc_delimiter) == 0)
-        {
-            fprintf(stderr, "[DEBUG] process_multiline_input: Found delimiter line '%s'\n", 
-                    lines[i]);
-            delimiter_found = 1;
-            // Don't write the delimiter line to the file
-            i++;
-            continue;
-        }
-        
+   		// For heredoc mode, check if this line is the delimiter
+		if (heredoc_found && i > 0)
+		{
+    	// Direct comparison with processed delimiter
+    		if (ft_strcmp(lines[i], vars->pipes->heredoc_delim) == 0)
+    		{
+        		fprintf(stderr, "[DEBUG] process_multiline_input: Found delimiter line '%s'\n", 
+                		lines[i]);
+        		delimiter_found = 1;
+        		i++;
+        		continue;
+    		}
+		}
         // For heredoc content, process variables if needed
-        if (heredoc_found && i > 0 && !delimiter_found && 
-            !is_quoted_delimiter(heredoc_delimiter))
+        if (heredoc_found && i > 0 && !delimiter_found && vars->pipes->hd_expand)
         {
             // Process and write heredoc content with variable expansion
             char *processed_line = process_heredoc_line(lines[i], vars);
@@ -555,6 +572,13 @@ int process_multiline_input(char *input, t_vars *vars)
         {
             fprintf(stderr, "[DEBUG] process_multiline_input: Delimiter was found in input\n");
             // Process the command with heredoc input ready
+            
+            // FREE THE LOCAL COPY HERE TO AVOID DOUBLE FREE LATER
+            if (heredoc_delimiter) {
+                free(heredoc_delimiter);
+                heredoc_delimiter = NULL;
+            }
+            
             process_command_with_heredoc(lines[0], vars);
         }
         else
@@ -582,7 +606,6 @@ int process_multiline_input(char *input, t_vars *vars)
     ft_free_2d(lines, ft_arrlen(lines));
     return 1;
 }
-
 
 // /*
 // Main entry point for input processing with a unified approach to
@@ -995,28 +1018,23 @@ Returns: void
 */
 void setup_heredoc_mode(char *input, t_vars *vars)
 {
-    int expand_vars;
+    char *delimiter;
     
     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setting up heredoc\n");
     
-    // Parse the heredoc delimiter from the input
-    vars->pipes->heredoc_delim = extract_heredoc_delimiter(input, vars);
-    if (!vars->pipes->heredoc_delim)
+    // Extract and process the delimiter using our unified function
+    delimiter = get_heredoc_delimiter(input, vars);
+    if (!delimiter)
     {
         fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
         return;
     }
     
-    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Got delimiter: '%s', heredoc_mode=%d\n", 
-            vars->pipes->heredoc_delim, vars->heredoc_mode);
+    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Got delimiter: '%s', expand_vars=%d\n",
+            delimiter, vars->pipes->hd_expand);
     
     // Mark heredoc as active for interactive input
     vars->heredoc_active = 1;
-    
-    // Determine if we should expand variables based on delimiter quoting
-    expand_vars = !is_quoted_delimiter(vars->pipes->heredoc_delim);
-    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Variable expansion: %s\n", 
-            expand_vars ? "enabled" : "disabled");
     
     // Prepare for interactive heredoc input
     manage_terminal_state(vars, TERM_HEREDOC);
@@ -1024,8 +1042,11 @@ void setup_heredoc_mode(char *input, t_vars *vars)
     // Set up for interactive collection if we're not already using stored content
     if (!vars->heredoc_mode)
     {
-        setup_interactive_heredoc(vars, expand_vars);
+        setup_interactive_heredoc(vars, vars->pipes->hd_expand);
     }
+    
+    // Free local copy since the data is now stored in vars->pipes->heredoc_delim
+    free(delimiter);
     
     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setup complete, active=%d, mode=%d\n", 
             vars->heredoc_active, vars->heredoc_mode);
@@ -1071,40 +1092,96 @@ Returns:
 - 1 (true) if the delimiter contains properly closed quotes
 - 0 (false) otherwise
 */
-int	is_quoted_delimiter(char *delimiter)
-{
-    int	i;
-    int	in_single_quote;
-    int	in_double_quote;
+// int	is_quoted_delimiter(char *delimiter)
+// {
+//     int	i;
+//     int	in_single_quote;
+//     int	in_double_quote;
     
-	fprintf(stderr, "[DBG_HEREDOC] Checking if delimiter '%s' is quoted\n", 
-		delimiter ? delimiter : "NULL");
-    if (!delimiter)
-        return (0);
-    i = 0;
-    in_single_quote = 0;
-    in_double_quote = 0;
-    while (delimiter[i])
-    {
-        // Track single quotes
-        if (delimiter[i] == '\'' && !in_double_quote)
-            in_single_quote = !in_single_quote;
-        // Track double quotes
-        else if (delimiter[i] == '\"' && !in_single_quote)
-            in_double_quote = !in_double_quote;
-        i++;
-    }
+// 	fprintf(stderr, "[DBG_HEREDOC] Checking if delimiter '%s' is quoted\n", 
+// 		delimiter ? delimiter : "NULL");
+//     if (!delimiter)
+//         return (0);
+//     i = 0;
+//     in_single_quote = 0;
+//     in_double_quote = 0;
+//     while (delimiter[i])
+//     {
+//         // Track single quotes
+//         if (delimiter[i] == '\'' && !in_double_quote)
+//             in_single_quote = !in_single_quote;
+//         // Track double quotes
+//         else if (delimiter[i] == '\"' && !in_single_quote)
+//             in_double_quote = !in_double_quote;
+//         i++;
+//     }
 	
-    // If we found quotes and all quotes are closed, consider it quoted
-    // If quotes are unclosed, this is likely an error case - return 0
-	int result = (((in_single_quote == 0) && (in_double_quote == 0)) && 
-                 (ft_strchr(delimiter, '\'') || ft_strchr(delimiter, '\"')));
-    fprintf(stderr, "[DBG_HEREDOC] Delimiter quoted status: %d\n", result);
-    return (result);
-    // if (((in_single_quote == 0) && (in_double_quote == 0)) && 
-    //     (ft_strchr(delimiter, '\'') || ft_strchr(delimiter, '\"')))
-    //     return (1);
-    // return (0);
+//     // If we found quotes and all quotes are closed, consider it quoted
+//     // If quotes are unclosed, this is likely an error case - return 0
+// 	int result = (((in_single_quote == 0) && (in_double_quote == 0)) && 
+//                  (ft_strchr(delimiter, '\'') || ft_strchr(delimiter, '\"')));
+//     fprintf(stderr, "[DBG_HEREDOC] Delimiter quoted status: %d\n", result);
+//     return (result);
+//     // if (((in_single_quote == 0) && (in_double_quote == 0)) && 
+//     //     (ft_strchr(delimiter, '\'') || ft_strchr(delimiter, '\"')))
+//     //     return (1);
+//     // return (0);
+// }
+// New implementation for node-based checking
+// int is_quoted_delimiter(t_node *node)
+// {
+//     if (!node) 
+//         return 0;
+        
+//     // First check if delimiter was originally quoted
+//     if (node->delim_quoted)
+//     {
+//         fprintf(stderr, "[DEBUG] is_quoted_delimiter: Node has delim_quoted flag set\n");
+//         return 1;
+//     }
+        
+//     // Fallback to checking for quotes in the delimiter string
+//     if (node->right && node->right->args && node->right->args[0])
+//     {
+//         int result = chk_expand_heredoc(node->right->args[0]) == 0;
+//         fprintf(stderr, "[DEBUG] is_quoted_delimiter: Checking delimiter '%s', quoted=%d\n", 
+//                 node->right->args[0], result);
+//         return result;
+//     }
+    
+//     return 0;
+// }
+/*
+Determines if heredoc content should have variables expanded based on delimiter quoting.
+If the delimiter was quoted (with '' or ""), variables should not be expanded.
+
+Parameters:
+- node: Node containing the heredoc redirection information
+- vars: Program state variables for accessing hd_expand flag
+
+Returns:
+- 1 if the delimiter indicates variables should not be expanded (quoted)
+- 0 if variables should be expanded
+*/
+int is_quoted_delimiter(t_node *node, t_vars *vars)
+{
+    // If we have the node and it's the last heredoc
+    if (node && vars && vars->pipes && vars->pipes->last_heredoc == node)
+    {
+        // Use the hd_expand flag (inverse, since we're checking if quoted)
+        return !vars->pipes->hd_expand;
+    }
+    
+    // Fallback to checking the delimiter string directly if needed
+    if (node && node->right && node->right->args && node->right->args[0])
+    {
+        char *delimiter_copy = ft_strdup(node->right->args[0]);
+        int was_quoted = process_heredoc_delimiter(&delimiter_copy);
+        free(delimiter_copy);
+        return was_quoted;
+    }
+    
+    return 0;
 }
 
 /*

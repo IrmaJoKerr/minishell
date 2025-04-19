@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 23:20:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 03:15:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ $0 -> "bleshell"
 */
 char *handle_special_var(const char *var_name, t_vars *vars)
 {
+	fprintf(stderr, "DEBUG: Entering handle_special_var()\n");
 	// If var_name or vars is NULL, return empty string (not NULL)
 	if (!var_name || !vars)
 		return (ft_strdup(""));
@@ -35,14 +36,14 @@ char *handle_special_var(const char *var_name, t_vars *vars)
 	// Special case for error code ($?)
 	if (ft_strcmp(var_name, "?") == 0)
 	{
-		fprintf(stderr, "DEBUG: Handling special var $? = %d\n", vars->error_code);
+		fprintf(stderr, "DEBUG: handle_special_var().Handling special var $? = %d\n", vars->error_code);
 		return (ft_itoa(vars->error_code));
 	}
 	
 	// Special case for shell name ($0)
 	if (ft_strcmp(var_name, "0") == 0)
 	{
-		fprintf(stderr, "DEBUG: Handling special var $0 = bleshell\n");
+		fprintf(stderr, "DEBUG: handle_special_var().Handling special var $0 = bleshell\n");
 		return (ft_strdup("bleshell"));
 	}
 	
@@ -120,6 +121,7 @@ Empty string if variable not found.
 */
 char	*handle_expansion(char *input, int *pos, t_vars *vars)
 {
+	fprintf(stderr, "DEBUG: Entering handle_expansion()\n");
     char	*var_name;
     char	*var_value;
 

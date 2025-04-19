@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 19:24:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 00:41:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,31 +148,6 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
-// void build_and_execute(t_vars *vars)
-// {
-// 	t_node *root;
-	
-// 	if (!vars || !vars->head)
-// 		return ;
-
-// 	DBG_PRINTF(DEBUG_EXEC, "Building AST from token list\n");
-	
-// 	// Use proc_token_list instead of process_token_list
-// 	root = proc_token_list(vars);
-// 	if (root)
-// 	{
-// 		vars->astroot = root;
-// 		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", root->type);
-// 		// Add in build_and_execute before execution
-// 		fprintf(stderr, "[DBG_HEREDOC] heredoc_mode before execution: %d\n", vars->heredoc_mode);
-// 		execute_cmd(vars->astroot, vars->env, vars);
-// 	}
-// 	else
-// 	{
-// 		//DBG_PRINTF(DEBUG_EXEC, "Failed to build AST, no valid root node\n");
-// 	}
-// }
-
 void build_and_execute(t_vars *vars)
 {
 	
@@ -248,145 +223,6 @@ Example: When user types a complex command
 - Builds and executes command if valid
 - Frees all temporary resources
 */
-// void process_command(char *command, t_vars *vars)
-// {
-// 	fprintf(stderr, "[DEBUG] process_command() called\n");
-    
-// 	int	pipe_result;
-	
-// 	// Store original command in vars->partial_input
-// 	vars->partial_input = ft_strdup(command);
-// 	if (!vars->partial_input)
-// 		return ;
-// 	// Handle quote completion first
-// 	vars->partial_input = handle_quote_completion(vars->partial_input, vars);
-// 	if (!vars->partial_input)
-// 		return ;
-// 	// Tokenize the input
-// 	if (!process_input_tokens(vars->partial_input, vars))
-// 	{
-// 		free(vars->partial_input);
-// 		vars->partial_input = NULL;
-// 		return ;
-// 	}
-// 	// // Use new pipe analysis system 
-// 	// pipe_result = analyze_pipe_syntax(vars);
-// 	// if (pipe_result == 1) // Syntax error
-// 	// {
-// 	// 	// Error already reported by analyze_pipe_syntax
-// 	// 	free(vars->partial_input);
-// 	// 	vars->partial_input = NULL;
-// 	// 	return ;
-// 	// }
-// 	// Use new pipe analysis system 
-//     pipe_result = analyze_pipe_syntax(vars);
-//     if (pipe_result == 1) // Syntax error
-//     {
-//         // Error already reported by analyze_pipe_syntax
-        
-//         // IMPORTANT: Reset all state variables that might be corrupted
-//         cleanup_token_list(vars);  // Make sure token list is clean
-//         vars->error_code = 2;      // Set appropriate error code
-        
-//         // Reset any other state variables that might be affected
-//         // For example, ensure redirection tracking is reset
-//         // vars->redir_state = 0;     // If you have such a variable
-        
-//         // Clear partial input and return
-//         free(vars->partial_input);
-//         vars->partial_input = NULL;
-//         return;
-//     }
-// 	else if (pipe_result == 2) // Needs pipe completion
-// 	{
-// 		char *completed_cmd = complete_pipe_command(vars->partial_input, vars);
-// 		if (!completed_cmd)
-// 		{
-// 			free(vars->partial_input);
-// 			vars->partial_input = NULL;
-// 			return ;
-// 		}
-// 		free(vars->partial_input);
-// 		vars->partial_input = completed_cmd;
-// 		// Re-tokenize with completed command
-// 		cleanup_token_list(vars);
-// 		if (!process_input_tokens(vars->partial_input, vars))
-// 		{
-// 			free(vars->partial_input);
-// 			vars->partial_input = NULL;
-// 			return ;
-// 		}
-// 	}
-// 	// Build and execute the command
-// 	build_and_execute(vars);
-// 	// Clean up
-// 	free(vars->partial_input);
-// 	vars->partial_input = NULL;
-// 	fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
-// }
-// void process_command(char *command, t_vars *vars)
-// {
-//     fprintf(stderr, "[DEBUG] process_command() called\n");
-    
-//     int pipe_result;
-    
-//     // Reset error state at the beginning of each command
-//     vars->error_code = 0;
-    
-//     // Reset pipes structure state
-//     if (vars->pipes) 
-//     {
-//         reset_redir_tracking(vars->pipes);
-//         vars->pipes->pipe_root = NULL;
-//         vars->pipes->redir_root = NULL;
-//     }
-    
-//     // Store original command in vars->partial_input
-//     vars->partial_input = ft_strdup(command);
-//     if (!vars->partial_input)
-//         return;
-//     // Handle quote completion first
-//     vars->partial_input = handle_quote_completion(vars->partial_input, vars);
-//     if (!vars->partial_input)
-//         return;
-//     // Tokenize the input
-//     if (!process_input_tokens(vars->partial_input, vars))
-//     {
-//         free(vars->partial_input);
-//         vars->partial_input = NULL;
-//         return;
-//     }
-//     // Use new pipe analysis system 
-//     pipe_result = analyze_pipe_syntax(vars);
-//     if (pipe_result == 1) // Syntax error
-//     {
-//         // Error already reported by analyze_pipe_syntax
-        
-//         // IMPORTANT: Reset all state variables that might be corrupted
-//         cleanup_token_list(vars);  // Make sure token list is clean
-//         vars->error_code = 2;      // Set appropriate error code
-        
-//         // Reset pipes structure to ensure clean state for next command
-//         if (vars->pipes)
-//             reset_redir_tracking(vars->pipes);
-        
-//         // Clear partial input and return
-//         free(vars->partial_input);
-//         vars->partial_input = NULL;
-//         return;
-//     }
-//     else if (pipe_result == 2) // Needs pipe completion
-//     {
-//         // Existing code for pipe completion...
-//     }
-    
-//     // Build and execute the command
-//     build_and_execute(vars);
-//     // Clean up
-//     free(vars->partial_input);
-//     vars->partial_input = NULL;
-//     fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
-// }
 void process_command(char *command, t_vars *vars)
 {
     fprintf(stderr, "[DEBUG] process_command() called\n");
@@ -458,34 +294,6 @@ void process_command(char *command, t_vars *vars)
     fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
 }
 
-// void reset_terminal_after_heredoc(void)
-// {
-//     struct termios	term;
-//     char			*tty_path;
-//     int				fd;
-    
-//     fprintf(stderr, "[DEBUG] Ensuring terminal is ready for next input\n");
-//     if (!isatty(STDIN_FILENO))
-// 	{
-//         tty_path = ttyname(STDOUT_FILENO);
-//         if (tty_path)
-// 		{
-//             fd = open(tty_path, O_RDONLY);
-//             if (fd >= 0)
-// 			{
-//                 dup2(fd, STDIN_FILENO);
-//                 close(fd);
-//             }
-//         }
-//     }
-//     if (isatty(STDIN_FILENO))
-// 	{
-//         tcgetattr(STDIN_FILENO, &term);
-//         term.c_lflag |= (ICANON | ECHO);
-//         tcsetattr(STDIN_FILENO, TCSANOW, &term);
-//         rl_on_new_line();
-//     }
-// }
 void reset_terminal_after_heredoc(void)
 {
     struct termios term;
@@ -539,42 +347,6 @@ void reset_terminal_after_heredoc(void)
         fprintf(stderr, "[DEBUG] reset_terminal_after_heredoc: Terminal reset complete\n");
     }
 }
-
-// /*
-// Handles input state management for the shell.
-// - Tracks consecutive NULL returns from reader()
-// - Resets terminal state after heredoc
-// - Handles empty input
-// Returns:
-// 1 if we should continue the loop, 0 if we should process the input
-// */
-// int	input_state(char **input, int *null_count, t_vars *vars)
-// {
-//     char	*exit_args[2];
-    
-//     exit_args[0] = NULL;
-//     exit_args[1] = NULL;
-//     if (*input == NULL)
-//     {
-//         fprintf(stderr, "[DEBUG] NULL input from reader(): '(null)'\n");
-//         (*null_count)++;
-//         if (*null_count >= 2)
-//         {
-//             fprintf(stderr, "[DEBUG] Multiple NULL inputs, exiting\n");
-//             builtin_exit(exit_args, vars);
-//         }
-//         reset_terminal_after_heredoc();
-//         return (1);
-//     }
-//     *null_count = 0;
-//     if (*input[0] == '\0')
-//     {
-//         free(*input);
-//         *input = NULL;
-//         return (1);
-//     }
-//     return (0);
-// }
 
 /*
 Main shell loop that processes user commands and manages execution flow.
