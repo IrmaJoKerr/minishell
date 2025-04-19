@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 12:08:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 21:49:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1151,38 +1151,38 @@ Returns:
     
 //     return 0;
 // }
-/*
-Determines if heredoc content should have variables expanded based on delimiter quoting.
-If the delimiter was quoted (with '' or ""), variables should not be expanded.
+// /*
+// Determines if heredoc content should have variables expanded based on delimiter quoting.
+// If the delimiter was quoted (with '' or ""), variables should not be expanded.
 
-Parameters:
-- node: Node containing the heredoc redirection information
-- vars: Program state variables for accessing hd_expand flag
+// Parameters:
+// - node: Node containing the heredoc redirection information
+// - vars: Program state variables for accessing hd_expand flag
 
-Returns:
-- 1 if the delimiter indicates variables should not be expanded (quoted)
-- 0 if variables should be expanded
-*/
-int is_quoted_delimiter(t_node *node, t_vars *vars)
-{
-    // If we have the node and it's the last heredoc
-    if (node && vars && vars->pipes && vars->pipes->last_heredoc == node)
-    {
-        // Use the hd_expand flag (inverse, since we're checking if quoted)
-        return !vars->pipes->hd_expand;
-    }
+// Returns:
+// - 1 if the delimiter indicates variables should not be expanded (quoted)
+// - 0 if variables should be expanded
+// */
+// int is_quoted_delimiter(t_node *node, t_vars *vars)
+// {
+//     // If we have the node and it's the last heredoc
+//     if (node && vars && vars->pipes && vars->pipes->last_heredoc == node)
+//     {
+//         // Use the hd_expand flag (inverse, since we're checking if quoted)
+//         return !vars->pipes->hd_expand;
+//     }
     
-    // Fallback to checking the delimiter string directly if needed
-    if (node && node->right && node->right->args && node->right->args[0])
-    {
-        char *delimiter_copy = ft_strdup(node->right->args[0]);
-        int was_quoted = process_heredoc_delimiter(&delimiter_copy);
-        free(delimiter_copy);
-        return was_quoted;
-    }
+//     // Fallback to checking the delimiter string directly if needed
+//     if (node && node->right && node->right->args && node->right->args[0])
+//     {
+//         char *delimiter_copy = ft_strdup(node->right->args[0]);
+//         int was_quoted = strip_outer_quotes(&delimiter_copy);
+//         free(delimiter_copy);
+//         return was_quoted;
+//     }
     
-    return 0;
-}
+//     return 0;
+// }
 
 /*
 Extracts the heredoc delimiter from a command string.

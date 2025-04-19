@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 13:21:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 23:32:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,8 @@ static void imp_tok_quote(char *input, t_vars *vars)
     // Check if this quoted string follows a redirection operator
     int is_redir_target = 0;
     if (vars->prev_type == TYPE_IN_REDIRECT || vars->prev_type == TYPE_OUT_REDIRECT ||
-        vars->prev_type == TYPE_APPEND_REDIRECT || vars->prev_type == TYPE_HEREDOC) {
+        vars->prev_type == TYPE_APPEND_REDIRECT || vars->prev_type == TYPE_HEREDOC)
+	{
         is_redir_target = 1;
         fprintf(stderr, "DEBUG[imp_tok_quote]: Quote follows redirection operator\n");
     }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 22:08:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 22:59:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,42 +97,42 @@ char *fix_open_quotes(char *original_input, t_vars *vars)
 	return (combined_input);
 }
 
-/*
- * Processes quotes in argument tokens
- * - Removes the outside quotes but preserves the content
- * - For single quotes: preserves literal contents including $ signs
- * - For double quotes: keeps content for later expansion
- * - Handles adjacent quoted text by joining with previous arg when needed
- */
-void process_arg_quotes(char **arg)
-{
-	char *str;
-	size_t len;
-	char *new_str;
+// /*
+//  * Processes quotes in argument tokens
+//  * - Removes the outside quotes but preserves the content
+//  * - For single quotes: preserves literal contents including $ signs
+//  * - For double quotes: keeps content for later expansion
+//  * - Handles adjacent quoted text by joining with previous arg when needed
+//  */
+// void process_arg_quotes(char **arg)
+// {
+// 	char *str;
+// 	size_t len;
+// 	char *new_str;
 	
-	if (!arg || !*arg)
-		return;
+// 	if (!arg || !*arg)
+// 		return;
 		
-	str = *arg;
-	len = ft_strlen(str);
+// 	str = *arg;
+// 	len = ft_strlen(str);
 	
-	DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
+// 	DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
 	
-	// Need at least 2 chars for quotes
-	if (len < 2)
-		return;
+// 	// Need at least 2 chars for quotes
+// 	if (len < 2)
+// 		return;
 		
-	// Check for matching quotes at start and end
-	if ((str[0] == '"' && str[len - 1] == '"') || 
-		(str[0] == '\'' && str[len - 1] == '\''))
-	{
-		DBG_PRINTF(DEBUG_QUOTES, "Removing quotes from '%s'\n", str);
-		new_str = ft_substr(str, 1, len - 2);
-		if (new_str)
-		{
-			free(*arg);  // Free the string content, not the pointer
-			*arg = new_str;
-			DBG_PRINTF(DEBUG_QUOTES, "After removing quotes: '%s'\n", *arg);
-		}
-	}
-}
+// 	// Check for matching quotes at start and end
+// 	if ((str[0] == '"' && str[len - 1] == '"') || 
+// 		(str[0] == '\'' && str[len - 1] == '\''))
+// 	{
+// 		DBG_PRINTF(DEBUG_QUOTES, "Removing quotes from '%s'\n", str);
+// 		new_str = ft_substr(str, 1, len - 2);
+// 		if (new_str)
+// 		{
+// 			free(*arg);  // Free the string content, not the pointer
+// 			*arg = new_str;
+// 			DBG_PRINTF(DEBUG_QUOTES, "After removing quotes: '%s'\n", *arg);
+// 		}
+// 	}
+// }

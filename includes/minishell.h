@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 12:48:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 22:59:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -426,7 +426,7 @@ int			read_heredoc(int *fd, char *delimiter
 				,t_vars *vars, int expand_vars);
 // void		cleanup_heredoc_storage(t_vars *vars);
 void		setup_heredoc_pipe(t_vars *vars);
-int 		process_heredoc_delimiter(char **delimiter);
+int 		strip_outer_quotes(char **delimiter);
 int			store_heredoc_content(char *input, int start_pos, char *delimiter
 				,t_vars *vars);
 int			handle_heredoc_err(t_vars *vars);
@@ -514,7 +514,7 @@ void		process_heredoc_continuation(char *input, t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
 void		setup_heredoc_mode(char *input, t_vars *vars);
 // void		write_heredoc_line(int fd, char *line, t_vars *vars);
-int			is_quoted_delimiter(t_node *node, t_vars *vars);
+// int			is_quoted_delimiter(t_node *node, t_vars *vars);
 char		*extract_heredoc_delimiter(char *input, t_vars *vars);
 int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
@@ -673,7 +673,7 @@ In quotes.c
 */
 int 		validate_quotes(char *input, t_vars *vars);
 char		*fix_open_quotes(char *input, t_vars *vars);
-void		process_arg_quotes(char **arg);
+// void		process_arg_quotes(char **arg);
 
 /*
 Redirection handling.

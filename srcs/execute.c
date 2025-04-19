@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 00:19:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 23:57:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,7 @@ int redir_mode_setup(t_node *node, t_vars *vars)
 	}
 	else if (node->type == TYPE_HEREDOC)
 	{
+		fprintf(stderr, "[DBG_HEREDOC] redir_mode_setup(). Calling handle heredoc()\n");
 		result = handle_heredoc(node, vars);
 	}
 	else
@@ -183,15 +184,91 @@ Returns:
 - 0 on failure.
 Works with exec_redirect_cmd().
 */
-int	setup_redirection(t_node *node, t_vars *vars)
-{
-	int	result;
+// int	setup_redirection(t_node *node, t_vars *vars)
+// {
+// 	int	result;
 	
-	vars->pipes->current_redirect = node;
-	if (node->right && node->right->args)
-		process_arg_quotes(&node->right->args[0]);
-	result = redir_mode_setup(node, vars);
-	return (result);
+// 	vars->pipes->current_redirect = node;
+// 	if (node->right && node->right->args)
+// 		process_arg_quotes(&node->right->args[0]);
+// 	result = redir_mode_setup(node, vars);
+// 	return (result);
+// }
+// int	setup_redirection(t_node *node, t_vars *vars)
+// {
+// 	int	result;
+	
+// 	vars->pipes->current_redirect = node;
+// 	if (node->right && node->right->args)
+// 		(void)strip_outer_quotes(&node->right->args[0]);
+// 	result = redir_mode_setup(node, vars);
+// 	return (result);
+// }
+// int setup_redirection(t_node *node, t_vars *vars)
+// {
+//     int	result;
+    
+//     vars->pipes->current_redirect = node;
+//     if (node->right && node->right->args)
+//     {
+//         if (node->type == TYPE_HEREDOC)
+//         {
+//             // For heredoc, check if the delimiter is quoted and set expansion flag
+//             int was_quoted = strip_outer_quotes(&node->right->args[0]);
+//             if (was_quoted)
+//             {
+//                 // If quotes were removed, we should NOT expand variables in the heredoc
+//                 vars->pipes->hd_expand = 0;
+//                 vars->pipes->last_heredoc = node;
+//                 fprintf(stderr, "[DBG_HEREDOC] setup_redirection: Found quoted heredoc delimiter, "
+//                         "setting hd_expand=0\n");
+//             }
+//         }
+//         else
+//         {
+//             // For other redirections, just strip quotes and ignore the return value
+//             (void)strip_outer_quotes(&node->right->args[0]);
+//         }
+//     }
+//     result = redir_mode_setup(node, vars);
+//     return (result);
+// }
+int setup_redirection(t_node *node, t_vars *vars)
+{
+    int result;
+    
+    vars->pipes->current_redirect = node;
+    if (node->right && node->right->args)
+    {
+        if (node->type == TYPE_HEREDOC)
+        {
+            // Make a temporary copy of the delimiter for checking quotes
+            char *temp_copy = ft_strdup(node->right->args[0]);
+            if (!temp_copy)
+                return (0);
+                
+            // Check if the delimiter has quotes
+            int was_quoted = strip_outer_quotes(&temp_copy);
+            free(temp_copy); // Free temporary copy
+            
+            if (was_quoted)
+            {
+                // If quotes were present, disable expansion but DO NOT modify original delimiter
+                vars->pipes->hd_expand = 0;
+                vars->pipes->last_heredoc = node;
+                fprintf(stderr, "[DBG_HEREDOC] setup_redirection: Found quoted heredoc delimiter, "
+                        "setting hd_expand=0\n");
+            }
+        }
+        else
+        {
+            // For other redirections, actually strip the quotes
+            (void)strip_outer_quotes(&node->right->args[0]);
+        }
+    }
+    
+    result = redir_mode_setup(node, vars);
+    return (result);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 03:42:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 23:16:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -464,13 +464,13 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
                 return (0);
             }
             
-            // If this is a heredoc redirection, mark the delimiter as quoted
-            if (redir_node->type == TYPE_HEREDOC)
-            {
-                fprintf(stderr, "[DEBUG] Marking heredoc delimiter as quoted\n");
-    			vars->pipes->hd_expand = 0;  // Disable expansion for quoted heredoc
-    			vars->pipes->last_heredoc = redir_node;  // Store the node for reference
-            }
+            // // If this is a heredoc redirection, mark the delimiter as quoted
+            // if (redir_node->type == TYPE_HEREDOC)
+            // {
+            //     fprintf(stderr, "[DEBUG] Marking heredoc delimiter as quoted\n");
+    		// 	vars->pipes->hd_expand = 0;  // Disable expansion for quoted heredoc
+    		// 	vars->pipes->last_heredoc = redir_node;  // Store the node for reference
+            // }
             
             // Connect to the redirection node
             redir_node->right = file_node;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 12:48:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/19 22:22:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,7 +221,7 @@ void setup_heredoc_pipe(t_vars *vars)
 // - Removes the outside quotes but preserves content
 // - Returns 1 if quotes were removed, 0 otherwise
 // */
-// int process_heredoc_delimiter(char **delimiter)
+// int strip_outer_quotes(char **delimiter)
 // {
 //     char	*str;
 //     size_t	len;
@@ -235,7 +235,7 @@ void setup_heredoc_pipe(t_vars *vars)
 // 	result = 0;
 //     str = *delimiter;
 //     len = ft_strlen(str);
-//     fprintf(stderr, "[DBG_HEREDOC] process_heredoc_delimiter: Processing '%s'\n", str);
+//     fprintf(stderr, "[DBG_HEREDOC] strip_outer_quotes: Processing '%s'\n", str);
 //     // Need at least 2 chars for quotes
 //     if (len < 2)
 //         return (0);
@@ -261,7 +261,7 @@ void setup_heredoc_pipe(t_vars *vars)
 //  * - Removes the outside quotes but preserves content
 //  * - Returns 1 if quotes were removed, 0 otherwise
 //  */
-// int process_heredoc_delimiter(char **delimiter)
+// int strip_outer_quotes(char **delimiter)
 // {
 //     char	*str;
 //     size_t	len;
@@ -274,7 +274,7 @@ void setup_heredoc_pipe(t_vars *vars)
 //     result = 0;
 //     str = *delimiter;
 //     len = ft_strlen(str);
-//     fprintf(stderr, "[DBG_HEREDOC] process_heredoc_delimiter: Processing '%s'\n", str);
+//     fprintf(stderr, "[DBG_HEREDOC] strip_outer_quotes: Processing '%s'\n", str);
     
 //     // Need at least 2 chars for quotes
 //     if (len < 2)
@@ -303,7 +303,7 @@ void setup_heredoc_pipe(t_vars *vars)
  * @param raw_delimiter The delimiter with potential quotes
  * @return A newly allocated string with quotes removed, or NULL on error
  */
-int process_heredoc_delimiter(char **delimiter)
+int strip_outer_quotes(char **delimiter)
 {
     char *str;
     size_t len;
@@ -316,7 +316,7 @@ int process_heredoc_delimiter(char **delimiter)
     result = 0;
     str = *delimiter;
     len = ft_strlen(str);
-    fprintf(stderr, "[DBG_HEREDOC] process_heredoc_delimiter: Processing '%s'\n", str);
+    fprintf(stderr, "[DBG_HEREDOC] strip_outer_quotes: Processing '%s'\n", str);
     
     // Need at least 2 chars for quotes
     if (len < 2)
@@ -525,7 +525,7 @@ int	handle_heredoc_err(t_vars *vars)
 
 int handle_heredoc(t_node *node, t_vars *vars)
 {
-    fprintf(stderr, "[DBG_HEREDOC] Setting up heredoc for command\n");
+    fprintf(stderr, "[DBG_HEREDOC] handle_heredoc() Setting up heredoc for command\n");
     
     // Process heredoc content if needed
     if (!process_heredoc(node, vars))
@@ -533,7 +533,7 @@ int handle_heredoc(t_node *node, t_vars *vars)
     
     // Connect the pipe to stdin
     if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1) {
-        fprintf(stderr, "[DBG_HEREDOC] Failed to redirect stdin: %s\n", strerror(errno));
+        fprintf(stderr, "[DBG_HEREDOC] handle_heredoc() Failed to redirect stdin: %s\n", strerror(errno));
         close(vars->pipes->heredoc_fd);
         return (0);
     }
@@ -542,7 +542,7 @@ int handle_heredoc(t_node *node, t_vars *vars)
     close(vars->pipes->heredoc_fd);
     vars->pipes->heredoc_fd = -1;  // Mark as used
     
-    fprintf(stderr, "[DBG_HEREDOC] Heredoc connected to stdin\n");
+    fprintf(stderr, "[DBG_HEREDOC] handle_heredoc() Heredoc connected to stdin\n");
     return (1);
 }
 
@@ -610,7 +610,7 @@ int process_heredoc_info(char *raw_delimiter, t_vars *vars)
     }
     
     // Process quotes and determine expansion mode
-    was_quoted = process_heredoc_delimiter(&delimiter_copy);
+    was_quoted = strip_outer_quotes(&delimiter_copy);
     
     // Store the processed delimiter and expansion flag
     vars->pipes->heredoc_delim = delimiter_copy;
@@ -827,12 +827,12 @@ int process_heredoc(t_node *node, t_vars *vars)
 {
 char *delimiter;
 
-fprintf(stderr, "[DBG_HEREDOC] Processing heredoc for node: %p, mode=%d\n", 
+fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Processing heredoc for node: %p, mode=%d\n", 
 		(void *)node, vars->heredoc_mode);
 
 if (!node || !node->right || !node->right->args || !node->right->args[0])
 {
-	fprintf(stderr, "[DBG_HEREDOC] Invalid node structure for heredoc\n");
+	fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Invalid node structure for heredoc\n");
 	return 0;
 }
 
@@ -843,7 +843,7 @@ delimiter = node->right->args[0];
 if (vars->pipes->last_heredoc == node)
 {
 	// Keep existing flag value if this node was already processed
-	fprintf(stderr, "[DBG_HEREDOC] Using existing expansion flag: %d\n", 
+	fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Using existing expansion flag: %d\n", 
 			vars->pipes->hd_expand);
 }
 else
@@ -853,21 +853,21 @@ else
 	// Store the node for future reference
 	vars->pipes->last_heredoc = node;
 	
-	fprintf(stderr, "[DBG_HEREDOC] Setting expansion flag to: %d based on delimiter\n", 
+	fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Setting expansion flag to: %d based on delimiter\n", 
 			vars->pipes->hd_expand);
 }
 
-fprintf(stderr, "[DBG_HEREDOC] Delimiter: '%s', expand_vars: %d\n", 
+fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Delimiter: '%s', expand_vars: %d\n", 
 		delimiter, vars->pipes->hd_expand);
 
 // Check heredoc_mode early to decide processing approach
 if (vars->heredoc_mode == 1)
 {
 	// Content already in temp file, just open it for reading
-	fprintf(stderr, "[DBG_HEREDOC] Using stored heredoc content from temp file\n");
+	fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Using stored heredoc content from temp file\n");
 	int fd = open(TMP_BUF, O_RDONLY);
 	if (fd == -1) {
-		fprintf(stderr, "[DBG_HEREDOC] WARNING: Failed to open temp file: %s\n", 
+		fprintf(stderr, "[DBG_HEREDOC] process_heredoc().WARNING: Failed to open temp file: %s\n", 
 				strerror(errno));
 		return (0);
 	}
@@ -877,13 +877,13 @@ if (vars->heredoc_mode == 1)
 else
 {
 	// Interactive mode - read from terminal
-	fprintf(stderr, "[DBG_HEREDOC] Reading heredoc input from terminal\n");
+	fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Reading heredoc input from terminal\n");
 	
 	// Open temp file for writing
 	int fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (fd == -1)
 	{
-		fprintf(stderr, "[DBG_HEREDOC] Failed to create temp file: %s\n", 
+		fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Failed to create temp file: %s\n", 
 				strerror(errno));
 		return (0);
 	}
@@ -909,14 +909,14 @@ else
 	fd = open(TMP_BUF, O_RDONLY);
 	if (fd == -1)
 	{
-		fprintf(stderr, "[DBG_HEREDOC] Failed to open temp file for reading: %s\n", 
+		fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Failed to open temp file for reading: %s\n", 
 				strerror(errno));
 		return (0);
 	}
 	vars->pipes->heredoc_fd = fd;
 }
 
-fprintf(stderr, "[DBG_HEREDOC] Heredoc content ready on fd=%d\n", 
+fprintf(stderr, "[DBG_HEREDOC] process_heredoc().Heredoc content ready on fd=%d\n", 
 		vars->pipes->heredoc_fd);
 return (1);
 }
