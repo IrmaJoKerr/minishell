@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 16:10:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 18:16:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,25 +66,70 @@ Returns:
 - 1 on success.
 - 0 on failure.
 */
-int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
+// int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
+// {
+// 	int	arg_idx;
+
+// 	DBG_PRINTF(DEBUG_EXPAND, "handle_tok_join: Joining '%s' to current token\n", 
+// 		expanded_val);
+// 	if (!vars->current->args || !vars->current->args[0])
+// 		return (0);
+// 	arg_idx = proc_join_args(vars, expanded_val);
+// 	if (arg_idx == -1)
+// 		return (0);
+// 	if (vars->current->arg_quote_type
+// 		&& vars->current->arg_quote_type[arg_idx])
+// 	{
+// 		DBG_PRINTF(DEBUG_EXPAND, "handle_tok_join: Updating quote types\n");
+// 		if (!update_quote_types(vars, arg_idx, expanded_val))
+// 			return (0);
+// 	}
+// 	DBG_PRINTF(DEBUG_EXPAND, "handle_tok_join: Freeing expanded_val and token\n");
+// 	free(expanded_val);
+// 	free(token);
+// 	if (vars->adj_state[1])
+// 		process_right_adj(input, vars);
+// 	return (1);
+// }
+int handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 {
-	int	arg_idx;
-	if (!vars->current->args || !vars->current->args[0])
-		return (0);
-	arg_idx = proc_join_args(vars, expanded_val);
-	if (arg_idx == -1)
-		return (0);
-	if (vars->current->arg_quote_type
-		&& vars->current->arg_quote_type[arg_idx])
-	{
-		if (!update_quote_types(vars, arg_idx, expanded_val))
-			return (0);
-	}
-	free(expanded_val);
-	free(token);
-	if (vars->adj_state[1])
-		process_right_adj(input, vars);
-	return (1);
+    int arg_idx;
+    
+    fprintf(stderr, "[MEM_DEBUG] handle_tok_join: Entry with expanded_val=%p, token=%p\n", 
+            (void*)expanded_val, (void*)token);
+            
+    if (!vars->current->args || !vars->current->args[0])
+    {
+        fprintf(stderr, "[MEM_DEBUG] handle_tok_join: Early failure, NOT freeing memory\n");
+        return (0);  // Caller must free memory
+    }
+    
+    arg_idx = proc_join_args(vars, expanded_val);
+    if (arg_idx == -1)
+    {
+        fprintf(stderr, "[MEM_DEBUG] handle_tok_join: proc_join_args failed, NOT freeing memory\n");
+        return (0);  // Caller must free memory
+    }
+    
+    if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
+    {
+        fprintf(stderr, "[MEM_DEBUG] handle_tok_join: Updating quote types\n");
+        if (!update_quote_types(vars, arg_idx, expanded_val))
+        {
+            fprintf(stderr, "[MEM_DEBUG] handle_tok_join: update_quote_types failed, NOT freeing\n");
+            return (0);  // Caller must free memory
+        }
+    }
+    
+    fprintf(stderr, "[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=%p, token=%p\n", 
+            (void*)expanded_val, (void*)token);
+    free(expanded_val);
+    free(token);
+    
+    if (vars->adj_state[1])
+        process_right_adj(input, vars);
+        
+    return (1);
 }
 
 /*

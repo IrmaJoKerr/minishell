@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/18 21:12:23 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/20 18:31:30 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ all: $(NAME)
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -gdwarf-4
 DEBUG_FLAGS = -gdwarf-4
-SANITIZE_FLAGS = -fsanitize=address,undefined
+SANITIZE_FLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer
 
 LIBFT_DIR = libft
 MINISHELL_DIR = srcs
@@ -50,6 +50,7 @@ MINISHELL_SRCS = \
 			srcs/make_exp_token_utils.c \
 			srcs/make_exp_token.c \
 			srcs/make_node_arrays.c \
+			srcs/memory_debug.c \
 			srcs/minishell.c \
 			srcs/operators.c \
 			srcs/paths.c \

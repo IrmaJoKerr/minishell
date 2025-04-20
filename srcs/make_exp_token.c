@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 09:08:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 19:25:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,28 +124,64 @@ Returns:
 - 1 on success
 - 0 on failure
 */
-int	sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
-	,char *token)
+// int	sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
+// 	,char *token)
+// {
+// 	if (vars->adj_state[0] && vars->current && 
+// 		(vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
+// 	{
+// 		if (handle_tok_join(input, vars, expanded_val, token))
+// 		{
+// 			process_adj(NULL, vars);
+// 			return (1);
+// 		}
+// 	}
+// 	if (!new_exp_token(vars, expanded_val, token))
+// 	{
+// 		free(expanded_val);
+// 		free(token);
+// 		return (0);
+// 	}
+// 	if (vars->adj_state[1] && vars->current)
+// 		process_right_adj(input, vars);
+// 	process_adj(NULL, vars);
+// 	return (1);
+// }
+int sub_make_exp_token(char *input, t_vars *vars, char *expanded_val, char *token)
 {
-	if (vars->adj_state[0] && vars->current && 
-		(vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
-	{
-		if (handle_tok_join(input, vars, expanded_val, token))
-		{
-			process_adj(NULL, vars);
-			return (1);
-		}
-	}
-	if (!new_exp_token(vars, expanded_val, token))
-	{
-		free(expanded_val);
-		free(token);
-		return (0);
-	}
-	if (vars->adj_state[1] && vars->current)
-		process_right_adj(input, vars);
-	process_adj(NULL, vars);
-	return (1);
+    fprintf(stderr, "[MEM_DEBUG] sub_make_exp_token: Entry with expanded_val=%p, token=%p\n", 
+            (void*)expanded_val, (void*)token);
+            
+    if (vars->adj_state[0] && vars->current && 
+        (vars->current->type == TYPE_CMD || vars->current->type == TYPE_ARGS))
+    {
+        if (handle_tok_join(input, vars, expanded_val, token))
+        {
+            process_adj(NULL, vars);
+            fprintf(stderr, "[MEM_DEBUG] sub_make_exp_token: handle_tok_join success path\n");
+            return (1);  // Memory was freed by handle_tok_join
+        }
+        
+        // handle_tok_join failed and did NOT free memory
+        fprintf(stderr, "[MEM_DEBUG] sub_make_exp_token: handle_tok_join failed\n");
+        // We continue to new_exp_token with the same memory
+    }
+    
+    // Try creating a new token
+    if (!new_exp_token(vars, expanded_val, token))
+    {
+        fprintf(stderr, "[MEM_DEBUG] sub_make_exp_token: new_exp_token failed, freeing memory\n");
+        free(expanded_val);
+        free(token);
+        return (0);
+    }
+    
+    if (vars->adj_state[1] && vars->current)
+        process_right_adj(input, vars);
+    process_adj(NULL, vars);
+    
+    fprintf(stderr, "[MEM_DEBUG] sub_make_exp_token: Normal exit success\n");
+    return (1);  // new_exp_token succeeded and now owns the memory
 }
 
 /*
@@ -154,31 +190,105 @@ Returns:
 - 1 if successful.
 - 0 on failure.
 */
-int	make_exp_token(char *input, t_vars *vars)
-{
-	char	*token;
-	char	*expanded_val;
-	char	*var_name;
-	int		result;
+// int	make_exp_token(char *input, t_vars *vars)
+// {
+// 	char	*token;
+// 	char	*expanded_val;
+// 	char	*var_name;
+// 	int		result;
 	
-	token = NULL;
-	expanded_val = NULL;
-	var_name = NULL;
-	vars->start = vars->pos;
-	check_token_adj(input, vars);
-	fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adj_left=%d, adj_right=%d\n",
-			vars->pos, input[vars->pos], input + vars->pos, vars->adj_state[0], vars->adj_state[1]);
-	if (!get_var_token(input, vars, &token, &var_name))
-		return (0);
-	expanded_val = expand_value(var_name, vars);
-	free(var_name);
-	if (!expanded_val)
-	{
-		free(token);
-		return (0);
-	}
-	fprintf(stderr, "DEBUG[make_exp_token]: Expanded '%s' to '%s', adj_left=%d, adj_right=%d\n", 
-			token, expanded_val, vars->adj_state[0], vars->adj_state[1]);
-	result = sub_make_exp_token(input, vars, expanded_val, token);
-	return (result);
+// 	token = NULL;
+// 	expanded_val = NULL;
+// 	var_name = NULL;
+// 	vars->start = vars->pos;
+// 	check_token_adj(input, vars);
+// 	fprintf(stderr, "DEBUG[make_exp_token]: At pos=%d, char='%c', input='%.10s...', adj_left=%d, adj_right=%d\n",
+// 			vars->pos, input[vars->pos], input + vars->pos, vars->adj_state[0], vars->adj_state[1]);
+// 	if (!get_var_token(input, vars, &token, &var_name))
+// 		return (0);
+// 	expanded_val = expand_value(var_name, vars);
+// 	free(var_name);
+// 	if (!expanded_val)
+// 	{
+// 		free(token);
+// 		return (0);
+// 	}
+// 	fprintf(stderr, "DEBUG[make_exp_token]: Expanded '%s' to '%s', adj_left=%d, adj_right=%d\n", 
+// 			token, expanded_val, vars->adj_state[0], vars->adj_state[1]);
+// 	result = sub_make_exp_token(input, vars, expanded_val, token);
+// 	return (result);
+// }
+// int make_exp_token(char *input, t_vars *vars)
+// {
+//     char    *token;
+//     char    *expanded_val;
+//     char    *var_name;
+//     int     result;
+    
+//     fprintf(stderr, "[MEM_DEBUG] make_exp_token: Entry\n");
+    
+//     token = NULL;
+//     expanded_val = NULL;
+//     var_name = NULL;
+//     vars->start = vars->pos;
+//     check_token_adj(input, vars);
+    
+//     if (!get_var_token(input, vars, &token, &var_name))
+//     {
+//         fprintf(stderr, "[MEM_DEBUG] make_exp_token: get_var_token failed\n");
+//         return (0);
+//     }
+    
+//     expanded_val = expand_value(var_name, vars);
+//     fprintf(stderr, "[MEM_DEBUG] make_exp_token: Expanded '%s' to '%p'\n", 
+//             var_name, (void*)expanded_val);
+//     free(var_name);
+    
+//     if (!expanded_val)
+//     {
+//         fprintf(stderr, "[MEM_DEBUG] make_exp_token: expand_value returned NULL, freeing token\n");
+//         free(token);
+//         return (0);
+//     }
+    
+//     result = sub_make_exp_token(input, vars, expanded_val, token);
+//     fprintf(stderr, "[MEM_DEBUG] make_exp_token: Exit with result=%d\n", result);
+//     return (result);
+// }
+int make_exp_token(char *input, t_vars *vars)
+{
+    char    *token;
+    char    *expanded_val;
+    char    *var_name;
+    int     result;
+    
+    fprintf(stderr, "[MEM_DEBUG] make_exp_token: Entry\n");
+    
+    token = NULL;
+    expanded_val = NULL;
+    var_name = NULL;
+    vars->start = vars->pos;
+    check_token_adj(input, vars);
+    
+    if (!get_var_token(input, vars, &token, &var_name))
+    {
+        fprintf(stderr, "[MEM_DEBUG] make_exp_token: get_var_token failed\n");
+        return (0);
+    }
+    
+    expanded_val = expand_variable(NULL, NULL, var_name, vars);
+    fprintf(stderr, "[MEM_DEBUG] make_exp_token: Expanded '%s' to '%p'\n", 
+            var_name, (void*)expanded_val);
+    free(var_name);
+    
+    if (!expanded_val)
+    {
+        fprintf(stderr, "[MEM_DEBUG] make_exp_token: expand_value returned NULL, freeing token\n");
+        free(token);
+        return (0);
+    }
+    
+    result = sub_make_exp_token(input, vars, expanded_val, token);
+    fprintf(stderr, "[MEM_DEBUG] make_exp_token: Exit with result=%d\n", result);
+    return (result);
 }

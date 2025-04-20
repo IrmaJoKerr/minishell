@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 23:16:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 01:06:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,44 @@ Return :
  - NULL on error.
 Works with expand_quoted_str().
 */
-char	*expand_quoted_var(char *expanded, char *content, int *pos
-				,t_vars *vars)
-{
-	char	*var_value;
-	char	*temp;
+// char	*expand_quoted_var(char *expanded, char *content, int *pos
+// 				,t_vars *vars)
+// {
+// 	char	*var_value;
+// 	char	*temp;
 	
-	var_value = handle_expansion(content, pos, vars);
-	if (!var_value)
-		return (expanded);
-	temp = ft_strjoin(expanded, var_value);
-	free(expanded);
-	free(var_value);
-	if (!temp)
-		return (NULL);
-	return (temp);
+// 	var_value = handle_expansion(content, pos, vars);
+// 	if (!var_value)
+// 		return (expanded);
+// 	temp = ft_strjoin(expanded, var_value);
+// 	free(expanded);
+// 	free(var_value);
+// 	if (!temp)
+// 		return (NULL);
+// 	return (temp);
+// }
+char	*expand_quoted_var(char *expanded, char *content, int *pos
+                ,t_vars *vars)
+{
+    char	*var_value;
+    char	*temp;
+    
+    // Replace handle_expansion() with direct call to expand_variable()
+    var_value = expand_variable(content, pos, NULL, vars);
+    if (!var_value)
+        return (expanded);  // Return original if expansion fails
+    
+    // Join expanded value with existing string
+    temp = ft_strjoin(expanded, var_value);
+    
+    // Clean up
+    free(expanded);
+    free(var_value);
+    
+    if (!temp)
+        return (NULL);
+        
+    return (temp);
 }
 
 /*
@@ -188,11 +211,35 @@ Returns:
  - 1 if successfully merged.
  - 0 otherwise.
 */
+// int	merge_quoted_token(char *input, char *content, t_vars *vars)
+// {
+//     char	*dummy_token;
+// 	int		join_success;
+    
+//     if (!vars->adj_state[0])
+//         return (0);
+//     dummy_token = ft_strdup("");
+//     if (!dummy_token)
+//         return (0);
+//     join_success = handle_tok_join(input, vars, content, dummy_token);
+//     if (!join_success)
+//         free(dummy_token);
+//     if (join_success)
+//     {
+//         if (vars->adj_state[1])
+//             process_right_adj(input, vars);
+//         process_adj(NULL, vars);
+//         return (1);
+//     }
+//     return (0);
+// }
 int	merge_quoted_token(char *input, char *content, t_vars *vars)
 {
     char	*dummy_token;
 	int		join_success;
     
+	DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Attempting with content='%s', left_adj=%d\n",
+		content, vars->adj_state[0]);
     if (!vars->adj_state[0])
         return (0);
     dummy_token = ft_strdup("");
@@ -200,17 +247,19 @@ int	merge_quoted_token(char *input, char *content, t_vars *vars)
         return (0);
     join_success = handle_tok_join(input, vars, content, dummy_token);
     if (!join_success)
-        free(dummy_token);
-    if (join_success)
     {
+        DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Join failed, freeing dummy_token\n");
+        free(dummy_token);
+    }
+    else
+    {
+        DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Join successful\n");
         if (vars->adj_state[1])
             process_right_adj(input, vars);
         process_adj(NULL, vars);
-        return (1);
     }
-    return (0);
+    return (join_success);
 }
-
 /*
 Process a character within quotes in the input string
 Handles extraction, expansion, and creation of tokens
@@ -218,92 +267,6 @@ Return:
  - 1 on success.
  - 0 on failure.
 */
-// int	process_quote_char(char *input, t_vars *vars)
-// {
-//     int		quote_type;
-//     char	*content;
-//     t_node	*cmd_node;
-    
-//     content = get_quoted_str(input, vars, &quote_type);
-//     if (!content)
-//         return (0);
-//     cmd_node = process_quoted_str(&content, quote_type, vars);
-//     if (!cmd_node)
-//     {
-//         free(content);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     if (!merge_quoted_token(input, content, vars))
-//     {
-//         append_arg(cmd_node, content, quote_type);
-//         free(content);
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//     }
-//     return (1);
-// }
-// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
-// {
-//     int     quote_type;
-//     char    *content;
-//     t_node  *cmd_node;
-    
-//     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
-//         is_redir_target ? " as redirection target" : "");
-        
-//     content = get_quoted_str(input, vars, &quote_type);
-//     if (!content)
-//         return (0);
-    
-//     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
-//         content, is_redir_target);
-        
-//     if (is_redir_target)
-//     {
-//         // Handle quoted filename for redirection
-//         t_node *redir_node = find_last_redir(vars);
-//         if (redir_node && redir_node->type >= TYPE_IN_REDIRECT && redir_node->type <= TYPE_APPEND_REDIRECT)
-//         {
-//             fprintf(stderr, "DEBUG: Associating quoted filename with redirection\n");
-            
-//             // Create a node for the filename
-//             t_node *file_node = initnode(TYPE_ARGS, NULL);
-//             if (!file_node) {
-//                 free(content);
-//                 return (0);
-//             }
-            
-//             // Add the quoted content as argument
-//             append_arg(file_node, content, quote_type);
-            
-//             // Connect to the redirection node
-//             redir_node->right = file_node;
-//             vars->current = file_node;
-            
-//             free(content);
-//             return (1);
-//         }
-//     }
-    
-//     cmd_node = process_quoted_str(&content, quote_type, vars);
-//     if (!cmd_node)
-//     {
-//         free(content);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     if (!merge_quoted_token(input, content, vars))
-//     {
-//         append_arg(cmd_node, content, quote_type);
-//         free(content);
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//     }
-//     return (1);
-// }
 // int process_quote_char(char *input, t_vars *vars, int is_redir_target)
 // {
 //     int     quote_type;
@@ -330,25 +293,30 @@ Return:
 //             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
 //                 content, redir_node->type);
             
-//             // Create a node for the filename
-//             t_node *file_node = initnode(TYPE_ARGS, NULL);
-//             if (!file_node) {
+//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
+//             t_node *file_node = initnode(TYPE_ARGS, content);
+//             if (!file_node)
+//             {
 //                 free(content);
 //                 return (0);
 //             }
-            
-//             // Add the quoted content as argument
-//             append_arg(file_node, content, quote_type);
-            
 //             // Connect to the redirection node
 //             redir_node->right = file_node;
+//             // Link into the token list
+//             if (redir_node->next)
+//             {
+//                 file_node->next = redir_node->next;
+//                 redir_node->next->prev = file_node;
+//             }
+//             redir_node->next = file_node;
+//             file_node->prev = redir_node;
+//             // Update current pointer
 //             vars->current = file_node;
-            
+//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
 //             free(content);
 //             return (1);
 //         }
 //     }
-    
 //     // Standard quote handling for non-redirection targets
 //     cmd_node = process_quoted_str(&content, quote_type, vars);
 //     if (!cmd_node)
@@ -393,25 +361,30 @@ Return:
 //             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
 //                 content, redir_node->type);
             
-//             // Create a node for the filename
-//             t_node *file_node = initnode(TYPE_ARGS, NULL);
-//             if (!file_node) {
+//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
+//             t_node *file_node = initnode(TYPE_ARGS, content);
+//             if (!file_node)
+//             {
 //                 free(content);
 //                 return (0);
 //             }
-            
-//             // Add the quoted content as argument
-//             append_arg(file_node, content, quote_type);
-            
 //             // Connect to the redirection node
 //             redir_node->right = file_node;
+//             // Link into the token list
+//             if (redir_node->next)
+//             {
+//                 file_node->next = redir_node->next;
+//                 redir_node->next->prev = file_node;
+//             }
+//             redir_node->next = file_node;
+//             file_node->prev = redir_node;
+//             // Update current pointer
 //             vars->current = file_node;
-            
+//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
 //             free(content);
 //             return (1);
 //         }
 //     }
-    
 //     // Standard quote handling for non-redirection targets
 //     cmd_node = process_quoted_str(&content, quote_type, vars);
 //     if (!cmd_node)
@@ -453,6 +426,15 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         redir_node = find_last_redir(vars);
         if (redir_node && is_redirection(redir_node->type))
         {
+            // NEW CODE: Check if this is a heredoc redirection and set expansion flag
+            if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
+            {
+                // Disable variable expansion for quoted heredoc delimiters
+                vars->pipes->hd_expand = 0;
+                vars->pipes->last_heredoc = redir_node;
+                fprintf(stderr, "[DEBUG] Heredoc with quoted delimiter detected, disabling expansion\n");
+            }
+            
             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
                 content, redir_node->type);
             
@@ -463,18 +445,8 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
                 free(content);
                 return (0);
             }
-            
-            // // If this is a heredoc redirection, mark the delimiter as quoted
-            // if (redir_node->type == TYPE_HEREDOC)
-            // {
-            //     fprintf(stderr, "[DEBUG] Marking heredoc delimiter as quoted\n");
-    		// 	vars->pipes->hd_expand = 0;  // Disable expansion for quoted heredoc
-    		// 	vars->pipes->last_heredoc = redir_node;  // Store the node for reference
-            // }
-            
             // Connect to the redirection node
             redir_node->right = file_node;
-            
             // Link into the token list
             if (redir_node->next)
             {
@@ -531,7 +503,8 @@ t_node *find_last_redir(t_vars *vars)
     int i;
     
     // First try the current node
-    if (vars->current && is_redirection(vars->current->type)) {
+    if (vars->current && is_redirection(vars->current->type)) \
+	{
         fprintf(stderr, "DEBUG: find_last_redir: Current node is redirection, type=%d\n", 
                 (int)vars->current->type);
         return vars->current;
@@ -540,7 +513,8 @@ t_node *find_last_redir(t_vars *vars)
     // Try the most recent nodes
     current = vars->current;
     i = 0;
-    while (current && current->prev && i < 3) {
+    while (current && current->prev && i < 3)
+	{
         current = current->prev;
         i++;
         

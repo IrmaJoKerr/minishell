@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 00:41:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 18:29:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,10 +287,17 @@ void process_command(char *command, t_vars *vars)
     
     // Build and execute the command
     build_and_execute(vars);
-    
-    // Clean up
-    free(vars->partial_input);
-    vars->partial_input = NULL;
+    // Add at the end of process_command()
+	if (vars->partial_input)
+	{
+    	fprintf(stderr, "[MEM_DEBUG] Freeing partial_input=%p\n", 
+            (void*)vars->partial_input);
+    	free(vars->partial_input);
+    	vars->partial_input = NULL;
+	}
+    // // Clean up
+    // free(vars->partial_input);
+    // vars->partial_input = NULL;
     fprintf(stderr, "[DEBUG] Reached the end of process_command()\n");
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 03:15:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 19:31:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,23 +68,146 @@ Example: For "HOME=/Users/bleow" in environment:
 get_env_val("HOME", env) -> "/Users/bleow"
 get_env_val("NONEXISTENT", env) -> ""
 */
-char	*get_env_val(const char *var_name, char **env)
-{
-	int		i;
-	size_t	var_len;
+// char	*get_env_val(const char *var_name, char **env)
+// {
+// 	int		i;
+// 	size_t	var_len;
 
-	if (!var_name || !*var_name || !env)
-		return (ft_strdup(""));
-	var_len = ft_strlen(var_name);
-	i = 0;
-	while (env[i])
-	{
-		if (!ft_strncmp(env[i], var_name, var_len)
-			&& env[i][var_len] == '=')
-			return (ft_strdup(env[i] + var_len + 1));
-		i++;
-	}
-	return (ft_strdup(""));
+// 	if (!var_name || !*var_name || !env)
+// 		return (ft_strdup(""));
+// 	var_len = ft_strlen(var_name);
+// 	i = 0;
+// 	while (env[i])
+// 	{
+// 		if (!ft_strncmp(env[i], var_name, var_len)
+// 			&& env[i][var_len] == '=')
+// 			return (ft_strdup(env[i] + var_len + 1));
+// 		i++;
+// 	}
+// 	return (ft_strdup(""));
+// }
+char *get_env_val(const char *var_name, char **env)
+{
+    int     i;
+    size_t  var_len;
+    char    *val;
+    
+    if (!var_name || !*var_name || !env)
+    {
+        val = ft_strdup("");
+        if (val)
+            register_allocation(val, "ENV_EMPTY", __func__);
+        return val;
+    }
+    
+    var_len = ft_strlen(var_name);
+    i = 0;
+    while (env[i])
+    {
+        if (!ft_strncmp(env[i], var_name, var_len) && env[i][var_len] == '=')
+        {
+            val = ft_strdup(env[i] + var_len + 1);
+            if (val)
+                register_allocation(val, "ENV_VALUE", __func__);
+            fprintf(stderr, "[MEM_TRACK] Allocated env value for '%s' at %p\n", 
+                    var_name, (void*)val);
+            return val;
+        }
+        i++;
+    }
+    
+    val = ft_strdup("");
+    if (val)
+        register_allocation(val, "ENV_NOTFOUND", __func__);
+    return val;
+}
+
+/**
+ * Central variable expansion engine that handles all expansion cases
+ * 
+ * @param input       Input string (NULL if var_name is provided)
+ * @param pos         Position in input string (updated if not NULL)
+ * @param var_name    Pre-extracted variable name (NULL if input/pos provided)
+ * @param vars        Shell variables structure
+ * 
+ * @return Newly allocated string with expansion result
+ */
+char *expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
+{
+    char *local_var_name = NULL;
+    char *result = NULL;
+    int free_var_name = 0;
+    
+    fprintf(stderr, "DEBUG: expand_variable: Called with %s\n", 
+            var_name ? var_name : (input ? "input string" : "NULL"));
+    
+    // Extract variable name if not provided
+    if (!var_name && input && pos) {
+        // Skip the $ character
+        (*pos)++;
+        
+        // Handle special case - end of string or whitespace
+        if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n') {
+            fprintf(stderr, "DEBUG: expand_variable: Lone $ detected\n");
+            result = ft_strdup("$");
+            #ifdef DEBUG_MEMORY
+            register_allocation(result, "LITERAL_$", __func__);
+            #endif
+            return result;
+        }
+        
+        // Handle special case - exit status
+        if (input[*pos] == '?') {
+            (*pos)++;
+            result = ft_itoa(vars->error_code);
+            fprintf(stderr, "DEBUG: expand_variable: $? expanded to '%s'\n", result);
+            #ifdef DEBUG_MEMORY
+            register_allocation(result, "EXIT_STATUS", __func__);
+            #endif
+            return result;
+        }
+        
+        // Extract regular variable name
+        local_var_name = get_var_name(input, pos);
+        var_name = local_var_name;
+        free_var_name = 1;
+    }
+    
+    // Handle the variable expansion
+    if (!var_name || !*var_name) {
+        result = ft_strdup(var_name ? "$" : "");
+        fprintf(stderr, "DEBUG: expand_variable: Empty variable name\n");
+    } else if (ft_strcmp(var_name, "?") == 0) {
+        result = ft_itoa(vars->error_code);
+        fprintf(stderr, "DEBUG: expand_variable: $? expanded to '%s'\n", result);
+    } else if (ft_strcmp(var_name, "0") == 0) {
+        result = ft_strdup("bleshell");
+        fprintf(stderr, "DEBUG: expand_variable: $0 expanded to 'bleshell'\n");
+    } else {
+        // Try special variables first
+        result = handle_special_var(var_name, vars);
+        
+        // If not a special var, try environment variable
+        if (!result) {
+            result = get_env_val(var_name, vars->env);
+            if (!result)
+                result = ft_strdup("");
+            fprintf(stderr, "DEBUG: expand_variable: Expanded '%s' to '%s'\n", 
+                    var_name, result);
+        }
+    }
+    
+    // Register the allocation
+    #ifdef DEBUG_MEMORY
+    if (result)
+        register_allocation(result, var_name ? var_name : "EMPTY", __func__);
+    #endif
+    
+    // Clean up if we created a local variable name
+    if (free_var_name && local_var_name)
+        free(local_var_name);
+        
+    return result;
 }
 
 /*

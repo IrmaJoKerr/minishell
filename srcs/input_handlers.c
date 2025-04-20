@@ -6,100 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 21:49:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 00:30:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-// /*
-// Processes heredoc input from command array
-// Stores heredoc lines in vars->heredoc_lines
-// Executes the heredoc command
-// */
-// void	proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars)
-// {
-// 	int	i;
-
-// 	// Free existing heredoc lines if any
-// 	if (vars->heredoc_lines)
-// 		ft_free_2d(vars->heredoc_lines, vars->heredoc_count);
-// 	// Set up new heredoc storage
-// 	vars->heredoc_count = line_count - 1;
-// 	vars->heredoc_lines = malloc(sizeof(char*) * vars->heredoc_count);
-// 	vars->heredoc_index = 0;
-// 	// Store heredoc lines
-// 	if (vars->heredoc_lines)
-// 	{
-// 		DBG_PRINTF(1, "Storing %d lines for heredoc\n", vars->heredoc_count);
-// 		i = 0;
-// 		while (i < vars->heredoc_count)
-// 		{
-// 			vars->heredoc_lines[i] = ft_strdup(cmdarr[i+1]);
-// 			DBG_PRINTF(1, "  Stored: '%s'\n", vars->heredoc_lines[i]);
-// 			i++;
-// 		}
-// 	}
-// 	// Process the heredoc command
-// 	DBG_PRINTF(1, "Processing heredoc command: '%s'\n", cmdarr[0]);
-// 	add_history(cmdarr[0]);
-// 	process_command(cmdarr[0], vars);
-// }
-
-// /* FLAG FOR REUSE. CAN BE USED FOR PASTED INPUT
-// Processes multiple command lines from command array
-// Adds commands to history and processes them
-// */
-// void	proc_multiline_input(char **cmdarr, int line_count, t_vars *vars)
-// {
-// 	int	i;
-	
-// 	i = 0;
-// 	while (i < line_count)
-// 	{
-// 		if (*cmdarr[i])
-// 		{
-// 			DBG_PRINTF(1, "Processing command: '%s'\n", cmdarr[i]);
-// 			add_history(cmdarr[i]);
-// 			process_command(cmdarr[i], vars);
-// 		}
-// 		i++;
-// 	}
-// }
-
-/*
-Handles user input and processes commands
-Manages both single-line and multi-line inputs
-Detects and processes heredoc inputs
-*/
-// void	handle_input(char *input, t_vars *vars)
-// {
-// 	char	**cmdarr;
-// 	int		count;
-	
-// 	if (!input || !*input)
-// 		return;
-// 	if (ft_strchr(input, '\n'))
-// 	{
-// 		DBG_PRINTF(1, "Multi-line input detected\n");
-// 		cmdarr = ft_split(input, '\n');
-// 		if (!cmdarr)
-// 			return ;
-// 		count = ft_arrlen(cmdarr);
-// 		if (count > 1 && ft_strnstr(cmdarr[0], "<<" , ft_strlen(cmdarr[0])))
-// 			proc_heredoc_input(cmdarr, count, vars);
-// 		else
-// 		{
-// 			proc_multiline_input(cmdarr, count, vars);
-// 		}
-// 		ft_free_2d(cmdarr, count);
-// 	}
-// 	else
-// 	{
-// 		DBG_PRINTF(1, "Single-line input: '%s'\n", input);
-// 		process_command(input, vars);
-// 	}
-// }
 
 /*
 Completes input based on its determined mode.
@@ -190,23 +101,8 @@ Parameters:
 Returns:
 - Processed line with variables expanded (newly allocated)
 - Original line duplicated if no expansion needed
+Updated process_heredoc_line to use hd_expand directly
 */
-// char *process_heredoc_line(char *line, t_vars *vars)
-// {
-//     // If we don't have a line, return NULL
-//     if (!line)
-//         return NULL;
-        
-//     // Handle variable expansion for heredoc content
-//     if (vars->pipes->heredoc_delim
-// 		&& !is_quoted_delimiter(vars->pipes->heredoc_delim))
-// 	{
-//         return expand_heredoc_line(line, vars);
-// 	}
-//     // No expansion needed, just duplicate the line
-//     return ft_strdup(line);
-// }
-// Updated process_heredoc_line to use hd_expand directly
 char *process_heredoc_line(char *line, t_vars *vars)
 {
     // If we don't have a line, return NULL
@@ -257,68 +153,6 @@ void process_command_with_heredoc(char *cmd_line, t_vars *vars)
     
     fprintf(stderr, "[DEBUG] process_cmd_heredoc: Command processed, heredoc state reset\n");
 }
-
-// /*
-// Non-recursive helper that processes a single command line.
-// Contains the core of handle_input without the multiline detection.
-
-// Parameters:
-// - input: Single line of input to process
-// - vars: Program state variables
-
-// Returns: void
-// */
-// void process_single_command(char *input, t_vars *vars)
-// {
-//     char *completed_input;
-//     t_inmode mode;
-    
-//     fprintf(stderr, "[DEBUG] process_single_command: Processing '%s'\n", input);
-    
-//     if (!input || !*input)
-//         return;
-    
-//     // Duplicate input to partial_input
-//     vars->partial_input = ft_strdup(input);
-//     if (!vars->partial_input)
-//         return;
-    
-//     // Check if we're in heredoc continuation
-//     if (vars->heredoc_active)
-//     {
-//         fprintf(stderr, "[DEBUG] process_single_command: Continuing heredoc input\n");
-//         process_heredoc_continuation(vars->partial_input, vars);
-//         clear_partial_input(vars);
-//         return;
-//     }
-    
-//     // Check input state and complete as needed
-//     mode = check_input_state(vars->partial_input, vars);
-//     fprintf(stderr, "[DEBUG] process_single_command: Input mode: %d\n", mode);
-    
-//     completed_input = complete_input(vars->partial_input, mode, vars);
-//     if (!completed_input)
-//     {
-//         clear_partial_input(vars);
-//         return;
-//     }
-    
-//     if (completed_input != vars->partial_input)
-//     {
-//         free(vars->partial_input);
-//         vars->partial_input = completed_input;
-//     }
-    
-//     // Process tokens and execute
-//     if (!process_input_tokens(vars->partial_input, vars))
-//     {
-//         clear_partial_input(vars);
-//         return;
-//     }
-    
-//     build_and_execute(vars);
-//     clear_partial_input(vars);
-// }
 
 /*
 Helper function to read an entire file into memory.
@@ -470,7 +304,7 @@ int process_multiline_input(char *input, t_vars *vars)
     char **lines;
     int i = 0;
     int heredoc_found = 0;
-    char *heredoc_delimiter = NULL;
+    // char *heredoc_delimiter = NULL;
     int fd;
     
     fprintf(stderr, "[DEBUG] process_multiline_input: Processing multiline input\n");
@@ -489,11 +323,11 @@ int process_multiline_input(char *input, t_vars *vars)
         fprintf(stderr, "[DEBUG] process_multiline_input: First line contains heredoc operator\n");
         
         // Extract and process the delimiter using our unified function
-        heredoc_delimiter = get_heredoc_delimiter(lines[0], vars);
-        if (heredoc_delimiter)
+        get_heredoc_delimiter(lines[0], vars);
+        if (vars->pipes->heredoc_delim)
         {
             fprintf(stderr, "[DEBUG] process_multiline_input: Found heredoc delimiter: '%s'\n", 
-                    heredoc_delimiter);
+				vars->pipes->heredoc_delim);
             heredoc_found = 1;
             
             // Note: No need to store the delimiter and expansion flag here
@@ -507,8 +341,8 @@ int process_multiline_input(char *input, t_vars *vars)
     {
         fprintf(stderr, "[ERROR] process_multiline_input: Failed to open temp file: %s\n", 
                 strerror(errno));
-        if (heredoc_delimiter)
-            free(heredoc_delimiter);
+        if (vars->pipes->heredoc_delim)
+            free(vars->pipes->heredoc_delim);
         ft_free_2d(lines, ft_arrlen(lines));
         return 0;
     }
@@ -573,11 +407,11 @@ int process_multiline_input(char *input, t_vars *vars)
             fprintf(stderr, "[DEBUG] process_multiline_input: Delimiter was found in input\n");
             // Process the command with heredoc input ready
             
-            // FREE THE LOCAL COPY HERE TO AVOID DOUBLE FREE LATER
-            if (heredoc_delimiter) {
-                free(heredoc_delimiter);
-                heredoc_delimiter = NULL;
-            }
+            // // FREE THE LOCAL COPY HERE TO AVOID DOUBLE FREE LATER
+            // if (heredoc_delimiter) {
+            //     free(heredoc_delimiter);
+            //     heredoc_delimiter = NULL;
+            // }
             
             process_command_with_heredoc(lines[0], vars);
         }
@@ -601,8 +435,8 @@ int process_multiline_input(char *input, t_vars *vars)
     }
     
     // Clean up
-    if (heredoc_delimiter)
-        free(heredoc_delimiter);
+    // if (heredoc_delimiter)
+    //     free(heredoc_delimiter);
     ft_free_2d(lines, ft_arrlen(lines));
     return 1;
 }
@@ -1018,20 +852,24 @@ Returns: void
 */
 void setup_heredoc_mode(char *input, t_vars *vars)
 {
-    char *delimiter;
+    
     
     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setting up heredoc\n");
     
     // Extract and process the delimiter using our unified function
-    delimiter = get_heredoc_delimiter(input, vars);
-    if (!delimiter)
+    get_heredoc_delimiter(input, vars);
+    if (!vars->pipes->heredoc_delim)
+	{
+		fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
+		return;
+	}
     {
         fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
         return;
     }
     
     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Got delimiter: '%s', expand_vars=%d\n",
-            delimiter, vars->pipes->hd_expand);
+            vars->pipes->heredoc_delim, vars->pipes->hd_expand);
     
     // Mark heredoc as active for interactive input
     vars->heredoc_active = 1;
@@ -1045,8 +883,8 @@ void setup_heredoc_mode(char *input, t_vars *vars)
         setup_interactive_heredoc(vars, vars->pipes->hd_expand);
     }
     
-    // Free local copy since the data is now stored in vars->pipes->heredoc_delim
-    free(delimiter);
+    // // Free local copy since the data is now stored in vars->pipes->heredoc_delim
+    // free(delimiter);
     
     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setup complete, active=%d, mode=%d\n", 
             vars->heredoc_active, vars->heredoc_mode);

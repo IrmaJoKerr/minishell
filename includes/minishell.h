@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 22:59:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 01:19:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,6 +404,7 @@ Expansion handling.
 In expansion.c
 */
 char		*handle_special_var(const char *var_name, t_vars *vars);
+char		*expand_variable(char *input, int *pos, char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 char		*handle_expansion(char *input, int *pos, t_vars *vars);
@@ -433,8 +434,9 @@ int			handle_heredoc_err(t_vars *vars);
 // int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			reset_heredoc_pipe(t_vars *vars);
-int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
-char 		*get_heredoc_delimiter(char *input, t_vars *vars);
+// int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
+// char 		*get_heredoc_delimiter(char *input, t_vars *vars);
+void 		get_heredoc_delimiter(char *input, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
 // int			proc_heredoc(t_node *node, t_vars *vars);
 
@@ -564,6 +566,28 @@ char		**setup_args(char *token);
 int			**setup_quotes(int len);
 void		make_node_arrays(t_node *node, char *token);
 
+/*
+Memory debugging functions.
+*/
+void ensure_token_cleanup(t_node *node_chain);
+void *tracked_malloc(size_t size, const char *func, int line);
+void tracked_free(void *ptr, const char *func, int line);
+void print_memory_stats(void);
+int safe_open(const char *path, int flags, mode_t mode);
+int safe_close(int fd);
+void close_all_tracked_fds(void);
+int *alloc_pipe_fds(int pipe_count);
+void close_all_pipe_fds(int *pipe_fds, int pipe_count);
+void final_cleanup(t_vars *vars);
+void verify_memory(void *ptr, const char *name, const char *func, int line);
+void register_external_free(void *ptr, const char *func, int line);
+void verify_memory_range(void *ptr, size_t size, const char *name, 
+	const char *func, int line);
+void register_allocation(void *ptr, const char *type, const char *caller_func);
+void verify_token_list_integrity(t_vars *vars);
+void track_alloc(void *ptr, const char *func, int line);
+void track_free(void *ptr, const char *func, int line);
+void cleanup_expansion_mem(char *token, char *expanded_val);
 /*
 Minishell program entry point functions.
 In minishell.c

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 23:32:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 11:52:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -402,13 +402,19 @@ int	build_token_linklist(t_vars *vars, t_node *node)
 {
     t_node *cmd_node;
     
-    if (!vars || !node) 
+    if (!vars || !node)
+	{
         return (0);
+	}
+	DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Adding node type=%d (%s), content='%s'\n", 
+		node->type, get_token_str(node->type), 
+		node->args ? node->args[0] : "NULL");
     // Case 1: First node becomes the head
     if (!vars->head)
     {
         vars->head = node;
         vars->current = node;
+		DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Set as head %p\n", (void*)node);
         return (0);
     }
     // Case 2: Heredoc operator (<<) handling
@@ -452,6 +458,13 @@ int	build_token_linklist(t_vars *vars, t_node *node)
     if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
     {
         cmd_node = vars->current;
+		t_node *next_node = node->next;  // Store the next node before we free
+        
+        DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Merging ARG '%s' into CMD '%s'\n", 
+                  node->args[0], cmd_node->args[0]);
+        DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Node to merge: %p, next=%p\n", 
+                  (void*)node, (void*)next_node);
+				  
         append_arg(cmd_node, node->args[0], 0);
         if (node->args)
         {
@@ -459,11 +472,23 @@ int	build_token_linklist(t_vars *vars, t_node *node)
             free(node->args);
         }
         node->args = NULL;
+		// Update links before freeing
+        if (next_node)
+        {
+            DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Preserving next link %p\n", 
+                      (void*)next_node);
+            cmd_node->next = next_node;
+            next_node->prev = cmd_node;
+        }
         free_token_node(node);
+		DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: After merge, CMD '%s', next=%p\n", 
+			cmd_node->args[0], (void*)cmd_node->next);
         return (1);  // Indicate that the node was freed
     }
     else
     {
+		DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Linking node %p to current %p\n", 
+			(void*)node, (void*)vars->current);
         token_link(node, vars);
         return (0);  // Node was not freed
     }
@@ -472,16 +497,31 @@ int	build_token_linklist(t_vars *vars, t_node *node)
 /* Debug function */
 void debug_token_list(t_vars *vars)
 {
-	t_node *current = vars->head;
-	int count = 0;
-	
-	DBG_PRINTF(DEBUG_TOKENIZE, "=== COMPLETE TOKEN LIST ===\n");
-	while (current)
-	{
-		DBG_PRINTF(DEBUG_TOKENIZE, "Token %d: type=%d (%s), content='%s'\n", 
-				  count++, current->type, get_token_str(current->type), 
-				  current->args ? current->args[0] : "NULL");
-		current = current->next;
-	}
-	DBG_PRINTF(DEBUG_TOKENIZE, "========================\n");
+    t_node *current = vars->head;
+    int count = 0;
+    
+    DBG_PRINTF(DEBUG_TOKENIZE, "=== COMPLETE TOKEN LIST WITH POINTERS ===\n");
+    while (current)
+    {
+        DBG_PRINTF(DEBUG_TOKENIZE, "Token %d: type=%d (%s), content='%s'\n", 
+                  count, current->type, get_token_str(current->type), 
+                  current->args ? current->args[0] : "NULL");
+        DBG_PRINTF(DEBUG_TOKENIZE, "       Address: %p, Prev: %p, Next: %p\n", 
+                  (void*)current, (void*)current->prev, (void*)current->next);
+        
+        if (current->args && current->args[1])
+        {
+            int arg_idx = 1;
+            while (current->args[arg_idx])
+            {
+                DBG_PRINTF(DEBUG_TOKENIZE, "       Arg[%d]: '%s'\n", 
+                          arg_idx, current->args[arg_idx]);
+                arg_idx++;
+            }
+        }
+        
+        current = current->next;
+        count++;
+    }
+    DBG_PRINTF(DEBUG_TOKENIZE, "======================================\n\n");
 }

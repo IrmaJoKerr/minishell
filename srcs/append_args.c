@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 20:39:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/20 18:25:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,34 @@ String: "Hello"'world'!
 Args: ["Hello", "world"]
 Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 */
+// void	append_arg(t_node *node, char *new_arg, int quote_type)
+// {
+// 	char	**new_args;
+// 	int		**new_quote_types;
+// 	size_t	len;
+	
+// 	if (!node || !new_arg || !node->args)
+// 		return ;
+// 	len = ft_arrlen(node->args);
+// 	new_args = dup_node_args(node, len);
+// 	if (!new_args)
+// 		return ;
+// 	new_args[len] = ft_strdup(new_arg);
+// 	if (!new_args[len])
+// 	{
+// 		ft_free_2d(new_args, len);
+// 		return ;
+// 	}
+// 	new_args[len + 1] = NULL;
+// 	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
+// 	if (!new_quote_types)
+// 		return ;
+// 	ft_free_2d(node->args, len);
+// 	if (node->arg_quote_type)
+// 		ft_free_int_2d(node->arg_quote_type, len);
+// 	node->args = new_args;
+// 	node->arg_quote_type = new_quote_types;
+// }
 void	append_arg(t_node *node, char *new_arg, int quote_type)
 {
 	char	**new_args;
@@ -180,7 +208,11 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 	
 	if (!node || !new_arg || !node->args)
 		return ;
+	DBG_PRINTF(DEBUG_ARGS, "append_arg: Adding '%s' to node %p\n", 
+		new_arg, (void*)node);
 	len = ft_arrlen(node->args);
+	DBG_PRINTF(DEBUG_ARGS, "append_arg: Current args count: %zu\n", len);
+    
 	new_args = dup_node_args(node, len);
 	if (!new_args)
 		return ;
@@ -194,11 +226,15 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
 	if (!new_quote_types)
 		return ;
+	DBG_PRINTF(DEBUG_ARGS, "append_arg: Freeing old arrays: args=%p, quotes=%p\n", 
+		(void*)node->args, (void*)node->arg_quote_type);
 	ft_free_2d(node->args, len);
 	if (node->arg_quote_type)
 		ft_free_int_2d(node->arg_quote_type, len);
 	node->args = new_args;
 	node->arg_quote_type = new_quote_types;
+	DBG_PRINTF(DEBUG_ARGS, "append_arg: Added arg, now node has %zu arguments\n", 
+		ft_arrlen(node->args));
 }
 
 /*
