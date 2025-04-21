@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 18:19:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 19:16:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -554,37 +554,31 @@ int process_multiline_input(char *input, t_vars *vars)
     char	*content_start;
     int		first_line_len;
     int		tokenize_success;
-    int     fd; // Added for writing to TMP_BUF
+    int     store_result; // To store result from store_multiline_heredoc_content
 
     fprintf(stderr, "[ML_DEBUG] process_multiline_input: START\n"); // DEBUG
-    // Find the end of the first line
     first_line_end = ft_strchr(input, '\n');
     if (!first_line_end) {
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: No newline found (shouldn't happen here)\n"); // DEBUG
-        process_command(input, vars); // Treat as single line just in case
+        process_command(input, vars);
         return (0);
     }
     first_line_len = first_line_end - input;
-    content_start = first_line_end + 1; // Start of the rest of the content
+    content_start = first_line_end + 1;
 
-    // Temporarily null-terminate the first line for tokenization
     *first_line_end = '\0';
     fprintf(stderr, "[ML_DEBUG] process_multiline_input: Tokenizing first line: '%.*s'\n", first_line_len, input); // DEBUG
 
-    // Tokenize the first line - this will call validate_heredoc_delimiter if << is present
-    reset_shell(vars); // Reset token list etc. before tokenizing
+    reset_shell(vars);
     tokenize_success = improved_tokenize(input, vars);
 
-    // Restore the newline character
-    *first_line_end = '\n';
+    *first_line_end = '\n'; // Restore newline
 
     if (!tokenize_success || vars->error_code == ERR_SYNTAX) {
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Tokenization failed or syntax error on first line.\n"); // DEBUG
-        // Error message should have been printed by tokenizer/validator
-        return (0); // Indicate failure
+        return (0);
     }
 
-    // Check if tokenization resulted in a valid heredoc delimiter being stored
     if (vars->pipes->heredoc_delim != NULL)
     {
         // --- HEREDOC PATH ---
@@ -592,11 +586,16 @@ int process_multiline_input(char *input, t_vars *vars)
         fprintf(stderr, "[DEBUG] process_multiline_input: Heredoc delimiter '%s' validated.\n", vars->pipes->heredoc_delim);
 
         // *** Perform Trailing Character Check ***
-        t_node *heredoc_node = vars->head; // Start searching from head
+        // (Keep your existing trailing character check logic here...)
+        t_node *heredoc_node = vars->head;
         t_node *delimiter_node = NULL;
         while(heredoc_node) {
             if (heredoc_node->type == TYPE_HEREDOC) {
+                // Find the actual delimiter node, skipping potential whitespace tokens
                 delimiter_node = heredoc_node->next;
+                while (delimiter_node && ft_isspace(*(delimiter_node->args[0])) && delimiter_node->next) {
+                     delimiter_node = delimiter_node->next; // Skip whitespace token if tokenizer created one
+                }
                 if (delimiter_node && delimiter_node->type == TYPE_ARGS) {
                      fprintf(stderr, "[ML_DEBUG] Found potential delimiter node: type=%d, content='%s'\n",
                              delimiter_node->type, delimiter_node->args ? delimiter_node->args[0] : "NULL"); // DEBUG
@@ -607,71 +606,78 @@ int process_multiline_input(char *input, t_vars *vars)
             }
             heredoc_node = heredoc_node->next;
         }
-
-        if (!delimiter_node || !delimiter_node->args || !delimiter_node->args[0]) {
+         if (!delimiter_node || !delimiter_node->args || !delimiter_node->args[0]) {
             fprintf(stderr, "[ERROR] process_multiline_input: Could not find delimiter token node after validation.\n");
             return (0); // Internal error
         }
-
         // Calculate position after the raw delimiter token on the first line
-        // Search for the raw delimiter string *after* the "<<" on the first line.
-        // Use ft_strnstr and search within the first line's length
-        char *heredoc_op_ptr = ft_strnstr(input, "<<", first_line_len); // Use ft_strnstr with length
+        char *heredoc_op_ptr = ft_strnstr(input, "<<", first_line_len);
         char *raw_delim_in_line = NULL;
         if (heredoc_op_ptr) {
-            // Search for the raw delimiter in the part of the first line *after* "<<"
             int search_start_offset = (heredoc_op_ptr - input) + 2;
             int remaining_len = first_line_len - search_start_offset;
             if (remaining_len > 0) {
-                 raw_delim_in_line = ft_strnstr(input + search_start_offset, delimiter_node->args[0], remaining_len); // Use ft_strnstr
+                 // Search for the RAW delimiter token content (e.g., "'END'" or "END")
+                 raw_delim_in_line = ft_strnstr(input + search_start_offset, delimiter_node->args[0], remaining_len);
             }
         }
-
-        if (!raw_delim_in_line) {
-             // Temporarily null-terminate for printing
+         if (!raw_delim_in_line) {
              *first_line_end = '\0';
              fprintf(stderr, "[ERROR] process_multiline_input: Could not find raw delimiter '%s' in first line '%s'.\n",
                      delimiter_node->args[0], input); // DEBUG
              *first_line_end = '\n'; // Restore
              return 0;
         }
-        // Calculate position relative to the start of the original 'input' buffer
-        int pos_after_raw_delim = (raw_delim_in_line - input) + strlen(delimiter_node->args[0]);
+        int pos_after_raw_delim = (raw_delim_in_line - input) + ft_strlen(delimiter_node->args[0]);
         fprintf(stderr, "[ML_DEBUG] Checking trailing chars after pos %d in first line.\n", pos_after_raw_delim); // DEBUG
-
-
-        // Temporarily null-terminate first line again for check_trailing_chars
         *first_line_end = '\0';
-        if (!check_trailing_chars(input, pos_after_raw_delim)) {
-            *first_line_end = '\n'; // Restore newline
+        if (!check_trailing_chars(input, pos_after_raw_delim))
+		{
+            *first_line_end = '\n';
             vars->error_code = ERR_SYNTAX;
-            return (0); // Syntax error
+            return (0);
         }
-         *first_line_end = '\n'; // Restore newline
+         *first_line_end = '\n';
+        // *** End Trailing Character Check ***
 
-        // Trailing chars OK, proceed to store content
+
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Trailing chars OK. Storing content starting from: '%.20s...'\n", content_start); // DEBUG
-        if (!store_multiline_heredoc_content(content_start, vars)) {
-            fprintf(stderr, "[ML_DEBUG] process_multiline_input: Failed to store heredoc content.\n"); // DEBUG
-            return (0); // Failure during storage
+
+        // --- MODIFICATION START ---
+        // 1. Attempt to store content from the initial buffer
+        store_result = store_multiline_heredoc_content(content_start, vars);
+
+        if (store_result == -1) {
+            fprintf(stderr, "[ML_DEBUG] process_multiline_input: Failed to store initial heredoc content.\n"); // DEBUG
+            return (0); // Error during storage
         }
+        else if (store_result == 1) {
+            // 2. Delimiter not found in buffer, read interactively
+            fprintf(stderr, "[ML_DEBUG] process_multiline_input: Delimiter not in buffer, reading interactively.\n"); // DEBUG
+            if (read_heredoc_interactive(vars) == -1) {
+                 fprintf(stderr, "[ML_DEBUG] process_multiline_input: Failed during interactive heredoc reading.\n"); // DEBUG
+                 return (0); // Error during interactive read
+            }
+        }
+        // If store_result was 0, delimiter was found in buffer, no interactive read needed.
+        // --- MODIFICATION END ---
+
 
         // Set mode and process the first line command
         vars->heredoc_mode = 1; // Indicate content is pre-stored
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Executing command from first line with stored heredoc.\n"); // DEBUG
-        // Restore null-termination for process_command
         *first_line_end = '\0';
         process_command(input, vars); // Execute the command part
-        *first_line_end = '\n'; // Restore again
+        *first_line_end = '\n';
         vars->heredoc_mode = 0; // Reset mode after execution
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: HEREDOC path finished.\n"); // DEBUG
     }
     else
     {
         // --- NON-HEREDOC MULTILINE PATH ---
+        // (Keep your existing non-heredoc logic here...)
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: NON-HEREDOC path entered.\n"); // DEBUG
-
-        // 1. Write the ENTIRE original input buffer to TMP_BUF
+        int fd;
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Writing full input (%zu bytes) to TMP_BUF.\n", ft_strlen(input)); // DEBUG
         fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
         if (fd == -1) {
@@ -688,8 +694,6 @@ int process_multiline_input(char *input, t_vars *vars)
         }
         close(fd);
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Finished writing to TMP_BUF.\n"); // DEBUG
-
-        // 2. Call the function to process commands from TMP_BUF
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Calling read_and_process_from_tmp_buf.\n"); // DEBUG
         read_and_process_from_tmp_buf(vars);
         fprintf(stderr, "[ML_DEBUG] process_multiline_input: Returned from read_and_process_from_tmp_buf.\n"); // DEBUG

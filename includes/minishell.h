@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 17:44:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 19:15:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ extern volatile sig_atomic_t	g_signal_received;
 #define DEBUG_ARGS 1
 #define DEBUG_EXPAND 1
 #define DEBUG_EXEC 1
+#define DEBUG_HEREDOC 1 
 
 // Debug print macro for cleaner code
 #define DBG_PRINTF(flag, fmt, ...) \
@@ -421,8 +422,9 @@ char		*read_heredoc_str(char *line, int *pos);
 char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
 char		*expand_heredoc_line(char *line, t_vars *vars);
 // int			chk_expand_heredoc(char *delimiter);
-int write_to_heredoc(int fd, char *line, t_vars *vars);
-int store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
+int			write_to_heredoc(int fd, char *line, t_vars *vars);
+int			store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
+int			read_heredoc_interactive(t_vars *vars);
 // int			read_heredoc(int *fd, char *delimiter
 // 				,t_vars *vars, int expand_vars);
 // void		cleanup_heredoc_storage(t_vars *vars);

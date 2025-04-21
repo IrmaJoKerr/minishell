@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 17:39:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 19:16:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -476,70 +476,256 @@ int write_to_heredoc(int fd, char *line, t_vars *vars)
         return (1); // Success
 }
 
-/*
-NEW: Stores content from multiline input buffer into TMP_BUF.
-Assumes the first line (with command and delimiter) is already processed.
-Uses the delimiter and expansion flag stored in vars.
-Returns 1 on success, 0 on failure.
-*/
-int store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars)
-{
-    int		fd;
-    char	*current_line;
-    char	*next_line_start;
-    int		line_len;
-    int		found_delimiter = 0;
+// /*
+// NEW: Stores content from multiline input buffer into TMP_BUF.
+// Assumes the first line (with command and delimiter) is already processed.
+// Uses the delimiter and expansion flag stored in vars.
+// Returns 1 on success, 0 on failure.
+// */
+// int store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars)
+// {
+//     int		fd;
+//     char	*current_line;
+//     char	*next_line_start;
+//     int		line_len;
+//     int		found_delimiter = 0;
 
-    if (!input_after_first_line || !vars || !vars->pipes || !vars->pipes->heredoc_delim)
-        return (0);
-    fprintf(stderr, "[DBG_HEREDOC] Storing multiline content, Delim='%s', Expand=%d\n",
-            vars->pipes->heredoc_delim, vars->pipes->hd_expand);
+//     if (!input_after_first_line || !vars || !vars->pipes || !vars->pipes->heredoc_delim)
+//         return (0);
+//     fprintf(stderr, "[DBG_HEREDOC] Storing multiline content, Delim='%s', Expand=%d\n",
+//             vars->pipes->heredoc_delim, vars->pipes->hd_expand);
+//     fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+//     if (fd == -1)
+//     {
+//         perror("bleshell: failed to open temp heredoc file for multiline storage");
+//         vars->error_code = ERR_DEFAULT;
+//         return (0);
+//     }
+//     next_line_start = input_after_first_line;
+//     while (*next_line_start)
+//     {
+//         current_line = next_line_start;
+//         // Find the end of the current line
+//         while (*next_line_start && *next_line_start != '\n')
+//             next_line_start++;
+//         line_len = next_line_start - current_line;
+//         // Check if this line is exactly the delimiter
+//         if (line_len == (int)ft_strlen(vars->pipes->heredoc_delim) &&
+//             ft_strncmp(current_line, vars->pipes->heredoc_delim, line_len) == 0)
+//         {
+//             fprintf(stderr, "[DBG_HEREDOC] Found delimiter in multiline input.\n");
+//             found_delimiter = 1;
+//             break; // Stop processing, don't write delimiter
+//         }
+//         // Write the line (allocate temporarily to pass to write_to_heredoc)
+//         char *temp_line = ft_substr(current_line, 0, line_len);
+//         if (!temp_line) { /* Malloc error */ close(fd); return (0); }
+//         if (!write_to_heredoc(fd, temp_line, vars))
+//         {
+//             free(temp_line);
+//             close(fd);
+//             unlink(TMP_BUF); // Attempt cleanup
+//             return (0); // Write failed
+//         }
+//         free(temp_line);
+//         // Move to the start of the next line (skip '\n')
+//         if (*next_line_start == '\n')
+//             next_line_start++;
+//     }
+//     close(fd);
+//     if (!found_delimiter)
+//     {
+//         fprintf(stderr, "bleshell: warning: here-document delimited by end-of-file (wanted `%s')\n", vars->pipes->heredoc_delim);
+//         // Continue anyway, content up to EOF is stored.
+//     }
+//     fprintf(stderr, "[DBG_HEREDOC] Multiline content stored in %s\n", TMP_BUF);
+//     return (1); // Success (even if delimiter wasn't found, EOF acts as delimiter)
+// }
+/*
+MODIFIED: Stores the content provided in the 'content' buffer into the heredoc
+temporary file (TMP_BUF). Stops if the delimiter is found within the buffer.
+Performs expansion based on vars->pipes->hd_expand.
+
+Returns:
+ 0: Delimiter found within the 'content' buffer.
+ 1: Delimiter NOT found within the 'content' buffer (reached end of buffer).
+-1: Error (e.g., file open/write failed).
+*/
+int store_multiline_heredoc_content(char *content, t_vars *vars)
+{
+    int     fd;
+    char    *line;
+    char    *expanded_line;
+    size_t  delim_len;
+    int     delimiter_found = 0;
+    char    *current_pos = content;
+    char    *next_newline;
+
+    if (!vars->pipes->heredoc_delim)
+        return (-1); // Should not happen if called correctly
+
+    DBG_PRINTF(DEBUG_HEREDOC, "Storing multiline content, Delim='%s', Expand=%d\n",
+               vars->pipes->heredoc_delim, vars->pipes->hd_expand);
+
     fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-    if (fd == -1)
-    {
-        perror("bleshell: failed to open temp heredoc file for multiline storage");
+    if (fd == -1) {
+        perror("bleshell: store_multiline_heredoc_content: open");
         vars->error_code = ERR_DEFAULT;
-        return (0);
+        return (-1);
     }
-    next_line_start = input_after_first_line;
-    while (*next_line_start)
+
+    delim_len = ft_strlen(vars->pipes->heredoc_delim);
+
+    while (current_pos && *current_pos)
     {
-        current_line = next_line_start;
-        // Find the end of the current line
-        while (*next_line_start && *next_line_start != '\n')
-            next_line_start++;
-        line_len = next_line_start - current_line;
-        // Check if this line is exactly the delimiter
-        if (line_len == (int)ft_strlen(vars->pipes->heredoc_delim) &&
-            ft_strncmp(current_line, vars->pipes->heredoc_delim, line_len) == 0)
-        {
-            fprintf(stderr, "[DBG_HEREDOC] Found delimiter in multiline input.\n");
-            found_delimiter = 1;
-            break; // Stop processing, don't write delimiter
+        next_newline = ft_strchr(current_pos, '\n');
+        if (next_newline) {
+            // Extract line without newline
+            line = ft_substr(current_pos, 0, next_newline - current_pos);
+            current_pos = next_newline + 1; // Move past newline for next iteration
+        } else {
+            // Last part of the buffer without a trailing newline
+            line = ft_strdup(current_pos);
+            current_pos = NULL; // Signal end of buffer
         }
-        // Write the line (allocate temporarily to pass to write_to_heredoc)
-        char *temp_line = ft_substr(current_line, 0, line_len);
-        if (!temp_line) { /* Malloc error */ close(fd); return (0); }
-        if (!write_to_heredoc(fd, temp_line, vars))
+
+        if (!line) { close(fd); vars->error_code = ERR_DEFAULT; return (-1); } // Malloc error
+
+        // Check for delimiter
+        if (ft_strncmp(line, vars->pipes->heredoc_delim, delim_len) == 0 &&
+            line[delim_len] == '\0')
         {
-            free(temp_line);
+            DBG_PRINTF(DEBUG_HEREDOC, "Found delimiter in multiline buffer.\n");
+            delimiter_found = 1;
+            free(line);
+            break; // Delimiter found, stop processing buffer
+        }
+
+        // Expand if necessary
+        if (vars->pipes->hd_expand) {
+            // Replace perform_expansion with expand_heredoc_line
+            expanded_line = expand_heredoc_line(line, vars);
+            free(line); // Free the original line
+            if (!expanded_line) { // Check if expansion failed
+                 close(fd);
+                 vars->error_code = ERR_DEFAULT; // Assuming expansion failure sets error
+                 return (-1);
+            }
+            line = expanded_line; // Use the expanded line
+        }
+
+        // Write line + newline to temp file
+        if (write(fd, line, ft_strlen(line)) == -1 || write(fd, "\n", 1) == -1) {
+            perror("bleshell: store_multiline_heredoc_content: write");
+            free(line); // Free line (original or expanded) before returning
             close(fd);
-            unlink(TMP_BUF); // Attempt cleanup
-            return (0); // Write failed
+            vars->error_code = ERR_DEFAULT;
+            return (-1);
         }
-        free(temp_line);
-        // Move to the start of the next line (skip '\n')
-        if (*next_line_start == '\n')
-            next_line_start++;
+        free(line); // Free line (original or expanded) after successful write
+
+        if (!next_newline) break; // Reached end if no newline was found
     }
+
     close(fd);
-    if (!found_delimiter)
-    {
-        fprintf(stderr, "bleshell: warning: here-document delimited by end-of-file (wanted `%s')\n", vars->pipes->heredoc_delim);
-        // Continue anyway, content up to EOF is stored.
+
+    if (!delimiter_found) {
+        // Print warning only if we reached the end of the *initial* buffer without finding delim
+         fprintf(stderr, "bleshell: warning: here-document delimited by end-of-file (wanted `%s')\n", vars->pipes->heredoc_delim);
+         DBG_PRINTF(DEBUG_HEREDOC, "Delimiter NOT found in initial buffer.\n");
+         return (1); // Signal that interactive reading is needed
     }
-    fprintf(stderr, "[DBG_HEREDOC] Multiline content stored in %s\n", TMP_BUF);
-    return (1); // Success (even if delimiter wasn't found, EOF acts as delimiter)
+
+    DBG_PRINTF(DEBUG_HEREDOC, "Multiline content stored in %s (from buffer)\n", TMP_BUF);
+    return (0); // Delimiter was found in the buffer
+}
+
+/*
+Reads heredoc input interactively from stdin until the delimiter is found.
+Appends the input (with expansion if needed) to the heredoc temporary file.
+Assumes TMP_BUF might already contain content from store_multiline_heredoc_content.
+
+Returns:
+ 0: Success (delimiter found or EOF reached after warning).
+-1: Error (e.g., file open/write failed, malloc failed).
+*/
+int read_heredoc_interactive(t_vars *vars)
+{
+    int     fd;
+    char    *line = NULL;
+    char    *expanded_line;
+    size_t  delim_len;
+    int     eof_reached = 0;
+
+    if (!vars->pipes->heredoc_delim)
+        return (-1);
+
+    DBG_PRINTF(DEBUG_HEREDOC, "Starting interactive heredoc reading, Delim='%s', Expand=%d\n",
+               vars->pipes->heredoc_delim, vars->pipes->hd_expand);
+
+    // Open in APPEND mode
+    fd = open(TMP_BUF, O_WRONLY | O_APPEND, 0600);
+    if (fd == -1) {
+        // If the file doesn't exist (e.g., store_multiline failed silently or wasn't called), try creating it.
+        fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+        if (fd == -1) {
+             perror("bleshell: read_heredoc_interactive: open");
+             vars->error_code = ERR_DEFAULT;
+             return (-1);
+        }
+    }
+
+    delim_len = ft_strlen(vars->pipes->heredoc_delim);
+
+    while (!eof_reached)
+    {
+        // Use readline for interactive prompt
+        line = readline("> ");
+
+        // Handle EOF (Ctrl+D)
+        if (!line) {
+            fprintf(stderr, "bleshell: warning: here-document delimited by end-of-file (wanted `%s')\n", vars->pipes->heredoc_delim);
+            eof_reached = 1; // Mark EOF reached
+            break; // Exit loop on EOF
+        }
+
+        // Check for delimiter
+        if (ft_strncmp(line, vars->pipes->heredoc_delim, delim_len) == 0 &&
+            line[delim_len] == '\0')
+        {
+            DBG_PRINTF(DEBUG_HEREDOC, "Found delimiter interactively.\n");
+            free(line);
+            break; // Delimiter found
+        }
+
+        // Expand if necessary
+        if (vars->pipes->hd_expand) {
+            // Use expand_heredoc_line (assuming it exists and handles full line expansion)
+            expanded_line = expand_heredoc_line(line, vars);
+            free(line); // Free the original line from readline
+            if (!expanded_line) { // Check if expansion failed
+                 close(fd);
+                 vars->error_code = ERR_DEFAULT; // Assuming expansion failure sets error
+                 return (-1);
+            }
+            line = expanded_line; // Use the expanded line for writing
+        }
+
+        // Write line + newline to temp file
+        if (write(fd, line, ft_strlen(line)) == -1 || write(fd, "\n", 1) == -1) {
+            perror("bleshell: read_heredoc_interactive: write");
+            free(line); // Free line (original or expanded) before returning
+            close(fd);
+            vars->error_code = ERR_DEFAULT;
+            return (-1);
+        }
+        free(line); // Free line (original or expanded) after successful write
+        line = NULL; // Reset for next readline call
+    }
+
+    close(fd);
+    DBG_PRINTF(DEBUG_HEREDOC, "Interactive heredoc reading finished.\n");
+    return (0); // Success (even if EOF was reached after warning)
 }
 
 // /*
