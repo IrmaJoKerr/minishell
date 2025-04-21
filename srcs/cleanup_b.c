@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 02:07:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 20:02:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,26 +34,37 @@ Works with cleanup_token_list(), build_token_linklist(), maketoken().
 //     }
 // 	free(node);
 // }
-void	free_token_node(t_node *node)
-{	
-    size_t arg_count; // Variable to hold the actual argument count
+#include "../includes/minishell.h" // Ensure includes
+#include "../includes/libft.h"    // Ensure libft includes
+
+/*
+Frees a single token node, including its internal arrays.
+*/
+void free_token_node(t_node *node)
+{
+    size_t current_arg_count;
 
     if (!node)
-        return ;
-
-    // Determine the number of arguments to know the size for arg_quote_type
-    arg_count = 0;
+        return;
+    // 1. Free args array and its contents
     if (node->args)
-        arg_count = ft_arrlen(node->args);
-
-    if (node->args)
-        ft_free_2d(node->args, arg_count); // Use the calculated count
-
+    {
+        // Get current number of arguments
+        current_arg_count = ft_arrlen(node->args);
+        ft_free_2d(node->args, current_arg_count); // Use current length
+        node->args = NULL;
+    }
+    else
+    {
+        current_arg_count = 0; // Set to 0 if args is NULL
+    }
+    // 2. Free arg_quote_type array and its contents
     if (node->arg_quote_type)
     {
-        // Use the actual argument count to free the quote type array correctly
-        ft_free_int_2d(node->arg_quote_type, arg_count); 
+        // Use current_arg_count, which matches the number of inner arrays allocated
+        ft_free_int_2d(node->arg_quote_type, current_arg_count);
         node->arg_quote_type = NULL;
     }
+    // 3. Free the node struct itself
     free(node);
 }
