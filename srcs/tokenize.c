@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 18:42:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 03:23:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -698,6 +698,90 @@ Example: When adding command node
 /*
 MODIFIED: Updates the token list, removing heredoc_active logic.
 */
+// int	build_token_linklist(t_vars *vars, t_node *node)
+// {
+//     t_node *cmd_node;
+
+//     if (!vars || !node)
+//         return (0);
+
+//     DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Adding node type=%d (%s), content='%s'\n",
+//         node->type, get_token_str(node->type),
+//         node->args ? node->args[0] : "NULL");
+
+//     // Case 1: First node becomes the head
+//     if (!vars->head)
+//     {
+//         vars->head = node;
+//         vars->current = node;
+//         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Set as head %p\n", (void*)node);
+//         return (0); // Node added, not freed
+//     }
+
+//     // REMOVED: Heredoc specific logic (Case 2 & 3) - Delimiter is now validated
+//     // and stored during tokenization loop, not in this linking function.
+//     // The << token and its delimiter (as TYPE_ARGS) are linked like normal tokens.
+
+//     // Existing functionality for merging args and handling pipes
+//     if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
+//     {
+//         node->type = TYPE_CMD; // Argument after pipe becomes a command
+//     }
+
+//     if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
+//     {
+//         // Merge ARG into preceding CMD
+//         cmd_node = vars->current;
+//         t_node *next_node = node->next; // Store the next node before modifying links
+
+//         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Merging ARG '%s' into CMD '%s'\n",
+//                   node->args[0], cmd_node->args[0]);
+
+//         append_arg(cmd_node, node->args[0], 0); // Assuming quote_type 0 for now
+
+//         // Free the merged ARG node's content (args array)
+//         if (node->args)
+//         {
+//             free(node->args[0]);
+//             free(node->args);
+//         }
+//         node->args = NULL;
+//         if (node->arg_quote_type) // Free quote types if they exist
+//         {
+//             // Assuming arg_quote_type is array of pointers, need to free sub-arrays if allocated
+//             // Or just free(node->arg_quote_type) if it's a flat array
+//             // Adjust based on your append_arg implementation
+//             free(node->arg_quote_type);
+//             node->arg_quote_type = NULL;
+//         }
+
+
+//         // Update links carefully before freeing the node itself
+//         if (next_node)
+//         {
+//             cmd_node->next = next_node;
+//             next_node->prev = cmd_node;
+//         } else {
+//             cmd_node->next = NULL; // Merged node was the last one
+//             vars->current = cmd_node; // Update current if merged node was last
+//         }
+
+//         // Now free the node structure itself
+//         free(node); // Use free, not free_token_node if args are already handled
+
+//         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: After merge, CMD '%s', next=%p\n",
+//             cmd_node->args[0], (void*)cmd_node->next);
+//         return (1);  // Indicate that the node was freed
+//     }
+//     else
+//     {
+//         // Link normally if not merging
+//         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Linking node %p to current %p\n",
+//             (void*)node, (void*)vars->current);
+//         token_link(node, vars);
+//         return (0);  // Node was linked, not freed
+//     }
+// }
 int	build_token_linklist(t_vars *vars, t_node *node)
 {
     t_node *cmd_node;
@@ -740,20 +824,26 @@ int	build_token_linklist(t_vars *vars, t_node *node)
         append_arg(cmd_node, node->args[0], 0); // Assuming quote_type 0 for now
 
         // Free the merged ARG node's content (args array)
-        if (node->args)
-        {
-            free(node->args[0]);
-            free(node->args);
-        }
-        node->args = NULL;
-        if (node->arg_quote_type) // Free quote types if they exist
-        {
-            // Assuming arg_quote_type is array of pointers, need to free sub-arrays if allocated
-            // Or just free(node->arg_quote_type) if it's a flat array
-            // Adjust based on your append_arg implementation
-            free(node->arg_quote_type);
-            node->arg_quote_type = NULL;
-        }
+        // NOTE: append_arg copies the string, so we need to free the original node's args.
+        // However, free_token_node will handle this. We just need to ensure
+        // the pointers are NULLed out here so free_token_node doesn't double-free
+        // if append_arg failed or had issues (though append_arg should handle its own failures).
+        // The safest approach is to let free_token_node handle the freeing entirely.
+        // We remove the manual frees here.
+
+        // if (node->args)
+        // {
+        //     free(node->args[0]); // This string was duplicated by setup_args
+        //     free(node->args);     // This outer array was allocated by setup_args
+        // }
+        // node->args = NULL; // Prevent double free if free_token_node is called later? No, free_token_node is called now.
+        // if (node->arg_quote_type) // Free quote types if they exist
+        // {
+        //     // This needs ft_free_int_2d, not just free()
+        //     // free(node->arg_quote_type); // INCORRECT - Leaks inner arrays
+        //     // ft_free_int_2d(node->arg_quote_type, 1); // Assuming only 1 arg in the merged node
+        // }
+        // node->arg_quote_type = NULL; // Prevent double free? No, free_token_node is called now.
 
 
         // Update links carefully before freeing the node itself
@@ -766,8 +856,9 @@ int	build_token_linklist(t_vars *vars, t_node *node)
             vars->current = cmd_node; // Update current if merged node was last
         }
 
-        // Now free the node structure itself
-        free(node); // Use free, not free_token_node if args are already handled
+        // Now free the node structure itself AND ITS CONTENTS
+        // free(node); // INCORRECT - Leaks args and arg_quote_type
+        free_token_node(node); // CORRECT - Frees node and its allocated members
 
         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: After merge, CMD '%s', next=%p\n",
             cmd_node->args[0], (void*)cmd_node->next);

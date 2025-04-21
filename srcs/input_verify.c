@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:01:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 03:09:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:21:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ char	*expand_value(char *var_name, t_vars *vars)
 	}
 	else if (ft_strcmp(var_name, "0") == 0)
 	{
-		// Special case for $?
+		// Special case for $0
 		expanded_value = ft_strdup("bleshell");
 		fprintf(stderr, "DEBUG: Handling $0, expanded to '%s'\n", expanded_value);
 	}

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:05:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:20:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Skips whitespace characters in the input string.
 - Updates vars->pos to point to the next non-whitespace.
 Returns:
 Nothing (void function).
-Works with lexerlist() to handle token separation.
+Handles token separation.
 
 Example: Input "  echo hello"
 - Skips the two spaces at the beginning

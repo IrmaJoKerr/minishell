@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 17:47:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:10:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,6 +260,7 @@ int	merge_quoted_token(char *input, char *content, t_vars *vars)
     }
     return (join_success);
 }
+
 /*
 Process a character within quotes in the input string
 Handles extraction, expansion, and creation of tokens
@@ -273,153 +274,13 @@ Return:
 //     char    *content;
 //     t_node  *cmd_node;
 //     t_node  *redir_node;
-    
 //     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
 //         is_redir_target ? " as redirection target" : "");
-        
 //     content = get_quoted_str(input, vars, &quote_type);
 //     if (!content)
 //         return (0);
-    
 //     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
 //         content, is_redir_target);
-        
-//     if (is_redir_target)
-//     {
-//         // Handle quoted filename for redirection
-//         redir_node = find_last_redir(vars);
-//         if (redir_node && is_redirection(redir_node->type))
-//         {
-//             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
-//                 content, redir_node->type);
-            
-//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
-//             t_node *file_node = initnode(TYPE_ARGS, content);
-//             if (!file_node)
-//             {
-//                 free(content);
-//                 return (0);
-//             }
-//             // Connect to the redirection node
-//             redir_node->right = file_node;
-//             // Link into the token list
-//             if (redir_node->next)
-//             {
-//                 file_node->next = redir_node->next;
-//                 redir_node->next->prev = file_node;
-//             }
-//             redir_node->next = file_node;
-//             file_node->prev = redir_node;
-//             // Update current pointer
-//             vars->current = file_node;
-//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-//             free(content);
-//             return (1);
-//         }
-//     }
-//     // Standard quote handling for non-redirection targets
-//     cmd_node = process_quoted_str(&content, quote_type, vars);
-//     if (!cmd_node)
-//     {
-//         free(content);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     if (!merge_quoted_token(input, content, vars))
-//     {
-//         append_arg(cmd_node, content, quote_type);
-//         free(content);
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//     }
-//     return (1);
-// }
-// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
-// {
-//     int     quote_type;
-//     char    *content;
-//     t_node  *cmd_node;
-//     t_node  *redir_node;
-    
-//     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
-//         is_redir_target ? " as redirection target" : "");
-        
-//     content = get_quoted_str(input, vars, &quote_type);
-//     if (!content)
-//         return (0);
-    
-//     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
-//         content, is_redir_target);
-        
-//     if (is_redir_target)
-//     {
-//         // Handle quoted filename for redirection
-//         redir_node = find_last_redir(vars);
-//         if (redir_node && is_redirection(redir_node->type))
-//         {
-//             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
-//                 content, redir_node->type);
-            
-//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
-//             t_node *file_node = initnode(TYPE_ARGS, content);
-//             if (!file_node)
-//             {
-//                 free(content);
-//                 return (0);
-//             }
-//             // Connect to the redirection node
-//             redir_node->right = file_node;
-//             // Link into the token list
-//             if (redir_node->next)
-//             {
-//                 file_node->next = redir_node->next;
-//                 redir_node->next->prev = file_node;
-//             }
-//             redir_node->next = file_node;
-//             file_node->prev = redir_node;
-//             // Update current pointer
-//             vars->current = file_node;
-//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-//             free(content);
-//             return (1);
-//         }
-//     }
-//     // Standard quote handling for non-redirection targets
-//     cmd_node = process_quoted_str(&content, quote_type, vars);
-//     if (!cmd_node)
-//     {
-//         free(content);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     if (!merge_quoted_token(input, content, vars))
-//     {
-//         append_arg(cmd_node, content, quote_type);
-//         free(content);
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//     }
-//     return (1);
-// }
-// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
-// {
-//     int     quote_type;
-//     char    *content;
-//     t_node  *cmd_node;
-//     t_node  *redir_node;
-    
-//     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
-//         is_redir_target ? " as redirection target" : "");
-        
-//     content = get_quoted_str(input, vars, &quote_type);
-//     if (!content)
-//         return (0);
-    
-//     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
-//         content, is_redir_target);
-        
 //     if (is_redir_target)
 //     {
 //         // Handle quoted filename for redirection
@@ -434,10 +295,8 @@ Return:
 //                 vars->pipes->last_heredoc = redir_node;
 //                 fprintf(stderr, "[DEBUG] Heredoc with quoted delimiter detected, disabling expansion\n");
 //             }
-            
 //             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
 //                 content, redir_node->type);
-            
 //             // Create a node for the filename - PASS THE CONTENT DIRECTLY
 //             t_node *file_node = initnode(TYPE_ARGS, content);
 //             if (!file_node)
@@ -513,10 +372,8 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
                 // vars->pipes->last_heredoc = redir_node;
                 fprintf(stderr, "[DEBUG] Heredoc delimiter is quoted. Expansion flag was set to %d during tokenization.\n", vars->pipes->hd_expand);
             }
-
             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
                 content, redir_node->type);
-
             // Create a node for the filename - PASS THE CONTENT DIRECTLY
             // NOTE: For heredoc, 'content' here is the QUOTED delimiter (e.g., "EOF").
             // The actual delimiter used for comparison is stored in vars->pipes->heredoc_delim.
@@ -550,7 +407,6 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         // Maybe set vars->error_code = ERR_SYNTAX; ?
         return (0); // Indicate error
     }
-
     // Standard quote handling for non-redirection targets
     cmd_node = process_quoted_str(&content, quote_type, vars);
     if (!cmd_node && vars->adj_state[0] == 0) // If no command node AND no left adjacency
@@ -591,8 +447,6 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
          // free(content); // Content freed by merge_quoted_token or handle_tok_join
          return (1);
     }
-
-
     // We have a command node, try merging or appending
     if (!merge_quoted_token(input, content, vars))
     {
@@ -605,26 +459,9 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
     }
      // If merge succeeded, content is handled by merge_quoted_token
      // free(content); // Content freed by merge_quoted_token or handle_tok_join
-
     return (1);
 }
 
-// t_node *find_last_redir(t_vars *vars)
-// {
-//     t_node *current = vars->current;
-//     while (current && current->prev)
-//     {
-//         current = current->prev;
-//         if (is_redirection(current->type))
-//         {
-//             // In find_last_redir()
-//             fprintf(stderr, "DEBUG: find_last_redir: Found redirection node at %p, type=%d\n",
-//                 (void*)current, current ? (int)current->type : 0);
-//             return current;
-//         }
-//     }
-//     return NULL;
-// }
 t_node *find_last_redir(t_vars *vars)
 {
     t_node *current;
@@ -637,7 +474,6 @@ t_node *find_last_redir(t_vars *vars)
                 (int)vars->current->type);
         return vars->current;
     }
-    
     // Try the most recent nodes
     current = vars->current;
     i = 0;
@@ -649,28 +485,28 @@ t_node *find_last_redir(t_vars *vars)
         if (is_redirection(current->type)) {
             fprintf(stderr, "DEBUG: find_last_redir: Found redirection at %d steps back, type=%d\n", 
                     i, (int)current->type);
-            return current;
+            return (current);
         }
     }
-    
     // Last resort: scan from head for the last redirection
     current = vars->head;
     t_node *last_redir = NULL;
-    
-    while (current) {
+    while (current)
+	{
         if (is_redirection(current->type)) {
             last_redir = current;
         }
         current = current->next;
     }
-    
-    if (last_redir) {
+    if (last_redir)
+	{
         fprintf(stderr, "DEBUG: find_last_redir: Found last redirection in scan, type=%d\n", 
                 (int)last_redir->type);
-    } else {
+    }
+	else
+	{
         fprintf(stderr, "DEBUG: find_last_redir: No redirection found\n");
     }
-    
     return last_redir;
 }
 
@@ -679,15 +515,14 @@ int validate_redirection_targets(t_vars *vars)
     t_node *current = vars->head;
     t_node *next;
     
+	current = vars->head;
     fprintf(stderr, "DEBUG: In validate_redirection_targets().Validating redirection targets\n");
-    
     while (current)
     {
         if (is_redirection(current->type))
         {
             fprintf(stderr, "DEBUG: In validate_redirection_targets().Found redirection of type %d at %p\n", 
                     (int)current->type, (void*)current);
-            
             // Check if it's the last token or the next token is another operator
             next = current->next;
             if (!next || is_redirection(next->type) || next->type == TYPE_PIPE)
@@ -695,11 +530,10 @@ int validate_redirection_targets(t_vars *vars)
                 fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - missing target\n");
                 shell_error("syntax error near unexpected token `newline'", ERR_ISDIRECTORY, vars);
                 vars->error_code = 2; // Syntax error
-                return 0;
+                return (0);
             }
         }
         current = current->next;
     }
-    
-    return 1;
+    return (1);
 }

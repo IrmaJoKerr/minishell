@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 19:15:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:32:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,7 +193,6 @@ typedef struct s_pipe
 	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
 	t_node		*last_cmd;       // Last command node encountered during parsing
-	// t_node		*last_heredoc;   // Last heredoc node encountered during parsing
 	t_node      *last_pipe;       // Last pipe node processed
 	t_node      *pipe_root;       // Root of temporary pipe structure for AST
 	t_node      *redir_root;      // Root redirection node
@@ -233,7 +232,6 @@ typedef struct s_vars
 	int				pos;
 	int				start;
 	int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
-	// int				heredoc_active; // Flag for heredoc status. is it active or not
 	int				shell_level;
 	struct termios	ori_term_settings;
 	int				ori_term_saved;

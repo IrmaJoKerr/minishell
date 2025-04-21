@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 01:31:11 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/20 19:37:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:17:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,11 +285,9 @@ void verify_memory_range(void *ptr, size_t size, const char *name,
 void register_allocation(void *ptr, const char *type, const char *caller_func)
 {
     if (!ptr)
-        return;
-        
+        return ;
     fprintf(stderr, "[MEMTRACK:%s] Allocation: %p (%s)\n", 
             caller_func, ptr, type);
-            
     // Optionally increment allocation counter if you want to track it in statistics
     #ifdef DEBUG_MEMORY
     g_malloc_count++;  // Comment this out if you don't want to count these as new allocations
@@ -299,7 +297,6 @@ void register_allocation(void *ptr, const char *type, const char *caller_func)
 // Use this when handling critical memory operations:
 // verify_memory_range(new_quote_types[0], sizeof(int) * total_chars, 
 //                    "quote_types buffer", __func__, __LINE__);
-
 void verify_token_list_integrity(t_vars *vars)
 {
     t_node *forward;
@@ -310,46 +307,37 @@ void verify_token_list_integrity(t_vars *vars)
     if (!vars || !vars->head) // Changed from token_list to head
     {
         fprintf(stderr, "[INTEGRITY] No token list to verify\n");
-        return;
+        return ;
     }
-    
     fprintf(stderr, "[INTEGRITY] Verifying token list integrity\n");
-    
     // Forward traversal
     forward = vars->head; // Changed from token_list to head
     while (forward)
     {
         forward_count++;
-        
         // Check for broken links
         if (forward->next && forward->next->prev != forward)
         {
             fprintf(stderr, "[INTEGRITY ERROR] Broken link: node %p -> next %p, but next->prev = %p\n", 
                     forward, forward->next, forward->next->prev);
         }
-        
         forward = forward->next;
     }
-    
     // Backward traversal
     backward = vars->current; // Changed from token_list_end to current
     while (backward)
     {
         backward_count++;
-        
         // Check for broken links
         if (backward->prev && backward->prev->next != backward)
         {
             fprintf(stderr, "[INTEGRITY ERROR] Broken link: node %p -> prev %p, but prev->next = %p\n", 
                     backward, backward->prev, backward->prev->next);
         }
-        
         backward = backward->prev;
     }
-    
     fprintf(stderr, "[INTEGRITY] Forward count: %d, Backward count: %d\n", 
             forward_count, backward_count);
-    
     if (forward_count != backward_count)
     {
         fprintf(stderr, "[INTEGRITY ERROR] List count mismatch: forward=%d, backward=%d\n", 

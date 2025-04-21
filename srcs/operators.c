@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 23:24:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 01:04:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ Returns:
 */
 void handle_string(char *input, t_vars *vars)
 {
-	char 		*token;
+	char		*token;
 	int			moves;
 	t_tokentype	token_type;
 	
@@ -50,8 +50,7 @@ void handle_string(char *input, t_vars *vars)
 	{
 		token = ft_substr(input, vars->start, vars->pos - vars->start);
 		if (!token)
-			return;
-		
+			return ;
 		// Determine token type based on the input
 		token_type = get_token_at(token, 0, &moves);
 		if (token_type == 0)
@@ -63,10 +62,8 @@ void handle_string(char *input, t_vars *vars)
 		{
 			vars->curr_type = token_type;
 		}
-		
 		maketoken_with_type(token, vars->curr_type, vars);
 		free(token);
-		
 		vars->start = vars->pos;
 	}
 }
