@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 00:30:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 18:19:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@ char	*complete_input(char *input, t_inmode mode, t_vars *vars)
 		result = fix_open_quotes(input, vars);
     else if (mode == INPUT_PIPE_COMPLETION)      
         result = complete_pipe_command(input, vars);
-    else if (mode == INPUT_HEREDOC_MODE)
-	{
-        setup_heredoc_mode(input, vars);
-        result = ft_strdup(input);
-	}
+    // else if (mode == INPUT_HEREDOC_MODE)
+	// {
+    //     setup_heredoc_mode(input, vars);
+    //     result = ft_strdup(input);
+	// }
     else if (mode == INPUT_NORMAL)
 		result = ft_strdup(input);
 	return (result);
@@ -121,39 +121,93 @@ char *process_heredoc_line(char *line, t_vars *vars)
     return ft_strdup(line);
 }
 
-/*
-Helper to process a command that has a heredoc.
-Sets up heredoc mode and processes the command.
+// /*
+// Helper to process a command that has a heredoc.
+// Sets up heredoc mode and processes the command.
 
-Parameters:
-- cmd_line: The command line that contains a heredoc operator
-- vars: Program state variables
+// Parameters:
+// - cmd_line: The command line that contains a heredoc operator
+// - vars: Program state variables
 
-Returns: void
-*/
-void process_command_with_heredoc(char *cmd_line, t_vars *vars)
-{
-    fprintf(stderr, "[DEBUG] process_cmd_heredoc: Processing command with heredoc\n");
+// Returns: void
+// */
+// void process_command_with_heredoc(char *cmd_line, t_vars *vars)
+// {
+//     fprintf(stderr, "[DEBUG] process_cmd_heredoc: Processing command with heredoc\n");
     
-    // Set up for heredoc usage
-    vars->heredoc_mode = 1;
+//     // Set up for heredoc usage
+//     vars->heredoc_mode = 1;
     
-    // Process the command line normally
-    // process_single_command(cmd_line, vars);
-	process_command(cmd_line, vars);
+//     // Process the command line normally
+//     // process_single_command(cmd_line, vars);
+// 	process_command(cmd_line, vars);
     
-    // Reset heredoc state after command completes
-    vars->heredoc_mode = 0;
-    vars->heredoc_active = 0;
-    if (vars->pipes->heredoc_delim)
-    {
-        free(vars->pipes->heredoc_delim);
-        vars->pipes->heredoc_delim = NULL;
-    }
+//     // Reset heredoc state after command completes
+//     vars->heredoc_mode = 0;
+//     vars->heredoc_active = 0;
+//     if (vars->pipes->heredoc_delim)
+//     {
+//         free(vars->pipes->heredoc_delim);
+//         vars->pipes->heredoc_delim = NULL;
+//     }
     
-    fprintf(stderr, "[DEBUG] process_cmd_heredoc: Command processed, heredoc state reset\n");
-}
+//     fprintf(stderr, "[DEBUG] process_cmd_heredoc: Command processed, heredoc state reset\n");
+// }
 
+// /*
+// Helper function to read an entire file into memory.
+// Returns a newly allocated string containing the file contents,
+// or NULL if an error occurred.
+// */
+// char *read_entire_file(const char *filename)
+// {
+//     int fd;
+//     char *content = NULL;
+//     struct stat file_stats;
+//     ssize_t bytes_read;
+    
+//     fd = open(filename, O_RDONLY);
+//     if (fd == -1)
+//     {
+//         fprintf(stderr, "[ERROR] read_entire_file: Failed to open file %s: %s\n", 
+//                 filename, strerror(errno));
+//         return NULL;
+//     }
+    
+//     // Get file size
+//     if (fstat(fd, &file_stats) == -1)
+//     {
+//         fprintf(stderr, "[ERROR] read_entire_file: Failed to stat file %s: %s\n", 
+//                 filename, strerror(errno));
+//         close(fd);
+//         return NULL;
+//     }
+    
+//     // Allocate memory for file content plus null terminator
+//     content = malloc(file_stats.st_size + 1);
+//     if (!content)
+//     {
+//         close(fd);
+//         return NULL;
+//     }
+    
+//     // Read entire file
+//     bytes_read = read(fd, content, file_stats.st_size);
+//     if (bytes_read == -1)
+//     {
+//         fprintf(stderr, "[ERROR] read_entire_file: Failed to read file %s: %s\n", 
+//                 filename, strerror(errno));
+//         free(content);
+//         close(fd);
+//         return NULL;
+//     }
+    
+//     // Null terminate the content
+//     content[bytes_read] = '\0';
+//     close(fd);
+    
+//     return content;
+// }
 /*
 Helper function to read an entire file into memory.
 Returns a newly allocated string containing the file contents,
@@ -165,50 +219,133 @@ char *read_entire_file(const char *filename)
     char *content = NULL;
     struct stat file_stats;
     ssize_t bytes_read;
-    
+
+    fprintf(stderr, "[ML_DEBUG] read_entire_file: Opening %s\n", filename); // DEBUG
     fd = open(filename, O_RDONLY);
     if (fd == -1)
     {
-        fprintf(stderr, "[ERROR] read_entire_file: Failed to open file %s: %s\n", 
+        fprintf(stderr, "[ERROR] read_entire_file: Failed to open file %s: %s\n",
                 filename, strerror(errno));
         return NULL;
     }
-    
+
     // Get file size
     if (fstat(fd, &file_stats) == -1)
     {
-        fprintf(stderr, "[ERROR] read_entire_file: Failed to stat file %s: %s\n", 
+        fprintf(stderr, "[ERROR] read_entire_file: Failed to stat file %s: %s\n",
                 filename, strerror(errno));
         close(fd);
         return NULL;
     }
-    
+    fprintf(stderr, "[ML_DEBUG] read_entire_file: File size is %ld bytes\n", file_stats.st_size); // DEBUG
+
     // Allocate memory for file content plus null terminator
     content = malloc(file_stats.st_size + 1);
     if (!content)
     {
+        fprintf(stderr, "[ERROR] read_entire_file: Malloc failed for %ld bytes\n", file_stats.st_size + 1); // DEBUG
         close(fd);
         return NULL;
     }
-    
+
     // Read entire file
     bytes_read = read(fd, content, file_stats.st_size);
     if (bytes_read == -1)
     {
-        fprintf(stderr, "[ERROR] read_entire_file: Failed to read file %s: %s\n", 
+        fprintf(stderr, "[ERROR] read_entire_file: Failed to read file %s: %s\n",
                 filename, strerror(errno));
         free(content);
         close(fd);
         return NULL;
     }
-    
+     fprintf(stderr, "[ML_DEBUG] read_entire_file: Read %zd bytes\n", bytes_read); // DEBUG
+
     // Null terminate the content
     content[bytes_read] = '\0';
     close(fd);
-    
+    fprintf(stderr, "[ML_DEBUG] read_entire_file: Closed fd, returning content.\n"); // DEBUG
+
     return content;
 }
 
+// /*
+// New helper function to read from temp file and process each line.
+// Uses the main command processing logic without recursion.
+
+// Parameters:
+// - vars: Program state variables
+
+// Returns: void
+// */
+// void read_and_process_from_tmp_buf(t_vars *vars)
+// {
+//     // Read the entire file content
+//     char *file_content = read_entire_file(TMP_BUF);
+//     if (!file_content)
+//         return;
+    
+//     // Process the content character by character to find quote boundaries
+//     char *buffer = malloc(strlen(file_content) + 1);
+//     if (!buffer) {
+//         free(file_content);
+//         return;
+//     }
+    
+//     int bufPos = 0;
+//     int in_quotes = 0;
+//     char quote_type = 0;
+//     int i = 0;
+    
+//     while (file_content[i]) {
+//         // Track quote state
+//         if ((file_content[i] == '"' || file_content[i] == '\'') && 
+//             (!in_quotes || quote_type == file_content[i])) {
+//             if (in_quotes && quote_type == file_content[i]) {
+//                 in_quotes = 0;
+//                 quote_type = 0;
+//             } else if (!in_quotes) {
+//                 in_quotes = 1;
+//                 quote_type = file_content[i];
+//             }
+//         }
+        
+//         // If we hit a newline
+//         if (file_content[i] == '\n') {
+//             if (in_quotes) {
+//                 // Inside quotes - replace newline with space
+//                 buffer[bufPos] = ' ';
+//                 bufPos++;
+//             } else {
+//                 // End of command - process and reset
+//                 buffer[bufPos] = '\0';
+//                 if (bufPos > 0) {
+//                     fprintf(stderr, "[DEBUG] read_and_process: Processing command: '%s'\n", buffer);
+//                     add_history(buffer);
+//                     // process_single_command(buffer, vars);
+// 					process_command(buffer, vars);
+//                 }
+//                 bufPos = 0;
+//             }
+//         } else {
+//             // Normal character
+//             buffer[bufPos] = file_content[i];
+//             bufPos++;
+//         }
+//         i++;
+//     }
+    
+//     // Process any remaining content
+//     if (bufPos > 0) {
+//         buffer[bufPos] = '\0';
+//         fprintf(stderr, "[DEBUG] read_and_process: Processing final command: '%s'\n", buffer);
+//         add_history(buffer);
+//         // process_single_command(buffer, vars);
+// 		process_command(buffer, vars);
+//     }
+    
+//     free(buffer);
+//     free(file_content);
+// }
 /*
 New helper function to read from temp file and process each line.
 Uses the main command processing logic without recursion.
@@ -220,26 +357,31 @@ Returns: void
 */
 void read_and_process_from_tmp_buf(t_vars *vars)
 {
-    // Read the entire file content
-    char *file_content = read_entire_file(TMP_BUF);
-    if (!file_content)
-        return;
-    
-    // Process the content character by character to find quote boundaries
-    char *buffer = malloc(strlen(file_content) + 1);
-    if (!buffer) {
-        free(file_content);
-        return;
-    }
-    
+    char *file_content;
+    char *buffer;
     int bufPos = 0;
     int in_quotes = 0;
     char quote_type = 0;
     int i = 0;
-    
+
+    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: START\n"); // DEBUG
+    file_content = read_entire_file(TMP_BUF);
+    if (!file_content) {
+        fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Failed to read TMP_BUF\n"); // DEBUG
+        return;
+    }
+    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Read %zu bytes from TMP_BUF\n", strlen(file_content)); // DEBUG
+
+    buffer = malloc(strlen(file_content) + 1);
+    if (!buffer) {
+        free(file_content);
+        fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Failed to malloc buffer\n"); // DEBUG
+        return;
+    }
+
     while (file_content[i]) {
         // Track quote state
-        if ((file_content[i] == '"' || file_content[i] == '\'') && 
+        if ((file_content[i] == '"' || file_content[i] == '\'') &&
             (!in_quotes || quote_type == file_content[i])) {
             if (in_quotes && quote_type == file_content[i]) {
                 in_quotes = 0;
@@ -249,23 +391,25 @@ void read_and_process_from_tmp_buf(t_vars *vars)
                 quote_type = file_content[i];
             }
         }
-        
+
         // If we hit a newline
         if (file_content[i] == '\n') {
             if (in_quotes) {
-                // Inside quotes - replace newline with space
+                fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Newline inside quotes at pos %d, replacing with space.\n", i); // DEBUG
                 buffer[bufPos] = ' ';
                 bufPos++;
             } else {
                 // End of command - process and reset
                 buffer[bufPos] = '\0';
                 if (bufPos > 0) {
-                    fprintf(stderr, "[DEBUG] read_and_process: Processing command: '%s'\n", buffer);
-                    add_history(buffer);
-                    // process_single_command(buffer, vars);
-					process_command(buffer, vars);
+                    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: '%s'\n", buffer); // DEBUG
+                    // add_history(buffer); // History added in handle_input for the whole block
+                    process_command(buffer, vars);
+                    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.\n"); // DEBUG
+                } else {
+                    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Found empty line, skipping.\n"); // DEBUG
                 }
-                bufPos = 0;
+                bufPos = 0; // Reset buffer position
             }
         } else {
             // Normal character
@@ -274,171 +418,284 @@ void read_and_process_from_tmp_buf(t_vars *vars)
         }
         i++;
     }
-    
-    // Process any remaining content
+
+    // Process any remaining content (if file doesn't end with newline)
     if (bufPos > 0) {
         buffer[bufPos] = '\0';
-        fprintf(stderr, "[DEBUG] read_and_process: Processing final command: '%s'\n", buffer);
-        add_history(buffer);
-        // process_single_command(buffer, vars);
-		process_command(buffer, vars);
+        fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Processing final command: '%s'\n", buffer); // DEBUG
+        // add_history(buffer); // History added in handle_input for the whole block
+        process_command(buffer, vars);
+        fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing final command.\n"); // DEBUG
     }
-    
+
     free(buffer);
     free(file_content);
+    // Optionally remove the temp file after processing
+    unlink(TMP_BUF);
+    fprintf(stderr, "[ML_DEBUG] read_and_process_from_tmp_buf: END\n"); // DEBUG
 }
 
+// /*
+// MODIFIED: Processes multiline input. If the first line contains a valid heredoc,
+// it stores the content in TMP_BUF and sets mode=1. Otherwise, processes as regular commands.
+// */
+// int process_multiline_input(char *input, t_vars *vars)
+// {
+//     char	*first_line_end;
+//     char	*content_start;
+//     int		first_line_len;
+//     int		tokenize_success;
+
+//     fprintf(stderr, "[DEBUG] process_multiline_input: Processing multiline input\n");
+//     // Find the end of the first line
+//     first_line_end = ft_strchr(input, '\n');
+//     if (!first_line_end) {
+//         // Should not happen if called for multiline input, but handle defensively
+//         fprintf(stderr, "[ERROR] process_multiline_input: No newline found in multiline input?\n");
+//         process_command(input, vars); // Treat as single line
+//         return (0); // Indicate failure or that it was handled as single line
+//     }
+//     first_line_len = first_line_end - input;
+//     content_start = first_line_end + 1; // Start of the rest of the content
+
+//     // Temporarily null-terminate the first line for tokenization
+//     *first_line_end = '\0';
+//     fprintf(stderr, "[DEBUG] process_multiline_input: Tokenizing first line: '%.*s'\n", first_line_len, input);
+
+//     // Tokenize the first line - this will call validate_heredoc_delimiter if << is present
+//     reset_shell(vars); // Reset token list etc. before tokenizing
+//     tokenize_success = improved_tokenize(input, vars);
+
+//     // Restore the newline character
+//     *first_line_end = '\n';
+
+//     if (!tokenize_success || vars->error_code == ERR_SYNTAX) {
+//         fprintf(stderr, "[DEBUG] process_multiline_input: Tokenization failed or syntax error on first line.\n");
+//         // Error message should have been printed by tokenizer/validator
+//         return (0); // Indicate failure
+//     }
+
+//     // Check if tokenization resulted in a valid heredoc delimiter being stored
+//     if (vars->pipes->heredoc_delim != NULL)
+//     {
+//         fprintf(stderr, "[DEBUG] process_multiline_input: Heredoc delimiter '%s' validated.\n", vars->pipes->heredoc_delim);
+
+//         // *** Perform Trailing Character Check ***
+//         // Find the delimiter token in the list (it should be the right child of <<)
+//         t_node *heredoc_node = vars->head; // Start searching from head
+//         t_node *delimiter_node = NULL;
+//         while(heredoc_node) {
+//             if (heredoc_node->type == TYPE_HEREDOC) {
+//                 delimiter_node = heredoc_node->right; // Assuming AST structure links it
+//                 break;
+//             }
+//             heredoc_node = heredoc_node->next;
+//         }
+
+//         if (!delimiter_node || !delimiter_node->args || !delimiter_node->args[0]) {
+//             fprintf(stderr, "[ERROR] process_multiline_input: Could not find delimiter token node after validation.\n");
+//             return (0); // Internal error
+//         }
+
+//         // Calculate position after the raw delimiter token on the first line
+//         // This requires token end position info, which might not be readily available.
+//         // Alternative: Search for the raw delimiter string after <<.
+//         char *raw_delim_in_line = strstr(input, delimiter_node->args[0]); // Find raw delim occurrence
+//         if (!raw_delim_in_line) { /* Error */ return 0; }
+//         int pos_after_raw_delim = (raw_delim_in_line - input) + strlen(delimiter_node->args[0]);
+
+
+//         if (!check_trailing_chars(input, pos_after_raw_delim)) {
+//             vars->error_code = ERR_SYNTAX;
+//             // Delimiter might be stored, need cleanup? validate_heredoc_delimiter handles freeing old one.
+//             return (0); // Syntax error
+//         }
+
+//         // Trailing chars OK, proceed to store content
+//         fprintf(stderr, "[DEBUG] process_multiline_input: Trailing chars OK. Storing content.\n");
+//         if (!store_multiline_heredoc_content(content_start, vars)) {
+//             fprintf(stderr, "[DEBUG] process_multiline_input: Failed to store heredoc content.\n");
+//             // store_multiline_heredoc_content should set error code
+//             return (0); // Failure during storage
+//         }
+
+//         // Set mode and process the first line command
+//         vars->heredoc_mode = 1; // Indicate content is pre-stored
+//         fprintf(stderr, "[DEBUG] process_multiline_input: Executing command from first line with stored heredoc.\n");
+//         // Restore null-termination for process_command
+//         *first_line_end = '\0';
+//         process_command(input, vars); // Execute the command part
+//         *first_line_end = '\n'; // Restore again (though likely not needed after this)
+//         vars->heredoc_mode = 0; // Reset mode after execution
+//     }
+//     else
+//     {
+//         // No valid heredoc found on the first line, treat as regular multiline command
+//         fprintf(stderr, "[DEBUG] process_multiline_input: No heredoc found. Processing as regular commands.\n");
+//         // Need a way to process the whole input buffer line by line or command by command
+//         // read_and_process_from_tmp_buf might be adapted, or process commands sequentially.
+//         // For simplicity, let's just process the first line for now.
+//         *first_line_end = '\0';
+//         process_command(input, vars);
+//         *first_line_end = '\n';
+//         // TODO: Implement robust handling for multiple commands in multiline input without heredoc.
+//     }
+
+//     return (1); // Indicate success
+// }
 /*
-Processes multiline input with a unified approach for both
-regular commands and heredocs.
-
-Parameters:
-- input: Multiline input string
-- vars: Program state variables
-
-Returns:
-- 1 on success, 0 on failure
+MODIFIED: Processes multiline input. If the first line contains a valid heredoc,
+it stores the content in TMP_BUF and sets mode=1. Otherwise, writes the full input
+to TMP_BUF and processes commands from there.
 */
 int process_multiline_input(char *input, t_vars *vars)
 {
-    char **lines;
-    int i = 0;
-    int heredoc_found = 0;
-    // char *heredoc_delimiter = NULL;
-    int fd;
-    
-    fprintf(stderr, "[DEBUG] process_multiline_input: Processing multiline input\n");
-    
-    // Split the input into lines
-    lines = ft_split(input, '\n');
-    if (!lines)
-    {
-        fprintf(stderr, "[ERROR] process_multiline_input: Failed to split input\n");
-        return 0;
+    char	*first_line_end;
+    char	*content_start;
+    int		first_line_len;
+    int		tokenize_success;
+    int     fd; // Added for writing to TMP_BUF
+
+    fprintf(stderr, "[ML_DEBUG] process_multiline_input: START\n"); // DEBUG
+    // Find the end of the first line
+    first_line_end = ft_strchr(input, '\n');
+    if (!first_line_end) {
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: No newline found (shouldn't happen here)\n"); // DEBUG
+        process_command(input, vars); // Treat as single line just in case
+        return (0);
     }
-    
-    // Check first line for heredoc operator
-    if (has_heredoc_operator(lines[0]))
+    first_line_len = first_line_end - input;
+    content_start = first_line_end + 1; // Start of the rest of the content
+
+    // Temporarily null-terminate the first line for tokenization
+    *first_line_end = '\0';
+    fprintf(stderr, "[ML_DEBUG] process_multiline_input: Tokenizing first line: '%.*s'\n", first_line_len, input); // DEBUG
+
+    // Tokenize the first line - this will call validate_heredoc_delimiter if << is present
+    reset_shell(vars); // Reset token list etc. before tokenizing
+    tokenize_success = improved_tokenize(input, vars);
+
+    // Restore the newline character
+    *first_line_end = '\n';
+
+    if (!tokenize_success || vars->error_code == ERR_SYNTAX) {
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Tokenization failed or syntax error on first line.\n"); // DEBUG
+        // Error message should have been printed by tokenizer/validator
+        return (0); // Indicate failure
+    }
+
+    // Check if tokenization resulted in a valid heredoc delimiter being stored
+    if (vars->pipes->heredoc_delim != NULL)
     {
-        fprintf(stderr, "[DEBUG] process_multiline_input: First line contains heredoc operator\n");
-        
-        // Extract and process the delimiter using our unified function
-        get_heredoc_delimiter(lines[0], vars);
-        if (vars->pipes->heredoc_delim)
-        {
-            fprintf(stderr, "[DEBUG] process_multiline_input: Found heredoc delimiter: '%s'\n", 
-				vars->pipes->heredoc_delim);
-            heredoc_found = 1;
-            
-            // Note: No need to store the delimiter and expansion flag here
-            // as get_heredoc_delimiter already did that
+        // --- HEREDOC PATH ---
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: HEREDOC path entered.\n"); // DEBUG
+        fprintf(stderr, "[DEBUG] process_multiline_input: Heredoc delimiter '%s' validated.\n", vars->pipes->heredoc_delim);
+
+        // *** Perform Trailing Character Check ***
+        t_node *heredoc_node = vars->head; // Start searching from head
+        t_node *delimiter_node = NULL;
+        while(heredoc_node) {
+            if (heredoc_node->type == TYPE_HEREDOC) {
+                delimiter_node = heredoc_node->next;
+                if (delimiter_node && delimiter_node->type == TYPE_ARGS) {
+                     fprintf(stderr, "[ML_DEBUG] Found potential delimiter node: type=%d, content='%s'\n",
+                             delimiter_node->type, delimiter_node->args ? delimiter_node->args[0] : "NULL"); // DEBUG
+                    break;
+                } else {
+                    delimiter_node = NULL;
+                }
+            }
+            heredoc_node = heredoc_node->next;
         }
-    }
-    
-    // Open temp file for all multiline content
-    fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-    if (fd == -1)
-    {
-        fprintf(stderr, "[ERROR] process_multiline_input: Failed to open temp file: %s\n", 
-                strerror(errno));
-        if (vars->pipes->heredoc_delim)
-            free(vars->pipes->heredoc_delim);
-        ft_free_2d(lines, ft_arrlen(lines));
-        return 0;
-    }
-    
-    // Write all lines to the temp file
-    fprintf(stderr, "[DEBUG] process_multiline_input: Writing %zu lines to temp file\n", 
-        ft_arrlen(lines));
-    i = 0;
-    int delimiter_found = 0;
-    
-    while (lines[i])
-    {
-   		// For heredoc mode, check if this line is the delimiter
-		if (heredoc_found && i > 0)
-		{
-    	// Direct comparison with processed delimiter
-    		if (ft_strcmp(lines[i], vars->pipes->heredoc_delim) == 0)
-    		{
-        		fprintf(stderr, "[DEBUG] process_multiline_input: Found delimiter line '%s'\n", 
-                		lines[i]);
-        		delimiter_found = 1;
-        		i++;
-        		continue;
-    		}
-		}
-        // For heredoc content, process variables if needed
-        if (heredoc_found && i > 0 && !delimiter_found && vars->pipes->hd_expand)
-        {
-            // Process and write heredoc content with variable expansion
-            char *processed_line = process_heredoc_line(lines[i], vars);
-            if (processed_line)
-            {
-                fprintf(stderr, "[DEBUG] process_multiline_input: Writing processed line: '%s'\n", 
-                        processed_line);
-                write(fd, processed_line, ft_strlen(processed_line));
-                write(fd, "\n", 1);
-                free(processed_line);
+
+        if (!delimiter_node || !delimiter_node->args || !delimiter_node->args[0]) {
+            fprintf(stderr, "[ERROR] process_multiline_input: Could not find delimiter token node after validation.\n");
+            return (0); // Internal error
+        }
+
+        // Calculate position after the raw delimiter token on the first line
+        // Search for the raw delimiter string *after* the "<<" on the first line.
+        // Use ft_strnstr and search within the first line's length
+        char *heredoc_op_ptr = ft_strnstr(input, "<<", first_line_len); // Use ft_strnstr with length
+        char *raw_delim_in_line = NULL;
+        if (heredoc_op_ptr) {
+            // Search for the raw delimiter in the part of the first line *after* "<<"
+            int search_start_offset = (heredoc_op_ptr - input) + 2;
+            int remaining_len = first_line_len - search_start_offset;
+            if (remaining_len > 0) {
+                 raw_delim_in_line = ft_strnstr(input + search_start_offset, delimiter_node->args[0], remaining_len); // Use ft_strnstr
             }
         }
-        else
-        {
-            // Write regular line without processing
-            fprintf(stderr, "[DEBUG] process_multiline_input: Writing line %d: '%s'\n", 
-                    i, lines[i]);
-            write(fd, lines[i], ft_strlen(lines[i]));
-            write(fd, "\n", 1);
+
+        if (!raw_delim_in_line) {
+             // Temporarily null-terminate for printing
+             *first_line_end = '\0';
+             fprintf(stderr, "[ERROR] process_multiline_input: Could not find raw delimiter '%s' in first line '%s'.\n",
+                     delimiter_node->args[0], input); // DEBUG
+             *first_line_end = '\n'; // Restore
+             return 0;
         }
-        i++;
-    }
-    
-    // Close the file
-    close(fd);
-    
-    // Set appropriate flags based on what we found
-    if (heredoc_found)
-    {
-        fprintf(stderr, "[DEBUG] process_multiline_input: Setting heredoc_mode = 1\n");
-        vars->heredoc_mode = 1;  // Indicate we're using stored content
-        
-        if (delimiter_found)
-        {
-            fprintf(stderr, "[DEBUG] process_multiline_input: Delimiter was found in input\n");
-            // Process the command with heredoc input ready
-            
-            // // FREE THE LOCAL COPY HERE TO AVOID DOUBLE FREE LATER
-            // if (heredoc_delimiter) {
-            //     free(heredoc_delimiter);
-            //     heredoc_delimiter = NULL;
-            // }
-            
-            process_command_with_heredoc(lines[0], vars);
+        // Calculate position relative to the start of the original 'input' buffer
+        int pos_after_raw_delim = (raw_delim_in_line - input) + strlen(delimiter_node->args[0]);
+        fprintf(stderr, "[ML_DEBUG] Checking trailing chars after pos %d in first line.\n", pos_after_raw_delim); // DEBUG
+
+
+        // Temporarily null-terminate first line again for check_trailing_chars
+        *first_line_end = '\0';
+        if (!check_trailing_chars(input, pos_after_raw_delim)) {
+            *first_line_end = '\n'; // Restore newline
+            vars->error_code = ERR_SYNTAX;
+            return (0); // Syntax error
         }
-        else
-        {
-            fprintf(stderr, "[DEBUG] process_multiline_input: Delimiter not found, "
-                    "will read interactively\n");
-            // We need to continue reading heredoc input interactively
-            vars->heredoc_active = 1;
-            // Store first line for later execution
-            if (vars->partial_input)
-                free(vars->partial_input);
-            vars->partial_input = ft_strdup(lines[0]);
+         *first_line_end = '\n'; // Restore newline
+
+        // Trailing chars OK, proceed to store content
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Trailing chars OK. Storing content starting from: '%.20s...'\n", content_start); // DEBUG
+        if (!store_multiline_heredoc_content(content_start, vars)) {
+            fprintf(stderr, "[ML_DEBUG] process_multiline_input: Failed to store heredoc content.\n"); // DEBUG
+            return (0); // Failure during storage
         }
+
+        // Set mode and process the first line command
+        vars->heredoc_mode = 1; // Indicate content is pre-stored
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Executing command from first line with stored heredoc.\n"); // DEBUG
+        // Restore null-termination for process_command
+        *first_line_end = '\0';
+        process_command(input, vars); // Execute the command part
+        *first_line_end = '\n'; // Restore again
+        vars->heredoc_mode = 0; // Reset mode after execution
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: HEREDOC path finished.\n"); // DEBUG
     }
     else
     {
-        // Process regular multiline commands
-        fprintf(stderr, "[DEBUG] process_multiline_input: Processing regular multiline commands\n");
+        // --- NON-HEREDOC MULTILINE PATH ---
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: NON-HEREDOC path entered.\n"); // DEBUG
+
+        // 1. Write the ENTIRE original input buffer to TMP_BUF
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Writing full input (%zu bytes) to TMP_BUF.\n", ft_strlen(input)); // DEBUG
+        fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+        if (fd == -1) {
+            perror("bleshell: process_multiline_input: open(TMP_BUF)");
+            vars->error_code = ERR_DEFAULT;
+            return (0);
+        }
+        if (write(fd, input, ft_strlen(input)) == -1) {
+             perror("bleshell: process_multiline_input: write(TMP_BUF)");
+             close(fd);
+             unlink(TMP_BUF); // Attempt cleanup
+             vars->error_code = ERR_DEFAULT;
+             return (0);
+        }
+        close(fd);
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Finished writing to TMP_BUF.\n"); // DEBUG
+
+        // 2. Call the function to process commands from TMP_BUF
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Calling read_and_process_from_tmp_buf.\n"); // DEBUG
         read_and_process_from_tmp_buf(vars);
+        fprintf(stderr, "[ML_DEBUG] process_multiline_input: Returned from read_and_process_from_tmp_buf.\n"); // DEBUG
     }
-    
-    // Clean up
-    // if (heredoc_delimiter)
-    //     free(heredoc_delimiter);
-    ft_free_2d(lines, ft_arrlen(lines));
-    return 1;
+    fprintf(stderr, "[ML_DEBUG] process_multiline_input: END\n"); // DEBUG
+    return (1); // Indicate success
 }
 
 // /*
@@ -580,33 +837,73 @@ Returns: void
 //     build_and_execute(vars);
 //     clear_partial_input(vars);
 // }
+// /*
+// MODIFIED: Main input handler. Distinguishes single vs multiline.
+// */
+// void handle_input(char *input, t_vars *vars)
+// {
+//     if (!input || !*input)
+//         return;
+//     fprintf(stderr, "[DEBUG] handle_input: Processing input (len=%zu)\n", ft_strlen(input));
+//     // Add to history before processing
+//     if (input && *input)
+//         add_history(input);
+//     // Reset shell state for new command processing
+//     reset_shell(vars);
+//     if (ft_strchr(input, '\n'))
+//     {
+//         fprintf(stderr, "[DEBUG] handle_input: Detected multiline input\n");
+//         if (!process_multiline_input(input, vars))
+//         {
+//             fprintf(stderr, "[DEBUG] handle_input: Failed to process multiline input\n");
+//             // Error code should be set by process_multiline_input
+//         }
+//     }
+//     else
+//     {
+//         fprintf(stderr, "[DEBUG] handle_input: Processing single-line input\n");
+//         process_command(input, vars);
+//     }
+//     // Cleanup after command execution (like freeing AST, resetting pipes) happens in process_command/build_and_execute
+//     fprintf(stderr, "[DEBUG] handle_input: Finished processing input.\n");
+// }
+/*
+MODIFIED: Main input handler. Distinguishes single vs multiline.
+*/
 void handle_input(char *input, t_vars *vars)
 {
     if (!input || !*input)
         return;
-    
-    fprintf(stderr, "[DEBUG] handle_input: Processing input (len=%zu)\n", ft_strlen(input));
-    
-    // Check if this is multiline input (contains newlines)
+    fprintf(stderr, "[ML_DEBUG] handle_input: START, input len=%zu\n", ft_strlen(input)); // DEBUG
+    // Add to history before processing
+    if (input && *input) {
+        fprintf(stderr, "[ML_DEBUG] handle_input: Adding to history: '%.30s...'\n", input); // DEBUG
+        add_history(input);
+    }
+    // Reset shell state for new command processing (token list, AST, etc.)
+    // Note: reset_shell might clear too much if called repeatedly by read_and_process_from_tmp_buf
+    // Consider moving reset_shell inside process_command or just before tokenization.
+    // reset_shell(vars); // Moved reset_shell inside process_multiline_input and process_command
+
     if (ft_strchr(input, '\n'))
     {
-        fprintf(stderr, "[DEBUG] handle_input: Detected multiline input\n");
-        
-        // Process the multiline input with unified approach
+        fprintf(stderr, "[ML_DEBUG] handle_input: Detected multiline input, calling process_multiline_input.\n"); // DEBUG
         if (!process_multiline_input(input, vars))
         {
-            fprintf(stderr, "[DEBUG] handle_input: Failed to process multiline input\n");
-            return;
+            fprintf(stderr, "[ML_DEBUG] handle_input: process_multiline_input FAILED.\n"); // DEBUG
+            // Error code should be set by process_multiline_input or its sub-functions
+        } else {
+            fprintf(stderr, "[ML_DEBUG] handle_input: process_multiline_input SUCCEEDED.\n"); // DEBUG
         }
-        
-        // Exit early as multiline input has been fully processed
-        return;
     }
-    
-    fprintf(stderr, "[DEBUG] handle_input: Processing single-line input\n");
-    
-    // For single-line input, use process_command which has proper pipe handling
-    process_command(input, vars);
+    else
+    {
+        fprintf(stderr, "[ML_DEBUG] handle_input: Detected single-line input, calling process_command.\n"); // DEBUG
+        process_command(input, vars); // process_command should handle its own reset_shell
+        fprintf(stderr, "[ML_DEBUG] handle_input: Returned from process_command.\n"); // DEBUG
+    }
+    // Cleanup after command execution (like freeing AST, resetting pipes) happens in process_command/build_and_execute
+    fprintf(stderr, "[ML_DEBUG] handle_input: END\n"); // DEBUG
 }
 
 /*
@@ -696,71 +993,86 @@ void	term_heredoc(t_vars *vars)
 //     fprintf(stderr, "heredoc> ");
 // }
 /*
-Handles a line of heredoc input in interactive mode.
-Checks for delimiter and writes content to TMP_BUF.
-
-Parameters:
-- input: Line of input in heredoc mode
-- vars: Program state variables
-
-Returns: void
+MODIFIED: Handles a line entered interactively when heredoc is active.
+This function might become less relevant if process_heredoc handles all interactive input.
+If kept, it should write to the fd opened by setup_interactive_heredoc.
 */
 void process_heredoc_continuation(char *input, t_vars *vars)
 {
-    fprintf(stderr, "[DEBUG] process_heredoc_cont: Processing line in heredoc mode\n");
-    
+    // This function assumes interactive mode was set up previously,
+    // and vars->pipes->hd_fd_write points to the open TMP_BUF.
+    // It also assumes vars->pipes->heredoc_delim is set.
+
+    if (!vars || !vars->pipes || !vars->pipes->heredoc_delim || vars->heredoc_mode != 0) {
+        fprintf(stderr, "[ERROR] process_heredoc_continuation: Invalid state.\n");
+        return;
+    }
+
+    fprintf(stderr, "[DEBUG] process_heredoc_cont: Processing line '%s'\n", input);
+
     // Check if this line is the delimiter
     if (ft_strcmp(input, vars->pipes->heredoc_delim) == 0)
     {
-        fprintf(stderr, "[DEBUG] process_heredoc_cont: Found delimiter '%s', ending heredoc\n", 
+        fprintf(stderr, "[DEBUG] process_heredoc_cont: Found delimiter '%s', ending heredoc.\n",
                 vars->pipes->heredoc_delim);
-        
-        // Close the temp file
+
+        // Close the temp file write descriptor
         if (vars->pipes->hd_fd_write != -1)
         {
             close(vars->pipes->hd_fd_write);
             vars->pipes->hd_fd_write = -1;
         }
-        
-        // Set mode and reset active flag
-        vars->heredoc_mode = 1;  // Now using stored content
-        vars->heredoc_active = 0;  // No longer collecting interactively
-        
-        // Process the original command
+
+        // Restore terminal
+        manage_terminal_state(vars, TERM_RESTORE);
+
+        // Set mode to indicate content is ready in TMP_BUF
+        vars->heredoc_mode = 1;
+
+        // Process the original command stored in partial_input
         if (vars->partial_input)
         {
-            // process_single_command(vars->partial_input, vars);
-			process_command(vars->partial_input, vars);
+            fprintf(stderr, "[DEBUG] process_heredoc_cont: Executing original command: '%s'\n", vars->partial_input);
+            // We need to tokenize and execute the original command now
+            process_command(vars->partial_input, vars);
+            free(vars->partial_input);
+            vars->partial_input = NULL;
+        } else {
+            fprintf(stderr, "[ERROR] process_heredoc_cont: Original command missing (partial_input is NULL).\n");
         }
-        
-        // Reset heredoc state
+
+        // Reset heredoc state after execution
         vars->heredoc_mode = 0;
-        if (vars->pipes->heredoc_delim)
-        {
+        if (vars->pipes->heredoc_delim) {
             free(vars->pipes->heredoc_delim);
             vars->pipes->heredoc_delim = NULL;
         }
+        vars->pipes->hd_expand = 0; // Reset expansion flag
+
     }
     else
     {
-        // Write this line to temp file
+        // Write this line to the temp file using the write fd
         if (vars->pipes->hd_fd_write != -1)
         {
-            // Process line based on expansion setting
-            char *processed_line = NULL;
-            if (vars->pipes->hd_expand)
-                processed_line = process_heredoc_line(input, vars);
-            else
-                processed_line = ft_strdup(input);
-            
-            if (processed_line)
-            {
-                fprintf(stderr, "[DEBUG] process_heredoc_cont: Writing line: '%s'\n", 
-                        processed_line);
-                write(vars->pipes->hd_fd_write, processed_line, ft_strlen(processed_line));
-                write(vars->pipes->hd_fd_write, "\n", 1);
-                free(processed_line);
+            if (!write_to_heredoc(vars->pipes->hd_fd_write, input, vars)) {
+                // Error writing, cleanup needed
+                close(vars->pipes->hd_fd_write);
+                vars->pipes->hd_fd_write = -1;
+                unlink(TMP_BUF);
+                manage_terminal_state(vars, TERM_RESTORE);
+                // Reset state?
+                if (vars->partial_input) free(vars->partial_input);
+                vars->partial_input = NULL;
+                if (vars->pipes->heredoc_delim) free(vars->pipes->heredoc_delim);
+                vars->pipes->heredoc_delim = NULL;
+
+            } else {
+                // Continue prompting implicitly by returning to main loop
             }
+        } else {
+            fprintf(stderr, "[ERROR] process_heredoc_cont: Invalid write fd.\n");
+            // Error state, need cleanup
         }
     }
 }
@@ -840,55 +1152,55 @@ void	manage_terminal_state(t_vars *vars, int action)
 // 	fprintf(stderr, "[DBG_HEREDOC] Heredoc setup complete, active=%d\n", 
 // 		vars->heredoc_active);
 // }
-/*
-Modified to focus only on interactive heredoc setup.
-Uses TMP_BUF for consistent storage.
+// /*
+// Modified to focus only on interactive heredoc setup.
+// Uses TMP_BUF for consistent storage.
 
-Parameters:
-- input: Command line containing a heredoc operator
-- vars: Program state variables
+// Parameters:
+// - input: Command line containing a heredoc operator
+// - vars: Program state variables
 
-Returns: void
-*/
-void setup_heredoc_mode(char *input, t_vars *vars)
-{
+// Returns: void
+// */
+// void setup_heredoc_mode(char *input, t_vars *vars)
+// {
     
     
-    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setting up heredoc\n");
+//     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setting up heredoc\n");
     
-    // Extract and process the delimiter using our unified function
-    get_heredoc_delimiter(input, vars);
-    if (!vars->pipes->heredoc_delim)
-	{
-		fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
-		return;
-	}
-    {
-        fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
-        return;
-    }
+//     // Extract and process the delimiter using our unified function
+//     get_heredoc_delimiter(input, vars);
+//     if (!vars->pipes->heredoc_delim)
+// 	{
+// 		fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
+// 		return;
+// 	}
+//     {
+//         fprintf(stderr, "[ERROR] setup_heredoc_mode: Failed to extract delimiter\n");
+//         return;
+//     }
     
-    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Got delimiter: '%s', expand_vars=%d\n",
-            vars->pipes->heredoc_delim, vars->pipes->hd_expand);
+//     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Got delimiter: '%s', expand_vars=%d\n",
+//             vars->pipes->heredoc_delim, vars->pipes->hd_expand);
     
-    // Mark heredoc as active for interactive input
-    vars->heredoc_active = 1;
+//     // Mark heredoc as active for interactive input
+//     vars->heredoc_active = 1;
     
-    // Prepare for interactive heredoc input
-    manage_terminal_state(vars, TERM_HEREDOC);
+//     // Prepare for interactive heredoc input
+//     manage_terminal_state(vars, TERM_HEREDOC);
     
-    // Set up for interactive collection if we're not already using stored content
-    if (!vars->heredoc_mode)
-    {
-        setup_interactive_heredoc(vars, vars->pipes->hd_expand);
-    }
+//     // Set up for interactive collection if we're not already using stored content
+//     if (!vars->heredoc_mode)
+//     {
+//         setup_interactive_heredoc(vars, vars->pipes->hd_expand);
+//     }
     
-    // // Free local copy since the data is now stored in vars->pipes->heredoc_delim
-    // free(delimiter);
+//     // // Free local copy since the data is now stored in vars->pipes->heredoc_delim
+//     // free(delimiter);
     
-    fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setup complete, active=%d, mode=%d\n", 
-            vars->heredoc_active, vars->heredoc_mode);
-}
+//     fprintf(stderr, "[DEBUG] setup_heredoc_mode: Setup complete, active=%d, mode=%d\n", 
+//             vars->heredoc_active, vars->heredoc_mode);
+// }
 
 /*
 Writes a line to a heredoc pipe with optional variable expansion.
@@ -1023,37 +1335,26 @@ Returns:
 // }
 
 /*
-Extracts the heredoc delimiter from a command string.
-Looks for the first token after << operator that isn't a special shell token.
-
-Parameters:
-- input: The command string containing a heredoc operator
-
-Returns:
-- The extracted delimiter as a newly allocated string
-- NULL if no valid delimiter is found
+SIMPLIFIED: Extracts the raw heredoc delimiter word following <<.
+Does NOT perform validation or storage.
+Returns: Newly allocated raw delimiter string, or NULL.
 */
-char	*extract_heredoc_delimiter(char *input, t_vars *vars)
+char	*extract_heredoc_delimiter(char *input)
 {
     int		i;
     int		start;
     int		in_quotes;
     char	quote_char;
-    char	*result;
-    
+
     if (!input)
-	{
         return (NULL);
-	}
-	fprintf(stderr, "[DBG_HEREDOC] Extracting delimiter from input\n");
+    fprintf(stderr, "[DBG_HEREDOC] Extracting raw delimiter from input\n");
     i = 0;
     in_quotes = 0;
     quote_char = 0;
-    // Find the << operator outside of quotes
     while (input[i])
     {
-        // Handle quote tracking
-        if ((input[i] == '\'' || input[i] == '\"') && 
+        if ((input[i] == '\'' || input[i] == '\"') && \
             (!in_quotes || quote_char == input[i]))
         {
             if (in_quotes && quote_char == input[i])
@@ -1064,59 +1365,44 @@ char	*extract_heredoc_delimiter(char *input, t_vars *vars)
                 quote_char = input[i];
             }
         }
-        // Look for << outside of quotes
         else if (!in_quotes && input[i] == '<' && input[i + 1] == '<')
         {
-			fprintf(stderr, "[DBG_HEREDOC] Found << operator at position %d\n", i-2);
-            // Skip past << and any whitespace
+            fprintf(stderr, "[DBG_HEREDOC] Found << operator\n");
             i += 2;
             while (input[i] && ft_isspace(input[i]))
                 i++;
-            // Check if we have a valid delimiter
             if (!input[i] || input[i] == '|' || input[i] == '<' || input[i] == '>')
-                return (NULL);
-            // Store the start of the delimiter
+                return (NULL); // Invalid syntax after <<
             start = i;
-            // Find the end of the delimiter (until whitespace or operator)
-            while (input[i] && !ft_isspace(input[i]) && 
+            while (input[i] && !ft_isspace(input[i]) && \
                    input[i] != '|' && input[i] != '<' && input[i] != '>')
-            {
                 i++;
-            }
-            // Near the end of extract_heredoc_delimiter
-			result = ft_substr(input, start, i - start);
-			if (result)
-			{
-    			// Attempt to store heredoc content if this is a multiline input
-    			int pos_after_delimiter = i;
-    			while (input[pos_after_delimiter] && ft_isspace(input[pos_after_delimiter]))
-				{
-        			pos_after_delimiter++;
-				}
-				if (store_heredoc_content(input, pos_after_delimiter, result, vars))
-				{
-					fprintf(stderr, "[DBG_HEREDOC] Stored multiline content, setting heredoc_mode=1\n");
-					vars->heredoc_mode = 1;
-				}
-				else
-				{
-					fprintf(stderr, "[DBG_HEREDOC] Failed to store multiline content\n");
-				}
-			}
-			fprintf(stderr, "[DBG_HEREDOC] Extracted delimiter: '%s'\n", 
-				result ? result : "NULL");
-			// Add at the end of extract_heredoc_delimiter
-			fprintf(stderr, "[DBG_HEREDOC] heredoc_mode after extraction: %d\n", vars->heredoc_mode);
-
-			return (result);
+            char *result = ft_substr(input, start, i - start);
+            fprintf(stderr, "[DBG_HEREDOC] Extracted raw delimiter: '%s'\n", result ? result : "NULL");
+            return (result); // Return the raw delimiter
         }
         i++;
     }
-	// Add at the end of extract_heredoc_delimiter
-	fprintf(stderr, "[DBG_HEREDOC] Extract heredoc delimiter at no heredoc operator found: %d\n", vars->heredoc_mode);
+    fprintf(stderr, "[DBG_HEREDOC] No << operator found\n");
+    return (NULL); // No heredoc operator found
+}
 
-    // No heredoc operator found
-    return (NULL);
+/*
+NEW Helper: Checks for non-whitespace characters after a certain position on a line.
+Returns 1 if only whitespace/end-of-string found, 0 otherwise.
+*/
+int check_trailing_chars(const char *line, int start_pos)
+{
+    int i = start_pos;
+    while (line[i] && ft_isspace(line[i])) {
+        i++;
+    }
+    // If we found something that's not whitespace and not the end, it's an error
+    if (line[i] != '\0') {
+        fprintf(stderr, "bleshell: syntax error near unexpected token `%.1s` after heredoc delimiter\n", &line[i]);
+        return (0); // Invalid trailing characters
+    }
+    return (1); // Only whitespace or end of string found
 }
 
 /*

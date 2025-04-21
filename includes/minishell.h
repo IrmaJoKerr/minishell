@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 01:19:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 17:44:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ typedef struct s_pipe
 	int			out_mode;    // Append flag for redirections
 	t_node		*current_redirect; // Current redirection node
 	t_node		*last_cmd;       // Last command node encountered during parsing
-	t_node		*last_heredoc;   // Last heredoc node encountered during parsing
+	// t_node		*last_heredoc;   // Last heredoc node encountered during parsing
 	t_node      *last_pipe;       // Last pipe node processed
 	t_node      *pipe_root;       // Root of temporary pipe structure for AST
 	t_node      *redir_root;      // Root redirection node
@@ -232,7 +232,7 @@ typedef struct s_vars
 	int				pos;
 	int				start;
 	int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
-	int				heredoc_active; // Flag for heredoc status. is it active or not
+	// int				heredoc_active; // Flag for heredoc status. is it active or not
 	int				shell_level;
 	struct termios	ori_term_settings;
 	int				ori_term_saved;
@@ -420,23 +420,23 @@ char		*expand_heredoc_var(char *line, int *pos, t_vars *vars);
 char		*read_heredoc_str(char *line, int *pos);
 char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
 char		*expand_heredoc_line(char *line, t_vars *vars);
-int			chk_expand_heredoc(char *delimiter);
-int			write_to_heredoc(int fd, char *line
-				,t_vars *vars, int expand_vars);
-int			read_heredoc(int *fd, char *delimiter
-				,t_vars *vars, int expand_vars);
+// int			chk_expand_heredoc(char *delimiter);
+int write_to_heredoc(int fd, char *line, t_vars *vars);
+int store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
+// int			read_heredoc(int *fd, char *delimiter
+// 				,t_vars *vars, int expand_vars);
 // void		cleanup_heredoc_storage(t_vars *vars);
 void		setup_heredoc_pipe(t_vars *vars);
-int 		strip_outer_quotes(char **delimiter);
-int			store_heredoc_content(char *input, int start_pos, char *delimiter
-				,t_vars *vars);
+int 		strip_outer_quotes(char **delimiter); //POTENTIAL TO DEPRECATE
+// int			store_heredoc_content(char *input, int start_pos, char *delimiter
+// 				,t_vars *vars);
 int			handle_heredoc_err(t_vars *vars);
 // int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			reset_heredoc_pipe(t_vars *vars);
 // int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
 // char 		*get_heredoc_delimiter(char *input, t_vars *vars);
-void 		get_heredoc_delimiter(char *input, t_vars *vars);
+// void 		get_heredoc_delimiter(char *input, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
 // int			proc_heredoc(t_node *node, t_vars *vars);
 
@@ -505,7 +505,7 @@ char		*complete_input(char *input, t_inmode mode, t_vars *vars);
 int         has_heredoc_operator(char *input);
 char        *process_heredoc_line(char *line, t_vars *vars);
 // void 		process_single_command(char *input, t_vars *vars);
-void		process_command_with_heredoc(char *cmd_line, t_vars *vars);
+// void		process_command_with_heredoc(char *cmd_line, t_vars *vars);
 char 		*read_entire_file(const char *filename);
 void		read_and_process_from_tmp_buf(t_vars *vars);
 int			process_multiline_input(char *input, t_vars *vars);
@@ -514,13 +514,15 @@ t_inmode	check_input_state(char *input, t_vars *vars);
 void		term_heredoc(t_vars *vars);
 void		process_heredoc_continuation(char *input, t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
-void		setup_heredoc_mode(char *input, t_vars *vars);
+// void		setup_heredoc_mode(char *input, t_vars *vars);
 // void		write_heredoc_line(int fd, char *line, t_vars *vars);
 // int			is_quoted_delimiter(t_node *node, t_vars *vars);
-char		*extract_heredoc_delimiter(char *input, t_vars *vars);
+char		*extract_heredoc_delimiter(char *input);
+int 		check_trailing_chars(const char *line, int start_pos);
 int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
 void		setup_interactive_heredoc(t_vars *vars, int expand_vars);
+int 		validate_heredoc_delimiter(char *raw_delimiter, t_vars *vars);
 
 /*
 Input verification functions.

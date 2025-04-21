@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 23:29:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 17:48:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ void reset_redirect_fds(t_vars *vars)
 	}
 	vars->pipes->out_mode = OUT_MODE_NONE;
 	vars->pipes->current_redirect = NULL;
-	vars->pipes->last_heredoc = NULL;
+	// vars->pipes->last_heredoc = NULL;
 	vars->pipes->last_in_redir = NULL;
 	vars->pipes->last_out_redir = NULL;
 	vars->pipes->cmd_redir = NULL;

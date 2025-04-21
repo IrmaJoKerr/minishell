@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 00:17:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 17:35:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,37 +270,94 @@ Works with exec_redirect_cmd().
 //     result = redir_mode_setup(node, vars);
 //     return (result);
 // }
+// int setup_redirection(t_node *node, t_vars *vars)
+// {
+//     int result;
+    
+//     vars->pipes->current_redirect = node;
+//     if (node->right && node->right->args)
+//     {
+//         if (node->type == TYPE_HEREDOC)
+//         {
+//             // Check if delimiter appears quoted
+//             char *delim = node->right->args[0];
+//             size_t len = ft_strlen(delim);
+//             int appears_quoted = (len >= 2 && ft_isquote(delim[0]) && 
+//                                  delim[0] == delim[len-1]);
+            
+//             if (appears_quoted)
+//             {
+//                 // If quotes were present, disable expansion
+//                 vars->pipes->hd_expand = 0;
+//                 vars->pipes->last_heredoc = node;
+//                 fprintf(stderr, "[DBG_HEREDOC] setup_redirection: Found quoted "
+//                         "heredoc delimiter, setting hd_expand=0\n");
+//             }
+//         }
+//         else
+//         {
+//             // For other redirections, actually strip the quotes
+//             (void)strip_outer_quotes(&node->right->args[0]);
+//         }
+//     }
+    
+//     result = redir_mode_setup(node, vars);
+//     return (result);
+// }
 int setup_redirection(t_node *node, t_vars *vars)
 {
     int result;
-    
+    t_node *cmd_node;
+
     vars->pipes->current_redirect = node;
+
+    // Find the command node associated with this redirection
+    // Use find_cmd with FIND_PREV mode, searching from the head up to the current redirection node.
+    cmd_node = find_cmd(vars->head, node, FIND_PREV, vars); // Corrected function call
+    if (!cmd_node)
+    {
+        // It's possible for a redirection to be the first thing (e.g., < file cat)
+        // In this case, find_cmd(FIND_PREV) might return NULL.
+        // We need to decide how to handle this. Maybe find the *next* command?
+        // Or perhaps the logic assumes a command always precedes or follows.
+        // For now, let's assume a command should be found or it's an error/edge case.
+        fprintf(stderr, "bleshell: Error: Command node not found relative to redirection.\n");
+        vars->error_code = ERR_DEFAULT; // Set an error code
+        return (0); // Indicate failure
+    }
+    vars->pipes->cmd_redir = cmd_node; // Store the target command node
+
+    // Store the last redirection node encountered
+    if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+        vars->pipes->last_in_redir = node;
+    else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
+        vars->pipes->last_out_redir = node;
+
+
     if (node->right && node->right->args)
     {
         if (node->type == TYPE_HEREDOC)
         {
-            // Check if delimiter appears quoted
-            char *delim = node->right->args[0];
-            size_t len = ft_strlen(delim);
-            int appears_quoted = (len >= 2 && ft_isquote(delim[0]) && 
-                                 delim[0] == delim[len-1]);
-            
-            if (appears_quoted)
-            {
-                // If quotes were present, disable expansion
-                vars->pipes->hd_expand = 0;
-                vars->pipes->last_heredoc = node;
-                fprintf(stderr, "[DBG_HEREDOC] setup_redirection: Found quoted "
-                        "heredoc delimiter, setting hd_expand=0\n");
-            }
+            // No action needed here regarding expansion flag or delimiter processing.
+            fprintf(stderr, "[DBG_HEREDOC] setup_redirection: Processing heredoc node (expansion flag already set to %d)\n", vars->pipes->hd_expand);
         }
         else
         {
-            // For other redirections, actually strip the quotes
+            // For other redirections (<, >, >>), strip quotes from the filename/target
             (void)strip_outer_quotes(&node->right->args[0]);
+            fprintf(stderr, "[DEBUG] setup_redirection: Stripped quotes from target: '%s'\n", node->right->args[0]);
         }
     }
-    
+    // Check for missing filename/delimiter only for non-heredoc redirections
+    else if (node->type != TYPE_HEREDOC)
+    {
+         fprintf(stderr, "bleshell: syntax error near unexpected token `newline'\n");
+         vars->error_code = ERR_SYNTAX;
+         return (0);
+    }
+
+
+    // Call the function that actually performs the dup2 based on type
     result = redir_mode_setup(node, vars);
     return (result);
 }

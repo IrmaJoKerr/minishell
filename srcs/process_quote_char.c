@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 01:06:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/21 17:47:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -403,42 +403,124 @@ Return:
 //     }
 //     return (1);
 // }
+// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
+// {
+//     int     quote_type;
+//     char    *content;
+//     t_node  *cmd_node;
+//     t_node  *redir_node;
+    
+//     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
+//         is_redir_target ? " as redirection target" : "");
+        
+//     content = get_quoted_str(input, vars, &quote_type);
+//     if (!content)
+//         return (0);
+    
+//     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
+//         content, is_redir_target);
+        
+//     if (is_redir_target)
+//     {
+//         // Handle quoted filename for redirection
+//         redir_node = find_last_redir(vars);
+//         if (redir_node && is_redirection(redir_node->type))
+//         {
+//             // NEW CODE: Check if this is a heredoc redirection and set expansion flag
+//             if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
+//             {
+//                 // Disable variable expansion for quoted heredoc delimiters
+//                 vars->pipes->hd_expand = 0;
+//                 vars->pipes->last_heredoc = redir_node;
+//                 fprintf(stderr, "[DEBUG] Heredoc with quoted delimiter detected, disabling expansion\n");
+//             }
+            
+//             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
+//                 content, redir_node->type);
+            
+//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
+//             t_node *file_node = initnode(TYPE_ARGS, content);
+//             if (!file_node)
+//             {
+//                 free(content);
+//                 return (0);
+//             }
+//             // Connect to the redirection node
+//             redir_node->right = file_node;
+//             // Link into the token list
+//             if (redir_node->next)
+//             {
+//                 file_node->next = redir_node->next;
+//                 redir_node->next->prev = file_node;
+//             }
+//             redir_node->next = file_node;
+//             file_node->prev = redir_node;
+//             // Update current pointer
+//             vars->current = file_node;
+//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
+//             free(content);
+//             return (1);
+//         }
+//     }
+//     // Standard quote handling for non-redirection targets
+//     cmd_node = process_quoted_str(&content, quote_type, vars);
+//     if (!cmd_node)
+//     {
+//         free(content);
+//         process_adj(NULL, vars);
+//         return (1);
+//     }
+//     if (!merge_quoted_token(input, content, vars))
+//     {
+//         append_arg(cmd_node, content, quote_type);
+//         free(content);
+//         if (vars->adj_state[1])
+//             process_right_adj(input, vars);
+//         process_adj(NULL, vars);
+//     }
+//     return (1);
+// }
 int process_quote_char(char *input, t_vars *vars, int is_redir_target)
 {
     int     quote_type;
     char    *content;
     t_node  *cmd_node;
     t_node  *redir_node;
-    
-    fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
+
+    fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n",
         is_redir_target ? " as redirection target" : "");
-        
+
     content = get_quoted_str(input, vars, &quote_type);
     if (!content)
         return (0);
-    
+
     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
         content, is_redir_target);
-        
+
     if (is_redir_target)
     {
         // Handle quoted filename for redirection
         redir_node = find_last_redir(vars);
         if (redir_node && is_redirection(redir_node->type))
         {
-            // NEW CODE: Check if this is a heredoc redirection and set expansion flag
+            // Check if this is a heredoc redirection.
+            // The expansion flag (hd_expand) is ALREADY set correctly by
+            // validate_heredoc_delimiter during tokenization based on whether
+            // the raw delimiter was quoted. No need to set it here.
             if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
             {
-                // Disable variable expansion for quoted heredoc delimiters
-                vars->pipes->hd_expand = 0;
-                vars->pipes->last_heredoc = redir_node;
-                fprintf(stderr, "[DEBUG] Heredoc with quoted delimiter detected, disabling expansion\n");
+                // REMOVED: This line caused the compile error. Expansion flag is set elsewhere.
+                // vars->pipes->last_heredoc = redir_node;
+                fprintf(stderr, "[DEBUG] Heredoc delimiter is quoted. Expansion flag was set to %d during tokenization.\n", vars->pipes->hd_expand);
             }
-            
+
             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
                 content, redir_node->type);
-            
+
             // Create a node for the filename - PASS THE CONTENT DIRECTLY
+            // NOTE: For heredoc, 'content' here is the QUOTED delimiter (e.g., "EOF").
+            // The actual delimiter used for comparison is stored in vars->pipes->heredoc_delim.
+            // We store the raw quoted version in the token node for potential debugging/AST representation.
             t_node *file_node = initnode(TYPE_ARGS, content);
             if (!file_node)
             {
@@ -458,26 +540,72 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
             // Update current pointer
             vars->current = file_node;
             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-            free(content);
+            free(content); // Content was copied by initnode
             return (1);
         }
+        // If is_redir_target is true, but we didn't find a preceding redirection node,
+        // it's likely a syntax error or unexpected state. Handle appropriately.
+        fprintf(stderr, "[ERROR] process_quote_char: Quoted string marked as redir target, but no preceding redirection found.\n");
+        free(content);
+        // Maybe set vars->error_code = ERR_SYNTAX; ?
+        return (0); // Indicate error
     }
+
     // Standard quote handling for non-redirection targets
     cmd_node = process_quoted_str(&content, quote_type, vars);
-    if (!cmd_node)
+    if (!cmd_node && vars->adj_state[0] == 0) // If no command node AND no left adjacency
     {
-        free(content);
-        process_adj(NULL, vars);
-        return (1);
-    }
-    if (!merge_quoted_token(input, content, vars))
-    {
-        append_arg(cmd_node, content, quote_type);
-        free(content);
+        // Create a new command node if needed (e.g., echo "hello")
+        cmd_node = initnode(TYPE_CMD, content);
+        if (!cmd_node) {
+            free(content);
+            process_adj(NULL, vars); // Reset adjacency state
+            return (0); // Malloc error
+        }
+        // Add the new command node to the list
+        if (build_token_linklist(vars, cmd_node)) {
+             // If build_token_linklist freed the node (e.g., merged), content is already handled.
+             // This path might need review depending on build_token_linklist behavior.
+        } else {
+             // Node was linked, content is now owned by the node.
+        }
+        free(content); // Content is now owned/copied by the node or was freed by merge
         if (vars->adj_state[1])
             process_right_adj(input, vars);
         process_adj(NULL, vars);
+        return (1);
     }
+    else if (!cmd_node) // No command node, but maybe left adjacency?
+    {
+        // Try merging first
+        if (!merge_quoted_token(input, content, vars))
+        {
+             // Merge failed, treat as error or create new token?
+             // For now, assume error if no command and merge fails.
+             fprintf(stderr, "[ERROR] process_quote_char: Failed to merge quoted token and no command node found.\n");
+             free(content);
+             process_adj(NULL, vars);
+             return (0); // Indicate error
+        }
+         // Merge succeeded, content is handled by merge_quoted_token
+         // free(content); // Content freed by merge_quoted_token or handle_tok_join
+         return (1);
+    }
+
+
+    // We have a command node, try merging or appending
+    if (!merge_quoted_token(input, content, vars))
+    {
+        // Merge failed, append as argument
+        append_arg(cmd_node, content, quote_type); // append_arg should handle copying/ownership
+        free(content); // Free original content after appending
+        if (vars->adj_state[1])
+            process_right_adj(input, vars);
+        process_adj(NULL, vars); // Reset adjacency state
+    }
+     // If merge succeeded, content is handled by merge_quoted_token
+     // free(content); // Content freed by merge_quoted_token or handle_tok_join
+
     return (1);
 }
 
