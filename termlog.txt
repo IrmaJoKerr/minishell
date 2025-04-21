@@ -1,0 +1,1349 @@
+bleow@bleow-VM-Mint:~/Coding/Core/minishell$ valgrind --leak-check=full ./minishell 
+==26006== Memcheck, a memory error detector
+==26006== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==26006== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==26006== Command: ./minishell
+==26006== 
+[DBG_HEREDOC] Created initial heredoc pipe: read_fd=3
+bleshell$> echo hello"$HOME".txt
+echo hello_"$HOME"_world
+echo hello@"$HOME"@world
+[ML_DEBUG] handle_input: START, input len=72
+[ML_DEBUG] handle_input: Adding to history: 'echo hello"$HOME".txt
+echo hel...'
+[ML_DEBUG] handle_input: Detected multiline input, calling process_multiline_input.
+[ML_DEBUG] process_multiline_input: START
+[ML_DEBUG] process_multiline_input: Tokenizing first line: 'echo hello"$HOME".txt'
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[DEBUG] reset_redirect_fds: Restoring stdin from fd=-1, stdout from fd=-1
+[DEBUG] reset_redirect_fds: Current STDIN isatty=1, STDOUT isatty=1
+[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=1, STDOUT isatty=1
+[TOK_DBG] improved_tokenize: START, input='echo hello"$HOME".tx...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b5b6b0
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=10, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=10
+[TOK_DBG] handle_text: Called. Start=5, Pos=10
+[TOK_DBG] handle_text: Extracted text = 'hello'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello' to node 0x4b5b6b0
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b5b730, quotes=0x4b5b7d0
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 10
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b5be50 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b5be50
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b5bea0, token=0x4b5bef0
+DEBUG[proc_join_args]: Joining 'hello' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b5bea0, token=0x4b5bef0
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 4 adjacent characters: '.txt'
+DEBUG[handle_right_adj]: ENTER - pos=21, start=17
+DEBUG[handle_right_adj]: Extracted '.txt'
+DEBUG[handle_right_adj]: Current token last arg='hello/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello/home/bleow.txt'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=21
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=21, start=21
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=21
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=21, Start=21
+[TOK_DBG] Loop finished. Pos=21, Start=21
+[TOK_DBG] Processing final text chunk if any (Start=21, Pos=21)
+[TOK_DBG] handle_text: Called. Start=21, Pos=21
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b5b6b0, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello/home/bleow.txt'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[ML_DEBUG] process_multiline_input: NON-HEREDOC path entered.
+[ML_DEBUG] process_multiline_input: Writing full input (72 bytes) to TMP_BUF.
+[ML_DEBUG] process_multiline_input: Finished writing to TMP_BUF.
+[ML_DEBUG] process_multiline_input: Calling read_and_process_from_tmp_buf.
+[ML_DEBUG] read_and_process_from_tmp_buf: START
+[ML_DEBUG] read_entire_file: Opening temp/temp_buffer
+[ML_DEBUG] read_entire_file: File size is 72 bytes
+[ML_DEBUG] read_entire_file: Read 72 bytes
+[ML_DEBUG] read_entire_file: Closed fd, returning content.
+[ML_DEBUG] read_and_process_from_tmp_buf: Read 72 bytes from TMP_BUF
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello"$HOME".txt'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello"$HOME".tx...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b5c300
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=10, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=10
+[TOK_DBG] handle_text: Called. Start=5, Pos=10
+[TOK_DBG] handle_text: Extracted text = 'hello'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello' to node 0x4b5c300
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b5c380, quotes=0x4b5c420
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 10
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b5caa0 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b5caa0
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b5caf0, token=0x4b5cb40
+DEBUG[proc_join_args]: Joining 'hello' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b5caf0, token=0x4b5cb40
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 4 adjacent characters: '.txt'
+DEBUG[handle_right_adj]: ENTER - pos=21, start=17
+DEBUG[handle_right_adj]: Extracted '.txt'
+DEBUG[handle_right_adj]: Current token last arg='hello/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello/home/bleow.txt'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=21
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=21, start=21
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=21
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=21, Start=21
+[TOK_DBG] Loop finished. Pos=21, Start=21
+[TOK_DBG] Processing final text chunk if any (Start=21, Pos=21)
+[TOK_DBG] handle_text: Called. Start=21, Pos=21
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b5c300, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello/home/bleow.txt'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello/home/bleow.txt
+[MEM_DEBUG] Freeing partial_input=0x4b5c200
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello_"$HOME"_world'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello_"$HOME"_w...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b5ce30
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='_', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='_', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=10 -> 11
+[TOK_DBG] Loop Top: Pos=11, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=11, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=11, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=11
+[TOK_DBG] handle_text: Called. Start=5, Pos=11
+[TOK_DBG] handle_text: Extracted text = 'hello_'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello_'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello_' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello_' to node 0x4b5ce30
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b5ceb0, quotes=0x4b5cf50
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 11
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b5d5d0 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b5d5d0
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b5d620, token=0x4b5d670
+DEBUG[proc_join_args]: Joining 'hello_' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b5d620, token=0x4b5d670
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 6 adjacent characters: '_world'
+DEBUG[handle_right_adj]: ENTER - pos=24, start=18
+DEBUG[handle_right_adj]: Extracted '_world'
+DEBUG[handle_right_adj]: Current token last arg='hello_/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello_/home/bleow_world'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=24
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=24, start=24
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=24
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=24, Start=24
+[TOK_DBG] Loop finished. Pos=24, Start=24
+[TOK_DBG] Processing final text chunk if any (Start=24, Pos=24)
+[TOK_DBG] handle_text: Called. Start=24, Pos=24
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b5ce30, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello_/home/bleow_world'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello_/home/bleow_world
+[MEM_DEBUG] Freeing partial_input=0x4b5cd30
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello@"$HOME"@world'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello@"$HOME"@w...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b5d960
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='@', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='@', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=10 -> 11
+[TOK_DBG] Loop Top: Pos=11, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=11, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=11, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=11
+[TOK_DBG] handle_text: Called. Start=5, Pos=11
+[TOK_DBG] handle_text: Extracted text = 'hello@'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello@'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello@' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello@' to node 0x4b5d960
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b5d9e0, quotes=0x4b5da80
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 11
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b5e100 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b5e100
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b5e150, token=0x4b5e1a0
+DEBUG[proc_join_args]: Joining 'hello@' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b5e150, token=0x4b5e1a0
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 6 adjacent characters: '@world'
+DEBUG[handle_right_adj]: ENTER - pos=24, start=18
+DEBUG[handle_right_adj]: Extracted '@world'
+DEBUG[handle_right_adj]: Current token last arg='hello@/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello@/home/bleow@world'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=24
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=24, start=24
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=24
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=24, Start=24
+[TOK_DBG] Loop finished. Pos=24, Start=24
+[TOK_DBG] Processing final text chunk if any (Start=24, Pos=24)
+[TOK_DBG] handle_text: Called. Start=24, Pos=24
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b5d960, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello@/home/bleow@world'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello@/home/bleow@world
+[MEM_DEBUG] Freeing partial_input=0x4b5d860
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: END
+[ML_DEBUG] process_multiline_input: Returned from read_and_process_from_tmp_buf.
+[ML_DEBUG] process_multiline_input: END
+[ML_DEBUG] handle_input: process_multiline_input SUCCEEDED.
+[ML_DEBUG] handle_input: END
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[DEBUG] reset_redirect_fds: Restoring stdin from fd=-1, stdout from fd=-1
+[DEBUG] reset_redirect_fds: Current STDIN isatty=1, STDOUT isatty=1
+[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=1, STDOUT isatty=1
+bleshell$> exit
+[ML_DEBUG] handle_input: START, input len=4
+[ML_DEBUG] handle_input: Adding to history: 'exit...'
+[ML_DEBUG] handle_input: Detected single-line input, calling process_command.
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='exit...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='x', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='x', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='i', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='i', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='t', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='t', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop finished. Pos=4, Start=0
+[TOK_DBG] Processing final text chunk if any (Start=0, Pos=4)
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'exit'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='exit'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b5e870
+[TOK_DBG] handle_text: Reset Start to 4
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='exit'
+[debug_token_list:798]        Address: 0x4b5e870, Prev: (nil), Next: (nil)
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: exit
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+exit
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+==26006== 
+==26006== HEAP SUMMARY:
+==26006==     in use at exit: 232,919 bytes in 239 blocks
+==26006==   total heap usage: 771 allocs, 532 frees, 285,055 bytes allocated
+==26006== 
+==26006== 24 bytes in 1 blocks are definitely lost in loss record 17 of 77
+==26006==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==26006==    by 0x1127FE: setup_quotes (make_node_arrays.c:52)
+==26006==    by 0x1128D3: make_node_arrays (make_node_arrays.c:82)
+==26006==    by 0x10F2C6: make_nodeframe (initnode.c:33)
+==26006==    by 0x10F34B: initnode (initnode.c:63)
+==26006==    by 0x11794A: maketoken_with_type (tokenize.c:56)
+==26006==    by 0x113D0E: handle_string (operators.c:67)
+==26006==    by 0x117DDF: handle_text (tokenize.c:191)
+==26006==    by 0x118249: imp_tok_quote (tokenize.c:296)
+==26006==    by 0x118B0F: improved_tokenize (tokenize.c:605)
+==26006==    by 0x1103D2: process_multiline_input (input_handlers.c:573)
+==26006==    by 0x110B01: handle_input (input_handlers.c:895)
+==26006== 
+==26006== 80 bytes in 3 blocks are definitely lost in loss record 22 of 77
+==26006==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==26006==    by 0x1127FE: setup_quotes (make_node_arrays.c:52)
+==26006==    by 0x1128D3: make_node_arrays (make_node_arrays.c:82)
+==26006==    by 0x10F2C6: make_nodeframe (initnode.c:33)
+==26006==    by 0x10F34B: initnode (initnode.c:63)
+==26006==    by 0x11794A: maketoken_with_type (tokenize.c:56)
+==26006==    by 0x113D0E: handle_string (operators.c:67)
+==26006==    by 0x117DDF: handle_text (tokenize.c:191)
+==26006==    by 0x118249: imp_tok_quote (tokenize.c:296)
+==26006==    by 0x118B0F: improved_tokenize (tokenize.c:605)
+==26006==    by 0x113537: process_input_tokens (minishell.c:208)
+==26006==    by 0x1135FA: process_command (minishell.c:246)
+==26006== 
+==26006== LEAK SUMMARY:
+==26006==    definitely lost: 104 bytes in 4 blocks
+==26006==    indirectly lost: 0 bytes in 0 blocks
+==26006==      possibly lost: 0 bytes in 0 blocks
+==26006==    still reachable: 232,815 bytes in 235 blocks
+==26006==         suppressed: 0 bytes in 0 blocks
+==26006== Reachable blocks (those to which a pointer was found) are not shown.
+==26006== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==26006== 
+==26006== For lists of detected and suppressed errors, rerun with: -s
+==26006== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+bleow@bleow-VM-Mint:~/Coding/Core/minishell$ make re
+Cleaning up...
+rm -rf objects
+rm -rf temp
+make -C libft clean
+make[1]: Entering directory '/home/bleow/Coding/Core/minishell/libft'
+rm -rf objects
+make[1]: Leaving directory '/home/bleow/Coding/Core/minishell/libft'
+Performing full clean...
+rm -f minishell
+make -C libft fclean
+make[1]: Entering directory '/home/bleow/Coding/Core/minishell/libft'
+rm -rf objects
+rm -f libft.a
+make[1]: Leaving directory '/home/bleow/Coding/Core/minishell/libft'
+Building libft
+make -C libft
+make[1]: Entering directory '/home/bleow/Coding/Core/minishell/libft'
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_arrlen.o lib_ft/ft_arrlen.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_atoi.o lib_ft/ft_atoi.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_atoiarr_cln.o lib_ft/ft_atoiarr_cln.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_atoiarr_errcln.o lib_ft/ft_atoiarr_errcln.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_atoierr.o lib_ft/ft_atoierr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_bzero.o lib_ft/ft_bzero.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_calloc.o lib_ft/ft_calloc.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_free_int_2d.o lib_ft/ft_free_int_2d.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_free_2d.o lib_ft/ft_free_2d.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_free_void_2d.o lib_ft/ft_free_void_2d.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_is_operator.o lib_ft/ft_is_operator.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isalnum.o lib_ft/ft_isalnum.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isalpha.o lib_ft/ft_isalpha.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isascii.o lib_ft/ft_isascii.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isdelimiter_quote.o lib_ft/ft_isdelimiter_quote.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isdelimiter.o lib_ft/ft_isdelimiter.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isdigit.o lib_ft/ft_isdigit.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isprint.o lib_ft/ft_isprint.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isquote.o lib_ft/ft_isquote.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_isspace.o lib_ft/ft_isspace.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_itoa.o lib_ft/ft_itoa.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_memchr.o lib_ft/ft_memchr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_memcmp.o lib_ft/ft_memcmp.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_memcpy.o lib_ft/ft_memcpy.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_memmove.o lib_ft/ft_memmove.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_memset.o lib_ft/ft_memset.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putchar_fd.o lib_ft/ft_putchar_fd.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putchar.o lib_ft/ft_putchar.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putendl_fd.o lib_ft/ft_putendl_fd.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putendl.o lib_ft/ft_putendl.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putnbr_fd.o lib_ft/ft_putnbr_fd.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putnbr.o lib_ft/ft_putnbr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putstr_fd.o lib_ft/ft_putstr_fd.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_putstr.o lib_ft/ft_putstr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_safefree.o lib_ft/ft_safefree.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_split.o lib_ft/ft_split.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_splitstr.o lib_ft/ft_splitstr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strchr.o lib_ft/ft_strchr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strcmp.o lib_ft/ft_strcmp.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strdup.o lib_ft/ft_strdup.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_striteri.o lib_ft/ft_striteri.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strjoin.o lib_ft/ft_strjoin.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strlcat.o lib_ft/ft_strlcat.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strlcpy.o lib_ft/ft_strlcpy.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strlen.o lib_ft/ft_strlen.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strmapi.o lib_ft/ft_strmapi.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strncmp.o lib_ft/ft_strncmp.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strndup.o lib_ft/ft_strndup.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strnlen.o lib_ft/ft_strnlen.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strnstr.o lib_ft/ft_strnstr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strrchr.o lib_ft/ft_strrchr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_strtrim.o lib_ft/ft_strtrim.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_substr.o lib_ft/ft_substr.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_tolower.o lib_ft/ft_tolower.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_toupper.o lib_ft/ft_toupper.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstadd_back.o lib_ft/ft_lstadd_back.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstadd_front.o lib_ft/ft_lstadd_front.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstclear.o lib_ft/ft_lstclear.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstdelone.o lib_ft/ft_lstdelone.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstiter.o lib_ft/ft_lstiter.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstlast.o lib_ft/ft_lstlast.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstmap.o lib_ft/ft_lstmap.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstnew.o lib_ft/ft_lstnew.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/lib_ft/ft_lstsize.o lib_ft/ft_lstsize.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/get_next_line/get_next_line.o get_next_line/get_next_line.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/get_next_line/get_next_line_utils.o get_next_line/get_next_line_utils.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/ft_printf.o libftprintf/ft_printf.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/master_parser.o libftprintf/master_parser.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_c.o libftprintf/arg_c.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_s.o libftprintf/arg_s.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_di.o libftprintf/arg_di.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_p.o libftprintf/arg_p.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_u.o libftprintf/arg_u.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_x_lower.o libftprintf/arg_x_lower.c
+gcc -Wall -Wextra -Werror -std=c89 -I. -I./libftprintf -I./get_next_line -I./objects -I./objects/libftprintf -I./objects/get_next_line -I./objects/lib_ft -I./includes -I./lib_ft -Iincludes -c -o objects/libftprintf/arg_x_upper.o libftprintf/arg_x_upper.c
+ar rcs libft.a objects/lib_ft/ft_arrlen.o objects/lib_ft/ft_atoi.o objects/lib_ft/ft_atoiarr_cln.o objects/lib_ft/ft_atoiarr_errcln.o objects/lib_ft/ft_atoierr.o objects/lib_ft/ft_bzero.o objects/lib_ft/ft_calloc.o objects/lib_ft/ft_free_int_2d.o objects/lib_ft/ft_free_2d.o objects/lib_ft/ft_free_void_2d.o objects/lib_ft/ft_is_operator.o objects/lib_ft/ft_isalnum.o objects/lib_ft/ft_isalpha.o objects/lib_ft/ft_isascii.o objects/lib_ft/ft_isdelimiter_quote.o objects/lib_ft/ft_isdelimiter.o objects/lib_ft/ft_isdigit.o objects/lib_ft/ft_isprint.o objects/lib_ft/ft_isquote.o objects/lib_ft/ft_isspace.o objects/lib_ft/ft_itoa.o objects/lib_ft/ft_memchr.o objects/lib_ft/ft_memcmp.o objects/lib_ft/ft_memcpy.o objects/lib_ft/ft_memmove.o objects/lib_ft/ft_memset.o objects/lib_ft/ft_putchar_fd.o objects/lib_ft/ft_putchar.o objects/lib_ft/ft_putendl_fd.o objects/lib_ft/ft_putendl.o objects/lib_ft/ft_putnbr_fd.o objects/lib_ft/ft_putnbr.o objects/lib_ft/ft_putstr_fd.o objects/lib_ft/ft_putstr.o objects/lib_ft/ft_safefree.o objects/lib_ft/ft_split.o objects/lib_ft/ft_splitstr.o objects/lib_ft/ft_strchr.o objects/lib_ft/ft_strcmp.o objects/lib_ft/ft_strdup.o objects/lib_ft/ft_striteri.o objects/lib_ft/ft_strjoin.o objects/lib_ft/ft_strlcat.o objects/lib_ft/ft_strlcpy.o objects/lib_ft/ft_strlen.o objects/lib_ft/ft_strmapi.o objects/lib_ft/ft_strncmp.o objects/lib_ft/ft_strndup.o objects/lib_ft/ft_strnlen.o objects/lib_ft/ft_strnstr.o objects/lib_ft/ft_strrchr.o objects/lib_ft/ft_strtrim.o objects/lib_ft/ft_substr.o objects/lib_ft/ft_tolower.o objects/lib_ft/ft_toupper.o objects/lib_ft/ft_lstadd_back.o objects/lib_ft/ft_lstadd_front.o objects/lib_ft/ft_lstclear.o objects/lib_ft/ft_lstdelone.o objects/lib_ft/ft_lstiter.o objects/lib_ft/ft_lstlast.o objects/lib_ft/ft_lstmap.o objects/lib_ft/ft_lstnew.o objects/lib_ft/ft_lstsize.o objects/get_next_line/get_next_line.o objects/get_next_line/get_next_line_utils.o objects/libftprintf/ft_printf.o objects/libftprintf/master_parser.o objects/libftprintf/arg_c.o objects/libftprintf/arg_s.o objects/libftprintf/arg_di.o objects/libftprintf/arg_p.o objects/libftprintf/arg_u.o objects/libftprintf/arg_x_lower.o objects/libftprintf/arg_x_upper.o  
+ranlib libft.a
+make[1]: Leaving directory '/home/bleow/Coding/Core/minishell/libft'
+Compiling BleShell srcs/append_args.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/append_args.c -o objects/append_args.o
+Compiling BleShell srcs/arguments.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/arguments.c -o objects/arguments.o
+Compiling BleShell srcs/buildast.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/buildast.c -o objects/buildast.o
+Compiling BleShell srcs/builtin.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtin.c -o objects/builtin.o
+Compiling BleShell srcs/cleanup_a.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/cleanup_a.c -o objects/cleanup_a.o
+Compiling BleShell srcs/cleanup_b.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/cleanup_b.c -o objects/cleanup_b.o
+Compiling BleShell srcs/cmd_finder.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/cmd_finder.c -o objects/cmd_finder.o
+Compiling BleShell srcs/errormsg.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/errormsg.c -o objects/errormsg.o
+Compiling BleShell srcs/execute.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/execute.c -o objects/execute.o
+Compiling BleShell srcs/expansion.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/expansion.c -o objects/expansion.o
+Compiling BleShell srcs/heredoc.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/heredoc.c -o objects/heredoc.o
+Compiling BleShell srcs/history_load.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/history_load.c -o objects/history_load.o
+Compiling BleShell srcs/history_save.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/history_save.c -o objects/history_save.o
+Compiling BleShell srcs/history.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/history.c -o objects/history.o
+Compiling BleShell srcs/initnode.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/initnode.c -o objects/initnode.o
+Compiling BleShell srcs/initshell.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/initshell.c -o objects/initshell.o
+Compiling BleShell srcs/input_completion.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/input_completion.c -o objects/input_completion.o
+Compiling BleShell srcs/input_handlers.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/input_handlers.c -o objects/input_handlers.o
+Compiling BleShell srcs/input_verify.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/input_verify.c -o objects/input_verify.o
+Compiling BleShell srcs/lexer.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/lexer.c -o objects/lexer.o
+Compiling BleShell srcs/make_exp_token_utils.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/make_exp_token_utils.c -o objects/make_exp_token_utils.o
+Compiling BleShell srcs/make_exp_token.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/make_exp_token.c -o objects/make_exp_token.o
+Compiling BleShell srcs/make_node_arrays.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/make_node_arrays.c -o objects/make_node_arrays.o
+Compiling BleShell srcs/memory_debug.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/memory_debug.c -o objects/memory_debug.o
+Compiling BleShell srcs/minishell.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/minishell.c -o objects/minishell.o
+Compiling BleShell srcs/operators.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/operators.c -o objects/operators.o
+Compiling BleShell srcs/paths.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/paths.c -o objects/paths.o
+Compiling BleShell srcs/pipe_analysis.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/pipe_analysis.c -o objects/pipe_analysis.o
+Compiling BleShell srcs/pipes.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/pipes.c -o objects/pipes.o
+Compiling BleShell srcs/process_pipes.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/process_pipes.c -o objects/process_pipes.o
+Compiling BleShell srcs/process_quote_char.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/process_quote_char.c -o objects/process_quote_char.o
+Compiling BleShell srcs/process_redirect.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/process_redirect.c -o objects/process_redirect.o
+Compiling BleShell srcs/quotes.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/quotes.c -o objects/quotes.o
+Compiling BleShell srcs/redirect.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/redirect.c -o objects/redirect.o
+Compiling BleShell srcs/shell_level.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/shell_level.c -o objects/shell_level.o
+Compiling BleShell srcs/signals.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/signals.c -o objects/signals.o
+Compiling BleShell srcs/tokenize.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/tokenize.c -o objects/tokenize.o
+Compiling BleShell srcs/typeconvert.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/typeconvert.c -o objects/typeconvert.o
+Compiling BleShell srcs/builtins/builtin_cd.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_cd.c -o objects/builtins/builtin_cd.o
+Compiling BleShell srcs/builtins/builtin_echo.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_echo.c -o objects/builtins/builtin_echo.o
+Compiling BleShell srcs/builtins/builtin_env.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_env.c -o objects/builtins/builtin_env.o
+Compiling BleShell srcs/builtins/builtin_exit.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_exit.c -o objects/builtins/builtin_exit.o
+Compiling BleShell srcs/builtins/builtin_export_utils.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_export_utils.c -o objects/builtins/builtin_export_utils.o
+Compiling BleShell srcs/builtins/builtin_export.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_export.c -o objects/builtins/builtin_export.o
+Compiling BleShell srcs/builtins/builtin_pwd.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_pwd.c -o objects/builtins/builtin_pwd.o
+Compiling BleShell srcs/builtins/builtin_unset_utils.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_unset_utils.c -o objects/builtins/builtin_unset_utils.o
+Compiling BleShell srcs/builtins/builtin_unset.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -Iincludes -Ilibft/includes -c srcs/builtins/builtin_unset.c -o objects/builtins/builtin_unset.o
+Linking minishell
+gcc -Wall -Wextra -Werror -gdwarf-4 objects/append_args.o objects/arguments.o objects/buildast.o objects/builtin.o objects/cleanup_a.o objects/cleanup_b.o objects/cmd_finder.o objects/errormsg.o objects/execute.o objects/expansion.o objects/heredoc.o objects/history_load.o objects/history_save.o objects/history.o objects/initnode.o objects/initshell.o objects/input_completion.o objects/input_handlers.o objects/input_verify.o objects/lexer.o objects/make_exp_token_utils.o objects/make_exp_token.o objects/make_node_arrays.o objects/memory_debug.o objects/minishell.o objects/operators.o objects/paths.o objects/pipe_analysis.o objects/pipes.o objects/process_pipes.o objects/process_quote_char.o objects/process_redirect.o objects/quotes.o objects/redirect.o objects/shell_level.o objects/signals.o objects/tokenize.o objects/typeconvert.o objects/builtins/builtin_cd.o objects/builtins/builtin_echo.o objects/builtins/builtin_env.o objects/builtins/builtin_exit.o objects/builtins/builtin_export_utils.o objects/builtins/builtin_export.o objects/builtins/builtin_pwd.o objects/builtins/builtin_unset_utils.o objects/builtins/builtin_unset.o -Llibft -lft -lreadline -o minishell
+bleow@bleow-VM-Mint:~/Coding/Core/minishell$ valgrind --leak-check=full ./minishell 
+==26695== Memcheck, a memory error detector
+==26695== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==26695== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==26695== Command: ./minishell
+==26695== 
+[DBG_HEREDOC] Created initial heredoc pipe: read_fd=3
+bleshell$> echo hello"$HOME".txt
+echo hello_"$HOME"_world
+echo hello@"$HOME"@world
+[ML_DEBUG] handle_input: START, input len=72
+[ML_DEBUG] handle_input: Adding to history: 'echo hello"$HOME".txt
+echo hel...'
+[ML_DEBUG] handle_input: Detected multiline input, calling process_multiline_input.
+[ML_DEBUG] process_multiline_input: START
+[ML_DEBUG] process_multiline_input: Tokenizing first line: 'echo hello"$HOME".txt'
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[DEBUG] reset_redirect_fds: Restoring stdin from fd=-1, stdout from fd=-1
+[DEBUG] reset_redirect_fds: Current STDIN isatty=1, STDOUT isatty=1
+[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=1, STDOUT isatty=1
+[TOK_DBG] improved_tokenize: START, input='echo hello"$HOME".tx...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b54120
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=10, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=10
+[TOK_DBG] handle_text: Called. Start=5, Pos=10
+[TOK_DBG] handle_text: Extracted text = 'hello'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello' to node 0x4b54120
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b541a0, quotes=0x4b54240
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 10
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b548c0 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b548c0
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b54910, token=0x4b54960
+DEBUG[proc_join_args]: Joining 'hello' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b54910, token=0x4b54960
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 4 adjacent characters: '.txt'
+DEBUG[handle_right_adj]: ENTER - pos=21, start=17
+DEBUG[handle_right_adj]: Extracted '.txt'
+DEBUG[handle_right_adj]: Current token last arg='hello/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello/home/bleow.txt'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=21
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=21, start=21
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=21
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=21, Start=21
+[TOK_DBG] Loop finished. Pos=21, Start=21
+[TOK_DBG] Processing final text chunk if any (Start=21, Pos=21)
+[TOK_DBG] handle_text: Called. Start=21, Pos=21
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b54120, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello/home/bleow.txt'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[ML_DEBUG] process_multiline_input: NON-HEREDOC path entered.
+[ML_DEBUG] process_multiline_input: Writing full input (72 bytes) to TMP_BUF.
+[ML_DEBUG] process_multiline_input: Finished writing to TMP_BUF.
+[ML_DEBUG] process_multiline_input: Calling read_and_process_from_tmp_buf.
+[ML_DEBUG] read_and_process_from_tmp_buf: START
+[ML_DEBUG] read_entire_file: Opening temp/temp_buffer
+[ML_DEBUG] read_entire_file: File size is 72 bytes
+[ML_DEBUG] read_entire_file: Read 72 bytes
+[ML_DEBUG] read_entire_file: Closed fd, returning content.
+[ML_DEBUG] read_and_process_from_tmp_buf: Read 72 bytes from TMP_BUF
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello"$HOME".txt'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello"$HOME".tx...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b54d70
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=10, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=10
+[TOK_DBG] handle_text: Called. Start=5, Pos=10
+[TOK_DBG] handle_text: Extracted text = 'hello'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello' to node 0x4b54d70
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b54df0, quotes=0x4b54e90
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 10
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b55510 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b55510
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b55560, token=0x4b555b0
+DEBUG[proc_join_args]: Joining 'hello' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b55560, token=0x4b555b0
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 4 adjacent characters: '.txt'
+DEBUG[handle_right_adj]: ENTER - pos=21, start=17
+DEBUG[handle_right_adj]: Extracted '.txt'
+DEBUG[handle_right_adj]: Current token last arg='hello/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello/home/bleow.txt'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=21
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=21, start=21
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=21
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=21, Start=21
+[TOK_DBG] Loop finished. Pos=21, Start=21
+[TOK_DBG] Processing final text chunk if any (Start=21, Pos=21)
+[TOK_DBG] handle_text: Called. Start=21, Pos=21
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b54d70, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello/home/bleow.txt'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello/home/bleow.txt
+[MEM_DEBUG] Freeing partial_input=0x4b54c70
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello_"$HOME"_world'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello_"$HOME"_w...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b558a0
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='_', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='_', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=10 -> 11
+[TOK_DBG] Loop Top: Pos=11, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=11, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=11, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=11
+[TOK_DBG] handle_text: Called. Start=5, Pos=11
+[TOK_DBG] handle_text: Extracted text = 'hello_'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello_'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello_' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello_' to node 0x4b558a0
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b55920, quotes=0x4b559c0
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 11
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b56040 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b56040
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b56090, token=0x4b560e0
+DEBUG[proc_join_args]: Joining 'hello_' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b56090, token=0x4b560e0
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 6 adjacent characters: '_world'
+DEBUG[handle_right_adj]: ENTER - pos=24, start=18
+DEBUG[handle_right_adj]: Extracted '_world'
+DEBUG[handle_right_adj]: Current token last arg='hello_/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello_/home/bleow_world'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=24
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=24, start=24
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=24
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=24, Start=24
+[TOK_DBG] Loop finished. Pos=24, Start=24
+[TOK_DBG] Processing final text chunk if any (Start=24, Pos=24)
+[TOK_DBG] handle_text: Called. Start=24, Pos=24
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b558a0, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello_/home/bleow_world'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello_/home/bleow_world
+[MEM_DEBUG] Freeing partial_input=0x4b557a0
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: Found command end. Processing: 'echo hello@"$HOME"@world'
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='echo hello@"$HOME"@w...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='c', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='c', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='h', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='o', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop Top: Pos=4, Char=' ', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=4, Char=' ', Type=0
+[TOK_DBG] Calling imp_tok_white
+[TOK_DBG] imp_tok_white: Called. Pos=4, Start=0
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'echo'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='echo'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b563d0
+[TOK_DBG] handle_text: Reset Start to 4
+[TOK_DBG] imp_tok_white: Skipped whitespace from 4 to 5.
+[TOK_DBG] imp_tok_white: Set Start=5, next_flag=1.
+[TOK_DBG] next_flag is set, continuing loop. Pos=5, Start=5
+[TOK_DBG] Loop Top: Pos=5, Char='h', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=5, Char='h', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=5 -> 6
+[TOK_DBG] Loop Top: Pos=6, Char='e', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=6, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=6 -> 7
+[TOK_DBG] Loop Top: Pos=7, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=7, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=7 -> 8
+[TOK_DBG] Loop Top: Pos=8, Char='l', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=8, Char='l', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=8 -> 9
+[TOK_DBG] Loop Top: Pos=9, Char='o', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=9, Char='o', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=9 -> 10
+[TOK_DBG] Loop Top: Pos=10, Char='@', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=10, Char='@', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=10 -> 11
+[TOK_DBG] Loop Top: Pos=11, Char='"', Start=5, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=11, Char='"', Type=5
+[TOK_DBG] Calling imp_tok_quote
+DEBUG[imp_tok_quote]: ENTER with pos=11, char='"', prev_type=2
+DEBUG: imp_tok_quote: Previous token type=2, pos=11
+[TOK_DBG] handle_text: Called. Start=5, Pos=11
+[TOK_DBG] handle_text: Extracted text = 'hello@'
+[TOK_DBG] handle_text: Set token type to 3. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=3 (ARGS), content='hello@'
+[build_token_linklist:737] build_token_linklist: Merging ARG 'hello@' into CMD 'echo'
+[append_arg:356] append_arg: Adding 'hello@' to node 0x4b563d0
+[append_arg:359] append_arg: Current args count: 1
+[append_arg:382] append_arg: Freeing old arrays: args=0x4b56450, quotes=0x4b564f0
+[append_arg:395] append_arg: Added arg, now node has 2 arguments
+[build_token_linklist:772] build_token_linklist: After merge, CMD 'echo', next=(nil)
+[TOK_DBG] handle_text: Reset Start to 11
+DEBUG[process_quote_char]: Processing quote
+DEBUG: process_quote_char: Quote content='$HOME', redir_target=0
+DEBUG: expand_variable: Called with input string
+DEBUG: Entering handle_special_var()
+[MEMTRACK:get_env_val] Allocation: 0x4b56b70 (ENV_VALUE)
+[MEM_TRACK] Allocated env value for 'HOME' at 0x4b56b70
+DEBUG: expand_variable: Expanded 'HOME' to '/home/bleow'
+[merge_quoted_token:241] merge_quoted_token: Attempting with content='/home/bleow', left_adj=1
+[MEM_DEBUG] handle_tok_join: Entry with expanded_val=0x4b56bc0, token=0x4b56c10
+DEBUG[proc_join_args]: Joining 'hello@' with '/home/bleow'
+[MEM_DEBUG] handle_tok_join: Updating quote types
+[MEM_DEBUG] handle_tok_join: Success, freeing expanded_val=0x4b56bc0, token=0x4b56c10
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 6 adjacent characters: '@world'
+DEBUG[handle_right_adj]: ENTER - pos=24, start=18
+DEBUG[handle_right_adj]: Extracted '@world'
+DEBUG[handle_right_adj]: Current token last arg='hello@/home/bleow'
+DEBUG[handle_right_adj]: Joined result='hello@/home/bleow@world'
+DEBUG[handle_right_adj]: EXIT
+DEBUG[process_process_right_adjcy]: Updated start=24
+[merge_quoted_token:256] merge_quoted_token: Join successful
+DEBUG[process_process_right_adjcy]: Right adjacency detected after left joining
+DEBUG[process_process_right_adjcy]: Consumed 0 adjacent characters: ''
+DEBUG[handle_right_adj]: ENTER - pos=24, start=24
+DEBUG[handle_right_adj]: No text to extract (pos <= start)
+DEBUG[process_process_right_adjcy]: Updated start=24
+DEBUG[imp_tok_quote]: Quote processed successfully
+[TOK_DBG] next_flag is set, continuing loop. Pos=24, Start=24
+[TOK_DBG] Loop finished. Pos=24, Start=24
+[TOK_DBG] Processing final text chunk if any (Start=24, Pos=24)
+[TOK_DBG] handle_text: Called. Start=24, Pos=24
+[TOK_DBG] handle_text: No text to process (Pos <= Start).
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='echo'
+[debug_token_list:798]        Address: 0x4b563d0, Prev: (nil), Next: (nil)
+[debug_token_list:806]        Arg[1]: 'hello@/home/bleow@world'
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: echo
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+hello@/home/bleow@world
+[MEM_DEBUG] Freeing partial_input=0x4b562d0
+[DEBUG] Reached the end of process_command()
+[ML_DEBUG] read_and_process_from_tmp_buf: Finished processing command.
+[ML_DEBUG] read_and_process_from_tmp_buf: END
+[ML_DEBUG] process_multiline_input: Returned from read_and_process_from_tmp_buf.
+[ML_DEBUG] process_multiline_input: END
+[ML_DEBUG] handle_input: process_multiline_input SUCCEEDED.
+[ML_DEBUG] handle_input: END
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[DEBUG] reset_redirect_fds: Restoring stdin from fd=-1, stdout from fd=-1
+[DEBUG] reset_redirect_fds: Current STDIN isatty=1, STDOUT isatty=1
+[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=1, STDOUT isatty=1
+bleshell$> exit
+[ML_DEBUG] handle_input: START, input len=4
+[ML_DEBUG] handle_input: Adding to history: 'exit...'
+[ML_DEBUG] handle_input: Detected single-line input, calling process_command.
+[DEBUG] process_command() called
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+[TOK_DBG] improved_tokenize: START, input='exit...'
+[TOK_DBG] Loop Top: Pos=0, Char='e', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=0, Char='e', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=0 -> 1
+[TOK_DBG] Loop Top: Pos=1, Char='x', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=1, Char='x', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=1 -> 2
+[TOK_DBG] Loop Top: Pos=2, Char='i', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=2, Char='i', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=2 -> 3
+[TOK_DBG] Loop Top: Pos=3, Char='t', Start=0, ExpectDelim=0
+[TOK_DBG] Regular Token Handling: Pos=3, Char='t', Type=0
+[TOK_DBG] Regular char, advancing pos. Pos=3 -> 4
+[TOK_DBG] Loop finished. Pos=4, Start=0
+[TOK_DBG] Processing final text chunk if any (Start=0, Pos=4)
+[TOK_DBG] handle_text: Called. Start=0, Pos=4
+[TOK_DBG] handle_text: Extracted text = 'exit'
+[TOK_DBG] handle_text: Set token type to 2. Calling handle_string.
+[build_token_linklist:708] build_token_linklist: Adding node type=2 (CMD), content='exit'
+[build_token_linklist:717] build_token_linklist: Set as head 0x4b572e0
+[TOK_DBG] handle_text: Reset Start to 4
+[improved_tokenize:667] Tokenization complete
+[debug_token_list:792] === COMPLETE TOKEN LIST WITH POINTERS ===
+[debug_token_list:795] Token 0: type=2 (CMD), content='exit'
+[debug_token_list:798]        Address: 0x4b572e0, Prev: (nil), Next: (nil)
+[debug_token_list:815] ======================================
+
+[TOK_DBG] improved_tokenize: END
+[build_and_execute:154] Building AST from token list
+DEBUG: In validate_redirection_targets().Validating redirection targets
+DEBUG: proc_redir function called
+DEBUG: proc_redir: Processing command line with 1 tokens
+DEBUG: Resetting redirection tracking
+DEBUG: Building redirection AST
+DEBUG: build_redir_ast: Checking redirection at pos 0, type=2, next=(nil)
+DEBUG: Found command: exit
+DEBUG: Redirection chain built: [end]
+[build_and_execute:183] AST built successfully, root type=2
+[DBG_HEREDOC] heredoc_mode before execution: 0
+exit
+[MEM_DEBUG] cleanup_token_list: Starting cleanup
+==26695== 
+==26695== HEAP SUMMARY:
+==26695==     in use at exit: 232,919 bytes in 239 blocks
+==26695==   total heap usage: 676 allocs, 437 frees, 261,764 bytes allocated
+==26695== 
+==26695== 24 bytes in 1 blocks are definitely lost in loss record 17 of 77
+==26695==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==26695==    by 0x1127FE: setup_quotes (make_node_arrays.c:52)
+==26695==    by 0x1128D3: make_node_arrays (make_node_arrays.c:82)
+==26695==    by 0x10F2C6: make_nodeframe (initnode.c:33)
+==26695==    by 0x10F34B: initnode (initnode.c:63)
+==26695==    by 0x11794A: maketoken_with_type (tokenize.c:56)
+==26695==    by 0x113D0E: handle_string (operators.c:67)
+==26695==    by 0x117DDF: handle_text (tokenize.c:191)
+==26695==    by 0x118249: imp_tok_quote (tokenize.c:296)
+==26695==    by 0x118B0F: improved_tokenize (tokenize.c:605)
+==26695==    by 0x1103D2: process_multiline_input (input_handlers.c:573)
+==26695==    by 0x110B01: handle_input (input_handlers.c:895)
+==26695== 
+==26695== 80 bytes in 3 blocks are definitely lost in loss record 22 of 77
+==26695==    at 0x4846828: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==26695==    by 0x1127FE: setup_quotes (make_node_arrays.c:52)
+==26695==    by 0x1128D3: make_node_arrays (make_node_arrays.c:82)
+==26695==    by 0x10F2C6: make_nodeframe (initnode.c:33)
+==26695==    by 0x10F34B: initnode (initnode.c:63)
+==26695==    by 0x11794A: maketoken_with_type (tokenize.c:56)
+==26695==    by 0x113D0E: handle_string (operators.c:67)
+==26695==    by 0x117DDF: handle_text (tokenize.c:191)
+==26695==    by 0x118249: imp_tok_quote (tokenize.c:296)
+==26695==    by 0x118B0F: improved_tokenize (tokenize.c:605)
+==26695==    by 0x113537: process_input_tokens (minishell.c:208)
+==26695==    by 0x1135FA: process_command (minishell.c:246)
+==26695== 
+==26695== LEAK SUMMARY:
+==26695==    definitely lost: 104 bytes in 4 blocks
+==26695==    indirectly lost: 0 bytes in 0 blocks
+==26695==      possibly lost: 0 bytes in 0 blocks
+==26695==    still reachable: 232,815 bytes in 235 blocks
+==26695==         suppressed: 0 bytes in 0 blocks
+==26695== Reachable blocks (those to which a pointer was found) are not shown.
+==26695== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==26695== 
+==26695== For lists of detected and suppressed errors, rerun with: -s
+==26695== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+bleow@bleow-VM-Mint:~/Coding/Core/minishell$ 
