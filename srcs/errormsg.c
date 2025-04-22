@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:23:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 15:21:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,23 @@ void	shell_error(char *element, int error_code, t_vars *vars)
 	}
 	if (vars)
 		vars->error_code = error_code;
+}
+
+/*
+Handles specific syntax error messages.
+- Prints a formatted syntax error message to stderr including the unexpected token.
+- Sets vars->error_code to ERR_SYNTAX (2).
+- Example: syntax_error_msg("newline", vars) -> "bleshell: syntax error near unexpected token `newline'"
+- Example: syntax_error_msg("|", vars) -> "bleshell: syntax error near unexpected token `|'"
+*/
+void	tok_syntax_error_msg(char *token_str, t_vars *vars)
+{
+    ft_putstr_fd("bleshell: syntax error near unexpected token `", 2);
+    ft_putstr_fd(token_str, 2);
+    ft_putendl_fd("'", 2); // Adds the closing backtick and newline
+
+    if (vars)
+        vars->error_code = ERR_SYNTAX; // Assuming ERR_SYNTAX is 2
 }
 
 /*

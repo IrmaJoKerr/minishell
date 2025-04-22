@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 11:38:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 16:24:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -455,9 +455,9 @@ Returns 1 on success, 0 on failure (syntax error or malloc error).
 //             if (!raw_delimiter_str) { /* Malloc error */ vars->error_code = ERR_DEFAULT; return (0); }
 
 //             // *** Validate and Store Delimiter ***
-//             if (!validate_heredoc_delimiter(raw_delimiter_str, vars)) {
+//             if (!is_valid_delim(raw_delimiter_str, vars)) {
 //                 free(raw_delimiter_str);
-//                 // validate_heredoc_delimiter sets error code and prints message
+//                 // is_valid_delim sets error code and prints message
 //                 return (0); // Validation failed
 //             }
 
@@ -573,16 +573,15 @@ int improved_tokenize(char *input, t_vars *vars)
              fprintf(stderr, "[TOK_DBG] Delimiter Extraction: Loop finished. Pos=%d (Delimiter end)\n", vars->pos); // DEBUG
 
             if (vars->pos == vars->start) { // Found whitespace/operator immediately
-                fprintf(stderr, "bleshell: syntax error near unexpected token `newline' or operator\n");
-                vars->error_code = ERR_SYNTAX;
-                return (0); // Missing delimiter word
+                tok_syntax_error_msg("newline", vars); // Use "newline" as the most likely case
+            	return (0); // Missing delimiter word
             }
             char *raw_delimiter_str = ft_substr(input, vars->start, vars->pos - vars->start);
             if (!raw_delimiter_str) { /* Malloc error */ vars->error_code = ERR_DEFAULT; return (0); }
             fprintf(stderr, "[TOK_DBG] Delimiter Extraction: Raw delimiter string = '%s'\n", raw_delimiter_str); // DEBUG
 
             // *** Validate and Store Delimiter ***
-            if (!validate_heredoc_delimiter(raw_delimiter_str, vars)) {
+            if (!is_valid_delim(raw_delimiter_str, vars)) {
                 fprintf(stderr, "[TOK_DBG] Delimiter Validation FAILED for '%s'\n", raw_delimiter_str); // DEBUG
                 free(raw_delimiter_str);
                 return (0); // Validation failed
@@ -658,10 +657,10 @@ int improved_tokenize(char *input, t_vars *vars)
 
     fprintf(stderr, "[TOK_DBG] Loop finished. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
     // After loop: Check if we were still expecting a delimiter
-    if (heredoc_expecting_delim) {
-        fprintf(stderr, "bleshell: syntax error near unexpected token `newline'\n");
-        vars->error_code = ERR_SYNTAX;
-        return (0); // Missing delimiter at end of input
+    if (heredoc_expecting_delim)
+	{
+        tok_syntax_error_msg("newline", vars);
+    	return (0); // Missing delimiter at end of input
     }
 
     // Process any remaining text

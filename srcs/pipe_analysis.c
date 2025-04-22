@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/15 18:20:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 15:34:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,8 @@ static int	check_pipe_at_start(t_vars *vars)
 		return (0);
 	if (vars->head->type == TYPE_PIPE)
 	{
-		ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
-		vars->error_code = 2;
-		return (1);
+		tok_syntax_error_msg("|", vars);
+    	return (1);
 	}
 	return (0);
 }
@@ -58,9 +57,8 @@ static int	check_consecutive_pipes(t_vars *vars)
 		{
 			if (expecting_command)
 			{
-				ft_putstr_fd("bleshell: syntax error near unexpected token '|'\n", 2);
-				vars->error_code = 2;
-				return (1);
+				tok_syntax_error_msg("|", vars);
+            	return (1);
 			}
 			expecting_command = 1;
 		}

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:39:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 15:37:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,14 +193,8 @@ int setup_redirection(t_node *node, t_vars *vars)
 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
 	if (!cmd_node)
 	{
-		// It's possible for a redirection to be the first thing (e.g., < file cat)
-		// In this case, find_cmd(FIND_PREV) might return NULL.
-		// We need to decide how to handle this. Maybe find the *next* command?
-		// Or perhaps the logic assumes a command always precedes or follows.
-		// For now, let's assume a command should be found or it's an error/edge case.
-		fprintf(stderr, "bleshell: Error: Command node not found relative to redirection.\n");
-		vars->error_code = ERR_DEFAULT; // Set an error code
-		return (0); // Indicate failure
+		vars->error_code = ERR_DEFAULT;
+		return (0);
 	}
 	vars->pipes->cmd_redir = cmd_node;
 	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
@@ -208,14 +202,11 @@ int setup_redirection(t_node *node, t_vars *vars)
 	else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
 		vars->pipes->last_out_redir = node;
 	if (node->right && node->right->args)
-	{
 			(void)strip_outer_quotes(&node->right->args[0]);
-	}
 	else if (node->type != TYPE_HEREDOC)
 	{
-		 fprintf(stderr, "bleshell: syntax error near unexpected token `newline'\n");
-		 vars->error_code = ERR_SYNTAX;
-		 return (0);
+		tok_syntax_error_msg("newline", vars);
+		return (0);
 	}
 	result = redir_mode_setup(node, vars);
 	return (result);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 11:43:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 15:30:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,8 +133,9 @@ void	build_redir_ast(t_vars *vars)
             if (!current->next || !current->next->args || !current->next->args[0])
             {
                 fprintf(stderr, "DEBUG: In build_redir_ast().Redirection syntax error - missing target\n");
-                shell_error("syntax error near unexpected token `newline'", ERR_SYNTAX, vars);
-                vars->error_code = 2; // Set proper error code for syntax error
+                // shell_error("syntax error near unexpected token `newline'", ERR_SYNTAX, vars);
+           		// vars->error_code = 2; // Set proper error code for syntax error
+            	tok_syntax_error_msg("newline", vars);
                 return ; // Stop processing redirections
             }
             // Process the redirection node if it has a valid target

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 11:21:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 16:24:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -473,7 +473,7 @@ void	read_and_process_from_tmp_buf(t_vars *vars)
 //     *first_line_end = '\0';
 //     fprintf(stderr, "[DEBUG] process_multiline_input: Tokenizing first line: '%.*s'\n", first_line_len, input);
 
-//     // Tokenize the first line - this will call validate_heredoc_delimiter if << is present
+//     // Tokenize the first line - this will call is_valid_delim if << is present
 //     reset_shell(vars); // Reset token list etc. before tokenizing
 //     tokenize_success = improved_tokenize(input, vars);
 
@@ -518,7 +518,7 @@ void	read_and_process_from_tmp_buf(t_vars *vars)
 
 //         if (!check_trailing_chars(input, pos_after_raw_delim)) {
 //             vars->error_code = ERR_SYNTAX;
-//             // Delimiter might be stored, need cleanup? validate_heredoc_delimiter handles freeing old one.
+//             // Delimiter might be stored, need cleanup? is_valid_delim handles freeing old one.
 //             return (0); // Syntax error
 //         }
 
@@ -1320,8 +1320,8 @@ int check_trailing_chars(const char *line, int start_pos)
         i++;
     }
     // If we found something that's not whitespace and not the end, it's an error
-    if (line[i] != '\0') {
-        fprintf(stderr, "bleshell: syntax error near unexpected token `%.1s` after heredoc delimiter\n", &line[i]);
+    if (line[i] != '\0')
+	{
         return (0); // Invalid trailing characters
     }
     return (1); // Only whitespace or end of string found

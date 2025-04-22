@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 11:44:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 17:46:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -378,6 +378,7 @@ Error handling.
 In errormsg.c
 */
 void		shell_error(char *element, int error_code, t_vars *vars);
+void		tok_syntax_error_msg(char *token_str, t_vars *vars);
 void		not_found_error(char *filename, t_vars *vars);
 void		crit_error(t_vars *vars);
 
@@ -428,18 +429,27 @@ int			read_heredoc_interactive(t_vars *vars);
 // 				,t_vars *vars, int expand_vars);
 // void		cleanup_heredoc_storage(t_vars *vars);
 void		setup_heredoc_pipe(t_vars *vars);
-int 		strip_outer_quotes(char **delimiter); //POTENTIAL TO DEPRECATE
+int 		strip_outer_quotes(char **delimiter);
 // int			store_heredoc_content(char *input, int start_pos, char *delimiter
 // 				,t_vars *vars);
-int			handle_heredoc_err(t_vars *vars);
+// int			handle_heredoc_err(t_vars *vars);
 // int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
-int			reset_heredoc_pipe(t_vars *vars);
+// int			reset_heredoc_pipe(t_vars *vars);
 // int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
 // char 		*get_heredoc_delimiter(char *input, t_vars *vars);
 // void 		get_heredoc_delimiter(char *input, t_vars *vars);
-int			process_heredoc(t_node *node, t_vars *vars);
 // int			proc_heredoc(t_node *node, t_vars *vars);
+int			process_heredoc(t_node *node, t_vars *vars);
+int			hd_read_write_loop(int fd, t_vars *vars);
+int			interactive_hd_mode(t_vars *vars);
+int			read_tmp_buf(t_vars *vars);
+int			chk_quoted_delim(char *orig_delim, size_t len
+				,char **clean_delim_ptr, int *quoted_ptr);
+int			chk_normal_delim(char *orig_delim, size_t len
+				,char **clean_delim_ptr, int *quoted_ptr);
+void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
+int			is_valid_delim(char *orig_delim, t_vars *vars);
 
 
 /*
@@ -524,7 +534,8 @@ int 		check_trailing_chars(const char *line, int start_pos);
 int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
 void		setup_interactive_heredoc(t_vars *vars, int expand_vars);
-int 		validate_heredoc_delimiter(char *raw_delimiter, t_vars *vars);
+void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
+// int 		is_valid_delim(char *raw_delimiter, t_vars *vars);
 
 /*
 Input verification functions.

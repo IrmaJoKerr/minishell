@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 11:28:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 16:24:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,7 +360,7 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         {
             // Check if this is a heredoc redirection.
             // The expansion flag (hd_expand) is ALREADY set correctly by
-            // validate_heredoc_delimiter during tokenization based on whether
+            // is_valid_delim during tokenization based on whether
             // the raw delimiter was quoted. No need to set it here.
             if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
             {
@@ -521,13 +521,20 @@ int validate_redirection_targets(t_vars *vars)
                     (int)current->type, (void*)current);
             // Check if it's the last token or the next token is another operator
             next = current->next;
-            if (!next || is_redirection(next->type) || next->type == TYPE_PIPE)
-            {
-                fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - missing target\n");
-                shell_error("syntax error near unexpected token `newline'", ERR_ISDIRECTORY, vars);
-                vars->error_code = 2; // Syntax error
-                return (0);
-            }
+            next = current->next;
+        	if (!next) // End of input after redirection operator
+        	{
+            	fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - missing target (newline)\n");
+            	tok_syntax_error_msg("newline", vars);
+            	return (0);
+        	}
+        	else if (is_redirection(next->type) || next->type == TYPE_PIPE) // Operator follows redirection operator
+        	{
+            	fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - operator follows operator\n");
+            	// Use the operator's string representation if available, otherwise a generic "operator"
+            	tok_syntax_error_msg(next->args[0] ? next->args[0] : "operator", vars);
+            	return (0);
+        	}
         }
         current = current->next;
     }
