@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:49:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 04:23:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ Handles critical errors that require immediate program exit.
 - Cleans up memory through partial cleanup function calls.
 - Exits program with status code 1.
 Works with init_shell() and other initialization functions.
-
 Example: When environment variable duplication fails:
 - crit_error(vars)
 - Displays error message and exits with code 1

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 01:32:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:44:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,7 +364,7 @@ In cleanup_b.c
 void		free_token_node(t_node *node);
 
 /*
-Master command finder function.
+Command finder function.
 In cmd_finder.c
 */
 t_node		*init_find_cmd(t_node *start, t_vars *vars);
@@ -396,6 +396,7 @@ int			proc_redir_chain(t_node *start_node, t_node *cmd_node
 int			exec_redirect_cmd(t_node *node, char **envp, t_vars *vars);
 int			exec_cmd_node(t_node *node, char **envp, t_vars *vars);
 int			execute_cmd(t_node *node, char **envp, t_vars *vars);
+void		exec_child(char *cmd_path, char **args, char **envp);
 int			exec_external_cmd(t_node *node, char **envp, t_vars *vars);
 
 /*
@@ -406,7 +407,7 @@ char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*expand_variable(char *input, int *pos, char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
-char		*handle_expansion(char *input, int *pos, t_vars *vars);
+// char		*handle_expansion(char *input, int *pos, t_vars *vars);
 void 		debug_cmd_args(t_node *node); //DEBUG FUNCTION
 // char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
 
@@ -492,7 +493,7 @@ int			init_heredoc_pipe(void);
 Input completion functions.
 In input_completion.c
 */
-int			is_input_complete(t_vars *vars);
+// int			is_input_complete(t_vars *vars);
 char		*append_input(char *original, char *additional);
 
 /*
@@ -501,23 +502,24 @@ In input_handlers.c
 */
 // void		proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars);
 // void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
-char		*complete_input(char *input, t_inmode mode, t_vars *vars);
-int         has_heredoc_operator(char *input);
-char        *process_heredoc_line(char *line, t_vars *vars);
+// char		*complete_input(char *input, t_inmode mode, t_vars *vars);
+void		clear_partial_input(t_vars *vars);
+// int         has_heredoc_operator(char *input);
+// char        *process_heredoc_line(char *line, t_vars *vars);
 // void 		process_single_command(char *input, t_vars *vars);
 // void		process_command_with_heredoc(char *cmd_line, t_vars *vars);
 char 		*read_entire_file(const char *filename);
 void		read_and_process_from_tmp_buf(t_vars *vars);
 int			process_multiline_input(char *input, t_vars *vars);
 void		handle_input(char *input, t_vars *vars);
-t_inmode	check_input_state(char *input, t_vars *vars);
+// t_inmode	check_input_state(char *input, t_vars *vars);
 void		term_heredoc(t_vars *vars);
-void		process_heredoc_continuation(char *input, t_vars *vars);
+// void		process_heredoc_continuation(char *input, t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
 // void		setup_heredoc_mode(char *input, t_vars *vars);
 // void		write_heredoc_line(int fd, char *line, t_vars *vars);
 // int			is_quoted_delimiter(t_node *node, t_vars *vars);
-char		*extract_heredoc_delimiter(char *input);
+// char		*extract_heredoc_delimiter(char *input);
 int 		check_trailing_chars(const char *line, int start_pos);
 int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
@@ -528,13 +530,13 @@ int 		validate_heredoc_delimiter(char *raw_delimiter, t_vars *vars);
 Input verification functions.
 In input_verify.c
 */
-char 		*expand_value(char *var_name, t_vars *vars);
+// char 		*expand_value(char *var_name, t_vars *vars);
 
 /*
 Lexer functions.
 In lexer.c
 */
-void		skip_whitespace(char *str, t_vars *vars);
+// void		skip_whitespace(char *str, t_vars *vars);
 
 /*
 Make_exp_token utility functions.
@@ -598,7 +600,7 @@ void		print_tokens(t_node *head); // Debug function
 char		*reader(void);
 void		setup_env(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
-t_node		*find_command_end(t_node *start_node);
+t_node		*find_command_end(t_node *start_node); // POSSIBLE REUSE
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
 void		process_command(char *command, t_vars *vars);
@@ -683,7 +685,7 @@ Redirection processing functions.
 In process_redirect.c
 */
 t_node		*proc_redir(t_vars *vars);
-int			count_tokens(t_node *head);
+int			count_tokens(t_node *head); // DEBUG FUNCTION
 void		reset_redir_tracking(t_pipe *pipes);
 void		build_redir_ast(t_vars *vars);
 void 		process_redir_node(t_node *redir_node, t_vars *vars);
@@ -734,13 +736,18 @@ In tokenize.c
 */
 void 		set_token_type(t_vars *vars, char *input);
 void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
-int			build_token_linklist(t_vars *vars, t_node *node);
-int 		is_adjacent_token(char *input, int pos);
+// int 		is_adjacent_token(char *input, int pos);
+// int			init_quote_processing(char *input, int *i, int *is_adjacent, char *quote_char);
 int			process_operator_char(char *input, int *i, t_vars *vars);
+void		handle_text(char *input, t_vars *vars);
+void		imp_tok_quote(char *input, t_vars *vars);
+void		imp_tok_expan(char *input, t_vars *vars);
+void		imp_tok_white(char *input, t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
 int			improved_tokenize(char *input, t_vars *vars);
 void		token_link(t_node *node, t_vars *vars);
-void 		debug_token_list(t_vars *vars);
+int			build_token_linklist(t_vars *vars, t_node *node);
+void 		debug_token_list(t_vars *vars); //DEBUG FUNCTION
 
 /*
 Type conversion functions.

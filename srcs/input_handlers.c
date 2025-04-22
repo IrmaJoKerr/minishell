@@ -6,33 +6,33 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 01:28:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:21:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-Completes input based on its determined mode.
-Handles quote completion, pipe completion, etc.
-*/
-char	*complete_input(char *input, t_inmode mode, t_vars *vars)
-{
-	char	*result;
+// /*
+// Completes input based on its determined mode.
+// Handles quote completion, pipe completion, etc.
+// */
+// char	*complete_input(char *input, t_inmode mode, t_vars *vars)
+// {
+// 	char	*result;
 	
-    if (mode == INPUT_QUOTE_COMPLETION)
-		result = fix_open_quotes(input, vars);
-    else if (mode == INPUT_PIPE_COMPLETION)      
-        result = complete_pipe_command(input, vars);
-    // else if (mode == INPUT_HEREDOC_MODE)
-	// {
-    //     setup_heredoc_mode(input, vars);
-    //     result = ft_strdup(input);
-	// }
-    else if (mode == INPUT_NORMAL)
-		result = ft_strdup(input);
-	return (result);
-}
+//     if (mode == INPUT_QUOTE_COMPLETION)
+// 		result = fix_open_quotes(input, vars);
+//     else if (mode == INPUT_PIPE_COMPLETION)      
+//         result = complete_pipe_command(input, vars);
+//     // else if (mode == INPUT_HEREDOC_MODE)
+// 	// {
+//     //     setup_heredoc_mode(input, vars);
+//     //     result = ft_strdup(input);
+// 	// }
+//     else if (mode == INPUT_NORMAL)
+// 		result = ft_strdup(input);
+// 	return (result);
+// }
 
 void	clear_partial_input(t_vars *vars)
 {
@@ -43,83 +43,83 @@ void	clear_partial_input(t_vars *vars)
 	}
 }
 
-/*
-Checks if an input string contains a heredoc operator '<<'
-outside of quotes.
+// /*
+// Checks if an input string contains a heredoc operator '<<'
+// outside of quotes.
 
-Parameters:
-- input: The string to check
+// Parameters:
+// - input: The string to check
 
-Returns:
-- 1 if a heredoc operator is found, 0 otherwise
-*/
-int has_heredoc_operator(char *input)
-{
-    int i;
-    int in_quotes;
-    char quote_char;
+// Returns:
+// - 1 if a heredoc operator is found, 0 otherwise
+// */
+// int has_heredoc_operator(char *input)
+// {
+//     int i;
+//     int in_quotes;
+//     char quote_char;
     
-    if (!input)
-        return 0;
+//     if (!input)
+//         return 0;
     
-    i = 0;
-    in_quotes = 0;
-    quote_char = 0;
+//     i = 0;
+//     in_quotes = 0;
+//     quote_char = 0;
     
-    while (input[i])
-    {
-        // Handle quote tracking
-        if ((input[i] == '\'' || input[i] == '\"') && 
-            (!in_quotes || quote_char == input[i]))
-        {
-            if (in_quotes && quote_char == input[i])
-                in_quotes = 0;
-            else if (!in_quotes)
-            {
-                in_quotes = 1;
-                quote_char = input[i];
-            }
-        }
-        // Look for << outside of quotes
-        else if (!in_quotes && input[i] == '<' && input[i + 1] == '<')
-        {
-            return 1; // Found heredoc operator
-        }
-        i++;
-    }
-    return 0;
-}
+//     while (input[i])
+//     {
+//         // Handle quote tracking
+//         if ((input[i] == '\'' || input[i] == '\"') && 
+//             (!in_quotes || quote_char == input[i]))
+//         {
+//             if (in_quotes && quote_char == input[i])
+//                 in_quotes = 0;
+//             else if (!in_quotes)
+//             {
+//                 in_quotes = 1;
+//                 quote_char = input[i];
+//             }
+//         }
+//         // Look for << outside of quotes
+//         else if (!in_quotes && input[i] == '<' && input[i + 1] == '<')
+//         {
+//             return 1; // Found heredoc operator
+//         }
+//         i++;
+//     }
+//     return 0;
+// }
 
-/*
-Processes a line of heredoc content, handling variable expansion
-if needed.
+// /*
+// Processes a line of heredoc content, handling variable expansion
+// if needed.
 
-Parameters:
-- line: The line of text to process
-- vars: Program state variables
+// Parameters:
+// - line: The line of text to process
+// - vars: Program state variables
 
-Returns:
-- Processed line with variables expanded (newly allocated)
-- Original line duplicated if no expansion needed
-Updated process_heredoc_line to use hd_expand directly
-*/
-char *process_heredoc_line(char *line, t_vars *vars)
-{
-    // If we don't have a line, return NULL
-    if (!line)
-        return NULL;
+// Returns:
+// - Processed line with variables expanded (newly allocated)
+// - Original line duplicated if no expansion needed
+// Updated process_heredoc_line to use hd_expand directly
+// */
+// char *process_heredoc_line(char *line, t_vars *vars)
+// {
+//     // If we don't have a line, return NULL
+//     if (!line)
+//         return NULL;
         
-    // Handle variable expansion based on the flag
-    if (vars->pipes->hd_expand)
-    {
-        fprintf(stderr, "[DEBUG] process_heredoc_line: Expanding variables in: '%s'\n", line);
-        return expand_heredoc_line(line, vars);
-    }
+//     // Handle variable expansion based on the flag
+//     if (vars->pipes->hd_expand)
+//     {
+//         fprintf(stderr, "[DEBUG] process_heredoc_line: Expanding variables in: '%s'\n", line);
+//         return expand_heredoc_line(line, vars);
+//     }
     
-    // No expansion needed
-    fprintf(stderr, "[DEBUG] process_heredoc_line: No expansion for: '%s'\n", line);
-    return ft_strdup(line);
-}
+//     // No expansion needed
+//     fprintf(stderr, "[DEBUG] process_heredoc_line: No expansion for: '%s'\n", line);
+//     return ft_strdup(line);
+// }
 
 // /*
 // Helper to process a command that has a heredoc.
@@ -832,24 +832,24 @@ void handle_input(char *input, t_vars *vars)
     fprintf(stderr, "[ML_DEBUG] handle_input: END\n"); // DEBUG
 }
 
-/*
-Determines the state of input and what processing is needed.
-Returns the appropriate input mode for further processing.
-*/
-t_inmode	check_input_state(char *input, t_vars *vars)
-{
-    // Check for incomplete quotes first
-    if (!validate_quotes(input, vars))
-        return (INPUT_QUOTE_COMPLETION);
-    // Check for unfinished pipes
-    if (analyze_pipe_syntax(vars) == 2)  // 2 indicates pipe at end
-        return (INPUT_PIPE_COMPLETION);
-    // Check for heredoc operation (has << without content)
-    if (has_unprocessed_heredoc(input))
-        return (INPUT_HEREDOC_MODE);
-    // Normal complete input
-    return (INPUT_NORMAL);
-}
+// /*
+// Determines the state of input and what processing is needed.
+// Returns the appropriate input mode for further processing.
+// */
+// t_inmode	check_input_state(char *input, t_vars *vars)
+// {
+//     // Check for incomplete quotes first
+//     if (!validate_quotes(input, vars))
+//         return (INPUT_QUOTE_COMPLETION);
+//     // Check for unfinished pipes
+//     if (analyze_pipe_syntax(vars) == 2)  // 2 indicates pipe at end
+//         return (INPUT_PIPE_COMPLETION);
+//     // Check for heredoc operation (has << without content)
+//     if (has_unprocessed_heredoc(input))
+//         return (INPUT_HEREDOC_MODE);
+//     // Normal complete input
+//     return (INPUT_NORMAL);
+// }
 
 void	term_heredoc(t_vars *vars)
 {
@@ -918,87 +918,86 @@ void	term_heredoc(t_vars *vars)
 //     // Prompt for more heredoc input
 //     fprintf(stderr, "heredoc> ");
 // }
-/*
-MODIFIED: Handles a line entered interactively when heredoc is active.
-This function might become less relevant if process_heredoc handles all interactive input.
-If kept, it should write to the fd opened by setup_interactive_heredoc.
-*/
-void process_heredoc_continuation(char *input, t_vars *vars)
-{
-    // This function assumes interactive mode was set up previously,
-    // and vars->pipes->hd_fd_write points to the open TMP_BUF.
-    // It also assumes vars->pipes->heredoc_delim is set.
-    if (!vars || !vars->pipes || !vars->pipes->heredoc_delim || vars->heredoc_mode != 0) {
-        fprintf(stderr, "[ERROR] process_heredoc_continuation: Invalid state.\n");
-        return ;
-    }
-    fprintf(stderr, "[DEBUG] process_heredoc_cont: Processing line '%s'\n", input);
-    // Check if this line is the delimiter
-    if (ft_strcmp(input, vars->pipes->heredoc_delim) == 0)
-    {
-        fprintf(stderr, "[DEBUG] process_heredoc_cont: Found delimiter '%s', ending heredoc.\n",
-                vars->pipes->heredoc_delim);
-        // Close the temp file write descriptor
-        if (vars->pipes->hd_fd_write != -1)
-        {
-            close(vars->pipes->hd_fd_write);
-            vars->pipes->hd_fd_write = -1;
-        }
-        // Restore terminal
-        manage_terminal_state(vars, TERM_RESTORE);
-        // Set mode to indicate content is ready in TMP_BUF
-        vars->heredoc_mode = 1;
-        // Process the original command stored in partial_input
-        if (vars->partial_input)
-        {
-            fprintf(stderr, "[DEBUG] process_heredoc_cont: Executing original command: '%s'\n", vars->partial_input);
-            // We need to tokenize and execute the original command now
-            process_command(vars->partial_input, vars);
-            free(vars->partial_input);
-            vars->partial_input = NULL;
-        }
-		else
-		{
-            fprintf(stderr, "[ERROR] process_heredoc_cont: Original command missing (partial_input is NULL).\n");
-        }
-        // Reset heredoc state after execution
-        vars->heredoc_mode = 0;
-        if (vars->pipes->heredoc_delim)
-		{
-            free(vars->pipes->heredoc_delim);
-            vars->pipes->heredoc_delim = NULL;
-        }
-        vars->pipes->hd_expand = 0; // Reset expansion flag
+// /*
+// MODIFIED: Handles a line entered interactively when heredoc is active.
+// This function might become less relevant if process_heredoc handles all interactive input.
+// If kept, it should write to the fd opened by setup_interactive_heredoc.
+// */
+// void process_heredoc_continuation(char *input, t_vars *vars)
+// {
+//     // This function assumes interactive mode was set up previously,
+//     // and vars->pipes->hd_fd_write points to the open TMP_BUF.
+//     // It also assumes vars->pipes->heredoc_delim is set.
+//     if (!vars || !vars->pipes || !vars->pipes->heredoc_delim || vars->heredoc_mode != 0) {
+//         fprintf(stderr, "[ERROR] process_heredoc_continuation: Invalid state.\n");
+//         return ;
+//     }
+//     fprintf(stderr, "[DEBUG] process_heredoc_cont: Processing line '%s'\n", input);
+//     // Check if this line is the delimiter
+//     if (ft_strcmp(input, vars->pipes->heredoc_delim) == 0)
+//     {
+//         fprintf(stderr, "[DEBUG] process_heredoc_cont: Found delimiter '%s', ending heredoc.\n",
+//                 vars->pipes->heredoc_delim);
+//         // Close the temp file write descriptor
+//         if (vars->pipes->hd_fd_write != -1)
+//         {
+//             close(vars->pipes->hd_fd_write);
+//             vars->pipes->hd_fd_write = -1;
+//         }
+//         // Restore terminal
+//         manage_terminal_state(vars, TERM_RESTORE);
+//         // Set mode to indicate content is ready in TMP_BUF
+//         vars->heredoc_mode = 1;
+//         // Process the original command stored in partial_input
+//         if (vars->partial_input)
+//         {
+//             fprintf(stderr, "[DEBUG] process_heredoc_cont: Executing original command: '%s'\n", vars->partial_input);
+//             // We need to tokenize and execute the original command now
+//             process_command(vars->partial_input, vars);
+//             free(vars->partial_input);
+//             vars->partial_input = NULL;
+//         }
+// 		else
+// 		{
+//             fprintf(stderr, "[ERROR] process_heredoc_cont: Original command missing (partial_input is NULL).\n");
+//         }
+//         // Reset heredoc state after execution
+//         vars->heredoc_mode = 0;
+//         if (vars->pipes->heredoc_delim)
+// 		{
+//             free(vars->pipes->heredoc_delim);
+//             vars->pipes->heredoc_delim = NULL;
+//         }
+//         vars->pipes->hd_expand = 0; // Reset expansion flag
 
-    }
-    else
-    {
-        // Write this line to the temp file using the write fd
-        if (vars->pipes->hd_fd_write != -1)
-        {
-            if (!write_to_heredoc(vars->pipes->hd_fd_write, input, vars)) {
-                // Error writing, cleanup needed
-                close(vars->pipes->hd_fd_write);
-                vars->pipes->hd_fd_write = -1;
-                unlink(TMP_BUF);
-                manage_terminal_state(vars, TERM_RESTORE);
-                // Reset state?
-                if (vars->partial_input) free(vars->partial_input);
-                vars->partial_input = NULL;
-                if (vars->pipes->heredoc_delim) free(vars->pipes->heredoc_delim);
-                vars->pipes->heredoc_delim = NULL;
-
-            }
-			else
-			{
-                // Continue prompting implicitly by returning to main loop
-            }
-        } else {
-            fprintf(stderr, "[ERROR] process_heredoc_cont: Invalid write fd.\n");
-            // Error state, need cleanup
-        }
-    }
-}
+//     }
+//     else
+//     {
+//         // Write this line to the temp file using the write fd
+//         if (vars->pipes->hd_fd_write != -1)
+//         {
+//             if (!write_to_heredoc(vars->pipes->hd_fd_write, input, vars)) {
+//                 // Error writing, cleanup needed
+//                 close(vars->pipes->hd_fd_write);
+//                 vars->pipes->hd_fd_write = -1;
+//                 unlink(TMP_BUF);
+//                 manage_terminal_state(vars, TERM_RESTORE);
+//                 // Reset state?
+//                 if (vars->partial_input) free(vars->partial_input);
+//                 vars->partial_input = NULL;
+//                 if (vars->pipes->heredoc_delim) free(vars->pipes->heredoc_delim);
+//                 vars->pipes->heredoc_delim = NULL;
+//             }
+// 			else
+// 			{
+//                 // Continue prompting implicitly by returning to main loop
+//             }
+//         } else {
+//             fprintf(stderr, "[ERROR] process_heredoc_cont: Invalid write fd.\n");
+//             // Error state, need cleanup
+//         }
+//     }
+// }
 
 /*
 Manages terminal states throughout different operations
@@ -1257,58 +1256,58 @@ Returns:
 //     return 0;
 // }
 
-/*
-SIMPLIFIED: Extracts the raw heredoc delimiter word following <<.
-Does NOT perform validation or storage.
-Returns: Newly allocated raw delimiter string, or NULL.
-*/
-char	*extract_heredoc_delimiter(char *input)
-{
-    int		i;
-    int		start;
-    int		in_quotes;
-    char	quote_char;
+// /*
+// SIMPLIFIED: Extracts the raw heredoc delimiter word following <<.
+// Does NOT perform validation or storage.
+// Returns: Newly allocated raw delimiter string, or NULL.
+// */
+// char	*extract_heredoc_delimiter(char *input)
+// {
+//     int		i;
+//     int		start;
+//     int		in_quotes;
+//     char	quote_char;
 
-    if (!input)
-        return (NULL);
-    fprintf(stderr, "[DBG_HEREDOC] Extracting raw delimiter from input\n");
-    i = 0;
-    in_quotes = 0;
-    quote_char = 0;
-    while (input[i])
-    {
-        if ((input[i] == '\'' || input[i] == '\"') && \
-            (!in_quotes || quote_char == input[i]))
-        {
-            if (in_quotes && quote_char == input[i])
-                in_quotes = 0;
-            else if (!in_quotes)
-            {
-                in_quotes = 1;
-                quote_char = input[i];
-            }
-        }
-        else if (!in_quotes && input[i] == '<' && input[i + 1] == '<')
-        {
-            fprintf(stderr, "[DBG_HEREDOC] Found << operator\n");
-            i += 2;
-            while (input[i] && ft_isspace(input[i]))
-                i++;
-            if (!input[i] || input[i] == '|' || input[i] == '<' || input[i] == '>')
-                return (NULL); // Invalid syntax after <<
-            start = i;
-            while (input[i] && !ft_isspace(input[i]) && \
-                   input[i] != '|' && input[i] != '<' && input[i] != '>')
-                i++;
-            char *result = ft_substr(input, start, i - start);
-            fprintf(stderr, "[DBG_HEREDOC] Extracted raw delimiter: '%s'\n", result ? result : "NULL");
-            return (result); // Return the raw delimiter
-        }
-        i++;
-    }
-    fprintf(stderr, "[DBG_HEREDOC] No << operator found\n");
-    return (NULL); // No heredoc operator found
-}
+//     if (!input)
+//         return (NULL);
+//     fprintf(stderr, "[DBG_HEREDOC] Extracting raw delimiter from input\n");
+//     i = 0;
+//     in_quotes = 0;
+//     quote_char = 0;
+//     while (input[i])
+//     {
+//         if ((input[i] == '\'' || input[i] == '\"') &&
+//             (!in_quotes || quote_char == input[i]))
+//         {
+//             if (in_quotes && quote_char == input[i])
+//                 in_quotes = 0;
+//             else if (!in_quotes)
+//             {
+//                 in_quotes = 1;
+//                 quote_char = input[i];
+//             }
+//         }
+//         else if (!in_quotes && input[i] == '<' && input[i + 1] == '<')
+//         {
+//             fprintf(stderr, "[DBG_HEREDOC] Found << operator\n");
+//             i += 2;
+//             while (input[i] && ft_isspace(input[i]))
+//                 i++;
+//             if (!input[i] || input[i] == '|' || input[i] == '<' || input[i] == '>')
+//                 return (NULL); // Invalid syntax after <<
+//             start = i;
+//             while (input[i] && !ft_isspace(input[i]) &&
+//                    input[i] != '|' && input[i] != '<' && input[i] != '>')
+//                 i++;
+//             char *result = ft_substr(input, start, i - start);
+//             fprintf(stderr, "[DBG_HEREDOC] Extracted raw delimiter: '%s'\n", result ? result : "NULL");
+//             return (result); // Return the raw delimiter
+//         }
+//         i++;
+//     }
+//     fprintf(stderr, "[DBG_HEREDOC] No << operator found\n");
+//     return (NULL); // No heredoc operator found
+// }
 
 /*
 NEW Helper: Checks for non-whitespace characters after a certain position on a line.

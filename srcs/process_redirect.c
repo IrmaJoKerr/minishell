@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 23:28:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:43:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,10 @@ t_node *proc_redir(t_vars *vars)
     return vars->pipes->redir_root;
 }
 
-// Add this helper function near the top of the file:
+/*
+DEBUG FUNCTION
+Add this helper function near the top of the file:
+*/
 int count_tokens(t_node *head)
 {
     int count = 0;
@@ -103,11 +106,13 @@ Builds the redirection AST by connecting commands to redirection operators.
 - Sets pipes->redir_root to the first valid redirection.
 Works with proc_redir for redirection structure building.
 */
-void build_redir_ast(t_vars *vars)
+void	build_redir_ast(t_vars *vars)
 {
-    t_node *current = vars->head;
-    int i = 0;
+    t_node	*current;
+    int		i;
     
+	current = vars->head;
+	i = 0;
     fprintf(stderr, "DEBUG: Building redirection AST\n");
     while (current)
     {
@@ -130,15 +135,13 @@ void build_redir_ast(t_vars *vars)
                 fprintf(stderr, "DEBUG: In build_redir_ast().Redirection syntax error - missing target\n");
                 shell_error("syntax error near unexpected token `newline'", ERR_SYNTAX, vars);
                 vars->error_code = 2; // Set proper error code for syntax error
-                return; // Stop processing redirections
+                return ; // Stop processing redirections
             }
-            
             // Process the redirection node if it has a valid target
             process_redir_node(current, vars);
         }
         current = current->next;
     }
-    
     fprintf(stderr, "DEBUG: Redirection chain built: [end]\n");
 }
 
@@ -154,7 +157,6 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
 {
     fprintf(stderr, "DEBUG: Processing redirection node, type: %d\n", 
             redir_node->type);
-            
     // Find the target command
     t_node *cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
     fprintf(stderr, "DEBUG: process_redir_node: Target cmd=%p, next=%p, args=%p\n",
@@ -164,7 +166,6 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
     {
         // Set up the redirection relationship
         set_redir_node(redir_node, cmd, redir_node->next);
-        
         // Find redirections for the same command in the token list
         t_node *prev_redir = redir_node->prev;
         while (prev_redir)
@@ -214,7 +215,6 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
             }
             vars->pipes->last_out_redir = redir_node;
         }
-        
         // Now check if we need to link input to output redirection
         if (vars->pipes->last_in_redir && vars->pipes->last_out_redir &&
             get_redir_target(vars->pipes->last_in_redir, vars->pipes->last_cmd) == 
@@ -227,11 +227,9 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
                 vars->pipes->last_in_redir->redir = vars->pipes->last_out_redir;
             }
         }
-        
         // Update root if this is the first redirection
         if (!vars->pipes->redir_root)
             vars->pipes->redir_root = redir_node;
-            
         fprintf(stderr, "DEBUG: Set up redirection from cmd '%s' to '%s'\n",
                 cmd->args ? cmd->args[0] : "NULL",
                 redir_node->next->args ? redir_node->next->args[0] : "NULL");
@@ -251,18 +249,15 @@ Works with proc_redir when pipe nodes exist.
 */
 void integrate_redirections_with_pipes(t_vars *vars)
 {
-    t_node *current;
-    t_node *target_cmd;
-    t_node *chain_head;
+    t_node	*current;
+    t_node	*target_cmd;
+    t_node	*chain_head;
     
     if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
-        return;
-        
+        return ;
     fprintf(stderr, "DEBUG: Integrating redirections with pipes\n");
-    
     current = vars->head;
     vars->pipes->last_cmd = NULL;
-    
     while (current)
     {
         if (current->type == TYPE_CMD)
@@ -276,7 +271,6 @@ void integrate_redirections_with_pipes(t_vars *vars)
             // Find the head of this redirection chain
             chain_head = current;
             t_node *prev_redir = current->prev;
-            
             while (prev_redir && is_redirection(prev_redir->type) &&
                    get_redir_target(prev_redir, vars->pipes->last_cmd) == 
                    get_redir_target(current, vars->pipes->last_cmd))
@@ -284,7 +278,6 @@ void integrate_redirections_with_pipes(t_vars *vars)
                 chain_head = prev_redir;
                 prev_redir = prev_redir->prev;
             }
-            
             // If this isn't the head of a chain, skip it - we only want to process chain heads
             if (chain_head != current)
             {
@@ -292,7 +285,6 @@ void integrate_redirections_with_pipes(t_vars *vars)
                 current = current->next;
                 continue;
             }
-            
             // For test 77: When dealing with missing files in pipes, we should
             // still complete the AST and let the execution phase handle the error
             target_cmd = get_redir_target(current, vars->pipes->last_cmd);
@@ -306,7 +298,6 @@ void integrate_redirections_with_pipes(t_vars *vars)
         }
         current = current->next;
     }
-    
     fprintf(stderr, "DEBUG: Completed pipe structure integration\n");
 }
 

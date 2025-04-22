@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 03:23:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:38:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	set_token_type(t_vars *vars, char *input)
 		vars->curr_type = TYPE_ARGS;
 }
 
-void maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
+void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
 {
     t_node	*node;
 	t_node	*check;
@@ -81,50 +81,50 @@ void maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
     }
 }
 
-int is_adjacent_token(char *input, int pos) // POSSIBLE CANDIDATE FOR DEPRECATION
-{
-	if (pos <= 0)
-		return (0);
+// int is_adjacent_token(char *input, int pos) // POSSIBLE CANDIDATE FOR DEPRECATION
+// {
+// 	if (pos <= 0)
+// 		return (0);
 	
-	// Don't join if previous char is an operator
-	if (input[pos - 1] == '<' || input[pos - 1] == '>' || 
-		input[pos - 1] == '|' || input[pos - 1] == ';')
-		return (0);
+// 	// Don't join if previous char is an operator
+// 	if (input[pos - 1] == '<' || input[pos - 1] == '>' || 
+// 		input[pos - 1] == '|' || input[pos - 1] == ';')
+// 		return (0);
 		
-	// Don't join if current position is an operator
-	if ((size_t)pos < ft_strlen(input) && 
-		(input[pos] == '<' || input[pos] == '>' || 
-		 input[pos] == '|' || input[pos] == ';'))
-		return (0);
+// 	// Don't join if current position is an operator
+// 	if ((size_t)pos < ft_strlen(input) && 
+// 		(input[pos] == '<' || input[pos] == '>' || 
+// 		 input[pos] == '|' || input[pos] == ';'))
+// 		return (0);
 	
-	// Check if previous character is not whitespace
-	if (ft_isspace(input[pos - 1]))
-		return (0);
-	// It's adjacent if previous char is not whitespace or operator
-	return (1);
-}
+// 	// Check if previous character is not whitespace
+// 	if (ft_isspace(input[pos - 1]))
+// 		return (0);
+// 	// It's adjacent if previous char is not whitespace or operator
+// 	return (1);
+// }
 
-/*
-Creates an expansion token from input
-- Identifies $ variables and creates TYPE_EXPANSION tokens
-- Handles $? as special case (exit status)
-- Doesn't perform expansion - just identifies tokens
-Returns 1 if expansion token was created, 0 otherwise
-*/
+// /*
+// Creates an expansion token from input
+// - Identifies $ variables and creates TYPE_EXPANSION tokens
+// - Handles $? as special case (exit status)
+// - Doesn't perform expansion - just identifies tokens
+// Returns 1 if expansion token was created, 0 otherwise
+// */
 
-int init_quote_processing(char *input, int *i, int *is_adjacent, char *quote_char)
-{
-	int	quote_type;
+// int init_quote_processing(char *input, int *i, int *is_adjacent, char *quote_char)
+// {
+// 	int	quote_type;
 	
-	fprintf(stderr, "DEBUG: Entering init_quote_processing, quote char: '%c'\n", *quote_char);
-    *quote_char = input[*i];
-    *is_adjacent = is_adjacent_token(input, *i);
-    if (*quote_char == '\'')
-        quote_type = TYPE_SINGLE_QUOTE;
-    else
-        quote_type = TYPE_DOUBLE_QUOTE;
-    return (quote_type);
-}
+// 	fprintf(stderr, "DEBUG: Entering init_quote_processing, quote char: '%c'\n", *quote_char);
+//     *quote_char = input[*i];
+//     *is_adjacent = is_adjacent_token(input, *i);
+//     if (*quote_char == '\'')
+//         quote_type = TYPE_SINGLE_QUOTE;
+//     else
+//         quote_type = TYPE_DOUBLE_QUOTE;
+//     return (quote_type);
+// }
 
 
 /*
@@ -177,10 +177,11 @@ Creates a token from the text between vars->start and vars->pos.
 // 		free(token_preview);
 // 	}
 // }
-static void handle_text(char *input, t_vars *vars)
+void	handle_text(char *input, t_vars *vars)
 {
-    char *token_preview = NULL; // Initialize to NULL
-
+    char *token_preview;
+	
+	token_preview = NULL; 
     fprintf(stderr, "[TOK_DBG] handle_text: Called. Start=%d, Pos=%d\n", vars->start, vars->pos); // DEBUG
     if (vars->pos > vars->start)
     {
@@ -189,14 +190,132 @@ static void handle_text(char *input, t_vars *vars)
         set_token_type(vars, token_preview);
         fprintf(stderr, "[TOK_DBG] handle_text: Set token type to %d. Calling handle_string.\n", vars->curr_type); // DEBUG
         handle_string(input, vars); // handle_string uses vars->start and vars->pos
-        if (token_preview) { // Check before freeing
+        if (token_preview)
+		{ // Check before freeing
             free(token_preview);
         }
         vars->start = vars->pos; // Reset start after processing text
         fprintf(stderr, "[TOK_DBG] handle_text: Reset Start to %d\n", vars->start); // DEBUG
-    } else {
+    }
+	else
+	{
         fprintf(stderr, "[TOK_DBG] handle_text: No text to process (Pos <= Start).\n"); // DEBUG
     }
+}
+
+// static	void imp_tok_quote(char *input, t_vars *vars)
+// {
+// 	int	saved_pos;
+	
+//     fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, start=%d, char='%c'\n", 
+//         vars->pos, vars->start, input[vars->pos]);
+//     handle_text(input, vars);
+//     // Save current position to restore if process_quote_char fails
+//     saved_pos = vars->pos;
+    
+//     if (process_quote_char(input, vars))
+//     {
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: After process_quote - pos=%d, start=%d\n", 
+//             vars->pos, vars->start);
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: Adjacency state: left=%d, right=%d\n",
+//             vars->adj_state[0], vars->adj_state[1]);
+//         vars->next_flag = 1;
+//         // Right adjacency handling now happens in process_quote_char
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG[imp_tok_quote]: process_quote_char returned 0 (failed)\n");
+//         vars->pos = saved_pos; // Restore position on failure
+//     }
+//     fprintf(stderr, "DEBUG[imp_tok_quote]: EXIT - next_flag=%d\n", vars->next_flag);
+// }
+void	imp_tok_quote(char *input, t_vars *vars)
+{
+    fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, char='%c', prev_type=%d\n", 
+        vars->pos, input[vars->pos], vars->prev_type);
+    // In imp_tok_quote()
+	fprintf(stderr, "DEBUG: imp_tok_quote: Previous token type=%d, pos=%d\n",
+        vars->prev_type, vars->pos);
+    // Check if this quoted string follows a redirection operator
+    int is_redir_target = 0;
+    if (vars->prev_type == TYPE_IN_REDIRECT || vars->prev_type == TYPE_OUT_REDIRECT ||
+        vars->prev_type == TYPE_APPEND_REDIRECT || vars->prev_type == TYPE_HEREDOC)
+	{
+        is_redir_target = 1;
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote follows redirection operator\n");
+    }
+    
+    handle_text(input, vars);
+    int saved_pos = vars->pos;
+    
+    if (process_quote_char(input, vars, is_redir_target))
+	{
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processed successfully\n");
+        vars->next_flag = 1;
+    } else
+	{
+        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processing failed\n");
+        vars->pos = saved_pos;
+    }
+}
+
+void	imp_tok_expan(char *input, t_vars *vars)
+{
+    fprintf(stderr, "DEBUG[imp_tok_expan]: ENTER with pos=%d, start=%d, char='%c', text='%.10s...'\n", 
+            vars->pos, vars->start, input[vars->pos], input + vars->pos);
+    
+    // Check if we have any text accumulated from start to pos
+    if (vars->pos > vars->start) {
+        fprintf(stderr, "DEBUG[imp_tok_expan]: Accumulated text from %d to %d: '%.*s'\n", 
+                vars->start, vars->pos, vars->pos - vars->start, 
+                input + vars->start);
+    }
+    
+    handle_text(input, vars);
+    
+    if (make_exp_token(input, vars))
+        vars->next_flag = 1;
+        
+    fprintf(stderr, "DEBUG[imp_tok_expan]: EXIT with pos=%d, start=%d, next_flag=%d\n", 
+            vars->pos, vars->start, vars->next_flag);
+}
+
+// /*
+// Handle operator tokens in the input.
+// Processes operators like >, <, |, etc.
+// Sets next_flag if processing should continue from the loop.
+// */
+// static void imp_tok_operat(char *input, t_vars *vars)
+// {
+// 	handle_text(input, vars);
+// 	if (process_operator_char(input, &vars->pos, vars))
+// 		vars->next_flag = 1;
+// }
+
+/*
+Handle whitespace in the input.
+Skips consecutive whitespace characters.
+Sets next_flag if processing should continue from the loop.
+*/
+// static void imp_tok_white(char *input, t_vars *vars)
+// {
+// 	handle_text(input, vars);
+// 	while (input[vars->pos] && input[vars->pos] <= ' ')
+// 		vars->pos++;
+// 	vars->start = vars->pos;
+// 	vars->next_flag = 1;
+// }
+void	imp_tok_white(char *input, t_vars *vars)
+{
+    fprintf(stderr, "[TOK_DBG] imp_tok_white: Called. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
+    handle_text(input, vars); // Process any text before whitespace
+    int initial_pos = vars->pos; // DEBUG
+    while (input[vars->pos] && input[vars->pos] <= ' ')
+        vars->pos++;
+    fprintf(stderr, "[TOK_DBG] imp_tok_white: Skipped whitespace from %d to %d.\n", initial_pos, vars->pos); // DEBUG
+    vars->start = vars->pos; // Start next token after whitespace
+    vars->next_flag = 1;
+    fprintf(stderr, "[TOK_DBG] imp_tok_white: Set Start=%d, next_flag=1.\n", vars->start); // DEBUG
 }
 
 void handle_right_adj(char *input, t_vars *vars)
@@ -249,121 +368,6 @@ void handle_right_adj(char *input, t_vars *vars)
     
     free(adjacent_text);
     fprintf(stderr, "DEBUG[handle_right_adj]: EXIT\n");
-}
-
-// static	void imp_tok_quote(char *input, t_vars *vars)
-// {
-// 	int	saved_pos;
-	
-//     fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, start=%d, char='%c'\n", 
-//         vars->pos, vars->start, input[vars->pos]);
-//     handle_text(input, vars);
-//     // Save current position to restore if process_quote_char fails
-//     saved_pos = vars->pos;
-    
-//     if (process_quote_char(input, vars))
-//     {
-//         fprintf(stderr, "DEBUG[imp_tok_quote]: After process_quote - pos=%d, start=%d\n", 
-//             vars->pos, vars->start);
-//         fprintf(stderr, "DEBUG[imp_tok_quote]: Adjacency state: left=%d, right=%d\n",
-//             vars->adj_state[0], vars->adj_state[1]);
-//         vars->next_flag = 1;
-//         // Right adjacency handling now happens in process_quote_char
-//     }
-//     else
-//     {
-//         fprintf(stderr, "DEBUG[imp_tok_quote]: process_quote_char returned 0 (failed)\n");
-//         vars->pos = saved_pos; // Restore position on failure
-//     }
-//     fprintf(stderr, "DEBUG[imp_tok_quote]: EXIT - next_flag=%d\n", vars->next_flag);
-// }
-static void imp_tok_quote(char *input, t_vars *vars)
-{
-    fprintf(stderr, "DEBUG[imp_tok_quote]: ENTER with pos=%d, char='%c', prev_type=%d\n", 
-        vars->pos, input[vars->pos], vars->prev_type);
-    // In imp_tok_quote()
-	fprintf(stderr, "DEBUG: imp_tok_quote: Previous token type=%d, pos=%d\n",
-        vars->prev_type, vars->pos);
-    // Check if this quoted string follows a redirection operator
-    int is_redir_target = 0;
-    if (vars->prev_type == TYPE_IN_REDIRECT || vars->prev_type == TYPE_OUT_REDIRECT ||
-        vars->prev_type == TYPE_APPEND_REDIRECT || vars->prev_type == TYPE_HEREDOC)
-	{
-        is_redir_target = 1;
-        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote follows redirection operator\n");
-    }
-    
-    handle_text(input, vars);
-    int saved_pos = vars->pos;
-    
-    if (process_quote_char(input, vars, is_redir_target))
-	{
-        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processed successfully\n");
-        vars->next_flag = 1;
-    } else
-	{
-        fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processing failed\n");
-        vars->pos = saved_pos;
-    }
-}
-
-static void imp_tok_expan(char *input, t_vars *vars)
-{
-    fprintf(stderr, "DEBUG[imp_tok_expan]: ENTER with pos=%d, start=%d, char='%c', text='%.10s...'\n", 
-            vars->pos, vars->start, input[vars->pos], input + vars->pos);
-    
-    // Check if we have any text accumulated from start to pos
-    if (vars->pos > vars->start) {
-        fprintf(stderr, "DEBUG[imp_tok_expan]: Accumulated text from %d to %d: '%.*s'\n", 
-                vars->start, vars->pos, vars->pos - vars->start, 
-                input + vars->start);
-    }
-    
-    handle_text(input, vars);
-    
-    if (make_exp_token(input, vars))
-        vars->next_flag = 1;
-        
-    fprintf(stderr, "DEBUG[imp_tok_expan]: EXIT with pos=%d, start=%d, next_flag=%d\n", 
-            vars->pos, vars->start, vars->next_flag);
-}
-
-// /*
-// Handle operator tokens in the input.
-// Processes operators like >, <, |, etc.
-// Sets next_flag if processing should continue from the loop.
-// */
-// static void imp_tok_operat(char *input, t_vars *vars)
-// {
-// 	handle_text(input, vars);
-// 	if (process_operator_char(input, &vars->pos, vars))
-// 		vars->next_flag = 1;
-// }
-
-/*
-Handle whitespace in the input.
-Skips consecutive whitespace characters.
-Sets next_flag if processing should continue from the loop.
-*/
-// static void imp_tok_white(char *input, t_vars *vars)
-// {
-// 	handle_text(input, vars);
-// 	while (input[vars->pos] && input[vars->pos] <= ' ')
-// 		vars->pos++;
-// 	vars->start = vars->pos;
-// 	vars->next_flag = 1;
-// }
-static void imp_tok_white(char *input, t_vars *vars)
-{
-    fprintf(stderr, "[TOK_DBG] imp_tok_white: Called. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
-    handle_text(input, vars); // Process any text before whitespace
-    int initial_pos = vars->pos; // DEBUG
-    while (input[vars->pos] && input[vars->pos] <= ' ')
-        vars->pos++;
-    fprintf(stderr, "[TOK_DBG] imp_tok_white: Skipped whitespace from %d to %d.\n", initial_pos, vars->pos); // DEBUG
-    vars->start = vars->pos; // Start next token after whitespace
-    vars->next_flag = 1;
-    fprintf(stderr, "[TOK_DBG] imp_tok_white: Set Start=%d, next_flag=1.\n", vars->start); // DEBUG
 }
 
 // /* 

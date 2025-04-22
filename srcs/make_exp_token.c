@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/20 19:25:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:23:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,7 +283,7 @@ int make_exp_token(char *input, t_vars *vars)
     
     if (!expanded_val)
     {
-        fprintf(stderr, "[MEM_DEBUG] make_exp_token: expand_value returned NULL, freeing token\n");
+        fprintf(stderr, "[MEM_DEBUG] make_exp_token: expand_variable returned NULL, freeing token\n");
         free(token);
         return (0);
     }

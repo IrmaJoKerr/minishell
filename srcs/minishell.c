@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/20 18:29:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:25:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ char *handle_quote_completion(char *cmd, t_vars *vars)
 }
 
 /*
+POSSIBLE REUSE:
 Finds the end of a command sequence in the token list
 Returns:
  - The last node in the list if not empty

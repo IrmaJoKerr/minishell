@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:06:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 04:22:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,41 +45,29 @@ t_node *initnode(t_tokentype type, char *token)
 	t_node  *node;
 	int     quote_type;
 	
-	// Set default quote type
 	quote_type = 0;
-	
-	// Allocate node
 	node = malloc(sizeof(t_node));
 	if (!node)
 		return (NULL);
-	
-	// Set quote type based on node type
 	if (type == TYPE_SINGLE_QUOTE)
 		quote_type = TYPE_SINGLE_QUOTE;
 	else if (type == TYPE_DOUBLE_QUOTE)
 		quote_type = TYPE_DOUBLE_QUOTE;
-	
-	// Initialize node framework
 	if (!make_nodeframe(node, type, token))
 	{
 		free(node);
 		return (NULL);
 	}
-	
-	// Set character-level quote types for quoted content
 	if (node->arg_quote_type && node->args && node->args[0] &&
 		(type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE))
 	{
 		int len = ft_strlen(node->args[0]);
 		int i = 0;
-		
-		// Set each character to the proper quote type
 		while (i < len)
 		{
 			node->arg_quote_type[0][i] = quote_type;
 			i++;
 		}
 	}
-	
 	return (node);
 }

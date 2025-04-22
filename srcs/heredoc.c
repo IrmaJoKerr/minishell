@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 19:16:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:09:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ char	*merge_and_free(char *str, char *chunk)
 /*
 Extracts and expands a variable from heredoc line.
 - Processes a variable starting with $ character.
-- Uses handle_expansion() to perform the expansion.
 - Falls back to returning "$" if expansion fails.
 Returns:
 Newly allocated string with expanded variable.

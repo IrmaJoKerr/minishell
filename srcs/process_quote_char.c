@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 01:10:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:28:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,17 +46,13 @@ char	*expand_quoted_var(char *expanded, char *content, int *pos
     var_value = expand_variable(content, pos, NULL, vars);
     if (!var_value)
         return (expanded);  // Return original if expansion fails
-    
     // Join expanded value with existing string
     temp = ft_strjoin(expanded, var_value);
-    
     // Clean up
     free(expanded);
     free(var_value);
-    
     if (!temp)
         return (NULL);
-        
     return (temp);
 }
 

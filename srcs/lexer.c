@@ -6,27 +6,27 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 01:20:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/22 11:24:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-Skips whitespace characters in the input string.
-- Moves past spaces, tabs, and newlines.
-- Updates vars->pos to point to the next non-whitespace.
-Returns:
-Nothing (void function).
-Handles token separation.
+// /*
+// Skips whitespace characters in the input string.
+// - Moves past spaces, tabs, and newlines.
+// - Updates vars->pos to point to the next non-whitespace.
+// Returns:
+// Nothing (void function).
+// Handles token separation.
 
-Example: Input "  echo hello"
-- Skips the two spaces at the beginning
-- Sets vars->pos to 2 (pointing at 'e')
-*/
-void	skip_whitespace(char *str, t_vars *vars)
-{
-	while (str[vars->pos] && (str[vars->pos] == ' '
-			|| str[vars->pos] == '\t' || str[vars->pos] == '\n'))
-		vars->pos++;
-}
+// Example: Input "  echo hello"
+// - Skips the two spaces at the beginning
+// - Sets vars->pos to 2 (pointing at 'e')
+// */
+// void	skip_whitespace(char *str, t_vars *vars)
+// {
+// 	while (str[vars->pos] && (str[vars->pos] == ' '
+// 			|| str[vars->pos] == '\t' || str[vars->pos] == '\n'))
+// 		vars->pos++;
+// }
