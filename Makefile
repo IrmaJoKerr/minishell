@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/20 18:31:30 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/23 13:40:34 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,7 @@ MINISHELL_SRCS = \
 			srcs/pipes.c \
 			srcs/process_pipes.c \
 			srcs/process_quote_char.c \
+			srcs/process_redir_node.c \
 			srcs/process_redirect.c \
 			srcs/quotes.c \
 			srcs/redirect.c \

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 17:46:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 14:04:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,6 @@ typedef struct s_pipe
 	int			saved_stdin;    // Saved standard input
 	int			saved_stdout;   // Saved standard output
 	int			heredoc_fd;     // File descriptor for heredoc if present
-	int			hd_fd_write;        // File descriptor for writing (ADDED for heredoc)
 	char		*heredoc_delim; // Delimiter for heredoc
 	int			hd_expand; // Flag for heredoc expansion
 	int			redirection_fd; // Current redirection file descriptor
@@ -231,7 +230,8 @@ typedef struct s_vars
 	t_tokentype		prev_type;
 	int				pos;
 	int				start;
-	int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
+	// int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
+	int				heredoc_content_ready; // Flag for heredoc content readiness
 	int				shell_level;
 	struct termios	ori_term_settings;
 	int				ori_term_saved;
@@ -408,9 +408,7 @@ char		*handle_special_var(const char *var_name, t_vars *vars);
 char		*expand_variable(char *input, int *pos, char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
-// char		*handle_expansion(char *input, int *pos, t_vars *vars);
 void 		debug_cmd_args(t_node *node); //DEBUG FUNCTION
-// char		*expand_quoted_argument(char *arg, int *quote_types, t_vars *vars);
 
 /*
 Heredoc main handling.
@@ -419,30 +417,16 @@ In heredoc.c
 char		*merge_and_free(char *str, char *chunk);
 char		*expand_heredoc_var(char *line, int *pos, t_vars *vars);
 char		*read_heredoc_str(char *line, int *pos);
-char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
-char		*expand_heredoc_line(char *line, t_vars *vars);
-// int			chk_expand_heredoc(char *delimiter);
+// char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
+char		*hd_expander(char *line, t_vars *vars);
+// char		*expand_heredoc_line(char *line, t_vars *vars);
+void		strip_outer_quotes(char **delimiter, t_vars *vars);
+int			trigger_interactive_heredoc_gathering(t_vars *vars);
 int			write_to_heredoc(int fd, char *line, t_vars *vars);
+int			gather_interactive_heredoc(int write_fd, t_vars *vars);
 int			store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
-int			read_heredoc_interactive(t_vars *vars);
-// int			read_heredoc(int *fd, char *delimiter
-// 				,t_vars *vars, int expand_vars);
-// void		cleanup_heredoc_storage(t_vars *vars);
-void		setup_heredoc_pipe(t_vars *vars);
-int 		strip_outer_quotes(char **delimiter);
-// int			store_heredoc_content(char *input, int start_pos, char *delimiter
-// 				,t_vars *vars);
-// int			handle_heredoc_err(t_vars *vars);
-// int			cleanup_heredoc_fail(int *fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
-// int			reset_heredoc_pipe(t_vars *vars);
-// int 		process_heredoc_info(char *raw_delimiter, t_vars *vars);
-// char 		*get_heredoc_delimiter(char *input, t_vars *vars);
-// void 		get_heredoc_delimiter(char *input, t_vars *vars);
-// int			proc_heredoc(t_node *node, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
-int			hd_read_write_loop(int fd, t_vars *vars);
-int			interactive_hd_mode(t_vars *vars);
 int			read_tmp_buf(t_vars *vars);
 int			chk_quoted_delim(char *orig_delim, size_t len
 				,char **clean_delim_ptr, int *quoted_ptr);
@@ -469,6 +453,7 @@ int			copy_file(const char *src, const char *dst);
 int			copy_to_temp(int fd_read);
 void		skip_lines(int fd, int count);
 void		trim_history(int excess_lines);
+int			chk_and_make_folder(const char *path);
 void		save_history(void);
 int			save_history_entries(int fd, HIST_ENTRY **hist_list,
 				int start, int total);
@@ -486,6 +471,7 @@ Node initialization functions.
 In initnode.c
 */
 int			make_nodeframe(t_node *node, t_tokentype type, char *token);
+void		set_quote_type(t_node *node, int quote_type);
 t_node		*initnode(t_tokentype type, char *token);
 
 /*
@@ -497,7 +483,7 @@ void		init_vars(t_vars *vars);
 t_pipe		*init_pipes(void);
 void		reset_pipe_vars(t_vars *vars);
 void		reset_shell(t_vars *vars);
-int			init_heredoc_pipe(void);
+void		setup_terminal_mode(t_vars *vars);
 
 /*
 Input completion functions.
@@ -513,7 +499,7 @@ In input_handlers.c
 // void		proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars);
 // void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
 // char		*complete_input(char *input, t_inmode mode, t_vars *vars);
-void		clear_partial_input(t_vars *vars);
+// void		clear_partial_input(t_vars *vars);
 // int         has_heredoc_operator(char *input);
 // char        *process_heredoc_line(char *line, t_vars *vars);
 // void 		process_single_command(char *input, t_vars *vars);
@@ -531,9 +517,9 @@ void		manage_terminal_state(t_vars *vars, int action);
 // int			is_quoted_delimiter(t_node *node, t_vars *vars);
 // char		*extract_heredoc_delimiter(char *input);
 int 		check_trailing_chars(const char *line, int start_pos);
-int			has_unprocessed_heredoc(char *input);
+// int			has_unprocessed_heredoc(char *input);
 // void		process_stored_heredoc_lines(t_vars *vars);
-void		setup_interactive_heredoc(t_vars *vars, int expand_vars);
+// void		setup_interactive_heredoc(t_vars *vars, int expand_vars);
 void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
 // int 		is_valid_delim(char *raw_delimiter, t_vars *vars);
 
@@ -603,18 +589,20 @@ void verify_token_list_integrity(t_vars *vars);
 void track_alloc(void *ptr, const char *func, int line);
 void track_free(void *ptr, const char *func, int line);
 void cleanup_expansion_mem(char *token, char *expanded_val);
+
 /*
 Minishell program entry point functions.
 In minishell.c
 */
 void		print_tokens(t_node *head); // Debug function
 char		*reader(void);
-void		setup_env(t_vars *vars, char **envp);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
-t_node		*find_command_end(t_node *start_node); // POSSIBLE REUSE
 void		build_and_execute(t_vars *vars);
 int 		process_input_tokens(char *command, t_vars *vars);
+int			finalize_pipes(t_vars *vars);
+int			handle_pipe_syntax(t_vars *vars);
 void		process_command(char *command, t_vars *vars);
+void		restore_terminal_fd(int target_fd, int source_fd, int mode);
 void		reset_terminal_after_heredoc(void);
 int			main(int ac, char **av, char **envp);
 
@@ -646,23 +634,14 @@ Pipe analysis functions.
 In pipe_analysis.c
 */
 int			analyze_pipe_syntax(t_vars *vars);
-char		*complete_pipe_command(char *command, t_vars *vars);
+char		*complete_pipe_cmd(char *command, t_vars *vars);
 
 /*
 Pipes main functions.
 In pipes.c
 */
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
-// int			is_related_to_cmd(t_node *redir_node, t_node *cmd_node, t_vars *vars); //Possible to reuse for redirections
-// void 		reset_done_pipes(char **pipe_cmd, char **result, int mode);
-// int			check_unfinished_pipe(t_vars *vars);
-// char		*handle_pipe_completion(char *cmd, t_vars *vars, int syntax_chk);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
-// void		setup_child_pipes(t_pipe *pipes, int cmd_idx, int pipe_count); //Possible to reuse for redirections
-// int			fork_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
-// int			count_pipes(t_vars *vars); //Possible to reuse for redirections
-// void 		close_all_pipe_fds(t_pipe *pipes);
-// int			wait_for_processes(t_pipe *pipes, t_vars *vars); //Possible to reuse for redirections
 
 /*
 Pipeline processing functions.
@@ -692,27 +671,39 @@ int			validate_redirection_targets(t_vars *vars);
 t_node		*find_last_redir(t_vars *vars);
 
 /*
+Process redirection nodes functions.
+In process_redir_node.c
+*/
+void		link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
+void		track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
+void		link_in_out_redirs(t_vars *vars);
+void 		process_redir_node(t_node *redir_node, t_vars *vars);
+
+/*
 Redirection processing functions.
 In process_redirect.c
 */
-t_node		*proc_redir(t_vars *vars);
 int			count_tokens(t_node *head); // DEBUG FUNCTION
+t_node		*proc_redir(t_vars *vars);
 void		reset_redir_tracking(t_pipe *pipes);
 void		build_redir_ast(t_vars *vars);
-void 		process_redir_node(t_node *redir_node, t_vars *vars);
-void		integrate_redirections_with_pipes(t_vars *vars);
+int			chk_redir_nodes(t_vars *vars, t_node *current);
+t_node		*find_redir_chain_head(t_node *current, t_node *last_cmd);
+void		link_redirs_pipes(t_vars *vars);
 void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
-// int			is_valid_redir_node(t_node *current); //Possible to reuse
+int			is_valid_redir_node(t_node *current);
 
 /*
 Quote handling.
 In quotes.c
 */
+void		track_quote_ctx(char quote_char, char *in_quote, int pos
+				,t_vars *vars);
 int 		validate_quotes(char *input, t_vars *vars);
+char		*quote_prompt(char quote_type);
 char		*fix_open_quotes(char *input, t_vars *vars);
-// void		process_arg_quotes(char **arg);
 
 /*
 Redirection handling.

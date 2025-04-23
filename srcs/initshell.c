@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/21 17:40:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 10:09:46 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,30 +20,51 @@ Initializes the shell environment and variables.
 - Prepares the command prompt.
 Works with main() as program entry point.
 */
-void	init_shell(t_vars *vars, char **envp)
+// void	init_shell(t_vars *vars, char **envp)
+// {
+// 	ft_memset(vars, 0, sizeof(t_vars));
+// 	vars->env = dup_env(envp);
+// 	if (!vars->env)
+// 	{
+// 		crit_error(vars);
+// 	}
+// 	get_shell_level(vars);
+// 	incr_shell_level(vars);
+// 	init_vars(vars);
+// 	vars->pipes = init_pipes();
+// 	if (!vars->pipes)
+// 	{
+// 		crit_error(vars);
+// 	}
+// 	if (isatty(STDIN_FILENO))
+// 	{
+//     	tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
+//     	vars->ori_term_saved = 1;
+// 	}
+// 	vars->error_code = 0;
+// 	load_signals();
+// 	load_history();
+// }
+void init_shell(t_vars *vars, char **envp)
 {
-	ft_memset(vars, 0, sizeof(t_vars));
-	vars->env = dup_env(envp);
-	if (!vars->env)
-	{
-		crit_error(vars);
-	}
-	get_shell_level(vars);
-	incr_shell_level(vars);
-	init_vars(vars);
-	vars->pipes = init_pipes();
-	if (!vars->pipes)
-	{
-		crit_error(vars);
-	}
-	if (isatty(STDIN_FILENO))
-	{
-    	tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
-    	vars->ori_term_saved = 1;
-	}
-	vars->error_code = 0;
-	load_signals();
-	load_history();
+    ft_memset(vars, 0, sizeof(t_vars));
+    vars->env = dup_env(envp);
+    if (!vars->env)
+    {
+        crit_error(vars);
+    }
+    get_shell_level(vars);
+    incr_shell_level(vars);
+    init_vars(vars);
+    vars->pipes = init_pipes();
+    if (!vars->pipes)
+    {
+        crit_error(vars);
+    }
+    setup_terminal_mode(vars);
+    vars->error_code = 0;
+    load_signals();
+    load_history();
 }
 
 /*
@@ -73,13 +94,13 @@ void init_vars(t_vars *vars)
 	vars->prev_type = TYPE_NULL;
 	vars->pos = 0;
 	vars->start = 0;
-	vars->heredoc_mode = 0;
+	vars->heredoc_content_ready = 0;
 }
 
-/*
-Initialise pipes structure.
-Allocates and sets up the pipes state.
-*/
+// /*
+// Initialise pipes structure.
+// Allocates and sets up the pipes state.
+// */
 // t_pipe *init_pipes(void)
 // {
 // 	t_pipe *pipes;
@@ -103,6 +124,7 @@ Allocates and sets up the pipes state.
 // 	pipes->pipe_at_end = 0;
 // 	return (pipes);
 // }
+
 /*
 Initialise pipes structure.
 Allocates and sets up the pipes state.
@@ -117,10 +139,9 @@ t_pipe *init_pipes(void)
     ft_memset(pipes, 0, sizeof(t_pipe));
     pipes->saved_stdin = -1;
     pipes->saved_stdout = -1;
-    pipes->heredoc_fd = init_heredoc_pipe();
-	pipes->hd_fd_write = -1;     // Initialize write fd to -1 (invalid)
-    pipes->heredoc_delim = NULL; // Ensure delimiter ptr is NULL
-    pipes->hd_expand = 0;        // Default: no expansion
+    pipes->heredoc_fd = -1;
+    pipes->heredoc_delim = NULL;
+    pipes->hd_expand = 0;
     pipes->redirection_fd = -1;
     pipes->last_cmd = NULL;
     pipes->last_pipe = NULL;
@@ -179,21 +200,21 @@ void reset_shell(t_vars *vars)
 }
 
 /*
-Initializes a heredoc pipe.
-Creates a pipe and returns the read end fd, closing the write end.
-Returns -1 on failure.
+Sets up terminal mode for shell operation.
+- Saves original terminal settings
+- Configures terminal for interactive shell use
+- Disables control character echoing
 */
-int	init_heredoc_pipe(void)
+void	setup_terminal_mode(t_vars *vars)
 {
-    int	fd[2];
+    struct termios	term;
     
-    if (pipe(fd) == -1)
-	{
-        fprintf(stderr, "[DBG_HEREDOC] Initial heredoc pipe creation failed: %s\n", 
-                strerror(errno));
-        return (-1);
+    if (isatty(STDIN_FILENO))
+    {
+        tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
+        vars->ori_term_saved = 1;
+        tcgetattr(STDIN_FILENO, &term);
+        term.c_lflag &= ~ECHOCTL;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
-    fprintf(stderr, "[DBG_HEREDOC] Created initial heredoc pipe: read_fd=%d\n", fd[0]);
-    close(fd[1]);  // Close write end until needed
-    return (fd[0]);
 }

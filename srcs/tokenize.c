@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 16:24:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 00:34:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,10 +244,8 @@ void	imp_tok_quote(char *input, t_vars *vars)
         is_redir_target = 1;
         fprintf(stderr, "DEBUG[imp_tok_quote]: Quote follows redirection operator\n");
     }
-    
     handle_text(input, vars);
     int saved_pos = vars->pos;
-    
     if (process_quote_char(input, vars, is_redir_target))
 	{
         fprintf(stderr, "DEBUG[imp_tok_quote]: Quote processed successfully\n");
@@ -263,19 +261,14 @@ void	imp_tok_expan(char *input, t_vars *vars)
 {
     fprintf(stderr, "DEBUG[imp_tok_expan]: ENTER with pos=%d, start=%d, char='%c', text='%.10s...'\n", 
             vars->pos, vars->start, input[vars->pos], input + vars->pos);
-    
-    // Check if we have any text accumulated from start to pos
     if (vars->pos > vars->start) {
         fprintf(stderr, "DEBUG[imp_tok_expan]: Accumulated text from %d to %d: '%.*s'\n", 
                 vars->start, vars->pos, vars->pos - vars->start, 
                 input + vars->start);
     }
-    
     handle_text(input, vars);
-    
     if (make_exp_token(input, vars))
         vars->next_flag = 1;
-        
     fprintf(stderr, "DEBUG[imp_tok_expan]: EXIT with pos=%d, start=%d, next_flag=%d\n", 
             vars->pos, vars->start, vars->next_flag);
 }
@@ -322,33 +315,25 @@ void handle_right_adj(char *input, t_vars *vars)
 {
     fprintf(stderr, "DEBUG[handle_right_adj]: ENTER - pos=%d, start=%d\n",
             vars->pos, vars->start);
-    
     if (vars->pos <= vars->start)
     {
         fprintf(stderr, "DEBUG[handle_right_adj]: No text to extract (pos <= start)\n");
-        return;
+        return ;
     }
-    
     char *adjacent_text = ft_substr(input, vars->start, vars->pos - vars->start);
     if (!adjacent_text)
     {
         fprintf(stderr, "DEBUG[handle_right_adj]: Failed to extract text\n");
-        return;
+        return ;
     }
-    
     fprintf(stderr, "DEBUG[handle_right_adj]: Extracted '%s'\n", adjacent_text);
-    
     if (vars->current && vars->current->args && vars->current->args[0])
     {
-        // Find the last argument
         int arg_idx = 0;
         while (vars->current->args[arg_idx + 1])
             arg_idx++;
-        
         fprintf(stderr, "DEBUG[handle_right_adj]: Current token last arg='%s'\n",
                 vars->current->args[arg_idx]);
-        
-        // Join with the last argument, not the first
         char *joined = ft_strjoin(vars->current->args[arg_idx], adjacent_text);
         if (joined)
         {
@@ -365,7 +350,6 @@ void handle_right_adj(char *input, t_vars *vars)
     {
         fprintf(stderr, "DEBUG[handle_right_adj]: No valid current token to join with\n");
     }
-    
     free(adjacent_text);
     fprintf(stderr, "DEBUG[handle_right_adj]: EXIT\n");
 }
@@ -791,12 +775,9 @@ int	build_token_linklist(t_vars *vars, t_node *node)
 
     if (!vars || !node)
         return (0);
-
     DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Adding node type=%d (%s), content='%s'\n",
         node->type, get_token_str(node->type),
         node->args ? node->args[0] : "NULL");
-
-    // Case 1: First node becomes the head
     if (!vars->head)
     {
         vars->head = node;
@@ -804,52 +785,17 @@ int	build_token_linklist(t_vars *vars, t_node *node)
         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Set as head %p\n", (void*)node);
         return (0); // Node added, not freed
     }
-
-    // REMOVED: Heredoc specific logic (Case 2 & 3) - Delimiter is now validated
-    // and stored during tokenization loop, not in this linking function.
-    // The << token and its delimiter (as TYPE_ARGS) are linked like normal tokens.
-
-    // Existing functionality for merging args and handling pipes
     if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
     {
         node->type = TYPE_CMD; // Argument after pipe becomes a command
     }
-
     if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
     {
-        // Merge ARG into preceding CMD
         cmd_node = vars->current;
         t_node *next_node = node->next; // Store the next node before modifying links
-
         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Merging ARG '%s' into CMD '%s'\n",
                   node->args[0], cmd_node->args[0]);
-
         append_arg(cmd_node, node->args[0], 0); // Assuming quote_type 0 for now
-
-        // Free the merged ARG node's content (args array)
-        // NOTE: append_arg copies the string, so we need to free the original node's args.
-        // However, free_token_node will handle this. We just need to ensure
-        // the pointers are NULLed out here so free_token_node doesn't double-free
-        // if append_arg failed or had issues (though append_arg should handle its own failures).
-        // The safest approach is to let free_token_node handle the freeing entirely.
-        // We remove the manual frees here.
-
-        // if (node->args)
-        // {
-        //     free(node->args[0]); // This string was duplicated by setup_args
-        //     free(node->args);     // This outer array was allocated by setup_args
-        // }
-        // node->args = NULL; // Prevent double free if free_token_node is called later? No, free_token_node is called now.
-        // if (node->arg_quote_type) // Free quote types if they exist
-        // {
-        //     // This needs ft_free_int_2d, not just free()
-        //     // free(node->arg_quote_type); // INCORRECT - Leaks inner arrays
-        //     // ft_free_int_2d(node->arg_quote_type, 1); // Assuming only 1 arg in the merged node
-        // }
-        // node->arg_quote_type = NULL; // Prevent double free? No, free_token_node is called now.
-
-
-        // Update links carefully before freeing the node itself
         if (next_node)
         {
             cmd_node->next = next_node;
@@ -858,9 +804,6 @@ int	build_token_linklist(t_vars *vars, t_node *node)
             cmd_node->next = NULL; // Merged node was the last one
             vars->current = cmd_node; // Update current if merged node was last
         }
-
-        // Now free the node structure itself AND ITS CONTENTS
-        // free(node); // INCORRECT - Leaks args and arg_quote_type
         free_token_node(node); // CORRECT - Frees node and its allocated members
 
         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: After merge, CMD '%s', next=%p\n",
@@ -869,7 +812,6 @@ int	build_token_linklist(t_vars *vars, t_node *node)
     }
     else
     {
-        // Link normally if not merging
         DBG_PRINTF(DEBUG_TOKENIZE, "build_token_linklist: Linking node %p to current %p\n",
             (void*)node, (void*)vars->current);
         token_link(node, vars);

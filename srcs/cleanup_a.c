@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:25:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 10:06:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ void cleanup_pipes(t_pipe *pipes)
 		close(pipes->saved_stdout);
 	if (pipes->heredoc_fd > 0)
 		close(pipes->heredoc_fd);
-	if (pipes->hd_fd_write > 0 && pipes->hd_fd_write != pipes->heredoc_fd)
-		close(pipes->hd_fd_write);
 	if (pipes->heredoc_delim)
 	{
 		free(pipes->heredoc_delim);
@@ -101,6 +99,10 @@ void cleanup_exit(t_vars *vars)
 {
 	if (!vars)
 		return ;
+	if (isatty(STDIN_FILENO) && vars->ori_term_saved)
+    {
+        tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
+    }
 	save_history();
 	if (vars->head)
 	{

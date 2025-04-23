@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:21:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 00:18:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,30 +89,21 @@ void	process_addon_pipes(t_vars *vars)
 
 	if (!vars || !vars->pipes || !vars->pipes->last_pipe)
 		return ;
-	// Start from after the last processed pipe
 	current = vars->pipes->last_pipe->next;
 	if (!current)
 		return ;
-	// Reset command tracking - we'll track as we go
 	vars->pipes->last_cmd = NULL;
-	// Process remaining tokens
 	while (current)
 	{
-		// Track commands
 		if (current->type == TYPE_CMD)
 			vars->pipes->last_cmd = current;
 		else if (current->type == TYPE_PIPE)
 		{
-			// Find the next command after this pipe
 			next_cmd = find_cmd(current->next, NULL, FIND_NEXT, vars);
-			// If we have valid commands to connect
 			if (vars->pipes->last_cmd && next_cmd)
 			{
-				// Set up pipe node
 				setup_pipe_node(current, vars->pipes->last_cmd, next_cmd);
-				// Link to existing chain
 				vars->pipes->last_pipe->right = current;
-				// Update tracking
 				vars->pipes->last_pipe = current;
 			}
 		}

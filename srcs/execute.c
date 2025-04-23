@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 15:37:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 13:51:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,36 +142,46 @@ Sets up a specific type of redirection based on node type.
 - Handles input, output, append, and heredoc redirections.
 - Updates mode flags and calls appropriate setup functions.
 - Centralizes error handling for all redirection types.
+- Triggers interactive heredoc gathering if content is not ready.
 Returns:
-1 on success, 0 on failure (with error_code set).
+- 1 on success.
+- 0 on failure (with error_code set).
 Works with setup_redirection().
 */
-int redir_mode_setup(t_node *node, t_vars *vars)
+int	redir_mode_setup(t_node *node, t_vars *vars)
 {
-	int	result;
-	
-	if (node->type == TYPE_IN_REDIRECT)
-		result = setup_in_redir(node, vars);
-	else if (node->type == TYPE_OUT_REDIRECT)
-	{
-		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-		result = setup_out_redir(node, vars);
-	}
-	else if (node->type == TYPE_APPEND_REDIRECT)
-	{
-		vars->pipes->out_mode = OUT_MODE_APPEND;
-		result = setup_out_redir(node, vars);
-	}
-	else if (node->type == TYPE_HEREDOC)
-	{
-		fprintf(stderr, "[DBG_HEREDOC] redir_mode_setup(). Calling handle heredoc()\n");
-		result = handle_heredoc(node, vars);
-	}
-	else
-		result = 0;
-	if (!result)
-		vars->error_code = 1;
-	return (result);
+    int	result;
+
+    result = 0;
+    if (node->type == TYPE_IN_REDIRECT)
+        result = setup_in_redir(node, vars);
+    else if (node->type == TYPE_OUT_REDIRECT)
+    {
+        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+        result = setup_out_redir(node, vars);
+    }
+    else if (node->type == TYPE_APPEND_REDIRECT)
+    {
+        vars->pipes->out_mode = OUT_MODE_APPEND;
+        result = setup_out_redir(node, vars);
+    }
+    else if (node->type == TYPE_HEREDOC)
+    {
+        if (!vars->heredoc_content_ready)
+        {
+            DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Heredoc content not ready, triggering gathering.\n");
+            if (!trigger_interactive_heredoc_gathering(vars))
+            {
+                DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Interactive heredoc gathering failed.\n");
+                return (0);
+            }
+        }
+        DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Content ready, calling handle_heredoc().\n");
+        result = handle_heredoc(node, vars);
+    }
+    if (!result)
+        vars->error_code = 1; // Use a more specific error? ERR_DEFAULT?
+    return (result);
 }
 
 /*
@@ -186,30 +196,34 @@ Works with exec_redirect_cmd().
 */
 int setup_redirection(t_node *node, t_vars *vars)
 {
-	int		result;
-	t_node	*cmd_node;
+    int		result;
+    t_node	*cmd_node;
 
-	vars->pipes->current_redirect = node;
-	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-	if (!cmd_node)
-	{
-		vars->error_code = ERR_DEFAULT;
-		return (0);
-	}
-	vars->pipes->cmd_redir = cmd_node;
-	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
-		vars->pipes->last_in_redir = node;
-	else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
-		vars->pipes->last_out_redir = node;
-	if (node->right && node->right->args)
-			(void)strip_outer_quotes(&node->right->args[0]);
-	else if (node->type != TYPE_HEREDOC)
-	{
-		tok_syntax_error_msg("newline", vars);
-		return (0);
-	}
-	result = redir_mode_setup(node, vars);
-	return (result);
+    vars->pipes->current_redirect = node;
+    cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+    if (!cmd_node)
+    {
+        // Maybe set a specific error?
+        vars->error_code = ERR_DEFAULT;
+        return (0);
+    }
+    vars->pipes->cmd_redir = cmd_node;
+    if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+        vars->pipes->last_in_redir = node;
+    else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
+        vars->pipes->last_out_redir = node;
+    if (node->right && node->right->args && node->right->args[0])
+    {
+        if (node->type != TYPE_HEREDOC)
+        	strip_outer_quotes(&node->right->args[0], vars);
+    }
+    else if (node->type != TYPE_HEREDOC)
+    {
+        tok_syntax_error_msg("newline", vars);
+        return (0);
+    }
+    result = redir_mode_setup(node, vars);
+    return (result);
 }
 
 /*
@@ -225,6 +239,7 @@ Works with exec_redirect_cmd().
 int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
 {
 	t_node	*current_node;
+	t_node	*next_redir;
 	
 	current_node = start_node;
 	while (current_node && is_redirection(current_node->type))
@@ -239,7 +254,7 @@ int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
 			current_node = current_node->redir;
 		else
 		{
-			t_node *next_redir = get_next_redir(current_node, cmd_node);
+			next_redir = get_next_redir(current_node, cmd_node);
 			if (next_redir)
 				current_node = next_redir;
 			else

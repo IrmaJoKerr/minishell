@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 03:49:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 09:26:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,5 @@ It does nothing else.
 void	sigquit_handler(int sig)
 {
 	(void)sig;
-	// rl_on_new_line();
 	rl_redisplay();
 }

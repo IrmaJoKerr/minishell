@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 15:34:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 10:12:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ Works with analyze_pipe_syntax().
 */
 static int	check_consecutive_pipes(t_vars *vars)
 {
-	t_node *current;
-	int expecting_command;
+	t_node	*current;
+	int		expecting_command;
 
 	if (!vars || !vars->head)
 		return (0);
@@ -150,7 +150,7 @@ Returns:
 - NULL on error.
 Works with process_command() to handle unfinished pipes.
 */
-char *complete_pipe_command(char *command, t_vars *vars)
+char	*complete_pipe_cmd(char *command, t_vars *vars)
 {
 	char	*pipe_cmd;
 	char	*temp;

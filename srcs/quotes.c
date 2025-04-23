@@ -6,21 +6,79 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 22:59:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 07:06:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Validates if all quotes in a command are properly closed
-Returns true if all quotes are balanced, false otherwise
-Also updates quote_ctx and quote_depth in vars
+Records a new open quote in the quote context tracking array.
+Updates in_quote to the current quote character.
+Updates quote context with position and depth information.
+Increments quote depth.
 */
-int	validate_quotes(char *input, t_vars *vars)
+void	track_quote_ctx(char quote_char, char *in_quote, int pos, t_vars *vars)
 {
-	int i;
-	char in_quote;
+	*in_quote = quote_char;
+	if (vars->quote_depth < 32)
+	{
+		vars->quote_ctx[vars->quote_depth].type = quote_char;
+		vars->quote_ctx[vars->quote_depth].start_pos = pos;
+		vars->quote_ctx[vars->quote_depth].depth = vars->quote_depth + 1;
+		vars->quote_depth++;
+	}
+}
+
+/*
+Validates if all quotes in a command are properly closed.
+Updates quote_ctx and quote_depth in vars struct.
+Returns:
+- 1 if all quotes are balanced.
+- 0 if unclosed quotes are found.
+*/
+// int	validate_quotes(char *input, t_vars *vars)
+// {
+// 	int		i;
+// 	char	in_quote;
+	 
+// 	i = 0;
+// 	in_quote = 0;
+// 	vars->quote_depth = 0; 
+// 	while (input[i])
+// 	{
+// 		if (!in_quote && (input[i] == '\'' || input[i] == '"'))
+// 		{
+// 			in_quote = input[i];
+// 			if (vars->quote_depth < 32)
+// 			{
+// 				vars->quote_ctx[vars->quote_depth].type = in_quote;
+// 				vars->quote_ctx[vars->quote_depth].start_pos = i;
+// 				vars->quote_ctx[vars->quote_depth].depth = vars->quote_depth + 1;
+// 				vars->quote_depth++;
+// 			}
+// 		}
+// 		else if (in_quote && input[i] == in_quote)
+// 		{
+// 			in_quote = 0;
+// 			vars->quote_depth--;
+// 		}
+// 		i++;
+// 	} 
+// 	return (in_quote == 0);
+// }
+/*
+Validates if all quotes in a command are properly closed.
+Updates quote_ctx and quote_depth in vars struct.
+Tracks single and double quotes.
+Returns:
+- 1 if all quotes are balanced.
+- 0 if unclosed quotes are found.
+*/
+int validate_quotes(char *input, t_vars *vars)
+{
+	int     i;
+	char    in_quote;
 	 
 	i = 0;
 	in_quote = 0;
@@ -29,110 +87,100 @@ int	validate_quotes(char *input, t_vars *vars)
 	{
 		if (!in_quote && (input[i] == '\'' || input[i] == '"'))
 		{
-			in_quote = input[i];
-			if (vars->quote_depth < 32)
-			{
-				vars->quote_ctx[vars->quote_depth].type = in_quote;
-				vars->quote_ctx[vars->quote_depth].start_pos = i;
-				vars->quote_ctx[vars->quote_depth].depth = vars->quote_depth + 1;
-				vars->quote_depth++;
-			}
+			track_quote_ctx(input[i], &in_quote, i, vars);
 		}
 		else if (in_quote && input[i] == in_quote)
 		{
 			in_quote = 0;
-			vars->quote_depth--; // Pop completed quote
+			vars->quote_depth--;
 		}
 		i++;
 	} 
 	return (in_quote == 0);
 }
 
+// /*
+// Reads additional input to complete unclosed quotes
+// Returns completed input or NULL on error
+// */
+// char *fix_open_quotes(char *original_input, t_vars *vars)
+// {
+// 	char *prompt;
+// 	char *addon_input;
+// 	char *merged_input;
+	
+// 	if (!vars->quote_depth)
+// 		return (ft_strdup(original_input));
+// 	if (vars->quote_ctx[vars->quote_depth - 1].type == '\'')
+// 		prompt = "SQUOTE> ";
+// 	else
+// 		prompt = "DQUOTE> ";
+// 	addon_input = readline(prompt);
+// 	if (!addon_input)
+// 		return (NULL);
+// 	if (addon_input && *addon_input)
+// 		add_history(addon_input);
+// 	merged_input = append_input(original_input, addon_input);
+// 	free(addon_input);
+// 	if (!merged_input)
+// 		return (NULL);
+// 	if (!validate_quotes(merged_input, vars))
+// 	{
+// 		char *temp = merged_input;
+// 		merged_input = fix_open_quotes(temp, vars);
+// 		free(temp);
+// 	}
+// 	return (merged_input);
+// }
+
 /*
-Reads additional input to complete unclosed quotes
-Returns completed input or NULL on error
+Prompts for additional input based on the quote type
+Returns: 
+- Newly allocated string with the input.
+- NULL if readline fails.
 */
-char *fix_open_quotes(char *original_input, t_vars *vars)
+char	*quote_prompt(char quote_type)
 {
 	char *prompt;
-	char *additional_input;
-	char *combined_input;
+	char *addon_input;
 	
-	// Check if we need quote completion
-	if (!vars->quote_depth)
-		return (ft_strdup(original_input));
-	
-	// Create appropriate prompt based on quote type
-	if (vars->quote_ctx[vars->quote_depth - 1].type == '\'')
+	if (quote_type == '\'')
 		prompt = "SQUOTE> ";
 	else
 		prompt = "DQUOTE> ";
-	
-	// Get additional input
-	additional_input = readline(prompt);
-	
-	if (!additional_input)
+	addon_input = readline(prompt);
+	if (!addon_input)
 		return (NULL);
-	
-	// Add to history if not empty
-	if (additional_input && *additional_input)
-		add_history(additional_input);
-	
-	// Combine inputs
-	combined_input = append_input(original_input, additional_input);
-	free(additional_input);
-	
-	if (!combined_input)
-		return (NULL);
-	
-	// Check if we have resolved all quotes
-	if (!validate_quotes(combined_input, vars))
-	{
-		// Still have unclosed quotes, recursively get more input
-		char *temp = combined_input;
-		combined_input = fix_open_quotes(temp, vars);
-		free(temp);
-	}
-	
-	return (combined_input);
+	if (*addon_input)
+		add_history(addon_input);
+	return (addon_input);
 }
 
-// /*
-//  * Processes quotes in argument tokens
-//  * - Removes the outside quotes but preserves the content
-//  * - For single quotes: preserves literal contents including $ signs
-//  * - For double quotes: keeps content for later expansion
-//  * - Handles adjacent quoted text by joining with previous arg when needed
-//  */
-// void process_arg_quotes(char **arg)
-// {
-// 	char *str;
-// 	size_t len;
-// 	char *new_str;
+/*
+Recursively reads additional input to complete unclosed quotes.
+Returns:
+- Completed input string.
+- NULL on error.
+*/
+char	*fix_open_quotes(char *original_input, t_vars *vars)
+{
+	char	*addon_input;
+	char	*merged_input;
 	
-// 	if (!arg || !*arg)
-// 		return;
-		
-// 	str = *arg;
-// 	len = ft_strlen(str);
-	
-// 	DBG_PRINTF(DEBUG_QUOTES, "process_arg_quotes: Processing '%s'\n", str);
-	
-// 	// Need at least 2 chars for quotes
-// 	if (len < 2)
-// 		return;
-		
-// 	// Check for matching quotes at start and end
-// 	if ((str[0] == '"' && str[len - 1] == '"') || 
-// 		(str[0] == '\'' && str[len - 1] == '\''))
-// 	{
-// 		DBG_PRINTF(DEBUG_QUOTES, "Removing quotes from '%s'\n", str);
-// 		new_str = ft_substr(str, 1, len - 2);
-// 		if (new_str)
-// 		{
-// 			free(*arg);  // Free the string content, not the pointer
-// 			*arg = new_str;
-// 			DBG_PRINTF(DEBUG_QUOTES, "After removing quotes: '%s'\n", *arg);
-// 		}
-// 	}
-// }
+	if (!vars->quote_depth)
+		return (ft_strdup(original_input));
+	addon_input = quote_prompt(vars->quote_ctx[vars->quote_depth - 1].type);
+	if (!addon_input)
+		return (NULL);
+	merged_input = append_input(original_input, addon_input);
+	free(addon_input);
+	if (!merged_input)
+		return (NULL);
+	if (!validate_quotes(merged_input, vars))
+	{
+		char *temp = merged_input;
+		merged_input = fix_open_quotes(temp, vars);
+		free(temp);
+	}
+	return (merged_input);
+}

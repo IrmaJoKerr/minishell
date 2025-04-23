@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:22:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 08:47:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,26 @@ int	make_nodeframe(t_node *node, t_tokentype type, char *token)
 }
 
 /*
+Applies quote type to all characters in the first argument of a node.
+Sets each character's quote type in the arg_quote_type array.
+*/
+void	set_quote_type(t_node *node, int quote_type)
+{
+    int	len;
+    int	i;
+
+    if (!node->arg_quote_type || !node->args || !node->args[0])
+        return ;
+    len = ft_strlen(node->args[0]);
+    i = 0;
+    while (i < len)
+    {
+        node->arg_quote_type[0][i] = quote_type;
+        i++;
+    }
+}
+
+/*
 Initializes a token node with the given type and content
 Sets up character-level quote tracking when appropriate
 */
@@ -58,16 +78,7 @@ t_node *initnode(t_tokentype type, char *token)
 		free(node);
 		return (NULL);
 	}
-	if (node->arg_quote_type && node->args && node->args[0] &&
-		(type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE))
-	{
-		int len = ft_strlen(node->args[0]);
-		int i = 0;
-		while (i < len)
-		{
-			node->arg_quote_type[0][i] = quote_type;
-			i++;
-		}
-	}
+	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
+        set_quote_type(node, quote_type);
 	return (node);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 10:33:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 08:41:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,6 +174,20 @@ void	trim_history(int excess_lines)
 	if (copy_file(HISTORY_FILE_TMP, HISTORY_FILE))
 		unlink(HISTORY_FILE_TMP);
 }
+/*
+Ensures a directory exists, creating it if needed.
+Returns 1 on success, 0 if directory creation failed.
+*/
+int	chk_and_make_folder(const char *path)
+{
+    struct stat	st = {0};
+    
+    if (stat(path, &st) == -1)
+    {
+        return (mkdir(path, 0755) == 0);
+    }
+    return (1);
+}
 
 /*
 Saves readline history entries to history file.
@@ -193,35 +207,62 @@ Example: When shell exits with 1500 history entries and HISTORY_FILE_MAX=1000
 - Writes newest 1000 entries to history file
 - Logs success with number of entries saved
 */
+// void	save_history(void)
+// {
+// 	int			fd;
+// 	HIST_ENTRY	**hist_list;
+// 	int			history_count;
+// 	int			excess_lines;
+// 	int			start_idx;
+//     struct stat	st = {0};
+	
+//     if (stat("temp", &st) == -1)
+// 	{
+//         mkdir("temp", 0755);
+//     }
+// 	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+// 	if (fd == -1)
+// 		return ;
+// 	hist_list = history_list();
+// 	if (!hist_list)
+// 	{
+// 		close(fd);
+// 		return ;
+// 	}
+// 	history_count = history_length;
+// 	excess_lines = history_count - HISTORY_FILE_MAX;
+// 	start_idx = 0;
+// 	if (excess_lines > 0)
+// 		start_idx = excess_lines;
+// 	save_history_entries(fd, hist_list, start_idx, history_count);
+// 	close(fd);
+// }
 void	save_history(void)
 {
-	int			fd;
-	HIST_ENTRY	**hist_list;
-	int			history_count;
-	int			excess_lines;
-	int			start_idx;
-    struct stat	st = {0};
-	
-    if (stat("temp", &st) == -1)
-	{
-        mkdir("temp", 0755);
+    int			fd;
+    HIST_ENTRY	**hist_list;
+    int			history_count;
+    int			excess_lines;
+    int			start_idx;
+    
+    if (!chk_and_make_folder("temp"))
+        return ;
+    fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1)
+        return ;
+    hist_list = history_list();
+    if (!hist_list)
+    {
+        close(fd);
+        return ;
     }
-	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd == -1)
-		return ;
-	hist_list = history_list();
-	if (!hist_list)
-	{
-		close(fd);
-		return ;
-	}
-	history_count = history_length;
-	excess_lines = history_count - HISTORY_FILE_MAX;
-	start_idx = 0;
-	if (excess_lines > 0)
-		start_idx = excess_lines;
-	save_history_entries(fd, hist_list, start_idx, history_count);
-	close(fd);
+    history_count = history_length;
+    excess_lines = history_count - HISTORY_FILE_MAX;
+    start_idx = 0;
+    if (excess_lines > 0)
+        start_idx = excess_lines;
+    save_history_entries(fd, hist_list, start_idx, history_count);
+    close(fd);
 }
 
 /*
