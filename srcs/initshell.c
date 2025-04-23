@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 10:09:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:01:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ void init_vars(t_vars *vars)
 	vars->prev_type = TYPE_NULL;
 	vars->pos = 0;
 	vars->start = 0;
-	vars->heredoc_content_ready = 0;
+	vars->hd_text_ready = 0;
 }
 
 // /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 23:39:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:01:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,40 +231,35 @@ void	strip_outer_quotes(char **delimiter, t_vars *vars)
 /*
 Triggers interactive heredoc gathering for single-line commands.
 - Opens TMP_BUF (O_TRUNC).
-- Calls gather_interactive_heredoc.
+- Calls get_interactive_hd.
 - Closes TMP_BUF.
-- Sets heredoc_content_ready flag.
+- Sets hd_text_ready flag.
 Returns:
 - 1 on success.
 - 0 on failure.
 */
-int	trigger_interactive_heredoc_gathering(t_vars *vars)
+int	interactive_hd_mode(t_vars *vars)
 {
     int	write_fd;
 
-    DBG_PRINTF(DEBUG_HEREDOC, "Triggering interactive heredoc gathering.\n");
     if (!vars || !vars->pipes || !vars->pipes->heredoc_delim)
 	{
-        DBG_PRINTF(DEBUG_HEREDOC, "trigger_interactive_heredoc_gathering: Invalid state.\n");
         return (0);
     }
     write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (write_fd == -1)
 	{
-        perror("bleshell: trigger_interactive_heredoc_gathering: open(TMP_BUF)");
         vars->error_code = ERR_DEFAULT;
         return (0);
     }
-    if (gather_interactive_heredoc(write_fd, vars) == -1)
+    if (get_interactive_hd(write_fd, vars) == -1)
 	{
         close(write_fd);
         unlink(TMP_BUF);
-        // gather_interactive_heredoc -> write_to_heredoc sets error_code
         return (0);
     }
     close(write_fd);
-    vars->heredoc_content_ready = 1;
-    DBG_PRINTF(DEBUG_HEREDOC, "Interactive heredoc gathering complete. TMP_BUF ready.\n");
+    vars->hd_text_ready = 1;
     return (1);
 }
 
@@ -317,12 +312,12 @@ Returns:
 - 0 on success (delimiter found or EOF reached after warning).
 - -1 on failure (write error or malloc error).
 */
-int	gather_interactive_heredoc(int write_fd, t_vars *vars)
+int	get_interactive_hd(int write_fd, t_vars *vars)
 {
     char	*line;
     int		status;
 
-    DBG_PRINTF(DEBUG_HEREDOC, "Entering gather_interactive_heredoc(). Delim='%s'\n",
+    DBG_PRINTF(DEBUG_HEREDOC, "Entering get_interactive_hd(). Delim='%s'\n",
                vars->pipes->heredoc_delim);
     status = 0;
     while (1)
@@ -347,7 +342,7 @@ int	gather_interactive_heredoc(int write_fd, t_vars *vars)
         free(line);
         line = NULL;
     }
-    DBG_PRINTF(DEBUG_HEREDOC, "Exiting gather_interactive_heredoc() with status %d.\n", status);
+    DBG_PRINTF(DEBUG_HEREDOC, "Exiting get_interactive_hd() with status %d.\n", status);
     return (status);
 }
 
@@ -595,9 +590,9 @@ int	process_heredoc(t_node *node, t_vars *vars)
         close(vars->pipes->heredoc_fd);
         vars->pipes->heredoc_fd = -1;
     }
-    if (!vars->heredoc_content_ready)
+    if (!vars->hd_text_ready)
 	{
-        DBG_PRINTF(DEBUG_HEREDOC, "process_heredoc() called but heredoc_content_ready is not set!\n");
+        DBG_PRINTF(DEBUG_HEREDOC, "process_heredoc() called but hd_text_ready is not set!\n");
         vars->error_code = ERR_DEFAULT;
         return (0);
     }

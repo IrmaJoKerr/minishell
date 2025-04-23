@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 13:51:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:31:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ Handles command execution status and updates error code.
 - For signals, adds 128 to the signal number (POSIX standard).
 Returns:
 - The final error code stored in vars->error_code.
-Works with exec_child_cmd() and execute_pipes().
+Works with exec_external_cmd() and execute_pipes().
 */
 int	handle_cmd_status(int status, t_vars *vars)
 {
@@ -45,7 +45,8 @@ Handles redirection setup for input files.
 - Redirects stdin to read from the file.
 - Properly handles and reports errors.
 Returns:
-1 on success, 0 on failure.
+- 1 on success.
+- 0 on failure.
 Works with setup_redirection().
 */
 int	setup_in_redir(t_node *node, t_vars *vars)
@@ -115,6 +116,30 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 }
 
 /*
+Sets up heredoc redirection handling.
+- Checks if heredoc content is ready.
+- Initiates interactive mode if end delimiter not found.
+- Handles the actual heredoc setup via handle_heredoc().
+Returns:
+- 1 on success
+- 0 on failure
+Works with redir_mode_setup().
+*/
+int	setup_heredoc_redir(t_node *node, t_vars *vars)
+{
+	int	result;
+	
+	result = 1;
+    if (!vars->hd_text_ready)
+    {
+        if (!interactive_hd_mode(vars))
+            return (0);
+    }
+	result = handle_heredoc(node, vars);
+    return (result);
+}
+
+/*
 Terminates all active child processes in a pipeline.
 - Safely iterates through the PID array.
 - Sends SIGTERM to each valid child process.
@@ -151,8 +176,8 @@ Works with setup_redirection().
 int	redir_mode_setup(t_node *node, t_vars *vars)
 {
     int	result;
-
-    result = 0;
+    
+	result = 0;
     if (node->type == TYPE_IN_REDIRECT)
         result = setup_in_redir(node, vars);
     else if (node->type == TYPE_OUT_REDIRECT)
@@ -166,22 +191,35 @@ int	redir_mode_setup(t_node *node, t_vars *vars)
         result = setup_out_redir(node, vars);
     }
     else if (node->type == TYPE_HEREDOC)
-    {
-        if (!vars->heredoc_content_ready)
-        {
-            DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Heredoc content not ready, triggering gathering.\n");
-            if (!trigger_interactive_heredoc_gathering(vars))
-            {
-                DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Interactive heredoc gathering failed.\n");
-                return (0);
-            }
-        }
-        DBG_PRINTF(DEBUG_HEREDOC, "redir_mode_setup: Content ready, calling handle_heredoc().\n");
-        result = handle_heredoc(node, vars);
-    }
+        result = setup_heredoc_redir(node, vars);
     if (!result)
-        vars->error_code = 1; // Use a more specific error? ERR_DEFAULT?
+        vars->error_code = ERR_DEFAULT;
     return (result);
+}
+
+/*
+Validates redirection target and processes quotes.
+- Checks if redirection target exists
+- Removes quotes from target if needed
+- Reports syntax error if target is missing
+Returns:
+- 1 if target is valid
+- 0 if target is invalid (with error_code set)
+*/
+int	proc_redir_target(t_node *node, t_vars *vars)
+{
+    if (node->right && node->right->args && node->right->args[0])
+    {
+        if (node->type != TYPE_HEREDOC)
+            strip_outer_quotes(&node->right->args[0], vars);
+        return (1);
+    }
+    else if (node->type != TYPE_HEREDOC)
+    {
+        tok_syntax_error_msg("newline", vars);
+        return (0);
+    }
+    return (1);
 }
 
 /*
@@ -203,25 +241,19 @@ int setup_redirection(t_node *node, t_vars *vars)
     cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
     if (!cmd_node)
     {
-        // Maybe set a specific error?
         vars->error_code = ERR_DEFAULT;
         return (0);
     }
     vars->pipes->cmd_redir = cmd_node;
     if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
         vars->pipes->last_in_redir = node;
-    else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
+    else if (node->type == TYPE_OUT_REDIRECT
+		|| node->type == TYPE_APPEND_REDIRECT)
+	{
         vars->pipes->last_out_redir = node;
-    if (node->right && node->right->args && node->right->args[0])
-    {
-        if (node->type != TYPE_HEREDOC)
-        	strip_outer_quotes(&node->right->args[0], vars);
-    }
-    else if (node->type != TYPE_HEREDOC)
-    {
-        tok_syntax_error_msg("newline", vars);
+	}
+    if (!proc_redir_target(node, vars))
         return (0);
-    }
     result = redir_mode_setup(node, vars);
     return (result);
 }

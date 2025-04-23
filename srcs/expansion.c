@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 14:06:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 16:40:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,35 +24,71 @@ Example: After a command exits with status 1:
 $? -> "1"
 $0 -> "bleshell"
 */
-char *handle_special_var(const char *var_name, t_vars *vars)
+char	*handle_special_var(const char *var_name, t_vars *vars)
 {
-	fprintf(stderr, "DEBUG: Entering handle_special_var()\n");
-	// If var_name or vars is NULL, return empty string (not NULL)
-	if (!var_name || !vars)
+	if ((!var_name || !vars) || (var_name[0] == '\0'))
 		return (ft_strdup(""));
-	// Special case for error code ($?)
 	if (ft_strcmp(var_name, "?") == 0)
 	{
-		fprintf(stderr, "DEBUG: handle_special_var().Handling special var $? = %d\n", vars->error_code);
 		return (ft_itoa(vars->error_code));
 	}
-	// Special case for shell name ($0)
 	if (ft_strcmp(var_name, "0") == 0)
 	{
-		fprintf(stderr, "DEBUG: handle_special_var().Handling special var $0 = bleshell\n");
 		return (ft_strdup("bleshell"));
 	}
-	// Empty variable name case
-	if (var_name[0] == '\0')
-		return (ft_strdup(""));
 	return (NULL);
 }
 
+/*
+Gets the value of a variable by checking special variables first,
+then environment.
+- Tries special variables like $? and $0 first
+- Falls back to environment variables if not special
+- Returns empty string for undefined variables
+Returns:
+- Newly allocated string containing variable value.
+- Empty string for undefined or invalid variables.
+Example:
+get_var_value("HOME", vars) -> "/Users/bleow"
+get_var_value("?", vars) -> "0" (assuming last command succeeded)
+*/
+char	*get_var_value(const char *var_name, t_vars *vars)
+{
+    char	*result;
+	
+	result = handle_special_var(var_name, vars);
+    if (!result)
+    {
+        result = get_env_val(var_name, vars->env);
+        if (!result)
+            result = ft_strdup("");
+    }
+    return (result);
+}
 
 /*
-Central variable expansion engine that handles all expansion cases
+Handles empty variable names in expansion.
+- For non-NULL but empty var_name: Returns "$"
+- For NULL var_name: Returns NULL
 Returns:
-- Newly allocated string with expansion result
+- Newly allocated string with "$" when var_name exists but is empty.
+- NULL when var_name is NULL.
+Example:
+empty_var("") -> "$"
+empty_var(NULL) -> NULL
+*/
+char	*empty_var(char *var_name)
+{
+    if (var_name)
+        return (ft_strdup("$"));
+    else
+        return (NULL);
+}
+
+/*
+Master control function for variable expansion.Handles all expansion cases.
+Returns:
+- Newly allocated string with expansion result.
 */
 char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
 {
@@ -64,52 +100,20 @@ char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
 	result = NULL;
 	free_var_name = 0;
     if (!var_name && input && pos)
-	{
+    {
         (*pos)++;
         if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
-		{
-            fprintf(stderr, "DEBUG: expand_variable: Lone $ detected\n");
-            result = ft_strdup("$");
-            return (result);
-        }
-        if (input[*pos] == '?')
-		{
-            (*pos)++;
-            result = ft_itoa(vars->error_code);
-            fprintf(stderr, "DEBUG: expand_variable: $? expanded to '%s'\n", result);
-            return (result);
-        }
-        local_var_name = get_var_name(input, pos);
-        var_name = local_var_name;
-        free_var_name = 1;
+			return (ft_strdup("$"));
+		local_var_name = get_var_name(input, pos);
+		var_name = local_var_name;
+		free_var_name = 1;
     }
     if (!var_name || !*var_name)
-	{
-        result = ft_strdup(var_name ? "$" : "");
-        fprintf(stderr, "DEBUG: expand_variable: Empty variable name\n");
-    }
-	else if (ft_strcmp(var_name, "?") == 0)
-	{
-        result = ft_itoa(vars->error_code);
-        fprintf(stderr, "DEBUG: expand_variable: $? expanded to '%s'\n", result);
-    }
-	else if (ft_strcmp(var_name, "0") == 0)
-	{
-        result = ft_strdup("bleshell");
-        fprintf(stderr, "DEBUG: expand_variable: $0 expanded to 'bleshell'\n");
-    }
-	else 
-	{
-        result = handle_special_var(var_name, vars);
-        if (!result)
-		{
-            result = get_env_val(var_name, vars->env);
-            if (!result)
-                result = ft_strdup("");
-            fprintf(stderr, "DEBUG: expand_variable: Expanded '%s' to '%s'\n", 
-                    var_name, result);
-        }
-    }
+        result = empty_var(var_name);
+    else
+        result = get_var_value(var_name, vars);
+    if (!result)
+        result = ft_strdup("");
     if (free_var_name && local_var_name)
         free(local_var_name);
     return (result);

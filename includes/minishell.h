@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 14:04:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:27:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,8 +230,7 @@ typedef struct s_vars
 	t_tokentype		prev_type;
 	int				pos;
 	int				start;
-	// int				heredoc_mode;   // Flag for heredoc mode. interactive or multiline
-	int				heredoc_content_ready; // Flag for heredoc content readiness
+	int				hd_text_ready;
 	int				shell_level;
 	struct termios	ori_term_settings;
 	int				ori_term_saved;
@@ -389,8 +388,10 @@ In execute.c
 int			handle_cmd_status(int status, t_vars *vars);
 int			setup_in_redir(t_node *node, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
+int			setup_heredoc_redir(t_node *node, t_vars *vars);
 void		end_pipe_processes(t_vars *vars);
 int			redir_mode_setup(t_node *node, t_vars *vars);
+int			proc_redir_target(t_node *node, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars);
 int			proc_redir_chain(t_node *start_node, t_node *cmd_node
 					,t_vars *vars);
@@ -405,6 +406,8 @@ Expansion handling.
 In expansion.c
 */
 char		*handle_special_var(const char *var_name, t_vars *vars);
+char		*get_var_value(const char *var_name, t_vars *vars);
+char		*empty_var(char *var_name);
 char		*expand_variable(char *input, int *pos, char *var_name, t_vars *vars);
 char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
@@ -421,9 +424,9 @@ char		*read_heredoc_str(char *line, int *pos);
 char		*hd_expander(char *line, t_vars *vars);
 // char		*expand_heredoc_line(char *line, t_vars *vars);
 void		strip_outer_quotes(char **delimiter, t_vars *vars);
-int			trigger_interactive_heredoc_gathering(t_vars *vars);
+int			interactive_hd_mode(t_vars *vars);
 int			write_to_heredoc(int fd, char *line, t_vars *vars);
-int			gather_interactive_heredoc(int write_fd, t_vars *vars);
+int			get_interactive_hd(int write_fd, t_vars *vars);
 int			store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);

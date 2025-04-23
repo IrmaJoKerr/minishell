@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 00:22:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:08:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,7 +495,6 @@ int validate_redirection_targets(t_vars *vars)
             fprintf(stderr, "DEBUG: In validate_redirection_targets().Found redirection of type %d at %p\n", 
                     (int)current->type, (void*)current);
             // Check if it's the last token or the next token is another operator
-            next = current->next;
             next = current->next;
         	if (!next) // End of input after redirection operator
         	{

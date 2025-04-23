@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 10:12:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:01:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -694,18 +694,18 @@ int process_multiline_input(char *input, t_vars *vars)
         // If delimiter was NOT found in the buffer, read interactively
         if (!delimiter_found_in_buffer)
         {
-            DBG_PRINTF(DEBUG_HEREDOC, "Delimiter not in buffer, calling gather_interactive_heredoc().\n");
-            if (gather_interactive_heredoc(write_fd, vars) == -1) {
+            DBG_PRINTF(DEBUG_HEREDOC, "Delimiter not in buffer, calling get_interactive_hd().\n");
+            if (get_interactive_hd(write_fd, vars) == -1) {
                 close(write_fd);
                 unlink(TMP_BUF);
-                // gather_interactive_heredoc -> write_to_heredoc sets error_code
+                // get_interactive_hd -> write_to_heredoc sets error_code
                 return (0);
             }
         }
 
         // Close the write fd, content is fully gathered
         close(write_fd);
-        vars->heredoc_content_ready = 1; // Mark content as ready in TMP_BUF
+        vars->hd_text_ready = 1; // Mark content as ready in TMP_BUF
         DBG_PRINTF(DEBUG_HEREDOC, "Heredoc content gathering complete. TMP_BUF ready.\n");
 
         // Execute the command from the first line
@@ -714,7 +714,7 @@ int process_multiline_input(char *input, t_vars *vars)
         process_command(input, vars); // Execute the command part
         *first_line_end = '\n'; // Restore (for safety, though likely not needed)
 
-        // heredoc_content_ready will be reset by reset_shell on the next input cycle
+        // hd_text_ready will be reset by reset_shell on the next input cycle
         DBG_PRINTF(DEBUG_HEREDOC, "process_multiline_input: HEREDOC path finished.\n");
     }
     else
