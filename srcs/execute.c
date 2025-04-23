@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:31:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 19:41:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -427,22 +427,24 @@ Example: For "ls -la"
 */
 int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 {
-	pid_t	pid;
-	int		status;
-	char	*cmd_path;
+    pid_t	pid;
+    int		status;
+    int		return_code;
+    char	*cmd_path;
 
-	cmd_path = get_cmd_path(node, envp, vars);
-	if (!cmd_path)
-		return (vars->error_code);
-	pid = fork();
-	if (pid < 0)
-	{
-		free(cmd_path);
-		return (vars->error_code = 1);
-	}
-	if (pid == 0)
-		exec_child(cmd_path, node->args, envp);
-	free(cmd_path);
-	waitpid(pid, &status, 0);
-	return (handle_cmd_status(status, vars));
+    cmd_path = get_cmd_path(node, envp, vars);
+    if (!cmd_path)
+        return (vars->error_code);
+    pid = fork();
+    if (pid < 0)
+    {
+        free(cmd_path);
+        return (vars->error_code = 1);
+    }
+    if (pid == 0)
+        exec_child(cmd_path, node->args, envp);
+    free(cmd_path);
+    waitpid(pid, &status, 0);
+    return_code = handle_cmd_status(status, vars);
+    return (return_code);
 }

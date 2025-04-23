@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:08:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 20:11:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,39 +16,20 @@
 Expands a variable and appends it to the result string
 Return :
  - Updated result string.
- - Original string unchanged if variable expansion fails
+ - Original string unchanged if variable expansion fails.
  - NULL on error.
 Works with expand_quoted_str().
 */
-// char	*expand_quoted_var(char *expanded, char *content, int *pos
-// 				,t_vars *vars)
-// {
-// 	char	*var_value;
-// 	char	*temp;
-	
-// 	var_value = handle_expansion(content, pos, vars);
-// 	if (!var_value)
-// 		return (expanded);
-// 	temp = ft_strjoin(expanded, var_value);
-// 	free(expanded);
-// 	free(var_value);
-// 	if (!temp)
-// 		return (NULL);
-// 	return (temp);
-// }
 char	*expand_quoted_var(char *expanded, char *content, int *pos
                 ,t_vars *vars)
 {
     char	*var_value;
     char	*temp;
     
-    // Replace handle_expansion() with direct call to expand_variable()
     var_value = expand_variable(content, pos, NULL, vars);
     if (!var_value)
-        return (expanded);  // Return original if expansion fails
-    // Join expanded value with existing string
+        return (expanded);
     temp = ft_strjoin(expanded, var_value);
-    // Clean up
     free(expanded);
     free(var_value);
     if (!temp)
@@ -64,9 +45,9 @@ Return:
  - NULL on error.
 Works with expand_quoted_str().
 */
-char *append_basic_strs(char *expanded, char *content, int *pos)
+char	*append_basic_strs(char *expanded, char *content, int *pos)
 {
-	int start;
+	int	start;
 
 	start = *pos;
 	while (content[*pos] && content[*pos] != '$')
@@ -90,7 +71,7 @@ Example: Input "$USER lives in $HOME"
  - Expands to "john lives in /home/john"
 Works with process_quote_char().
 */
-char *expand_quoted_str(char *content, t_vars *vars)
+char	*expand_quoted_str(char *content, t_vars *vars)
 {
 	char	*expanded;
 	int		pos;
@@ -182,8 +163,10 @@ char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 /*
 Process quoted content, including variable expansion in double quotes.
 Finds the appropriate command node for the content.
-Returns the command node (or NULL if not found/error).
 Modifies the content pointer if expansion is needed.
+Returns:
+- The command node.
+- NULL if not found/error.
 */
 t_node	*process_quoted_str(char **content_ptr, int quote_type, t_vars *vars)
 {
@@ -207,35 +190,11 @@ Returns:
  - 1 if successfully merged.
  - 0 otherwise.
 */
-// int	merge_quoted_token(char *input, char *content, t_vars *vars)
-// {
-//     char	*dummy_token;
-// 	int		join_success;
-    
-//     if (!vars->adj_state[0])
-//         return (0);
-//     dummy_token = ft_strdup("");
-//     if (!dummy_token)
-//         return (0);
-//     join_success = handle_tok_join(input, vars, content, dummy_token);
-//     if (!join_success)
-//         free(dummy_token);
-//     if (join_success)
-//     {
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     return (0);
-// }
 int	merge_quoted_token(char *input, char *content, t_vars *vars)
 {
     char	*dummy_token;
 	int		join_success;
     
-	DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Attempting with content='%s', left_adj=%d\n",
-		content, vars->adj_state[0]);
     if (!vars->adj_state[0])
         return (0);
     dummy_token = ft_strdup("");
@@ -244,12 +203,10 @@ int	merge_quoted_token(char *input, char *content, t_vars *vars)
     join_success = handle_tok_join(input, vars, content, dummy_token);
     if (!join_success)
     {
-        DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Join failed, freeing dummy_token\n");
         free(dummy_token);
     }
     else
     {
-        DBG_PRINTF(DEBUG_QUOTES, "merge_quoted_token: Join successful\n");
         if (vars->adj_state[1])
             process_right_adj(input, vars);
         process_adj(NULL, vars);
@@ -376,7 +333,7 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
             file_node->prev = redir_node;
             vars->current = file_node;
             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-            free(content); // Content was copied by initnode
+            free(content);
             return (1);
         }
         fprintf(stderr, "[ERROR] process_quote_char: Quoted string marked as redir target, but no preceding redirection found.\n");
@@ -385,18 +342,21 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         return (0); // Indicate error
     }
     cmd_node = process_quoted_str(&content, quote_type, vars);
-    if (!cmd_node && vars->adj_state[0] == 0) // If no command node AND no left adjacency
+    if (!cmd_node && vars->adj_state[0] == 0)
     {
         cmd_node = initnode(TYPE_CMD, content);
-        if (!cmd_node) {
+        if (!cmd_node)
+		{
             free(content);
-            process_adj(NULL, vars); // Reset adjacency state
-            return (0); // Malloc error
+            process_adj(NULL, vars);
+            return (0);
         }
-        if (build_token_linklist(vars, cmd_node)) {
+        if (build_token_linklist(vars, cmd_node))
+		{
              // If build_token_linklist freed the node (e.g., merged), content is already handled.
              // This path might need review depending on build_token_linklist behavior.
-        } else {
+        } else
+		{
              // Node was linked, content is now owned by the node.
         }
         free(content); // Content is now owned/copied by the node or was freed by merge
@@ -405,48 +365,48 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         process_adj(NULL, vars);
         return (1);
     }
-    else if (!cmd_node) // No command node, but maybe left adjacency?
+    else if (!cmd_node)
     {
-        // Try merging first
         if (!merge_quoted_token(input, content, vars))
         {
-             // Merge failed, treat as error or create new token?
-             // For now, assume error if no command and merge fails.
              fprintf(stderr, "[ERROR] process_quote_char: Failed to merge quoted token and no command node found.\n");
              free(content);
              process_adj(NULL, vars);
-             return (0); // Indicate error
+             return (0);
         }
-         // Merge succeeded, content is handled by merge_quoted_token
-         // free(content); // Content freed by merge_quoted_token or handle_tok_join
-         return (1);
+        return (1);
     }
-    // We have a command node, try merging or appending
     if (!merge_quoted_token(input, content, vars))
     {
-        // Merge failed, append as argument
-        append_arg(cmd_node, content, quote_type); // append_arg should handle copying/ownership
-        free(content); // Free original content after appending
+        append_arg(cmd_node, content, quote_type);
+        free(content);
         if (vars->adj_state[1])
             process_right_adj(input, vars);
-        process_adj(NULL, vars); // Reset adjacency state
+        process_adj(NULL, vars);
     }
-     // If merge succeeded, content is handled by merge_quoted_token
-     // free(content); // Content freed by merge_quoted_token or handle_tok_join
     return (1);
 }
 
+/*
+Finds the most relevant redirection node in the token list.
+Checks in the following order of priority:
+ - Current node if it's a redirection
+ - Recent previous nodes (up to 3 back)
+ - Last redirection in the entire token list
+Returns:
+ - Pointer to the located redirection node
+ - NULL if no redirection node exists
+Works with process_quote_char() for redirection target handling.
+*/
 t_node	*find_last_redir(t_vars *vars)
 {
     t_node	*current;
+	t_node	*last_redir;
     int		i;
 
+	last_redir = NULL;
     if (vars->current && is_redirection(vars->current->type))
-	{
-        fprintf(stderr, "DEBUG: find_last_redir: Current node is redirection, type=%d\n", 
-                (int)vars->current->type);
-        return vars->current;
-    }
+        return (vars->current);
     current = vars->current;
     i = 0;
     while (current && current->prev && i < 3)
@@ -454,63 +414,101 @@ t_node	*find_last_redir(t_vars *vars)
         current = current->prev;
         i++;
         if (is_redirection(current->type))
-		{
-            fprintf(stderr, "DEBUG: find_last_redir: Found redirection at %d steps back, type=%d\n", 
-                    i, (int)current->type);
             return (current);
-        }
     }
     current = vars->head;
-    t_node *last_redir = NULL;
     while (current)
 	{
-        if (is_redirection(current->type)) {
+        if (is_redirection(current->type))
             last_redir = current;
-        }
         current = current->next;
     }
-    if (last_redir)
-	{
-        fprintf(stderr, "DEBUG: find_last_redir: Found last redirection in scan, type=%d\n", 
-                (int)last_redir->type);
-    }
-	else
-	{
-        fprintf(stderr, "DEBUG: find_last_redir: No redirection found\n");
-    }
-    return last_redir;
+    return (last_redir);
 }
 
-int validate_redirection_targets(t_vars *vars)
+/*
+Validates that a single redirection token has a valid target.
+- Checks that the redirection has a next token
+- Ensures the next token isn't another operator
+- Reports appropriate syntax errors
+Returns:
+- 1 if the redirection has a valid target
+- 0 otherwise (with error message shown)
+*/
+int	validate_single_redir(t_node *redir_node, t_vars *vars)
 {
-    t_node *current = vars->head;
     t_node *next;
     
-	current = vars->head;
-    fprintf(stderr, "DEBUG: In validate_redirection_targets().Validating redirection targets\n");
+    next = redir_node->next;
+    if (!next)
+    {
+        tok_syntax_error_msg("newline", vars);
+        return (0);
+    }
+    else if (is_redirection(next->type) || next->type == TYPE_PIPE)
+    {
+        if (next->args[0])
+            tok_syntax_error_msg(next->args[0], vars);
+        else
+            tok_syntax_error_msg("operator", vars);
+        return (0);
+    }
+    return (1);
+}
+
+/*
+Validates that all redirection operators in the token list have valid targets.
+- Ensures no redirection is at the end of input
+- Ensures no redirection is followed by another operator
+- Reports appropriate syntax errors
+Returns:
+- 1 if all redirections have valid targets
+- 0 otherwise (with error_code set)
+*/
+int	validate_redir_targets(t_vars *vars)
+{
+    t_node	*current;
+    
+    current = vars->head;
     while (current)
     {
         if (is_redirection(current->type))
         {
-            fprintf(stderr, "DEBUG: In validate_redirection_targets().Found redirection of type %d at %p\n", 
-                    (int)current->type, (void*)current);
-            // Check if it's the last token or the next token is another operator
-            next = current->next;
-        	if (!next) // End of input after redirection operator
-        	{
-            	fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - missing target (newline)\n");
-            	tok_syntax_error_msg("newline", vars);
-            	return (0);
-        	}
-        	else if (is_redirection(next->type) || next->type == TYPE_PIPE) // Operator follows redirection operator
-        	{
-            	fprintf(stderr, "DEBUG: In validate_redirection_targets().Redirection syntax error - operator follows operator\n");
-            	// Use the operator's string representation if available, otherwise a generic "operator"
-            	tok_syntax_error_msg(next->args[0] ? next->args[0] : "operator", vars);
-            	return (0);
-        	}
+            if (!validate_single_redir(current, vars))
+                return (0);
         }
         current = current->next;
     }
     return (1);
 }
+
+
+// int validate_redir_targets(t_vars *vars)
+// {
+//     t_node		*current;
+//     t_node		*next;
+    
+// 	current = vars->head;
+//     while (current)
+//     {
+//         if (is_redirection(current->type))
+//         {
+//             next = current->next;
+//         	if (!next)
+//         	{
+//             	tok_syntax_error_msg("newline", vars);
+//             	return (0);
+//         	}
+//         	else if (is_redirection(next->type) || next->type == TYPE_PIPE)
+//         	{
+// 				if (next->args[0])
+// 					tok_syntax_error_msg(next->args[0], vars);
+// 				else
+//             		tok_syntax_error_msg("operator", vars);
+//             	return (0);
+//         	}
+//         }
+//         current = current->next;
+//     }
+//     return (1);
+// }

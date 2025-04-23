@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 01:04:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 20:37:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ int is_operator_token(t_tokentype type)
 		return (1);
 	if (type == TYPE_HEREDOC)
 		return (1);
-	
 	return (0);
 }
 
@@ -51,11 +50,9 @@ void handle_string(char *input, t_vars *vars)
 		token = ft_substr(input, vars->start, vars->pos - vars->start);
 		if (!token)
 			return ;
-		// Determine token type based on the input
 		token_type = get_token_at(token, 0, &moves);
 		if (token_type == 0)
 		{
-			// Pass the token content to help determine type
 			set_token_type(vars, token);
 		}
 		else

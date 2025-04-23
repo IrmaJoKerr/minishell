@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:37:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 19:39:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ void	shell_error(char *element, int error_code, t_vars *vars)
 		ft_putstr_fd(element, 2);
 		ft_putendl_fd(": No such file or directory", 2);
 	}
-	else if (error_code == ERR_ISDIRECTORY && ft_strncmp(element, "syntax error", 12) != 0)
+	else if (error_code == ERR_ISDIRECTORY
+		&& ft_strncmp(element, "syntax error", 12) != 0)
 	{
 		ft_putstr_fd(element, 2);
 		ft_putendl_fd(": Is a directory", 2);
@@ -110,4 +111,18 @@ void	crit_error(t_vars *vars)
 	if (vars->pipes)
 		cleanup_pipes(vars->pipes);
 	exit(1);
+}
+
+/*
+Handles file error cleanup.
+- Closes the file descriptor
+- Sets the error code
+- Logs error information if provided
+*/
+void	handle_fd_error(int fd, t_vars *vars, const char *error_msg)
+{
+    if (error_msg)
+        perror(error_msg);
+    close(fd);
+    vars->error_code = ERR_DEFAULT;
 }

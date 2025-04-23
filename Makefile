@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/23 13:40:34 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/23 21:38:20 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,6 +37,7 @@ MINISHELL_SRCS = \
 			srcs/errormsg.c \
 			srcs/execute.c \
 			srcs/expansion.c \
+			srcs/heredoc_multiline.c \
 			srcs/heredoc.c \
 			srcs/history_load.c \
 			srcs/history_save.c \
@@ -64,6 +65,7 @@ MINISHELL_SRCS = \
 			srcs/redirect.c \
 			srcs/shell_level.c \
 			srcs/signals.c \
+			srcs/tmp_buf_reader.c \
 			srcs/tokenize.c \
 			srcs/typeconvert.c \
 			 

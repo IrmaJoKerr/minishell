@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 11:29:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 19:48:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ Example: For "echo hello | grep h"
 void	build_and_execute(t_vars *vars)
 {
 	fprintf(stderr, "[build_and_execute:%d] Building AST from token list\n", __LINE__);
-	if (!validate_redirection_targets(vars))
+	if (!validate_redir_targets(vars))
 	{
 		fprintf(stderr, "[build_and_execute:%d] Redirection validation failed, skipping execution\n", __LINE__);
 		return ;

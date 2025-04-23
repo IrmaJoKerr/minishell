@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:27:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 21:47:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,14 +132,6 @@ typedef enum e_tokentype
 	TYPE_EXIT_STATUS = 12,
 }	t_tokentype;
 
-typedef enum e_inmode
-{
-    INPUT_NORMAL,
-    INPUT_QUOTE_COMPLETION,
-    INPUT_PIPE_COMPLETION,
-    INPUT_HEREDOC_MODE
-} t_inmode;
-
 /*
 This structure is used to store the context of quotes.
 Example: "'Hello 'world'!'" has 2 quotes, one single and one double.
@@ -167,6 +159,20 @@ typedef struct s_node
 	struct s_node	*right;
 	struct s_node	*redir;
 }	t_node;
+
+/*
+Structure for managing read buffer processing.
+Handles the variables needed for reading and processing.
+content from a temporary file.
+*/
+typedef struct s_read_buf
+{
+    char	*file_content;  // Content read from file
+    char	*buffer;        // Processing buffer
+    int		pos;          // Current position in buffer
+    int		in_quotes;       // Flag for quote state
+    char	quote_type;     // Type of quote (single/double)
+}   t_read_buf;
 
 /*
 Structure for storing pipeline information.
@@ -380,6 +386,7 @@ void		shell_error(char *element, int error_code, t_vars *vars);
 void		tok_syntax_error_msg(char *token_str, t_vars *vars);
 void		not_found_error(char *filename, t_vars *vars);
 void		crit_error(t_vars *vars);
+void		handle_fd_error(int fd, t_vars *vars, const char *error_msg);
 
 /*
 Execution functions.
@@ -414,20 +421,28 @@ char		*get_var_name(char *input, int *pos);
 void 		debug_cmd_args(t_node *node); //DEBUG FUNCTION
 
 /*
+Process and store multiline heredoc content.
+In heredoc_multiline.c
+*/
+int			open_hd_file(char *content, t_vars *vars, char **curr_pos);
+char		*get_hd_line(char **curr_pos, int fd, t_vars *vars);
+int			is_hd_delim(char *line, char *delim, int *has_delim);
+int			process_and_write_line(int fd, char *line, t_vars *vars);
+int			store_multiline_hd(char *input_after_first_line, t_vars *vars);
+
+/*
 Heredoc main handling.
 In heredoc.c
 */
 char		*merge_and_free(char *str, char *chunk);
-char		*expand_heredoc_var(char *line, int *pos, t_vars *vars);
-char		*read_heredoc_str(char *line, int *pos);
-// char		*expand_one_line(char *line, int *pos, t_vars *vars, char *result);
+char		*expand_hd_var(char *line, int *pos, t_vars *vars);
+char		*read_hd_str(char *line, int *pos);
 char		*hd_expander(char *line, t_vars *vars);
-// char		*expand_heredoc_line(char *line, t_vars *vars);
 void		strip_outer_quotes(char **delimiter, t_vars *vars);
 int			interactive_hd_mode(t_vars *vars);
-int			write_to_heredoc(int fd, char *line, t_vars *vars);
+char		*prepare_hd_line(char *line, t_vars *vars);
+int			write_to_hd(int fd, char *line, t_vars *vars);
 int			get_interactive_hd(int write_fd, t_vars *vars);
-int			store_multiline_heredoc_content(char *input_after_first_line, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
 int			read_tmp_buf(t_vars *vars);
@@ -437,7 +452,6 @@ int			chk_normal_delim(char *orig_delim, size_t len
 				,char **clean_delim_ptr, int *quoted_ptr);
 void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
 int			is_valid_delim(char *orig_delim, t_vars *vars);
-
 
 /*
 History loading functions.
@@ -492,51 +506,29 @@ void		setup_terminal_mode(t_vars *vars);
 Input completion functions.
 In input_completion.c
 */
-// int			is_input_complete(t_vars *vars);
 char		*append_input(char *original, char *additional);
 
 /*
 Input processing functions.
 In input_handlers.c
 */
-// void		proc_heredoc_input(char **cmdarr, int line_count, t_vars *vars);
-// void		proc_multiline_input(char **cmdarr, int line_count, t_vars *vars);
-// char		*complete_input(char *input, t_inmode mode, t_vars *vars);
-// void		clear_partial_input(t_vars *vars);
-// int         has_heredoc_operator(char *input);
-// char        *process_heredoc_line(char *line, t_vars *vars);
-// void 		process_single_command(char *input, t_vars *vars);
-// void		process_command_with_heredoc(char *cmd_line, t_vars *vars);
+char		*allocate_and_read(int fd, size_t size);
 char 		*read_entire_file(const char *filename);
-void		read_and_process_from_tmp_buf(t_vars *vars);
 int			process_multiline_input(char *input, t_vars *vars);
 void		handle_input(char *input, t_vars *vars);
-// t_inmode	check_input_state(char *input, t_vars *vars);
 void		term_heredoc(t_vars *vars);
-// void		process_heredoc_continuation(char *input, t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
-// void		setup_heredoc_mode(char *input, t_vars *vars);
-// void		write_heredoc_line(int fd, char *line, t_vars *vars);
-// int			is_quoted_delimiter(t_node *node, t_vars *vars);
-// char		*extract_heredoc_delimiter(char *input);
 int 		check_trailing_chars(const char *line, int start_pos);
-// int			has_unprocessed_heredoc(char *input);
-// void		process_stored_heredoc_lines(t_vars *vars);
-// void		setup_interactive_heredoc(t_vars *vars, int expand_vars);
-void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
-// int 		is_valid_delim(char *raw_delimiter, t_vars *vars);
 
 /*
 Input verification functions.
 In input_verify.c
 */
-// char 		*expand_value(char *var_name, t_vars *vars);
 
 /*
 Lexer functions.
 In lexer.c
 */
-// void		skip_whitespace(char *str, t_vars *vars);
 
 /*
 Make_exp_token utility functions.
@@ -628,7 +620,8 @@ In paths.c
 */
 char		**get_path_env(char **envp);
 char		*try_path(char *path, char *cmd);
-char		*search_in_env(char *cmd, char **envp);
+char		*search_in_env(char *cmd, char **envp, t_vars *vars);
+char		*handle_direct_path(char *cmd, t_vars *vars);
 char		*get_cmd_path(t_node *node, char **envp, t_vars *vars);
 char		**dup_env(char **envp);
 
@@ -670,8 +663,9 @@ t_node		*process_quoted_str(char **content_ptr, int quote_type
 				,t_vars *vars);
 int			merge_quoted_token(char *input, char *content, t_vars *vars);
 int 		process_quote_char(char *input, t_vars *vars, int is_redir_target);
-int			validate_redirection_targets(t_vars *vars);
 t_node		*find_last_redir(t_vars *vars);
+int			validate_single_redir(t_node *redir_node, t_vars *vars);
+int			validate_redir_targets(t_vars *vars);
 
 /*
 Process redirection nodes functions.
@@ -734,6 +728,16 @@ In signals.c
 void		load_signals(void);
 void		sigint_handler(int sig);
 void		sigquit_handler(int sig);
+
+/*
+Temporary buffer reader and processing.
+In tmp_buf_reader.c
+*/
+int			init_read_buf(t_read_buf *rb);
+void		cleanup_rd_buf(t_read_buf *rb, int remove_tmp);
+void		update_quote_state(char c, t_read_buf *rb);
+void		process_buffer_command(t_read_buf *rb, t_vars *vars);
+void		tmp_buf_reader(t_vars *vars);
 
 /*
 Tokenizing functions.

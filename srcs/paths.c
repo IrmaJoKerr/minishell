@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/19 00:14:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:56:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ Example: For command "grep" with PATH=/usr/bin:/bin
 - Returns "/usr/bin/grep" if found there
 - Returns NULL if not found in any directory
 */
-char	*search_in_env(char *cmd, char **envp)
+char	*search_in_env(char *cmd, char **envp, t_vars *vars)
 {
 	char	**paths;
 	char	*path;
@@ -106,8 +106,7 @@ char	*search_in_env(char *cmd, char **envp)
 		}
 		i++;
 	}
-	ft_putstr_fd("Command not found in any PATH directory: ", 2);
-	ft_putendl_fd(cmd, 2);
+	shell_error(cmd, ERR_CMD_NOT_FOUND, vars);
 	ft_free_2d(paths, ft_arrlen(paths));
 	return (NULL);
 }
@@ -122,9 +121,9 @@ Returns:
 - NULL if path is invalid, a directory, or lacks permissions.
 Works with get_cmd_path() for direct path handling.
 */
-static char	*handle_direct_path(char *cmd, t_vars *vars)
+char	*handle_direct_path(char *cmd, t_vars *vars)
 {
-    struct stat	statbuf;
+	struct stat	statbuf;
     
     if (stat(cmd, &statbuf) == 0)
     {
@@ -144,60 +143,6 @@ static char	*handle_direct_path(char *cmd, t_vars *vars)
 }
 
 /*
-Resolves command path for execution.
-- Handles absolute and relative paths directly.
-- Searches PATH environment for other commands.
-- Verifies executable permissions.
-Returns:
-Full path to executable or NULL if not found/accessible.
-Works with execute_cmd() during command execution.
-
-Example: For "ls" command
-- Checks if it's a direct path (starts with / or ./)
-- If not, searches in PATH environment directories
-- Returns "/bin/ls" (or similar) if found
-- Returns NULL with error message if not found
-*/
-// char	*get_cmd_path(char *cmd, char **envp)
-// {
-// 	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-// 				|| (cmd[1] == '.' && cmd[2] == '/'))))
-// 	{
-// 		if (access(cmd, X_OK) == 0)
-// 			return (ft_strdup(cmd));
-// 		ft_putstr_fd("Direct path access denied: ", 2);
-// 		ft_putendl_fd(cmd, 2);
-// 		return (NULL);
-// 	}
-// 	return (search_in_env(cmd, envp));
-// }
-// char	*get_cmd_path(char *cmd, char **envp)
-// {
-//     struct stat statbuf;
-    
-//     if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-//                 || (cmd[1] == '.' && cmd[2] == '/'))))
-//     {
-//         if (stat(cmd, &statbuf) == 0)
-//         {
-//             if (S_ISDIR(statbuf.st_mode))
-//             {
-//                 shell_error(cmd, ERR_ISDIRECTORY, NULL);
-//                 return (NULL);
-//             }
-//             if (access(cmd, X_OK) == 0)
-//                 return (ft_strdup(cmd));
-//             shell_error(cmd, ERR_PERMISSIONS, NULL);
-//         }
-//         else
-//         {
-//             shell_error(cmd, ERR_CMD_NOT_FOUND, NULL);
-//         }
-//         return (NULL);
-//     }
-//     return (search_in_env(cmd, envp));
-// }
-/*
 Resolves command path for execution with node validation.
 - Validates the command node structure.
 - Handles absolute and relative paths directly.
@@ -207,7 +152,7 @@ Resolves command path for execution with node validation.
 Returns:
 - Full path to executable (caller must free).
 - NULL if invalid node, command not found, or permission denied.
-Works with execute_cmd() during command execution.
+Works with exec_external_cmd() during command execution.
 
 Example: For "ls" command
 - Validates node has valid arguments
@@ -216,42 +161,6 @@ Example: For "ls" command
 - Returns "/bin/ls" (or similar) if found
 - Returns NULL with error message if not found/invalid
 */
-// char *get_cmd_path(t_node *node, char **envp, t_vars *vars)
-// {
-//     struct stat	statbuf;
-//     char		*cmd;
-// 	char		*path
-    
-//     if (!node || !node->args || !node->args[0])
-//     {
-//         vars->error_code = 1;
-//         return (NULL);
-//     }
-//     cmd = node->args[0];
-//     if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-//                 || (cmd[1] == '.' && cmd[2] == '/'))))
-//     {
-//         if (stat(cmd, &statbuf) == 0)
-//         {
-//             if (S_ISDIR(statbuf.st_mode))
-//             {
-//                 shell_error(cmd, ERR_ISDIRECTORY, vars);
-//                 return (NULL);
-//             }
-//             if (access(cmd, X_OK) == 0)
-//                 return (ft_strdup(cmd));
-//             shell_error(cmd, ERR_PERMISSIONS, vars);
-//         }
-//         else
-//             shell_error(cmd, ERR_CMD_NOT_FOUND, vars);
-//         vars->error_code = 127;
-//         return (NULL);
-//     }
-//     path = search_in_env(cmd, envp);
-//     if (!path)
-//         vars->error_code = 127;
-//     return (path);
-// }
 char	*get_cmd_path(t_node *node, char **envp, t_vars *vars)
 {
     char	*cmd;
@@ -270,7 +179,7 @@ char	*get_cmd_path(t_node *node, char **envp, t_vars *vars)
         direct_path = handle_direct_path(cmd, vars);
 		return (direct_path);
     }
-    path = search_in_env(cmd, envp);
+    path = search_in_env(cmd, envp, vars);
     if (!path)
         vars->error_code = 127;
     return (path);

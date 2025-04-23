@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:01:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/23 17:53:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,32 +20,7 @@ Initializes the shell environment and variables.
 - Prepares the command prompt.
 Works with main() as program entry point.
 */
-// void	init_shell(t_vars *vars, char **envp)
-// {
-// 	ft_memset(vars, 0, sizeof(t_vars));
-// 	vars->env = dup_env(envp);
-// 	if (!vars->env)
-// 	{
-// 		crit_error(vars);
-// 	}
-// 	get_shell_level(vars);
-// 	incr_shell_level(vars);
-// 	init_vars(vars);
-// 	vars->pipes = init_pipes();
-// 	if (!vars->pipes)
-// 	{
-// 		crit_error(vars);
-// 	}
-// 	if (isatty(STDIN_FILENO))
-// 	{
-//     	tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
-//     	vars->ori_term_saved = 1;
-// 	}
-// 	vars->error_code = 0;
-// 	load_signals();
-// 	load_history();
-// }
-void init_shell(t_vars *vars, char **envp)
+void	init_shell(t_vars *vars, char **envp)
 {
     ft_memset(vars, 0, sizeof(t_vars));
     vars->env = dup_env(envp);
@@ -71,7 +46,7 @@ void init_shell(t_vars *vars, char **envp)
 Initialize the lexer state.
 Reset position trackers and node pointers.
 */
-void init_vars(t_vars *vars)
+void	init_vars(t_vars *vars)
 {
 	if (!vars)
 		return ;
@@ -97,41 +72,13 @@ void init_vars(t_vars *vars)
 	vars->hd_text_ready = 0;
 }
 
-// /*
-// Initialise pipes structure.
-// Allocates and sets up the pipes state.
-// */
-// t_pipe *init_pipes(void)
-// {
-// 	t_pipe *pipes;
-	
-// 	pipes = (t_pipe *)malloc(sizeof(t_pipe));
-// 	if (!pipes)
-// 		return (NULL);
-// 	ft_memset(pipes, 0, sizeof(t_pipe));
-// 	pipes->saved_stdin = -1;
-// 	pipes->saved_stdout = -1;
-// 	pipes->heredoc_fd = -1;
-// 	pipes->redirection_fd = -1;
-// 	pipes->last_cmd = NULL;
-// 	pipes->last_heredoc = NULL;
-// 	pipes->last_pipe = NULL;
-// 	pipes->pipe_root = NULL;
-// 	pipes->redir_root = NULL;
-// 	pipes->last_in_redir = NULL;
-// 	pipes->last_out_redir = NULL;
-// 	pipes->cmd_redir = NULL;
-// 	pipes->pipe_at_end = 0;
-// 	return (pipes);
-// }
-
 /*
 Initialise pipes structure.
 Allocates and sets up the pipes state.
 */
-t_pipe *init_pipes(void)
+t_pipe	*init_pipes(void)
 {
-    t_pipe *pipes;
+    t_pipe	*pipes;
     
     pipes = (t_pipe *)malloc(sizeof(t_pipe));
     if (!pipes)
@@ -161,7 +108,7 @@ Works with reset_shell().
 void	reset_pipe_vars(t_vars *vars)
 {
 	if (!vars || !vars->pipes)
-		return;
+		return ;
 	vars->pipes->pipe_count = 0;
 	vars->pipes->out_mode = OUT_MODE_NONE;
 	vars->pipes->current_redirect = NULL;
@@ -183,10 +130,10 @@ Reset the shell state.
 - Resets the pipes state.
 - Resets vars struct.
 */
-void reset_shell(t_vars *vars)
+void	reset_shell(t_vars *vars)
 {
 	if (!vars)
-		return;
+		return ;
 	cleanup_token_list(vars);
 	if (vars->partial_input)
 		free(vars->partial_input);
