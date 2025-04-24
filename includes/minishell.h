@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 21:47:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 08:35:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,8 @@ HIST_LINE_SZ - Buffer size for reading each history line in bytes.
 # define HISTORY_FILE "temp/bleshell_history"
 # define HISTORY_FILE_TMP "temp/bleshell_history_tmp"
 # define TMP_BUF "temp/temp_buffer"
-# define HISTORY_FILE_MAX 2000
-# define HIST_MEM_MAX 1000
+# define HISTORY_FILE_MAX 100
+# define HIST_MEM_MAX 50
 # define HIST_BUFFER_SZ 4096
 # define HIST_LINE_SZ 1024
 
@@ -338,7 +338,6 @@ Argument handling.
 In arguments.c
 */
 
-
 /*
 AST token processing and AST tree building.
 In buildast.c
@@ -351,6 +350,16 @@ In builtin.c
 */
 int			is_builtin(char *cmd);
 int			execute_builtin(char *cmd, char **args, t_vars *vars);
+
+/*
+Permission checking functions.
+In check_permissions.c
+*/
+char		*extract_dir_path(char *filename);
+int			chk_read_permission(char *filename, t_vars *vars);
+int			chk_file_write_permission(char *filename, t_vars *vars);
+int			chk_dir_write_permission(char *filename, t_vars *vars);
+int			chk_permissions(char *filename, int mode, t_vars *vars);
 
 /*
 Group A of cleanup functions.
@@ -421,16 +430,6 @@ char		*get_var_name(char *input, int *pos);
 void 		debug_cmd_args(t_node *node); //DEBUG FUNCTION
 
 /*
-Process and store multiline heredoc content.
-In heredoc_multiline.c
-*/
-int			open_hd_file(char *content, t_vars *vars, char **curr_pos);
-char		*get_hd_line(char **curr_pos, int fd, t_vars *vars);
-int			is_hd_delim(char *line, char *delim, int *has_delim);
-int			process_and_write_line(int fd, char *line, t_vars *vars);
-int			store_multiline_hd(char *input_after_first_line, t_vars *vars);
-
-/*
 Heredoc main handling.
 In heredoc.c
 */
@@ -450,6 +449,7 @@ int			chk_quoted_delim(char *orig_delim, size_t len
 				,char **clean_delim_ptr, int *quoted_ptr);
 int			chk_normal_delim(char *orig_delim, size_t len
 				,char **clean_delim_ptr, int *quoted_ptr);
+void		cleanup_heredoc_fd(int write_fd);
 void		store_cln_delim(t_vars *vars, char *clean_delim, int quoted);
 int			is_valid_delim(char *orig_delim, t_vars *vars);
 
@@ -457,7 +457,6 @@ int			is_valid_delim(char *orig_delim, t_vars *vars);
 History loading functions.
 In history_load.c
 */
-void		skip_history_lines(int fd, int skip_count);
 void		read_history_lines(int fd);
 void		load_history(void);
 
@@ -465,22 +464,28 @@ void		load_history(void);
 History saving functions.
 In history_save.c
 */
+int 		prepare_history_entries(HIST_ENTRY ***hist_list,int *history_count
+					, int *start_idx);
+void		save_history(void);
+int			save_history_entries(int fd, HIST_ENTRY **hist_list
+					, int start, int total);
+			
+/*
+History utility functions.
+In history_utils.c
+*/
+void		trim_history(int excess_lines);
+int			chk_and_make_folder(const char *path);
 int			copy_file_content(int fd_src, int fd_dst);
 int			copy_file(const char *src, const char *dst);
 int			copy_to_temp(int fd_read);
-void		skip_lines(int fd, int count);
-void		trim_history(int excess_lines);
-int			chk_and_make_folder(const char *path);
-void		save_history(void);
-int			save_history_entries(int fd, HIST_ENTRY **hist_list,
-				int start, int total);
 
 /*
 History main functions.
 In history.c
 */
+void		skip_lines(int fd, int count);
 int			init_history_fd(int mode);
-int			append_history(int fd, const char *line);
 int			get_history_count(void);
 
 /*
@@ -514,21 +519,10 @@ In input_handlers.c
 */
 char		*allocate_and_read(int fd, size_t size);
 char 		*read_entire_file(const char *filename);
-int			process_multiline_input(char *input, t_vars *vars);
 void		handle_input(char *input, t_vars *vars);
 void		term_heredoc(t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
 int 		check_trailing_chars(const char *line, int start_pos);
-
-/*
-Input verification functions.
-In input_verify.c
-*/
-
-/*
-Lexer functions.
-In lexer.c
-*/
 
 /*
 Make_exp_token utility functions.
@@ -640,6 +634,31 @@ int			execute_pipes(t_node *pipe_node, t_vars *vars);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
 
 /*
+Process multiline_input functions.
+In process_multiline_input.c
+*/
+int			process_multiline_input(char *input, t_vars *vars);
+int			proc_first_line(char *input, char *first_line_end, t_vars *vars);
+int			process_heredoc_path(char *input, char *first_line_end
+				, char *content_start, t_vars *vars);
+int			tokenize_first_line(char *input, char *nl_ptr, t_vars *vars);
+t_node		*find_delim_token(t_node *head);
+char		*find_raw_delim(char *line_start, int len, const char *delim);
+int			chk_hd_tail(char *line_start, char *raw_delim_ptr, char *delim
+				, t_vars *vars);
+char		*chk_raw_delim(char *line_start, int len, char *delim_arg
+				, t_vars *vars);
+int			chk_hd_first_line(char *line_start, int len, t_vars *vars);
+int			open_hd_tmp_buf(t_vars *vars);
+char		*extract_next_line(char **current_pos_ptr, t_vars *vars);
+int			proc_hd_line(int write_fd, char *line, t_vars *vars);
+int			proc_hd_buffer(int fd, char *content, t_vars *vars);
+int			handle_interactive_hd(int fd, int found_in_buf, t_vars *vars);
+void		exec_first_line(char *input, char *nl_ptr, t_vars *vars);
+int			hd_proc_end(int fd, char *input, char *nl_ptr, t_vars *vars);
+int			process_standard(char *input, t_vars *vars);
+
+/*
 Pipeline processing functions.
 In process_pipes.c
 */
@@ -706,11 +725,8 @@ char		*fix_open_quotes(char *input, t_vars *vars);
 Redirection handling.
 In redirect.c
 */
-int			chk_permissions(char *filename, int mode, t_vars *vars); //Possible to reuse
 int			is_redirection(t_tokentype type);
 void		reset_redirect_fds(t_vars *vars);
-// int			output_redirect(t_node *node, int *fd_out,
-// 				int append, t_vars *vars);
 t_node		*get_next_redir(t_node *current, t_node *cmd);
 
 /*

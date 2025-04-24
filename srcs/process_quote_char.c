@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 20:11:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 05:47:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,77 +221,6 @@ Return:
  - 1 on success.
  - 0 on failure.
 */
-// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
-// {
-//     int     quote_type;
-//     char    *content;
-//     t_node  *cmd_node;
-//     t_node  *redir_node;
-//     fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n", 
-//         is_redir_target ? " as redirection target" : "");
-//     content = get_quoted_str(input, vars, &quote_type);
-//     if (!content)
-//         return (0);
-//     fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
-//         content, is_redir_target);
-//     if (is_redir_target)
-//     {
-//         // Handle quoted filename for redirection
-//         redir_node = find_last_redir(vars);
-//         if (redir_node && is_redirection(redir_node->type))
-//         {
-//             // NEW CODE: Check if this is a heredoc redirection and set expansion flag
-//             if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
-//             {
-//                 // Disable variable expansion for quoted heredoc delimiters
-//                 vars->pipes->hd_expand = 0;
-//                 vars->pipes->last_heredoc = redir_node;
-//                 fprintf(stderr, "[DEBUG] Heredoc with quoted delimiter detected, disabling expansion\n");
-//             }
-//             fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
-//                 content, redir_node->type);
-//             // Create a node for the filename - PASS THE CONTENT DIRECTLY
-//             t_node *file_node = initnode(TYPE_ARGS, content);
-//             if (!file_node)
-//             {
-//                 free(content);
-//                 return (0);
-//             }
-//             // Connect to the redirection node
-//             redir_node->right = file_node;
-//             // Link into the token list
-//             if (redir_node->next)
-//             {
-//                 file_node->next = redir_node->next;
-//                 redir_node->next->prev = file_node;
-//             }
-//             redir_node->next = file_node;
-//             file_node->prev = redir_node;
-//             // Update current pointer
-//             vars->current = file_node;
-//             fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-//             free(content);
-//             return (1);
-//         }
-//     }
-//     // Standard quote handling for non-redirection targets
-//     cmd_node = process_quoted_str(&content, quote_type, vars);
-//     if (!cmd_node)
-//     {
-//         free(content);
-//         process_adj(NULL, vars);
-//         return (1);
-//     }
-//     if (!merge_quoted_token(input, content, vars))
-//     {
-//         append_arg(cmd_node, content, quote_type);
-//         free(content);
-//         if (vars->adj_state[1])
-//             process_right_adj(input, vars);
-//         process_adj(NULL, vars);
-//     }
-//     return (1);
-// }
 int process_quote_char(char *input, t_vars *vars, int is_redir_target)
 {
     int     quote_type;
@@ -481,34 +410,3 @@ int	validate_redir_targets(t_vars *vars)
     }
     return (1);
 }
-
-
-// int validate_redir_targets(t_vars *vars)
-// {
-//     t_node		*current;
-//     t_node		*next;
-    
-// 	current = vars->head;
-//     while (current)
-//     {
-//         if (is_redirection(current->type))
-//         {
-//             next = current->next;
-//         	if (!next)
-//         	{
-//             	tok_syntax_error_msg("newline", vars);
-//             	return (0);
-//         	}
-//         	else if (is_redirection(next->type) || next->type == TYPE_PIPE)
-//         	{
-// 				if (next->args[0])
-// 					tok_syntax_error_msg(next->args[0], vars);
-// 				else
-//             		tok_syntax_error_msg("operator", vars);
-//             	return (0);
-//         	}
-//         }
-//         current = current->next;
-//     }
-//     return (1);
-// }

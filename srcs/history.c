@@ -6,11 +6,42 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/17 10:32:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 06:16:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+
+
+/*
+Skips specified number of lines in an open file.
+- Reads and discards requested number of lines.
+- Uses get_next_line to properly handle line endings.
+- Ensures proper memory management during skipping.
+- Stops if end of file is reached before count is complete.
+Works with trim_history().
+
+Example: For a history with 1000 lines
+- skip_lines(fd, 500) skips first 500 entries
+- Positions file pointer at 501st entry
+- Properly frees all memory used during skipping
+*/
+void	skip_lines(int fd, int count)
+{
+	char	*line;
+	int		i;
+
+	i = 0;
+	while (i < count)
+	{
+		line = get_next_line(fd);
+		if (!line)
+			break ;
+		free(line);
+		i++;
+	}
+}
 
 /*
 Opens history file with appropriate access mode.
@@ -48,35 +79,6 @@ int	init_history_fd(int mode)
 		return (-1);
 	fd = open(HISTORY_FILE, mode);
 	return (fd);
-}
-
-/*
-Appends command line to both history file and memory.
-- Writes provided line to the history file with newline.
-- Adds line to readline's history for in-memory access.
-Returns:
-1 on success, 0 on failure.
-Works with save_history().
-
-Example: append_history(fd, "ls -la")
-- Writes "ls -la\n" to history file
-- Adds "ls -la" to readline's history
-- Returns 1 if successful
-*/
-int	append_history(int fd, const char *line)
-{
-	int	write_ret;
-
-	if (!line)
-		return (0);
-	write_ret = write(fd, line, ft_strlen(line));
-	if (write_ret == -1)
-		return (0);
-	write_ret = write(fd, "\n", 1);
-	if (write_ret == -1)
-		return (0);
-	add_history(line);
-	return (1);
 }
 
 /*

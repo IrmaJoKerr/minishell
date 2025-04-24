@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 07:06:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 05:03:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,43 +30,6 @@ void	track_quote_ctx(char quote_char, char *in_quote, int pos, t_vars *vars)
 	}
 }
 
-/*
-Validates if all quotes in a command are properly closed.
-Updates quote_ctx and quote_depth in vars struct.
-Returns:
-- 1 if all quotes are balanced.
-- 0 if unclosed quotes are found.
-*/
-// int	validate_quotes(char *input, t_vars *vars)
-// {
-// 	int		i;
-// 	char	in_quote;
-	 
-// 	i = 0;
-// 	in_quote = 0;
-// 	vars->quote_depth = 0; 
-// 	while (input[i])
-// 	{
-// 		if (!in_quote && (input[i] == '\'' || input[i] == '"'))
-// 		{
-// 			in_quote = input[i];
-// 			if (vars->quote_depth < 32)
-// 			{
-// 				vars->quote_ctx[vars->quote_depth].type = in_quote;
-// 				vars->quote_ctx[vars->quote_depth].start_pos = i;
-// 				vars->quote_ctx[vars->quote_depth].depth = vars->quote_depth + 1;
-// 				vars->quote_depth++;
-// 			}
-// 		}
-// 		else if (in_quote && input[i] == in_quote)
-// 		{
-// 			in_quote = 0;
-// 			vars->quote_depth--;
-// 		}
-// 		i++;
-// 	} 
-// 	return (in_quote == 0);
-// }
 /*
 Validates if all quotes in a command are properly closed.
 Updates quote_ctx and quote_depth in vars struct.
@@ -98,40 +61,6 @@ int validate_quotes(char *input, t_vars *vars)
 	} 
 	return (in_quote == 0);
 }
-
-// /*
-// Reads additional input to complete unclosed quotes
-// Returns completed input or NULL on error
-// */
-// char *fix_open_quotes(char *original_input, t_vars *vars)
-// {
-// 	char *prompt;
-// 	char *addon_input;
-// 	char *merged_input;
-	
-// 	if (!vars->quote_depth)
-// 		return (ft_strdup(original_input));
-// 	if (vars->quote_ctx[vars->quote_depth - 1].type == '\'')
-// 		prompt = "SQUOTE> ";
-// 	else
-// 		prompt = "DQUOTE> ";
-// 	addon_input = readline(prompt);
-// 	if (!addon_input)
-// 		return (NULL);
-// 	if (addon_input && *addon_input)
-// 		add_history(addon_input);
-// 	merged_input = append_input(original_input, addon_input);
-// 	free(addon_input);
-// 	if (!merged_input)
-// 		return (NULL);
-// 	if (!validate_quotes(merged_input, vars))
-// 	{
-// 		char *temp = merged_input;
-// 		merged_input = fix_open_quotes(temp, vars);
-// 		free(temp);
-// 	}
-// 	return (merged_input);
-// }
 
 /*
 Prompts for additional input based on the quote type

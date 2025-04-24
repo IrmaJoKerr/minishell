@@ -1,0 +1,10 @@
+echo "Hello World" > out.txt
+
+echo "Line 1" >> out.txt
+echo "Line 2" >> out.txt
+
+cat << 'END'
+This is a test: $HOME
+END
+
+exit

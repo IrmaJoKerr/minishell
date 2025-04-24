@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 18:35:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 06:38:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,7 @@ int	interactive_hd_mode(t_vars *vars)
 	vars->hd_text_ready = 1;
 	return (1);
 }
+
 /*
 Prepares a line for heredoc by conditionally expanding variables.
 - Expands variables if hd_expand flag is set
@@ -433,6 +434,18 @@ int	chk_normal_delim(char *orig_delim, size_t len
 		return (0);
 	*quoted_ptr = 0;
 	return (1);
+}
+
+/*
+Cleans up resources after a heredoc error.
+- Closes the file descriptor.
+- Removes the temporary file.
+Works with process_heredoc_path to centralize error handling.
+*/
+void	cleanup_heredoc_fd(int write_fd)
+{
+    close(write_fd);
+    unlink(TMP_BUF);
 }
 
 /*

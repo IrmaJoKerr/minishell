@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/23 21:38:20 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/24 08:34:36 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,23 +31,22 @@ MINISHELL_SRCS = \
 			srcs/arguments.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
+			srcs/check_permissions.c \
 			srcs/cleanup_a.c \
 			srcs/cleanup_b.c \
 			srcs/cmd_finder.c \
 			srcs/errormsg.c \
 			srcs/execute.c \
 			srcs/expansion.c \
-			srcs/heredoc_multiline.c \
 			srcs/heredoc.c \
 			srcs/history_load.c \
 			srcs/history_save.c \
+			srcs/history_utils.c \
 			srcs/history.c \
 			srcs/initnode.c \
 			srcs/initshell.c \
 			srcs/input_completion.c \
 			srcs/input_handlers.c \
-			srcs/input_verify.c \
-			srcs/lexer.c \
 			srcs/make_exp_token_utils.c \
 			srcs/make_exp_token.c \
 			srcs/make_node_arrays.c \
@@ -57,6 +56,7 @@ MINISHELL_SRCS = \
 			srcs/paths.c \
 			srcs/pipe_analysis.c \
 			srcs/pipes.c \
+			srcs/process_multiline_input.c \
 			srcs/process_pipes.c \
 			srcs/process_quote_char.c \
 			srcs/process_redir_node.c \

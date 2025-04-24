@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 13:26:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 05:51:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ void	link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
             get_redir_target(prev_redir, vars->pipes->last_cmd) == cmd &&
             prev_redir->redir == NULL)
         {
-            fprintf(stderr, "DEBUG: Found previous redirection in token list, chaining\n");
             prev_redir->redir = redir_node;
             break ;
         }
@@ -54,20 +53,21 @@ void	track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
     {
         if (vars->pipes->last_in_redir && 
             vars->pipes->last_in_redir != redir_node &&
-            get_redir_target(vars->pipes->last_in_redir, vars->pipes->last_cmd) == cmd)
+            get_redir_target(vars->pipes->last_in_redir
+				, vars->pipes->last_cmd) == cmd)
         {
-            fprintf(stderr, "DEBUG: Chaining input redirection to existing one\n");
             vars->pipes->last_in_redir->redir = redir_node;
         }
         vars->pipes->last_in_redir = redir_node;
     }
-    else if (redir_node->type == TYPE_OUT_REDIRECT || redir_node->type == TYPE_APPEND_REDIRECT)
+    else if (redir_node->type == TYPE_OUT_REDIRECT
+		|| redir_node->type == TYPE_APPEND_REDIRECT)
     {
         if (vars->pipes->last_out_redir && 
             vars->pipes->last_out_redir != redir_node &&
-            get_redir_target(vars->pipes->last_out_redir, vars->pipes->last_cmd) == cmd)
+            get_redir_target(vars->pipes->last_out_redir
+				, vars->pipes->last_cmd) == cmd)
         {
-            fprintf(stderr, "DEBUG: Chaining output redirection to existing one\n");
             vars->pipes->last_out_redir->redir = redir_node;
         }
         vars->pipes->last_out_redir = redir_node;
@@ -97,14 +97,13 @@ void	link_in_out_redirs(t_vars *vars)
         out_target = get_redir_target(last_out, last_cmd);
         if (in_target == out_target && !last_in->redir)
         {
-            fprintf(stderr, "DEBUG: Linking input redirection to output redirection\n");
             last_in->redir = last_out;
         }
     }
 }
 
 /*
-Processes an individual redirection node.
+Master control function for processing an individual redirection node.
 - Finds the target command for the redirection
 - Links the redirection node to command and target
 - Chains with previous redirections
@@ -116,12 +115,7 @@ void	process_redir_node(t_node *redir_node, t_vars *vars)
 {
 	t_node	*cmd;
 	
-    fprintf(stderr, "DEBUG: Processing redirection node, type: %d\n", 
-            redir_node->type);
     cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
-    fprintf(stderr, "DEBUG: process_redir_node: Target cmd=%p, next=%p, args=%p\n",
-        (void*)cmd, (void*)redir_node->next, 
-        redir_node->next ? (void*)redir_node->next->args : NULL);
     if (cmd && redir_node->next)
     {
         set_redir_node(redir_node, cmd, redir_node->next);
@@ -130,12 +124,5 @@ void	process_redir_node(t_node *redir_node, t_vars *vars)
         link_in_out_redirs(vars);
         if (!vars->pipes->redir_root)
             vars->pipes->redir_root = redir_node;
-        fprintf(stderr, "DEBUG: Set up redirection from cmd '%s' to '%s'\n",
-                cmd->args ? cmd->args[0] : "NULL",
-                redir_node->next->args ? redir_node->next->args[0] : "NULL");
-    }
-    else
-    {
-        fprintf(stderr, "DEBUG: Invalid redirection setup\n");
     }
 }

@@ -6,38 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 22:51:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 06:02:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Skips specified number of lines from history file.
-- Reads and discards requested number of lines.
-- Properly frees line memory during skipping.
-- Stops if end of file is reached before count is complete.
-Returns:
-Nothing (void function).
-Works with load_history() to maintain history size limits.
-
-Example: If history file has 1000 entries but HIST_MEM_MAX is 500
-- skip_history_lines(fd, 500) skips first 500 entries
-- Allows only loading the 500 most recent commands
-*/
-void	skip_history_lines(int fd, int skip_count)
-{
-	char	*line;
-
-	while (skip_count > 0)
-	{
-		line = get_next_line(fd);
-		if (!line)
-			break ;
-		free(line);
-		skip_count--;
-	}
-}
 
 /*
 Reads history lines from file descriptor and adds to readline history.
@@ -105,7 +78,7 @@ void	load_history(void)
 	skip = 0;
 	if (count > HIST_MEM_MAX)
 		skip = count - HIST_MEM_MAX;
-	skip_history_lines(fd, skip);
+	skip_lines(fd, skip);
 	read_history_lines(fd);
 	close(fd);
 }
