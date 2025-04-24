@@ -6,39 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 05:04:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 15:02:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-void print_tokens(t_node *head) // Debug function
-{
-	t_node *curr = head;
-	int i;
-	
-	fprintf(stderr, "\n--- TOKEN LIST ---\n");
-	while (curr)
-	{
-		fprintf(stderr, "Token: type=%d (%s), content='%s'\n", 
-		      curr->type, get_token_str(curr->type), 
-		      curr->args ? curr->args[0] : "NULL");
-		
-		if (curr->args && curr->args[1])
-		{
-			fprintf(stderr, "  Arguments:");
-			i = 1;
-			while (curr->args[i])
-			{
-				fprintf(stderr, " '%s'", curr->args[i]);
-				i++;
-			}
-			fprintf(stderr, "\n");
-		}
-		curr = curr->next;
-	}
-	fprintf(stderr, "----------------\n\n");
-}
 
 /*
 Reads input line from the user with prompt display.
@@ -117,16 +89,13 @@ Example: For "echo hello | grep h"
 */
 void	build_and_execute(t_vars *vars)
 {
-	fprintf(stderr, "[build_and_execute:%d] Building AST from token list\n", __LINE__);
 	if (!validate_redir_targets(vars))
 	{
-		fprintf(stderr, "[build_and_execute:%d] Redirection validation failed, skipping execution\n", __LINE__);
 		return ;
 	}
 	vars->astroot = proc_token_list(vars);
 	if (vars->astroot)
 	{
-		DBG_PRINTF(DEBUG_EXEC, "AST built successfully, root type=%d\n", vars->astroot->type);
 		execute_cmd(vars->astroot, vars->env, vars);
 	}
 }

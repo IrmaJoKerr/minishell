@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 20:37:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 15:54:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void handle_string(char *input, t_vars *vars)
 		{
 			vars->curr_type = token_type;
 		}
-		maketoken_with_type(token, vars->curr_type, vars);
+		maketoken(token, vars->curr_type, vars);
 		free(token);
 		vars->start = vars->pos;
 	}
@@ -163,7 +163,7 @@ int	handle_single_operator(char *input, t_vars *vars)
 	token = ft_substr(input, vars->pos, 1);
 	if (!token)
 		return (vars->pos);
-	maketoken_with_type(token, vars->curr_type, vars);
+	maketoken(token, vars->curr_type, vars);
 	free(token);
 	vars->pos++;
 	vars->start = vars->pos;
@@ -188,7 +188,7 @@ int	handle_double_operator(char *input, t_vars *vars)
 	token = ft_substr(input, vars->pos, moves);
 	if (!token)
 		return (vars->pos);
-	maketoken_with_type(token, vars->curr_type, vars);
+	maketoken(token, vars->curr_type, vars);
 	free(token);
 	vars->pos += moves;
 	vars->start = vars->pos;

@@ -6,11 +6,99 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 13:47:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 12:21:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+/*
+Handles execution within the left child process of a pipe.
+- Closes unused pipe read end.
+- Redirects stdout to the pipe write end.
+- Closes the pipe write end.
+- Executes the command node.
+- Exits with the command's status.
+*/
+void	exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
+{
+    close(pipe_fd[0]);
+    if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+    {
+        perror("dup2 (left child)");
+        exit(EXIT_FAILURE);
+    }
+    close(pipe_fd[1]);
+    exit(execute_cmd(cmd_node, vars->env, vars));
+}
+
+/*
+Handles execution within the right child process of a pipe.
+- Closes unused pipe write end (already done by parent before fork).
+- Redirects stdin to the pipe read end.
+- Closes the pipe read end.
+- Executes the command node.
+- Exits with the command's status.
+*/
+void	exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
+{
+    if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+    {
+        perror("dup2 (right child)");
+        exit(EXIT_FAILURE);
+    }
+    close(pipe_fd[0]);
+    exit(execute_cmd(cmd_node, vars->env, vars));
+}
+
+/*
+Creates and sets up the left child process for a pipe.
+Returns:
+- 0 on successful fork
+- 1 on fork failure (with appropriate cleanup)
+Note: If successful, closes pipe_fd[1] in the parent process.
+*/
+int	fork_left_child(t_node *left_cmd, int pipe_fd[2], t_vars *vars
+				, pid_t *left_pid_ptr)
+{
+    *left_pid_ptr = fork();
+    if (*left_pid_ptr == -1)
+    {
+        ft_putendl_fd("fork: Creation failed (left)", 2);
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
+        return (1);
+    }
+    if (*left_pid_ptr == 0)
+    {
+        exec_pipe_left(left_cmd, pipe_fd, vars);
+    }
+    close(pipe_fd[1]);
+    pipe_fd[1] = -1;
+    return (0);
+}
+
+/*
+ * Initializes pipe execution variables and creates the pipe.
+ * Parameters:
+ * - pipe_fd: Array to store the created pipe file descriptors
+ * - r_status_ptr: Pointer to the r_status variable to initialize
+ * - l_status_ptr: Pointer to the l_status variable to initialize
+ * Returns:
+ * - 0 on successful initialization and pipe creation
+ * - 1 on pipe creation failure (with appropriate error message)
+ */
+int	init_pipe_exec(int pipe_fd[2], int *r_status_ptr, int *l_status_ptr)
+{
+    *r_status_ptr = 0;
+    *l_status_ptr = 0;
+    if (pipe(pipe_fd) == -1)
+    {
+        ft_putendl_fd("pipe: Creation failed", 2);
+        return (1);
+    }
+    return (0);
+}
 
 /*
 Executes commands connected by a pipe.
@@ -27,53 +115,87 @@ Example: For "ls -l | grep txt"
 - Waits for both commands to complete
 - Returns final execution status
 */
-int execute_pipes(t_node *pipe_node, t_vars *vars)
+int	execute_pipes(t_node *pipe_node, t_vars *vars)
 {
-	int     pipe_fd[2];
-	pid_t   left_pid;
-	pid_t   right_pid;
-	int     status;
-	int     left_status = 0;
-	
-	if (pipe(pipe_fd) == -1) {
-		ft_putendl_fd("pipe: Creation failed", 2);
-		return 1;
-	}
-	left_pid = fork();
-	if (left_pid == 0)
-	{
-		close(pipe_fd[0]);  // Close read end in left process
-		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-			exit(1);
-		close(pipe_fd[1]);
-		exit(execute_cmd(pipe_node->left, vars->env, vars));
-	}
-	else if (left_pid > 0)
-	{
-		close(pipe_fd[1]);  // Close write end in parent
-		right_pid = fork();
-		if (right_pid == 0)
-		{
-			if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
-				exit(1);
-			close(pipe_fd[0]);
-			exit(execute_cmd(pipe_node->right, vars->env, vars));
-		}
-		else if (right_pid > 0)
-		{
-			close(pipe_fd[0]);
-			waitpid(left_pid, &left_status, 0);
-			waitpid(right_pid, &status, 0);
-			if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-				return left_status;
-			else
-				return (handle_cmd_status(status, vars));
-		}
-	}
-	ft_putendl_fd("fork: Creation failed", 2);
-	close(pipe_fd[0]);
-	close(pipe_fd[1]);
-	return 1;
+    int     pipe_fd[2];
+    pid_t   left_pid;
+    pid_t   right_pid;
+    int     r_status;
+    int     l_status;
+
+    if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+        return (1);
+    if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+        return (1);
+    right_pid = fork();
+    if (right_pid == -1)
+    {
+        ft_putendl_fd("fork: Creation failed (right)", 2);
+        close(pipe_fd[0]);
+        waitpid(left_pid, &l_status, 0);
+        return (1);
+    }
+    if (right_pid == 0)
+        exec_pipe_right(pipe_node->right, pipe_fd, vars);
+    close(pipe_fd[0]);
+    waitpid(left_pid, &l_status, 0);
+    waitpid(right_pid, &r_status, 0);
+    return (handle_cmd_status(r_status, vars));
+}
+
+/*
+Reads and validates input from the continuation prompt.
+- Displays the secondary prompt ("> ")
+- Reads user input
+- Trims whitespace
+- Handles empty inputs by recursing
+Returns:
+- A valid, non-empty string that the caller must free
+- NULL on critical error (like EOF)
+*/
+char	*read_until_complete(void)
+{
+	char	*input;
+    char	*trimmed;
+
+    input = readline("> ");
+    if (!input)
+        return (NULL);
+    trimmed = ft_strtrim(input, " \t\n");
+    free(input);
+    
+    if (!trimmed || trimmed[0] == '\0')
+    {
+        free(trimmed);
+        return (read_until_complete());
+    }
+    return (trimmed);
+}
+
+/*
+Appends new input to an existing command with a space separator.
+- Joins the original command with a space
+- Joins the result with the new input
+- Frees original string and replaces it with combined result
+Returns:
+- 0 on success (*cmd_ptr will point to the new string)
+- -1 on allocation error (original cmd_ptr preserved)
+*/
+int	append_to_cmdline(char **cmd_ptr, const char *addition)
+{
+    char	*tmp;
+    char	*combined;
+    
+    tmp = ft_strjoin(*cmd_ptr, " ");
+    if (!tmp)
+        return (-1);
+    combined = ft_strjoin(tmp, addition);
+    free(tmp);
+    if (!combined)
+        return (-1);
+    free(*cmd_ptr);
+    *cmd_ptr = combined;
+    return (0);
 }
 
 /*
@@ -84,42 +206,22 @@ Returns:
 - 0 if no unfinished pipes found
 - -1 if an error occurred
 */
-int handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
+int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
 {
-	char *addon_input;
-	char *tmp;
-	char *combined;
-
-	addon_input = NULL;
-	tmp = NULL;
-	
-	addon_input = readline("> ");
-	if (!addon_input)
-		return (-1);
-	tmp = ft_strtrim(addon_input, " \t\n");
-	free(addon_input);
-	addon_input = tmp;
-	if (!addon_input || addon_input[0] == '\0')
-	{
-		free(addon_input);
-		return handle_unfinished_pipes(processed_cmd, vars);
-	}
-	tmp = ft_strjoin(*processed_cmd, " ");
-	if (!tmp)
-	{
-		free(addon_input);
-		return (-1);
-	}
-	combined = ft_strjoin(tmp, addon_input);
-	free(tmp);
-	free(addon_input);
-	if (!combined)
-		return (-1);
-	free(*processed_cmd);
-	*processed_cmd = combined;
-	if (!process_input_tokens(*processed_cmd, vars))
-    	return (-1);
-	if (analyze_pipe_syntax(vars) == 2)
-		return handle_unfinished_pipes(processed_cmd, vars);
-	return (1);
+    char	*addon_input;
+    
+    addon_input = read_until_complete();
+    if (!addon_input)
+        return (-1);
+    if (append_to_cmdline(processed_cmd, addon_input) == -1)
+    {
+        free(addon_input);
+        return (-1);
+    }
+    free(addon_input);
+    if (!process_input_tokens(*processed_cmd, vars))
+        return (-1);
+    if (analyze_pipe_syntax(vars) == 2)
+        return handle_unfinished_pipes(processed_cmd, vars);
+    return (1);
 }

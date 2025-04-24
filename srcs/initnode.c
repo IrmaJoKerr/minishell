@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 05:17:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 14:31:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,12 @@
 
 /*
 Sets up basic node structure framework.
-Handles node type, token, and argument array initialization.
-Has special case for head nodes.
-Sets a default token if token is NULL.
-Returns 1 on success, 0 on failure.
+- Handles node type, token, and argument array initialization.
+- Has special case for head nodes.
+- Sets a default token if token is NULL.
+Returns:
+- 1 on success.
+- 0 on failure.
 */
 int	make_nodeframe(t_node *node, t_tokentype type, char *token)
 {

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 13:42:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 16:00:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,12 @@ Works with proc_token_list.
 */
 t_node	*proc_redir(t_vars *vars)
 {
-    fprintf(stderr, "DEBUG: proc_redir function called\n");
-    fprintf(stderr, "DEBUG: proc_redir: Processing command line with %d tokens\n", 
-        count_tokens(vars->head));
-    
     if (!vars || !vars->head || !vars->pipes)
         return (NULL);
     reset_redir_tracking(vars->pipes);
     build_redir_ast(vars);
     if (vars->error_code == 2)
     {
-        fprintf(stderr, "DEBUG: Redirection processing aborted due to syntax error\n");
         return NULL;
     }
     if (vars->pipes->pipe_root)
@@ -43,27 +38,8 @@ t_node	*proc_redir(t_vars *vars)
     if (vars->pipes->redir_root)
     {
         vars->astroot = vars->pipes->redir_root;
-        fprintf(stderr, "DEBUG: Setting AST root to redirection node type=%d\n",
-                vars->pipes->redir_root->type);
     }
     return vars->pipes->redir_root;
-}
-
-/*
-DEBUG FUNCTION
-Add this helper function near the top of the file:
-*/
-int count_tokens(t_node *head)
-{
-    int count = 0;
-    t_node *current = head;
-    
-    while (current)
-    {
-        count++;
-        current = current->next;
-    }
-    return count;
 }
 
 /*
@@ -74,11 +50,8 @@ Works with proc_redir to clean state before processing.
 */
 void reset_redir_tracking(t_pipe *pipes)
 {
-	fprintf(stderr, "DEBUG: Resetting redirection tracking\n");
-	
 	if (!pipes)
-		return;
-		
+		return ;
 	pipes->last_cmd = NULL;
 	pipes->redir_root = NULL;
 	pipes->last_in_redir = NULL;
@@ -96,14 +69,10 @@ Works with proc_redir for redirection structure building.
 void	build_redir_ast(t_vars *vars)
 {
     t_node	*current;
-    int		i;
     
     current = vars->head;
-    i = 0;
     while (current)
     {
-        fprintf(stderr, "DEBUG: build_redir_ast: Checking redirection at pos %d, type=%d, next=%p\n", 
-            i++, current->type, (void*)current->next);
         if (current->type == TYPE_CMD)
             vars->pipes->last_cmd = current;
         else if (is_redirection(current->type))
@@ -131,8 +100,8 @@ Returns:
 */
 int	chk_redir_nodes(t_vars *vars, t_node *current)
 {
-    t_node *chain_head;
-    t_node *target_cmd;
+    t_node	*chain_head;
+    t_node	*target_cmd;
     
     chain_head = find_redir_chain_head(current, vars->pipes->last_cmd);
     if (chain_head != current)
@@ -192,16 +161,12 @@ void	link_redirs_pipes(t_vars *vars)
     
     if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
         return ;
-    fprintf(stderr, "DEBUG: Integrating redirections with pipes\n");
-    current = vars->head;
     vars->pipes->last_cmd = NULL;
     while (current)
     {
         if (current->type == TYPE_CMD)
         {
             vars->pipes->last_cmd = current;
-            fprintf(stderr, "DEBUG: Found command in pipe integration: %s\n", 
-                   current->args ? current->args[0] : "NULL");
         }
         else if (is_redirection(current->type) && current->next)
         {
@@ -213,8 +178,7 @@ void	link_redirs_pipes(t_vars *vars)
         }
         current = current->next;
     }
-    fprintf(stderr, "DEBUG: Completed pipe structure integration\n");
-}
+}	
 
 /*
 Configures a redirection node with source and target commands.

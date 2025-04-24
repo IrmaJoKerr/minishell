@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 04:59:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 16:03:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /*
 Sets appropriate token type based on position and context.
 Determines if current token should be a command or argument.
-Updates vars->curr_type accordingly
+Updates vars->curr_type accordingly.
 */
 void	set_token_type(t_vars *vars, char *input)
 {
@@ -44,41 +44,60 @@ void	set_token_type(t_vars *vars, char *input)
 		vars->curr_type = TYPE_ARGS;
 }
 
-void	maketoken_with_type(char *token, t_tokentype type, t_vars *vars)
+/*
+Checks if a node is orphaned (not properly linked in the token list)
+and frees it if necessary to prevent memory leaks.
+This function is called when a node is created and added to the token list.
+*/
+void	free_if_orphan_node(t_node *node, t_vars *vars)
+{
+	t_node	*check;
+	int		found_in_list;
+    if (node != vars->head && node != vars->current)
+    {
+        found_in_list = 0;
+        check = vars->head;
+        while (check && !found_in_list)
+        {
+            if (check == node)
+                found_in_list = 1;
+            check = check->next;
+        }
+        if (!found_in_list)
+        {
+            fprintf(stderr, "DEBUG[maketoken]: Freeing orphaned node not in list. "
+                    "node=%p, type=%d, content='%s'\n",
+                    (void*)node, node->type, 
+                    (node->args && node->args[0]) ? node->args[0] : "NULL");
+            free_token_node(node);
+        }
+    }
+}
+
+/*
+Creates a token node and adds it to the token linked list.
+- Creates a node with the given token string and type.
+- Links the node into the shell's token linked list.
+- Handles orphaned nodes to prevent memory leaks.
+- Updates current token pointer as needed.
+Example: When tokenizing "echo hello"
+- Creates separate nodes for "echo" and "hello"
+- Links them in sequence with proper type assignment.
+*/
+void	maketoken(char *token, t_tokentype type, t_vars *vars)
 {
     t_node	*node;
-	t_node	*check;
-    int		node_freed;
-	int		found_in_list;
+	int		node_freed;
 
-	found_in_list = 0;
-	check = vars->head;
-    node = initnode(type, token);
+	if (!token || !vars)
+		return ;
+	fprintf(stderr, "[TOK_DBG] maketoken: Called with token='%s', type=%d\n", token, type);
+	node = initnode(type, token);
     if (!node)
         return ;
     node_freed = build_token_linklist(vars, node);
     if (!node_freed) 
-    {
-        if (node != vars->head && node != vars->current)
-        {
-            found_in_list = 0;
-            check = vars->head;
-            while (check && !found_in_list)
-            {
-                if (check == node)
-                    found_in_list = 1;
-                check = check->next;
-            }
-            if (!found_in_list)
-            {
-                fprintf(stderr, "DEBUG[maketoken_with_type]: Freeing orphaned node not in list. "
-                        "node=%p, type=%d, content='%s'\n",
-                        (void*)node, node->type, 
-                        (node->args && node->args[0]) ? node->args[0] : "NULL");
-                free_token_node(node);
-            }
-        }
-    }
+        free_if_orphan_node(node, vars);
 }
 
 /*
@@ -318,7 +337,7 @@ int improved_tokenize(char *input, t_vars *vars)
             }
              fprintf(stderr, "[TOK_DBG] Delimiter Validation SUCCEEDED for '%s'. Stored: '%s', Expand=%d\n",
                      raw_delimiter_str, vars->pipes->heredoc_delim, vars->pipes->hd_expand);
-            maketoken_with_type(raw_delimiter_str, TYPE_ARGS, vars);
+            maketoken(raw_delimiter_str, TYPE_ARGS, vars);
             free(raw_delimiter_str);
             heredoc_expecting_delim = 0;
             fprintf(stderr, "[TOK_DBG] Delimiter Processed: ExpectDelim reset to 0.\n");
@@ -345,7 +364,7 @@ int improved_tokenize(char *input, t_vars *vars)
                 if (token_type == TYPE_HEREDOC)
 				{
                     fprintf(stderr, "[TOK_DBG] Operator is HEREDOC (<<)\n");
-                    maketoken_with_type("<<", TYPE_HEREDOC, vars);
+                    maketoken("<<", TYPE_HEREDOC, vars);
                     vars->pos += 2;
                     vars->start = vars->pos;
                     heredoc_expecting_delim = 1;
@@ -453,7 +472,9 @@ int	build_token_linklist(t_vars *vars, t_node *node)
         {
             cmd_node->next = next_node;
             next_node->prev = cmd_node;
-        } else {
+        }
+		else
+		{
             cmd_node->next = NULL;
             vars->current = cmd_node;
         }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:53:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 14:51:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,6 @@ t_pipe	*init_pipes(void)
     pipes->last_in_redir = NULL;
     pipes->last_out_redir = NULL;
     pipes->cmd_redir = NULL;
-    pipes->pipe_at_end = 0;
     return (pipes);
 }
 
@@ -119,7 +118,6 @@ void	reset_pipe_vars(t_vars *vars)
 	vars->pipes->last_in_redir = NULL;
 	vars->pipes->last_out_redir = NULL;
 	vars->pipes->cmd_redir = NULL;
-	vars->pipes->pipe_at_end = 0;
 }
 
 /*

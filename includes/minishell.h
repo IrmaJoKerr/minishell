@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 08:35:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 16:28:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,9 +186,7 @@ Has variables tracking:
 typedef struct s_pipe
 {
 	int			pipe_count;     // Number of pipes in the chain
-	int			*pipe_fds;      // Array of pipe file descriptors
 	pid_t		*pids;          // Array of process IDs
-	int			*status;        // Status for each process
 	int			saved_stdin;    // Saved standard input
 	int			saved_stdout;   // Saved standard output
 	int			heredoc_fd;     // File descriptor for heredoc if present
@@ -204,7 +202,6 @@ typedef struct s_pipe
 	t_node      *last_in_redir;   // Last input redirection encountered
 	t_node      *last_out_redir;  // Last output redirection encountered
 	t_node		*cmd_redir;      // Command node being targeted for redirection
-	int			pipe_at_end;     // Flag indicating pipe at end (requires more input)
 } t_pipe;
 
 /*
@@ -244,7 +241,8 @@ typedef struct s_vars
 	t_pipe			*pipes;
 } t_vars;
 
-/* Builtin commands functions. In srcs/builtins directory. */
+/* Builtin commands functions.
+In srcs/builtins directory. */
 
 /*
 builtin_cd.c - Builtin "cd" command. Changes the current working directory.
@@ -583,7 +581,6 @@ void cleanup_expansion_mem(char *token, char *expanded_val);
 Minishell program entry point functions.
 In minishell.c
 */
-void		print_tokens(t_node *head); // Debug function
 char		*reader(void);
 char		*handle_quote_completion(char *cmd, t_vars *vars);
 void		build_and_execute(t_vars *vars);
@@ -599,7 +596,6 @@ int			main(int ac, char **av, char **envp);
 Operator handling.
 In operators.c
 */
-
 int			is_operator_token(t_tokentype type);
 void		handle_string(char *input, t_vars *vars);
 int			is_single_token(char *input, int pos, int *moves);
@@ -623,6 +619,9 @@ char		**dup_env(char **envp);
 Pipe analysis functions.
 In pipe_analysis.c
 */
+int			check_pipe_at_start(t_vars *vars);
+int			check_consecutive_pipes(t_vars *vars);
+int			check_pipe_completion_needed(t_vars *vars);
 int			analyze_pipe_syntax(t_vars *vars);
 char		*complete_pipe_cmd(char *command, t_vars *vars);
 
@@ -630,7 +629,15 @@ char		*complete_pipe_cmd(char *command, t_vars *vars);
 Pipes main functions.
 In pipes.c
 */
+void		exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+void		exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+int			fork_left_child(t_node *left_cmd, int pipe_fd[2], t_vars *vars
+					, pid_t *left_pid_ptr);
+int			init_pipe_exec(int pipe_fd[2], int *r_status_ptr
+					, int *l_status_ptr);
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
+char		*read_until_complete(void);
+int			append_to_cmdline(char **cmd_ptr, const char *addition);
 int			handle_unfinished_pipes(char **processed_cmd, t_vars *vars);
 
 /*
@@ -681,6 +688,12 @@ char		*get_quoted_str(char *input, t_vars *vars, int *quote_type);
 t_node		*process_quoted_str(char **content_ptr, int quote_type
 				,t_vars *vars);
 int			merge_quoted_token(char *input, char *content, t_vars *vars);
+void		link_file_to_redir(t_node *redir_node, t_node *file_node
+					, t_vars *vars);
+int			token_cleanup_error(char *content, t_vars *vars);
+void		cleanup_and_process_adj(char *content, char *input, t_vars *vars);
+int			handle_redir_target(char *content, t_vars *vars);
+int			make_quoted_cmd(char *content, char *input, t_vars *vars);
 int 		process_quote_char(char *input, t_vars *vars, int is_redir_target);
 t_node		*find_last_redir(t_vars *vars);
 int			validate_single_redir(t_node *redir_node, t_vars *vars);
@@ -699,7 +712,6 @@ void 		process_redir_node(t_node *redir_node, t_vars *vars);
 Redirection processing functions.
 In process_redirect.c
 */
-int			count_tokens(t_node *head); // DEBUG FUNCTION
 t_node		*proc_redir(t_vars *vars);
 void		reset_redir_tracking(t_pipe *pipes);
 void		build_redir_ast(t_vars *vars);
@@ -708,7 +720,7 @@ t_node		*find_redir_chain_head(t_node *current, t_node *last_cmd);
 void		link_redirs_pipes(t_vars *vars);
 void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
+void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir); //REMOVE DEBUG PRINTS LATER
 int			is_valid_redir_node(t_node *current);
 
 /*
@@ -726,6 +738,8 @@ Redirection handling.
 In redirect.c
 */
 int			is_redirection(t_tokentype type);
+void		restore_fd(int *saved_fd_ptr, int target_fd);
+void		reset_pipe_redir_state(t_pipe *pipes);
 void		reset_redirect_fds(t_vars *vars);
 t_node		*get_next_redir(t_node *current, t_node *cmd);
 
@@ -760,7 +774,8 @@ Tokenizing functions.
 In tokenize.c
 */
 void 		set_token_type(t_vars *vars, char *input);
-void		maketoken_with_type(char *token, t_tokentype type, t_vars *vars);
+void		free_if_orphan_node(t_node *node, t_vars *vars); //REMOVE DEBUG PRINTS LATER
+void		maketoken(char *token, t_tokentype type, t_vars *vars); //REMOVE DEBUG PRINTS LATER
 // int 		is_adjacent_token(char *input, int pos);
 // int			init_quote_processing(char *input, int *i, int *is_adjacent, char *quote_char);
 int			process_operator_char(char *input, int *i, t_vars *vars);

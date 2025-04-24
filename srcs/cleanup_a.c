@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 10:06:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 14:55:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,8 @@ void cleanup_pipes(t_pipe *pipes)
 {
 	if (!pipes)
 		return ;
-	if (pipes->pipe_fds)
-		free(pipes->pipe_fds);
 	if (pipes->pids)
 		free(pipes->pids);
-	if (pipes->status)
-		free(pipes->status);
 	if (pipes->saved_stdin > 2)
 		close(pipes->saved_stdin);
 	if (pipes->saved_stdout > 2)

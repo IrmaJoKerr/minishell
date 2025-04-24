@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 08:44:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 11:02:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,63 +35,85 @@ int	is_redirection(t_tokentype type)
 }
 
 /*
-Resets saved standard file descriptors.
+Restores a standard file descriptor (like stdin/stdout) from a saved fd.
+- Checks if the saved_fd is valid (> 2).
+- Duplicates saved_fd onto target_fd (e.g., STDIN_FILENO).
+- Closes the saved_fd.
+- Logs debug/error messages.
+- Resets the saved_fd value to -1 via the pointer.
+Works with reset_redirect_fds() to restore original file descriptors.
+*/
+void	restore_fd(int *saved_fd_ptr, int target_fd)
+{
+    if (*saved_fd_ptr > 2)
+    {
+		int result;
+		
+        result = dup2(*saved_fd_ptr, target_fd);
+        if (result == -1)
+        {
+			perror("dup2");
+        }
+        close(*saved_fd_ptr);
+        *saved_fd_ptr = -1;
+    }
+}
+
+/*
+Resets specific redirection tracking variables within the t_pipe structure.
+Works with reset_redirect_fds() to clean up redirection state after
+command execution or FD restoration.
+*/
+void	reset_pipe_redir_state(t_pipe *pipes)
+{
+	if(!pipes)
+		return ;
+    pipes->out_mode = OUT_MODE_NONE;
+    pipes->current_redirect = NULL;
+    pipes->last_in_redir = NULL;
+    pipes->last_out_redir = NULL;
+    pipes->cmd_redir = NULL;
+}
+
+/*
+Resets saved standard file descriptors and redirection state.
 - Restores original stdin and stdout if they were changed.
-- Closes any open heredoc file descriptor.
-- Updates the pipes state in vars.
+- Closes any open heredoc or general redirection file descriptors.
+- Resets internal redirection tracking variables.
 Works with execute_cmd() to clean up after command execution.
 */
 void	reset_redirect_fds(t_vars *vars)
 {
-	fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring stdin from fd=%d, stdout from fd=%d\n", 
-        vars->pipes ? vars->pipes->saved_stdin : -999,
-        vars->pipes ? vars->pipes->saved_stdout : -999);
-	fprintf(stderr, "[DEBUG] reset_redirect_fds: Current STDIN isatty=%d, STDOUT isatty=%d\n",
-        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
-	if (!vars || !vars->pipes)
-		return ;
-	if (vars->pipes->saved_stdin > 2)
+    if (!vars || !vars->pipes)
+        return ;
+    restore_fd(&vars->pipes->saved_stdin, STDIN_FILENO);
+    restore_fd(&vars->pipes->saved_stdout, STDOUT_FILENO);
+    if (vars->pipes->heredoc_fd >= 0)
     {
-        fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring STDIN from fd=%d to fd=%d\n", 
-            vars->pipes->saved_stdin, STDIN_FILENO);
-        int result = dup2(vars->pipes->saved_stdin, STDIN_FILENO);
-        fprintf(stderr, "[DEBUG] reset_redirect_fds: dup2 result for STDIN=%d\n", result);
-        close(vars->pipes->saved_stdin);
-        vars->pipes->saved_stdin = -1;
+        close(vars->pipes->heredoc_fd);
+        vars->pipes->heredoc_fd = -1;
     }
-    if (vars->pipes->saved_stdout > 2)
+    if (vars->pipes->redirection_fd > 2)
     {
-        fprintf(stderr, "[DEBUG] reset_redirect_fds: Restoring STDOUT from fd=%d to fd=%d\n", 
-            vars->pipes->saved_stdout, STDOUT_FILENO);
-        int result = dup2(vars->pipes->saved_stdout, STDOUT_FILENO);
-        fprintf(stderr, "[DEBUG] reset_redirect_fds: dup2 result for STDOUT=%d\n", result);
-        if (result == -1)
-        {
-            fprintf(stderr, "[ERROR] reset_redirect_fds: Failed to restore stdout: %s\n", 
-                strerror(errno));
-        }
-        close(vars->pipes->saved_stdout);
-        vars->pipes->saved_stdout = -1;
+        close(vars->pipes->redirection_fd);
+        vars->pipes->redirection_fd = -1;
     }
-	if (vars->pipes->heredoc_fd >= 0)
-	{
-    	close(vars->pipes->heredoc_fd);
-    	vars->pipes->heredoc_fd = -1;
-	}
-	if (vars->pipes->redirection_fd > 2)
-	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
-	}
-	vars->pipes->out_mode = OUT_MODE_NONE;
-	vars->pipes->current_redirect = NULL;
-	vars->pipes->last_in_redir = NULL;
-	vars->pipes->last_out_redir = NULL;
-	vars->pipes->cmd_redir = NULL;
-	fprintf(stderr, "[DEBUG] reset_redirect_fds: After restoration, STDIN isatty=%d, STDOUT isatty=%d\n",
-        isatty(STDIN_FILENO), isatty(STDOUT_FILENO));
+    reset_pipe_redir_state(vars->pipes);
 }
 
+/*
+Finds the next redirection node associated with a specific command.
+- Iterates through the token list starting from the node after 'current'.
+- Checks if a node is a redirection type using is_redirection().
+- Checks if the redirection targets the specified 'cmd' node using
+  get_redir_target().
+Returns:
+- Pointer to the next t_node that is a redirection for 'cmd'.
+- NULL if no further redirections for 'cmd' are found after 'current'.
+Works with proce_redir_chain() redirection processing logic to handle
+multiple redirections applied to the same command.
+(e.g., cmd < in1 > out1 < in2).
+*/
 t_node	*get_next_redir(t_node *current, t_node *cmd)
 {
     t_node	*next;

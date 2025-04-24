@@ -6,13 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 06:16:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 14:30:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-
 
 /*
 Skips specified number of lines in an open file.
@@ -21,7 +19,6 @@ Skips specified number of lines in an open file.
 - Ensures proper memory management during skipping.
 - Stops if end of file is reached before count is complete.
 Works with trim_history().
-
 Example: For a history with 1000 lines
 - skip_lines(fd, 500) skips first 500 entries
 - Positions file pointer at 501st entry
@@ -51,7 +48,6 @@ Opens history file with appropriate access mode.
 Returns:
 File descriptor for history file or -1 on error.
 Works with load_history() and save_history().
-
 Example: init_history_fd(O_RDONLY)
 - Checks if HISTORY_FILE exists and is readable
 - Opens it for reading if exists and accessible

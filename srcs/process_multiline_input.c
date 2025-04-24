@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:12:20 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 06:52:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 15:13:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,80 +22,14 @@ Returns:
 - 1 on successful processing.
 - 0 on failure (e.g., syntax error, file I/O error).
 */
-// int	process_multiline_input(char *input, t_vars *vars)
-// {
-// 	char	*first_line_end;
-// 	char	*content_start;
-// 	int 	first_line_len;
-// 	int 	status;
-
-// 	DBG_PRINTF(DEBUG_HEREDOC, "process_multiline_input: START\n");
-// 	first_line_end = ft_strchr(input, '\n');
-// 	if (!first_line_end)
-// 	{
-// 		DBG_PRINTF(DEBUG_HEREDOC, "No newline found, processing as single line.\n");
-// 		process_command(input, vars);
-// 		return (1);
-// 	}
-// 	first_line_len = first_line_end - input;
-// 	content_start = first_line_end + 1;
-// 	reset_shell(vars);
-// 	status = tokenize_first_line(input, first_line_end, vars);
-// 	if (!status || vars->error_code == ERR_SYNTAX)
-// 		return (0);
-// 	if (vars->pipes->heredoc_delim != NULL)
-// 	{
-// 		DBG_PRINTF(DEBUG_HEREDOC, "HEREDOC path entered. Delim='%s'\n", vars->pipes->heredoc_delim);
-// 		int	write_fd;
-// 		int found_in_buf;
-// 		status = chk_hd_first_line(input, first_line_len, vars);
-// 		if (!status)
-// 			return (0);
-// 		write_fd = open_hd_tmp_buf(vars);
-// 		if (write_fd == -1)
-// 			return (0);
-// 		found_in_buf = proc_hd_buffer(write_fd, content_start, vars);
-// 		if (found_in_buf == -1)
-// 		{
-// 			 close(write_fd);
-// 			 unlink(TMP_BUF);
-// 			 return (0);
-// 		}
-// 		status = handle_interactive_hd(write_fd, found_in_buf, vars);
-// 		if (status == -1)
-// 		{
-// 			close(write_fd);
-// 			unlink(TMP_BUF);
-// 			return (0);
-// 		}
-// 		return hd_proc_end(write_fd, input, first_line_end, vars);
-// 	}
-// 	else
-// 	{
-// 		DBG_PRINTF(DEBUG_HEREDOC, "NON-HEREDOC path entered.\n");
-// 		return process_standard(input, vars);
-// 	}
-// }
-/*
-Processes multiline input strings.
-- If no newline is found, treats as single-line input.
-- If the first line contains a heredoc (<<), processes heredoc content
-  into TMP_BUF and sets hd_text_ready=1 before executing the command.
-- Otherwise, writes the full input to TMP_BUF and calls tmp_buf_reader().
-Returns:
-- 1 on successful processing.
-- 0 on failure (e.g., syntax error, file I/O error).
-*/
 int	process_multiline_input(char *input, t_vars *vars)
 {
     char	*first_line_end;
     char	*content_start;
 	
-    DBG_PRINTF(DEBUG_HEREDOC, "process_multiline_input: START\n");
     first_line_end = ft_strchr(input, '\n');
     if (!first_line_end)
     {
-        DBG_PRINTF(DEBUG_HEREDOC, "No newline found, processing as single line.\n");
         process_command(input, vars);
         return (1);
     }
@@ -108,7 +42,6 @@ int	process_multiline_input(char *input, t_vars *vars)
                                   content_start, vars);
     else
     {
-        DBG_PRINTF(DEBUG_HEREDOC, "NON-HEREDOC path entered.\n");
         return (process_standard(input, vars));
     }
 }
@@ -189,7 +122,6 @@ int	tokenize_first_line(char *input, char *nl_ptr, t_vars *vars)
 
 	original_char = *nl_ptr;
 	*nl_ptr = '\0';
-	DBG_PRINTF(DEBUG_HEREDOC, "Tokenizing first line: '%s'\n", input);
 	result = improved_tokenize(input, vars);
 	*nl_ptr = original_char;
 	return (result);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 08:28:42 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 08:42:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 14:24:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,10 +124,8 @@ Works with redirection setup to validate file operations.
 */
 int	chk_permissions(char *filename, int mode, t_vars *vars)
 {
-	int result;
+	int	result;
 	
-    fprintf(stderr, "DEBUG: Checking permissions for file: '%s', mode: %d\n",
-            filename, mode);
     if (mode == O_RDONLY)
 	{
 		result = chk_read_permission(filename, vars);

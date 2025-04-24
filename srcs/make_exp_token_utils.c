@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 19:37:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 16:29:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ int	new_exp_token(t_vars *vars, char *expanded_val, char *token)
 		return (0);
 	build_token_linklist(vars, exp_node);
 	free(token);
+	free(expanded_val);
 	return (1);
 }
 

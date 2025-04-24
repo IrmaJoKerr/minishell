@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 05:47:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 15:19:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,8 +128,10 @@ char	*append_substr(char *dest, char *src, int start, int len)
 
 /*
 Extracts quoted content from input.
-Returns the quoted string (or NULL on error).
 Sets the quote_type to TYPE_SINGLE_QUOTE or TYPE_DOUBLE_QUOTE.
+Returns:
+- The quoted string.
+- NULL on error.
 */
 char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 {
@@ -215,103 +217,153 @@ int	merge_quoted_token(char *input, char *content, t_vars *vars)
 }
 
 /*
-Process a character within quotes in the input string
-Handles extraction, expansion, and creation of tokens
-Return:
- - 1 on success.
- - 0 on failure.
+Links a file node into the token list after a redirection node.
+- Sets redirection->right pointer to the file node
+- Handles proper linked list connections
+- Updates vars->current pointer
+Works with handle_redir_target().
 */
-int process_quote_char(char *input, t_vars *vars, int is_redir_target)
+void	link_file_to_redir(t_node *redir_node, t_node *file_node, t_vars *vars)
 {
-    int     quote_type;
-    char    *content;
-    t_node  *cmd_node;
-    t_node  *redir_node;
+    redir_node->right = file_node;
+    if (redir_node->next)
+    {
+        file_node->next = redir_node->next;
+        redir_node->next->prev = file_node;
+    }
+    redir_node->next = file_node;
+    file_node->prev = redir_node;
+    vars->current = file_node;
+}
 
-    fprintf(stderr, "DEBUG[process_quote_char]: Processing quote%s\n",
-        is_redir_target ? " as redirection target" : "");
+/*
+ Handles failure when merging quoted tokens
+- Reports error message
+- Frees content memory
+- Resets adjacency state
+Returns:
+- 0 to indicate error
+*/
+int	token_cleanup_error(char *content, t_vars *vars)
+{
+    free(content);
+    process_adj(NULL, vars);
+    return (0);
+}
+
+/*
+Cleans up after token processing and handles adjacency states.
+- Frees content memory.
+- Processes right adjacency if needed.
+- Resets adjacency state.
+*/
+void	cleanup_and_process_adj(char *content, char *input, t_vars *vars)
+{
+    free(content);
+    if (vars->adj_state[1])
+        process_right_adj(input, vars);
+    process_adj(NULL, vars);
+}
+
+/*
+Handles quoted text as a redirection target.
+- Finds the relevant redirection node in the token list.
+- Creates a file node with the quoted content.
+- Links the file node to the redirection operator.
+- Sets error code if no valid redirection is found.
+Returns:
+- 1 on success (content is freed)
+- 0 on failure (content is freed)
+Works with process_quote_char() for handling quoted filenames.
+Example:
+- For "echo > "file.txt"", creates file node for "file.txt".
+*/
+int	handle_redir_target(char *content, t_vars *vars)
+{
+    t_node	*redir_node;
+    t_node	*file_node;
+
+    redir_node = find_last_redir(vars);
+    if (redir_node && is_redirection(redir_node->type))
+    {
+        file_node = initnode(TYPE_ARGS, content);
+        if (!file_node)
+        {
+            free(content);
+            return (0);
+        }
+        link_file_to_redir(redir_node, file_node, vars);
+        free(content);
+        return (1);
+    }
+    free(content);
+    vars->error_code = ERR_SYNTAX;
+    return (0);
+}
+
+/*
+Creates a new command from quoted content
+- Creates command node 
+- Links to token list
+- Handles token adjacency
+Returns:
+- 1 on success (takes ownership of content)
+- 0 on failure (frees content)
+*/
+int	make_quoted_cmd(char *content, char *input, t_vars *vars)
+{
+    t_node	*cmd_node;
+    
+    cmd_node = initnode(TYPE_CMD, content);
+    if (!cmd_node)
+    {
+        return (token_cleanup_error(content, vars));
+    }
+    build_token_linklist(vars, cmd_node);
+    cleanup_and_process_adj(content, input, vars);
+    return (1);
+}
+
+/*
+Master control function for processing quoted text in shell input.
+This function controls the complete handling of quoted strings:
+ - Extracts content from between quotes (single or double).
+ - Handles variable expansion for double-quoted text.
+ - Creates appropriate token structures based on context.
+ - Processes special cases like redirection targets (">file.txt").
+ - Manages token adjacency and merging.
+Return:
+ - 1 on successful processing.
+ - 0 on extraction failure or other errors.
+Example flows:
+ - "echo hello" -> Creates command with argument.
+ - echo "hello world" -> Appends argument to existing command.
+ - echo > "file.txt" -> Creates file node for redirection.
+*/
+int	process_quote_char(char *input, t_vars *vars, int is_redir_target)
+{
+    int		quote_type;
+    char	*content;
+    t_node	*cmd_node;
+
     content = get_quoted_str(input, vars, &quote_type);
     if (!content)
         return (0);
-    fprintf(stderr, "DEBUG: process_quote_char: Quote content='%s', redir_target=%d\n",
-        content, is_redir_target);
     if (is_redir_target)
-    {
-        redir_node = find_last_redir(vars);
-        if (redir_node && is_redirection(redir_node->type))
-        {
-            if (redir_node->type == TYPE_HEREDOC && vars && vars->pipes)
-            {
-                fprintf(stderr, "[DEBUG] Heredoc delimiter is quoted. Expansion flag was set to %d during tokenization.\n", vars->pipes->hd_expand);
-            }
-            fprintf(stderr, "DEBUG: Associating quoted filename '%s' with redirection type %d\n",
-                content, redir_node->type);
-            t_node *file_node = initnode(TYPE_ARGS, content);
-            if (!file_node)
-            {
-                free(content);
-                return (0);
-            }
-            redir_node->right = file_node;
-            if (redir_node->next)
-            {
-                file_node->next = redir_node->next;
-                redir_node->next->prev = file_node;
-            }
-            redir_node->next = file_node;
-            file_node->prev = redir_node;
-            vars->current = file_node;
-            fprintf(stderr, "DEBUG: Added file node to token list after redirection node\n");
-            free(content);
-            return (1);
-        }
-        fprintf(stderr, "[ERROR] process_quote_char: Quoted string marked as redir target, but no preceding redirection found.\n");
-        free(content);
-        // Maybe set vars->error_code = ERR_SYNTAX; ?
-        return (0); // Indicate error
-    }
+        return handle_redir_target(content, vars);
     cmd_node = process_quoted_str(&content, quote_type, vars);
     if (!cmd_node && vars->adj_state[0] == 0)
-    {
-        cmd_node = initnode(TYPE_CMD, content);
-        if (!cmd_node)
-		{
-            free(content);
-            process_adj(NULL, vars);
-            return (0);
-        }
-        if (build_token_linklist(vars, cmd_node))
-		{
-             // If build_token_linklist freed the node (e.g., merged), content is already handled.
-             // This path might need review depending on build_token_linklist behavior.
-        } else
-		{
-             // Node was linked, content is now owned by the node.
-        }
-        free(content); // Content is now owned/copied by the node or was freed by merge
-        if (vars->adj_state[1])
-            process_right_adj(input, vars);
-        process_adj(NULL, vars);
-        return (1);
-    }
+        return make_quoted_cmd(content, input, vars);
     else if (!cmd_node)
     {
         if (!merge_quoted_token(input, content, vars))
-        {
-             fprintf(stderr, "[ERROR] process_quote_char: Failed to merge quoted token and no command node found.\n");
-             free(content);
-             process_adj(NULL, vars);
-             return (0);
-        }
+            return token_cleanup_error(content, vars);
         return (1);
     }
     if (!merge_quoted_token(input, content, vars))
     {
         append_arg(cmd_node, content, quote_type);
-        free(content);
-        if (vars->adj_state[1])
-            process_right_adj(input, vars);
-        process_adj(NULL, vars);
+        cleanup_and_process_adj(content, input, vars);
     }
     return (1);
 }
@@ -366,7 +418,7 @@ Returns:
 */
 int	validate_single_redir(t_node *redir_node, t_vars *vars)
 {
-    t_node *next;
+    t_node	*next;
     
     next = redir_node->next;
     if (!next)
