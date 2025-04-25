@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 16:44:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 20:47:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,80 +49,57 @@ Checks if a node is orphaned (not properly linked in the token list)
 and frees it if necessary to prevent memory leaks.
 This function is called when a node is created and added to the token list.
 */
-// void	free_if_orphan_node(t_node *node, t_vars *vars)
-// {
-// 	t_node	*check;
-// 	int		found_in_list;
-	
-// 	if (node != vars->head && node != vars->current)
-// 	{
-// 		found_in_list = 0;
-// 		check = vars->head;
-// 		while (check && !found_in_list)
-// 		{
-// 			if (check == node)
-// 				found_in_list = 1;
-// 			check = check->next;	
-// 		}
-// 		if (!found_in_list)
-// 		{
-// 			// fprintf(stderr, "DEBUG[maketoken]: Freeing orphaned node not in list. "
-// 			//         "node=%p, type=%d, content='%s'\n",
-// 			//         (void*)node, node->type, 
-// 			//         (node->args && node->args[0]) ? node->args[0] : "NULL");
-// 			free_token_node(node);
-// 		}
-// 	}
-// }
-void free_if_orphan_node(t_node *node, t_vars *vars)
+void	free_if_orphan_node(t_node *node, t_vars *vars)
 {
-    fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Entry with node=%p, type=%d\n",
-            (void*)node, node->type);
-    
-    if (node == vars->head || node == vars->current) {
-        fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Not orphaned (head/current), returning\n");
-        return;
-    }
-    
-    t_node *check;
-    int found_in_list = 0;
-    
-    check = vars->head;
-    while (check && !found_in_list) {
-        if (check == node) {
-            found_in_list = 1;
-            fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Node found in list\n");
-        }
-        check = check->next;    
-    }
-    
-    if (!found_in_list) {
-        fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Orphaned node detected, freeing\n");
-        free_token_node(node);
-    }
+	t_node	*check;
+	int		found_in_list;
+
+	found_in_list = 0;
+	if (node == vars->head || node == vars->current)
+	{
+		return ;
+	}
+	check = vars->head;
+	while (check && !found_in_list)
+	{
+		if (check == node)
+		{
+			found_in_list = 1;
+		}
+		check = check->next;
+	}
+	if (!found_in_list)
+	{
+		free_token_node(node);
+	}
 }
 
-// Helper function to count arguments in a command
-int count_args(char **args)
+// Helper function to count arguments in a command //DEBUG
+int	count_args(char **args)
 {
-    int count = 0;
-    if (!args) return 0;
-    
-    while (args[count]) {
-        count++;
-    }
-    return count;
+	int	count;
+
+	count = 0;
+	if (!args)
+		return (0);
+	while (args[count])
+	{
+		count++;
+	}
+	return (count);
 }
 
-void debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars)
+/*DEBUG FUNCTION*/
+void	debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars)
 {
-    static int token_count = 0;
-    
-    fprintf(stderr, "[TOKEN_CREATE] #%d From: %s\n", ++token_count, function_name);
-    fprintf(stderr, "  - Token: '%s', Type: %d\n", token, type);
-    fprintf(stderr, "  - Prev token: %s\n", vars->current ? 
-            (vars->current->args && vars->current->args[0] ? 
-             vars->current->args[0] : "NULL") : "NULL");
+	static int	token_count = 0;
+
+	token_count = 0;
+	fprintf(stderr, "[TOKEN_CREATE] #%d From: %s\n", ++token_count, function_name);
+	fprintf(stderr, "  - Token: '%s', Type: %d\n", token, type);
+	fprintf(stderr, "  - Prev token: %s\n", vars->current ?
+		(vars->current->args && vars->current->args[0] ?
+			vars->current->args[0] : "NULL") : "NULL");
 }
 
 /*
@@ -138,45 +115,28 @@ Example: When tokenizing "echo hello"
 void	maketoken(char *token, t_tokentype type, t_vars *vars)
 {
 	t_node	*node;
+	t_node	*curr;
 	int		node_freed;
 
-	fprintf(stderr, "[TOK_DBG] maketoken: Entry with token='%s', type=%d\n", 
-		token ? token : "NULL", type);
 	if (!token || !vars)
 	{
-        fprintf(stderr, "[TOK_DBG] maketoken: Early return, token=%p, vars=%p\n", 
-                token, vars);
-        return;
-    }
+		return ;
+	}
 	node = initnode(type, token);
 	if (!node)
 	{
-        fprintf(stderr, "[TOK_DBG] maketoken: initnode failed for '%s'\n", token);
-        return;
-    }
-	fprintf(stderr, "[TOK_DBG] maketoken: Created node=%p, type=%d, content='%s'\n",
-            (void*)node, node->type, node->args[0]);
-    
-    fprintf(stderr, "[TOK_DBG] maketoken: Calling build_token_linklist\n");
-    node_freed = build_token_linklist(vars, node);
-    
-    fprintf(stderr, "[TOK_DBG] maketoken: build_token_linklist returned %d (1=node_freed)\n", 
-            node_freed);
-    
-	// node_freed = build_token_linklist(vars, node);
+		return ;
+	}
+	node_freed = build_token_linklist(vars, node);
 	if (!node_freed)
 	{
-        fprintf(stderr, "[TOK_DBG] maketoken: Calling free_if_orphan_node\n");
-        free_if_orphan_node(node, vars);
-    }
-	fprintf(stderr, "[TOK_DBG] maketoken: Current token list:");
-    t_node *curr = vars->head;
-    while (curr) {
-        fprintf(stderr, " [%d:%s]", curr->type, 
-                (curr->args && curr->args[0]) ? curr->args[0] : "NULL");
-        curr = curr->next;
-    }
-    fprintf(stderr, "\n");
+		free_if_orphan_node(node, vars);
+	}
+	curr = vars->head;
+	while (curr)
+	{
+		curr = curr->next;
+	}
 }
 
 /*
@@ -350,25 +310,11 @@ Helper function to link a new token node to the current node.
 // 	node->prev = vars->current;
 // 	vars->current = node;
 // }
-void token_link(t_node *node, t_vars *vars)
+void	token_link(t_node *node, t_vars *vars)
 {
-    fprintf(stderr, "[TOK_DBG] token_link: Entry with node=%p, type=%d, content='%s'\n",
-            (void*)node, node->type, node->args[0]);
-    
-    fprintf(stderr, "[TOK_DBG] token_link: Before - current=%p\n", 
-            (void*)vars->current);
-    
-    // Check if this is an operator token
-    if (is_operator_token(node->type)) {
-        fprintf(stderr, "[TOK_DBG] token_link: Linking OPERATOR token\n");
-    }
-    
-    vars->current->next = node;
-    node->prev = vars->current;
-    vars->current = node;
-    
-    fprintf(stderr, "[TOK_DBG] token_link: After - current=%p, prev=%p\n",
-            (void*)vars->current, (void*)vars->current->prev);
+	vars->current->next = node;
+	node->prev = vars->current;
+	vars->current = node;
 }
 
 /*
@@ -400,41 +346,26 @@ Returns:
 // 	free_token_node(arg_node);
 // 	return (1);
 // }
-int merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
+int	merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
 {
-    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Entry with arg_node=%p, content='%s'\n",
-            (void*)arg_node, arg_node->args[0]);
-    
-    t_node *cmd_node;
-    t_node *next_node;
+	t_node	*cmd_node;
+	t_node	*next_node;
 
-    cmd_node = vars->current;
-    next_node = arg_node->next;
-    
-    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: cmd_node=%p, args_count=%d\n",
-            (void*)cmd_node, count_args(cmd_node->args));
-    
-    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Calling append_arg with '%s'\n",
-            arg_node->args[0]);
-            
-    append_arg(cmd_node, arg_node->args[0], 0);
-    
-    if (next_node) {
-        fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Linking with next_node=%p\n",
-                (void*)next_node);
-        cmd_node->next = next_node;
-        next_node->prev = cmd_node;
-    }
-    else {
-        fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: No next node, cmd_node becomes current\n");
-        cmd_node->next = NULL;
-        vars->current = cmd_node;
-    }
-    
-    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Freeing arg_node=%p\n", 
-            (void*)arg_node);
-    free_token_node(arg_node);
-    return (1);
+	cmd_node = vars->current;
+	next_node = arg_node->next;
+	append_arg(cmd_node, arg_node->args[0], 0);
+	if (next_node)
+	{
+		cmd_node->next = next_node;
+		next_node->prev = cmd_node;
+	}
+	else
+	{
+		cmd_node->next = NULL;
+		vars->current = cmd_node;
+	}
+	free_token_node(arg_node);
+	return (1);
 }
 
 /*
@@ -470,44 +401,31 @@ Example: When adding command node
 // 		return (0);
 // 	}
 // }
-int build_token_linklist(t_vars *vars, t_node *node)
+int	build_token_linklist(t_vars *vars, t_node *node)
 {
-    fprintf(stderr, "[TOK_DBG] build_token_linklist: Entry with node=%p, type=%d, content='%s'\n",
-            (void*)node, node->type, node->args[0]);
-    
-    if (!vars || !node) {
-        fprintf(stderr, "[TOK_DBG] build_token_linklist: Early return, vars=%p, node=%p\n", 
-                vars, node);
-        return (0);
-    }
-    
-    if (!vars->head) {
-        fprintf(stderr, "[TOK_DBG] build_token_linklist: First token in list\n");
-        vars->head = node;
-        vars->current = node;
-        return (0);
-    }
-    
-    fprintf(stderr, "[TOK_DBG] build_token_linklist: Current head=%p, current=%p\n",
-            (void*)vars->head, (void*)vars->current);
-    
-    fprintf(stderr, "[TOK_DBG] build_token_linklist: Current->type=%d, node->type=%d\n",
-            vars->current->type, node->type);
-    
-    // Check if node after pipe should become a command
-    if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS) {
-        fprintf(stderr, "[TOK_DBG] build_token_linklist: Converting ARGS to CMD after PIPE\n");
-        node->type = TYPE_CMD;
-    }
-    
-    // Check if this is an argument that should be merged with a command
-    if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD) {
-        fprintf(stderr, "[TOK_DBG] build_token_linklist: Merging arg with command\n");
-        return (merge_arg_with_cmd(vars, node)); // Returns 1 (node freed)
-    }
-    else {
-        fprintf(stderr, "[TOK_DBG] build_token_linklist: Linking node to list\n");
-        token_link(node, vars);
-        return (0); // Node not freed
-    }
+	if (!vars || !node)
+	{
+		return (0);
+	}
+	if (!vars->head)
+	{
+		vars->head = node;
+		vars->current = node;
+		return (0);
+	}
+	if (vars->current && vars->current->type == TYPE_PIPE
+		&& node->type == TYPE_ARGS)
+	{
+		node->type = TYPE_CMD;
+	}
+	if (node->type == TYPE_ARGS && vars->current
+		&& vars->current->type == TYPE_CMD)
+	{
+		return (merge_arg_with_cmd(vars, node));
+	}
+	else
+	{
+		token_link(node, vars);
+		return (0);
+	}
 }

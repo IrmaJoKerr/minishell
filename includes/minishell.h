@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 16:46:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 20:51:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -687,7 +687,6 @@ t_node		*get_redir_target(t_node *current, t_node *last_cmd);
 void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir); //REMOVE DEBUG PRINTS LATER
 int			is_valid_redir_node(t_node *current);
 
-
 /*
 Quote handling.
 In quotes.c
@@ -747,8 +746,8 @@ In tokenize.c
 void		set_token_type(t_vars *vars, char *input);
 int			count_args(char **args); //DEBUG
 void		debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars);// DEBUG
-void		free_if_orphan_node(t_node *node, t_vars *vars); //REMOVE DEBUG PRINTS LATER
-void		maketoken(char *token, t_tokentype type, t_vars *vars); //REMOVE DEBUG PRINTS LATER
+void		free_if_orphan_node(t_node *node, t_vars *vars);
+void		maketoken(char *token, t_tokentype type, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
 void		handle_text(char *input, t_vars *vars);
 void		tokenize_quote(char *input, t_vars *vars);

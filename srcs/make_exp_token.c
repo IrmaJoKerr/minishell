@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:02:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 20:54:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,16 @@ int	addon_quo_type_arr(int *dest, int *src, int new_len)
 	return (j);
 }
 
+/*
+Processes expansion token based on adjacency state.
+- Handles token joining with previous tokens if left adjacent (adj_state[0])
+- Creates new expansion token if not joining with previous token
+- Processes right adjacency if needed (adj_state[1])
+- Cleans up adjacency state after processing
+Returns:
+- 1 on success
+- 0 on failure
+*/
 int	sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
 				, char *token)
 {
