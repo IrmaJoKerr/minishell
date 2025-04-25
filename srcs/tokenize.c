@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 20:47:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:07:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,34 +72,6 @@ void	free_if_orphan_node(t_node *node, t_vars *vars)
 	{
 		free_token_node(node);
 	}
-}
-
-// Helper function to count arguments in a command //DEBUG
-int	count_args(char **args)
-{
-	int	count;
-
-	count = 0;
-	if (!args)
-		return (0);
-	while (args[count])
-	{
-		count++;
-	}
-	return (count);
-}
-
-/*DEBUG FUNCTION*/
-void	debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars)
-{
-	static int	token_count = 0;
-
-	token_count = 0;
-	fprintf(stderr, "[TOKEN_CREATE] #%d From: %s\n", ++token_count, function_name);
-	fprintf(stderr, "  - Token: '%s', Type: %d\n", token, type);
-	fprintf(stderr, "  - Prev token: %s\n", vars->current ?
-		(vars->current->args && vars->current->args[0] ?
-			vars->current->args[0] : "NULL") : "NULL");
 }
 
 /*
@@ -304,12 +276,6 @@ Helper function to link a new token node to the current node.
 - Updates the current pointer to the new node.
 - Works with build_token_linklist().
 */
-// void	token_link(t_node *node, t_vars *vars)
-// {
-// 	vars->current->next = node;
-// 	node->prev = vars->current;
-// 	vars->current = node;
-// }
 void	token_link(t_node *node, t_vars *vars)
 {
 	vars->current->next = node;
@@ -325,27 +291,6 @@ Merges an argument node into a command node.
 Returns:
 - 1 to indicate node was merged and old arg node freed.
 */
-// int	merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
-// {
-// 	t_node	*cmd_node;
-// 	t_node	*next_node;
-
-// 	cmd_node = vars->current;
-// 	next_node = arg_node->next;
-// 	append_arg(cmd_node, arg_node->args[0], 0);
-// 	if (next_node)
-// 	{
-// 		cmd_node->next = next_node;
-// 		next_node->prev = cmd_node;
-// 	}
-// 	else
-// 	{
-// 		cmd_node->next = NULL;
-// 		vars->current = cmd_node;
-// 	}
-// 	free_token_node(arg_node);
-// 	return (1);
-// }
 int	merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
 {
 	t_node	*cmd_node;
@@ -379,28 +324,6 @@ Example: When adding command node
 - Otherwise links to previous token
 - Updates current pointer
 */
-// int	build_token_linklist(t_vars *vars, t_node *node)
-// {
-// 	if (!vars || !node)
-// 		return (0);
-// 	if (!vars->head)
-// 	{
-// 		vars->head = node;
-// 		vars->current = node;
-// 		return (0);
-// 	}
-// 	if (vars->current && vars->current->type == TYPE_PIPE
-// 		&& node->type == TYPE_ARGS)
-// 		node->type = TYPE_CMD;
-// 	if (node->type == TYPE_ARGS && vars->current
-// 		&& vars->current->type == TYPE_CMD)
-// 		return (merge_arg_with_cmd(vars, node));
-// 	else
-// 	{
-// 		token_link(node, vars);
-// 		return (0);
-// 	}
-// }
 int	build_token_linklist(t_vars *vars, t_node *node)
 {
 	if (!vars || !node)

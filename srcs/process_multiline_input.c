@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:12:20 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:42:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 21:47:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,7 @@ int	tokenize_first_line(char *input, char *nl_ptr, t_vars *vars)
 
 	original_char = *nl_ptr;
 	*nl_ptr = '\0';
-	result = improved_tokenize(input, vars);
+	result = tokenizer(input, vars);
 	*nl_ptr = original_char;
 	return (result);
 }

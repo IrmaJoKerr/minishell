@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:51:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 21:47:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ char	*handle_quote_completion(char *cmd, t_vars *vars)
 		cmd = new_cmd;
 	}
 	cleanup_token_list(vars);
-	improved_tokenize(cmd, vars);
+	tokenizer(cmd, vars);
 	return (cmd);
 }
 
@@ -114,7 +114,7 @@ int	process_input_tokens(char *command, t_vars *vars)
 	if (!command || !*command)
 		return (0);
 	cleanup_token_list(vars);
-	if (!improved_tokenize(command, vars))
+	if (!tokenizer(command, vars))
 		return (0);
 	return (1);
 }

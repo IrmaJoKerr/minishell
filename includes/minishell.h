@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 20:51:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:12:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -684,7 +684,7 @@ t_node		*find_redir_chain_head(t_node *current, t_node *last_cmd);
 void		link_redirs_pipes(t_vars *vars);
 void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir); //REMOVE DEBUG PRINTS LATER
+void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 int			is_valid_redir_node(t_node *current);
 
 /*
@@ -737,15 +737,22 @@ void		tmp_buf_reader(t_vars *vars);
 Improved tokenize temp file
 In improved_tokenize.c
 */
-int			improved_tokenize(char *input, t_vars *vars);
+void		init_tokenizer(t_vars *vars);
+char		*get_delim_str(char *input, t_vars *vars, int *error_code);
+int			proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim);
+int			handle_quotes(char *input, t_vars *vars, int *adj_saved);
+int			proc_opr_token(char *input, t_vars *vars, int *hd_is_delim,
+				t_tokentype token_type);
+int			handle_token(char *input, t_vars *vars, int *hd_is_delim);
+int			finish_tokenizing(char *input, t_vars *vars, int hd_is_delim);
+int			chk_move_pos(t_vars *vars, int hd_is_delim);
+int			tokenizer(char *input, t_vars *vars);
 
 /*
 Tokenizing functions.
 In tokenize.c
 */
 void		set_token_type(t_vars *vars, char *input);
-int			count_args(char **args); //DEBUG
-void		debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars);// DEBUG
 void		free_if_orphan_node(t_node *node, t_vars *vars);
 void		maketoken(char *token, t_tokentype type, t_vars *vars);
 int			process_operator_char(char *input, int *i, t_vars *vars);
@@ -757,7 +764,6 @@ void		handle_right_adj(char *input, t_vars *vars);
 void		token_link(t_node *node, t_vars *vars);
 int			merge_arg_with_cmd(t_vars *vars, t_node *arg_node);
 int			build_token_linklist(t_vars *vars, t_node *node);
-void		debug_token_list(t_vars *vars); //DEBUG FUNCTION
 
 /*
 Type conversion functions.

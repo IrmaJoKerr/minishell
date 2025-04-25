@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 16:42:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 21:23:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:13:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Initialize tokenizer state
 - Clears quote depth
 - Resets heredoc state
 */
-static void	initialize_tokenizer(t_vars *vars)
+void	init_tokenizer(t_vars *vars)
 {
 	vars->pos = 0;
 	vars->start = 0;
@@ -32,6 +32,43 @@ static void	initialize_tokenizer(t_vars *vars)
 }
 
 /*
+Extracts raw delimiter string from input
+- Sets start position at current position
+- Advances position until delimiter end is found
+- Validates non-empty delimiter
+- Handles memory allocation
+Returns:
+- Raw delimiter string on success
+- NULL on error (with error_code set)
+*/
+char	*get_delim_str(char *input, t_vars *vars, int *error_code)
+{
+	int		moves;
+	char	*ori_delim_str;
+
+	vars->start = vars->pos;
+	while (input[vars->pos] && !ft_isspace(input[vars->pos])
+		&& !is_operator_token(get_token_at(input, vars->pos, &moves)))
+	{
+		vars->pos++;
+	}
+	if (vars->pos == vars->start)
+	{
+		tok_syntax_error_msg("newline", vars);
+		*error_code = 1;
+		return (NULL);
+	}
+	ori_delim_str = ft_substr(input, vars->start, vars->pos - vars->start);
+	if (!ori_delim_str)
+	{
+		vars->error_code = ERR_DEFAULT;
+		*error_code = 1;
+		return (NULL);
+	}
+	return (ori_delim_str);
+}
+
+/*
 Process heredoc delimiter when expected
 - Skips whitespace before delimiter
 - Extracts and validates delimiter string
@@ -42,44 +79,72 @@ Returns:
 - 1 on success with next_flag set (continue)
 - 2 on waiting for more input (whitespace skipping)
 */
-static int	process_heredoc_delimiter(char *input, t_vars *vars, int *hd_is_delim)
+int	proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim)
 {
-	char	*raw_delimiter_str;
-	int		moves;
+	char	*ori_delim_str;
+	int		error_code;
 
+	error_code = 0;
 	if (ft_isspace(input[vars->pos]))
 	{
 		vars->pos++;
 		vars->start = vars->pos;
 		return (2);
 	}
-	vars->start = vars->pos;
-	while (input[vars->pos] && !ft_isspace(input[vars->pos])
-		&& !is_operator_token(get_token_at(input, vars->pos, &moves)))
+	ori_delim_str = get_delim_str(input, vars, &error_code);
+	if (error_code || !ori_delim_str)
+		return (0);
+	if (!is_valid_delim(ori_delim_str, vars))
 	{
-		vars->pos++;
-	}
-	if (vars->pos == vars->start)
-	{
-		tok_syntax_error_msg("newline", vars);
+		free(ori_delim_str);
 		return (0);
 	}
-	raw_delimiter_str = ft_substr(input, vars->start, vars->pos - vars->start);
-	if (!raw_delimiter_str)
-	{
-		vars->error_code = ERR_DEFAULT;
-		return (0);
-	}
-	if (!is_valid_delim(raw_delimiter_str, vars))
-	{
-		free(raw_delimiter_str);
-		return (0);
-	}
-	debug_token_creation("process_heredoc_delimiter:raw_delimiter", raw_delimiter_str, TYPE_ARGS, vars);
-	maketoken(raw_delimiter_str, TYPE_ARGS, vars);
-	free(raw_delimiter_str);
+	maketoken(ori_delim_str, TYPE_ARGS, vars);
+	free(ori_delim_str);
 	*hd_is_delim = 0;
 	vars->start = vars->pos;
+	vars->next_flag = 1;
+	return (1);
+}
+
+/*
+Handle quote tokens preserving adjacency state
+- Restores saved adjacency state before quote processing
+- Processes quoted text through tokenize_quote
+Returns:
+- 1 on success
+*/
+int	handle_quotes(char *input, t_vars *vars, int *adj_saved)
+{
+	ft_memcpy(vars->adj_state, adj_saved, sizeof(int) * 3);
+	tokenize_quote(input, vars);
+	return (1);
+}
+
+/*
+Process operators and update token state
+- Handles heredoc operators specially
+- Processes other operators through process_operator_char
+- Updates state for next token processing
+Returns:
+- 1 on success
+- 0 on error
+*/
+int	proc_opr_token(char *input, t_vars *vars, int *hd_is_delim, t_tokentype token_type)
+{
+	handle_text(input, vars);
+	if (token_type == TYPE_HEREDOC)
+	{
+		maketoken("<<", TYPE_HEREDOC, vars);
+		vars->pos += 2;
+		vars->start = vars->pos;
+		*hd_is_delim = 1;
+	}
+	else
+	{
+		if (!process_operator_char(input, &vars->pos, vars))
+			return (0);
+	}
 	vars->next_flag = 1;
 	return (1);
 }
@@ -93,8 +158,7 @@ Returns:
 - 1 on success
 - 0 on error
 */
-static int	handle_token(char *input, t_vars *vars,
-		int *hd_is_delim)
+int	handle_token(char *input, t_vars *vars, int *hd_is_delim)
 {
 	t_tokentype	token_type;
 	int			moves;
@@ -103,11 +167,7 @@ static int	handle_token(char *input, t_vars *vars,
 	ft_memcpy(adj_saved, vars->adj_state, sizeof(adj_saved));
 	token_type = get_token_at(input, vars->pos, &moves);
 	if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
-	{
-		ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
-		tokenize_quote(input, vars);
-		return (1);
-	}
+		return (handle_quotes(input, vars, adj_saved));
 	if (input[vars->pos] == '$' && !vars->quote_depth)
 	{
 		ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
@@ -115,24 +175,7 @@ static int	handle_token(char *input, t_vars *vars,
 		return (1);
 	}
 	if (is_operator_token(token_type))
-	{
-		handle_text(input, vars);
-		if (token_type == TYPE_HEREDOC)
-		{
-			debug_token_creation("handle_token:heredoc", "<<", TYPE_HEREDOC, vars);
-			maketoken("<<", TYPE_HEREDOC, vars);
-			vars->pos += 2;
-			vars->start = vars->pos;
-			*hd_is_delim = 1;
-		}
-		else
-		{
-			if (!process_operator_char(input, &vars->pos, vars))
-				return (0);
-		}
-		vars->next_flag = 1;
-		return (1);
-	}
+		return (proc_opr_token(input, vars, hd_is_delim, token_type));
 	if (ft_isspace(input[vars->pos]))
 	{
 		tokenize_white(input, vars);
@@ -150,7 +193,7 @@ Returns:
 - 1 on success
 - 0 on error
 */
-static int	finalize_tokenization(char *input, t_vars *vars, int hd_is_delim)
+int	finish_tokenizing(char *input, t_vars *vars, int hd_is_delim)
 {
 	if (hd_is_delim)
 	{
@@ -162,22 +205,43 @@ static int	finalize_tokenization(char *input, t_vars *vars, int hd_is_delim)
 }
 
 /*
-Tokenizes input string. Calls delimiter validation when << is found.
-Returns 1 on success, 0 on failure (syntax error or malloc error).
+Check token position handling
+- Increments position counter if not in heredoc mode
+Returns:
+-1 if next_flag is set (to continue main loop).
+- 0 to continue normal processing.
 */
-int	improved_tokenize(char *input, t_vars *vars)
+int	chk_move_pos(t_vars *vars, int hd_is_delim)
+{
+	if (vars->next_flag)
+		return (1);
+	if (!hd_is_delim)
+		vars->pos++;
+	return (0);
+}
+
+/*
+Handle token processing based on token type
+- Preserve adjacency state across function boundaries
+- Route to appropriate specialized handlers
+- Process operators, quotes, expansions and whitespace
+Returns:
+- 1 on success.
+- 0 on error.
+*/
+int	tokenizer(char *input, t_vars *vars)
 {
 	int	hd_is_delim;
 	int	result;
 
-	initialize_tokenizer(vars);
+	init_tokenizer(vars);
 	hd_is_delim = 0;
 	while (input && input[vars->pos])
 	{
 		vars->next_flag = 0;
 		if (hd_is_delim)
 		{
-			result = process_heredoc_delimiter(input, vars, &hd_is_delim);
+			result = proc_hd_delim(input, vars, &hd_is_delim);
 			if (result == 0)
 				return (0);
 			if (result == 1)
@@ -188,10 +252,8 @@ int	improved_tokenize(char *input, t_vars *vars)
 			if (!handle_token(input, vars, &hd_is_delim))
 				return (0);
 		}
-		if (vars->next_flag)
+		if (chk_move_pos(vars, hd_is_delim))
 			continue ;
-		if (!hd_is_delim)
-			vars->pos++;
 	}
-	return (finalize_tokenization(input, vars, hd_is_delim));
+	return (finish_tokenizing(input, vars, hd_is_delim));
 }
