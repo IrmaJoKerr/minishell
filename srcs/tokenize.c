@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:25:46 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 16:44:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,30 +49,80 @@ Checks if a node is orphaned (not properly linked in the token list)
 and frees it if necessary to prevent memory leaks.
 This function is called when a node is created and added to the token list.
 */
-void	free_if_orphan_node(t_node *node, t_vars *vars)
-{
-	t_node	*check;
-	int		found_in_list;
+// void	free_if_orphan_node(t_node *node, t_vars *vars)
+// {
+// 	t_node	*check;
+// 	int		found_in_list;
 	
-	if (node != vars->head && node != vars->current)
-	{
-		found_in_list = 0;
-		check = vars->head;
-		while (check && !found_in_list)
-		{
-			if (check == node)
-				found_in_list = 1;
-			check = check->next;	
-		}
-		if (!found_in_list)
-		{
-			// fprintf(stderr, "DEBUG[maketoken]: Freeing orphaned node not in list. "
-			//         "node=%p, type=%d, content='%s'\n",
-			//         (void*)node, node->type, 
-			//         (node->args && node->args[0]) ? node->args[0] : "NULL");
-			free_token_node(node);
-		}
-	}
+// 	if (node != vars->head && node != vars->current)
+// 	{
+// 		found_in_list = 0;
+// 		check = vars->head;
+// 		while (check && !found_in_list)
+// 		{
+// 			if (check == node)
+// 				found_in_list = 1;
+// 			check = check->next;	
+// 		}
+// 		if (!found_in_list)
+// 		{
+// 			// fprintf(stderr, "DEBUG[maketoken]: Freeing orphaned node not in list. "
+// 			//         "node=%p, type=%d, content='%s'\n",
+// 			//         (void*)node, node->type, 
+// 			//         (node->args && node->args[0]) ? node->args[0] : "NULL");
+// 			free_token_node(node);
+// 		}
+// 	}
+// }
+void free_if_orphan_node(t_node *node, t_vars *vars)
+{
+    fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Entry with node=%p, type=%d\n",
+            (void*)node, node->type);
+    
+    if (node == vars->head || node == vars->current) {
+        fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Not orphaned (head/current), returning\n");
+        return;
+    }
+    
+    t_node *check;
+    int found_in_list = 0;
+    
+    check = vars->head;
+    while (check && !found_in_list) {
+        if (check == node) {
+            found_in_list = 1;
+            fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Node found in list\n");
+        }
+        check = check->next;    
+    }
+    
+    if (!found_in_list) {
+        fprintf(stderr, "[TOK_DBG] free_if_orphan_node: Orphaned node detected, freeing\n");
+        free_token_node(node);
+    }
+}
+
+// Helper function to count arguments in a command
+int count_args(char **args)
+{
+    int count = 0;
+    if (!args) return 0;
+    
+    while (args[count]) {
+        count++;
+    }
+    return count;
+}
+
+void debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars)
+{
+    static int token_count = 0;
+    
+    fprintf(stderr, "[TOKEN_CREATE] #%d From: %s\n", ++token_count, function_name);
+    fprintf(stderr, "  - Token: '%s', Type: %d\n", token, type);
+    fprintf(stderr, "  - Prev token: %s\n", vars->current ? 
+            (vars->current->args && vars->current->args[0] ? 
+             vars->current->args[0] : "NULL") : "NULL");
 }
 
 /*
@@ -90,15 +140,43 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 	t_node	*node;
 	int		node_freed;
 
+	fprintf(stderr, "[TOK_DBG] maketoken: Entry with token='%s', type=%d\n", 
+		token ? token : "NULL", type);
 	if (!token || !vars)
-		return ;
-	// fprintf(stderr, "[TOK_DBG] maketoken: Called with token='%s', type=%d\n", token, type);
+	{
+        fprintf(stderr, "[TOK_DBG] maketoken: Early return, token=%p, vars=%p\n", 
+                token, vars);
+        return;
+    }
 	node = initnode(type, token);
 	if (!node)
-		return ;
-	node_freed = build_token_linklist(vars, node);
+	{
+        fprintf(stderr, "[TOK_DBG] maketoken: initnode failed for '%s'\n", token);
+        return;
+    }
+	fprintf(stderr, "[TOK_DBG] maketoken: Created node=%p, type=%d, content='%s'\n",
+            (void*)node, node->type, node->args[0]);
+    
+    fprintf(stderr, "[TOK_DBG] maketoken: Calling build_token_linklist\n");
+    node_freed = build_token_linklist(vars, node);
+    
+    fprintf(stderr, "[TOK_DBG] maketoken: build_token_linklist returned %d (1=node_freed)\n", 
+            node_freed);
+    
+	// node_freed = build_token_linklist(vars, node);
 	if (!node_freed)
-		free_if_orphan_node(node, vars);
+	{
+        fprintf(stderr, "[TOK_DBG] maketoken: Calling free_if_orphan_node\n");
+        free_if_orphan_node(node, vars);
+    }
+	fprintf(stderr, "[TOK_DBG] maketoken: Current token list:");
+    t_node *curr = vars->head;
+    while (curr) {
+        fprintf(stderr, " [%d:%s]", curr->type, 
+                (curr->args && curr->args[0]) ? curr->args[0] : "NULL");
+        curr = curr->next;
+    }
+    fprintf(stderr, "\n");
 }
 
 /*
@@ -260,401 +338,37 @@ void	handle_right_adj(char *input, t_vars *vars)
 }
 
 /*
-Tokenizes input string. Calls delimiter validation when << is found.
-Returns 1 on success, 0 on failure (syntax error or malloc error).
-*/
-int	improved_tokenize(char *input, t_vars *vars)
-{
-	t_tokentype	token_type;
-	char		*raw_delimiter_str;
-	int			moves;
-	int			heredoc_expecting_delim;
-
-	heredoc_expecting_delim = 0;
-	vars->pos = 0;
-	vars->start = 0;
-	vars->quote_depth = 0;
-	if (vars->pipes->heredoc_delim)
-	{
-		free(vars->pipes->heredoc_delim);
-		vars->pipes->heredoc_delim = NULL;
-	}
-	vars->pipes->hd_expand = 0;
-	fprintf(stderr, "[TOK_DBG] improved_tokenize: START, input='%.*s...'\n", 20, input); // DEBUG
-	while (input && input[vars->pos])
-	{
-		vars->next_flag = 0;
-		token_type = get_token_at(input, vars->pos, &moves);
-		fprintf(stderr, "[TOK_DBG] Loop Top: Pos=%d, Char='%c', Start=%d, ExpectDelim=%d\n",
-			vars->pos, input[vars->pos] ? input[vars->pos] : '0', vars->start, heredoc_expecting_delim); // DEBUG
-		if (heredoc_expecting_delim)
-		{
-			fprintf(stderr, "[TOK_DBG] Expecting Delimiter: Current char '%c'\n", input[vars->pos]); // DEBUG
-			if (ft_isspace(input[vars->pos]))
-			{
-				fprintf(stderr, "[TOK_DBG] Expecting Delimiter: Skipping whitespace at pos %d\n", vars->pos); // DEBUG
-				vars->pos++;
-				vars->start = vars->pos;
-				continue ;
-			}
-			fprintf(stderr, "[TOK_DBG] Expecting Delimiter: Found non-whitespace '%c' at pos %d. Processing delimiter.\n", input[vars->pos], vars->pos); // DEBUG
-			vars->start = vars->pos;
-			fprintf(stderr, "[TOK_DBG] Delimiter Extraction: Start set to %d\n", vars->start);
-			while (input[vars->pos] && !ft_isspace(input[vars->pos])
-				&& !is_operator_token(get_token_at(input, vars->pos, &moves)))
-			{
-				vars->pos++;
-			}
-			fprintf(stderr, "[TOK_DBG] Delimiter Extraction: Loop finished. Pos=%d (Delimiter end)\n", vars->pos); // DEBUG
-			if (vars->pos == vars->start)
-			{
-				tok_syntax_error_msg("newline", vars);
-				return (0);
-			}
-			raw_delimiter_str = ft_substr(input, vars->start,
-					vars->pos - vars->start);
-			if (!raw_delimiter_str)
-			{
-				vars->error_code = ERR_DEFAULT;
-				return (0);
-			}
-			fprintf(stderr, "[TOK_DBG] Delimiter Extraction: Raw delimiter string = '%s'\n", raw_delimiter_str);
-			if (!is_valid_delim(raw_delimiter_str, vars))
-			{
-				fprintf(stderr, "[TOK_DBG] Delimiter Validation FAILED for '%s'\n", raw_delimiter_str);
-				free(raw_delimiter_str);
-				return (0);
-			}
-			fprintf(stderr, "[TOK_DBG] Delimiter Validation SUCCEEDED for '%s'. Stored: '%s', Expand=%d\n",
-				raw_delimiter_str, vars->pipes->heredoc_delim, vars->pipes->hd_expand);
-			maketoken(raw_delimiter_str, TYPE_ARGS, vars);
-			free(raw_delimiter_str);
-			heredoc_expecting_delim = 0;
-			fprintf(stderr, "[TOK_DBG] Delimiter Processed: ExpectDelim reset to 0.\n");
-			vars->start = vars->pos;
-			vars->next_flag = 1;
-		}
-		if (!vars->next_flag && !heredoc_expecting_delim)
-		{
-			fprintf(stderr, "[TOK_DBG] Regular Token Handling: Pos=%d, Char='%c', Type=%d\n", vars->pos, input[vars->pos], token_type); // DEBUG
-			if (token_type == TYPE_SINGLE_QUOTE
-				|| token_type == TYPE_DOUBLE_QUOTE)
-			{
-				fprintf(stderr, "[TOK_DBG] Calling tokenize_quote\n");
-				tokenize_quote(input, vars);
-			}
-			else if (input[vars->pos] == '$' && !vars->quote_depth)
-			{
-				fprintf(stderr, "[TOK_DBG] Calling tokenize_expan\n");
-				tokenize_expan(input, vars);
-			}
-			else if (is_operator_token(token_type))
-			{
-				maketoken("<<", TYPE_HEREDOC, vars);
-				fprintf(stderr, "[TOK_DBG] Handling Operator Token: Type=%d\n", token_type);
-				handle_text(input, vars);
-				if (token_type == TYPE_HEREDOC)
-				{
-					fprintf(stderr, "[TOK_DBG] Operator is HEREDOC (<<)\n");
-					maketoken("<<", TYPE_HEREDOC, vars);
-					vars->pos += 2;
-					vars->start = vars->pos;
-					heredoc_expecting_delim = 1;
-					fprintf(stderr, "[TOK_DBG] Set ExpectDelim=1. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
-				}
-				else
-				{
-					fprintf(stderr, "[TOK_DBG] Handling other operator (calling process_operator_char)\n"); // DEBUG
-					if (!process_operator_char(input, &vars->pos, vars))
-					{
-						return (0);
-					}
-				}
-				vars->next_flag = 1;
-			}
-			else if (ft_isspace(input[vars->pos]))
-			{
-				fprintf(stderr, "[TOK_DBG] Calling tokenize_white\n"); // DEBUG
-				tokenize_white(input, vars);
-			}
-			else
-			{
-				fprintf(stderr, "[TOK_DBG] Regular char, advancing pos. Pos=%d -> %d\n", vars->pos, vars->pos + 1); // DEBUG
-			}
-		}
-		if (vars->next_flag)
-		{
-			fprintf(stderr, "[TOK_DBG] next_flag is set, continuing loop. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
-			continue ;
-		}
-		if (!heredoc_expecting_delim)
-		{
-			vars->pos++;
-		}
-	}
-	fprintf(stderr, "[TOK_DBG] Loop finished. Pos=%d, Start=%d\n", vars->pos, vars->start); // DEBUG
-	if (heredoc_expecting_delim)
-	{
-		tok_syntax_error_msg("newline", vars);
-		return (0);
-	}
-	fprintf(stderr, "[TOK_DBG] Processing final text chunk if any (Start=%d, Pos=%d)\n", vars->start, vars->pos); // DEBUG
-	handle_text(input, vars);
-	fprintf(stderr, "[TOK_DBG] improved_tokenize: END\n");
-	return (1);
-}
-// int	improved_tokenize(char *input, t_vars *vars)
-// {
-//     t_tokentype	token_type;
-// 	char		*raw_delimiter_str;
-// 	int			moves;
-//     int			heredoc_expecting_delim;
-//
-// 	heredoc_expecting_delim = 0;
-//     vars->pos = 0;
-//     vars->start = 0;
-//     vars->quote_depth = 0;
-//     if (vars->pipes->heredoc_delim)
-// 	{
-//         free(vars->pipes->heredoc_delim);
-//         vars->pipes->heredoc_delim = NULL;
-//     }
-//     vars->pipes->hd_expand = 0;
-//     while (input && input[vars->pos])
-//     {
-//         vars->next_flag = 0;
-//         token_type = get_token_at(input, vars->pos, &moves);
-//         if (heredoc_expecting_delim)
-// 		{
-//             if (ft_isspace(input[vars->pos]))
-// 			{
-//                 vars->pos++;
-//                 vars->start = vars->pos;
-//                 continue ;
-//             }
-//             vars->start = vars->pos;
-//             while (input[vars->pos] && !ft_isspace(input[vars->pos]) &&
-//                    !is_operator_token(get_token_at(input, vars->pos, &moves)))
-// 			{
-//                 vars->pos++;
-//             }
-//             if (vars->pos == vars->start)
-// 			{
-//                 tok_syntax_error_msg("newline", vars);
-//             	return (0);
-//             }
-//             raw_delimiter_str = ft_substr(input, vars->start, vars->pos - vars->start);
-//             if (!raw_delimiter_str)
-// 			{
-// 				vars->error_code = ERR_DEFAULT;
-// 				return (0);
-// 			}
-//             if (!is_valid_delim(raw_delimiter_str, vars))
-// 			{
-//                 free(raw_delimiter_str);
-//                 return (0);
-//             }
-//             maketoken(raw_delimiter_str, TYPE_ARGS, vars);
-//             free(raw_delimiter_str);
-//             heredoc_expecting_delim = 0;
-//             vars->start = vars->pos;
-//             vars->next_flag = 1;
-//         }
-//         if (!vars->next_flag && !heredoc_expecting_delim)
-//         {
-//             if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
-//                 tokenize_quote(input, vars);
-//             else if (input[vars->pos] == '$' && !vars->quote_depth)
-//                 tokenize_expan(input, vars);
-//             else if (is_operator_token(token_type))
-//             {
-//                 handle_text(input, vars);
-//                 if (token_type == TYPE_HEREDOC)
-// 				{
-//                     maketoken("<<", TYPE_HEREDOC, vars);
-//                     vars->pos += 2;
-//                     vars->start = vars->pos;
-//                     heredoc_expecting_delim = 1;
-//                 }
-// 				else
-// 				{
-//                     if (!process_operator_char(input, &vars->pos, vars))
-//                         return (0);
-//                 }
-//                 vars->next_flag = 1;
-//             }
-//             else if (ft_isspace(input[vars->pos]))
-//                 tokenize_white(input, vars);
-//         }
-//         if (vars->next_flag)
-//             continue ;
-//         if (!heredoc_expecting_delim)
-//             vars->pos++;
-//     }
-//     if (heredoc_expecting_delim)
-// 	{
-//         tok_syntax_error_msg("newline", vars);
-//     	return (0);
-//     }
-//     fprintf(stderr, "[TOK_DBG] Processing final text chunk if any (Start=%d, Pos=%d)\n", vars->start, vars->pos); // DEBUG
-//     handle_text(input, vars);
-//     debug_token_list(vars);
-//     return (1);
-// }
-
-/*
- * Processes a heredoc delimiter in the input string.
- * - Extracts delimiter text and validates its syntax
- * - Creates a token for the delimiter
- * - Manages tokenizer state for heredoc processing
- * 
- * Returns:
- * - 1 on successful processing
- * - 0 on syntax error or memory allocation failure
- * - 2 to indicate whitespace skip (continue loop)
- */
-// static int	process_heredoc_delimiter(char *input, t_vars *vars)
-// {
-//     char	*raw_delimiter_str;
-//     int		moves;
-//  
-//     if (ft_isspace(input[vars->pos]))
-//     {
-//         vars->pos++;
-//         vars->start = vars->pos;
-//         return (2);
-//     }
-//     vars->start = vars->pos;
-//     while (input[vars->pos] && !ft_isspace(input[vars->pos]) &&
-//            !is_operator_token(get_token_at(input, vars->pos, &moves)))
-//     {
-//         vars->pos++;
-//     }
-//     if (vars->pos == vars->start)
-//     {
-//         tok_syntax_error_msg("newline", vars);
-//         return (0);
-//     }
-//     raw_delimiter_str = ft_substr(input, vars->start, vars->pos - vars->start);
-//     if (!raw_delimiter_str)
-//     {
-//         vars->error_code = ERR_DEFAULT;
-//         return (0);
-//     }
-//     if (!is_valid_delim(raw_delimiter_str, vars))
-//     {
-//         free(raw_delimiter_str);
-//         return (0);
-//     }
-//     maketoken(raw_delimiter_str, TYPE_ARGS, vars);
-//     free(raw_delimiter_str);
-//     vars->start = vars->pos;
-//     vars->next_flag = 1;
-//     return (1);
-// }
-
-/*
- * Processes operator tokens in the input string.
- * - Handles redirections, pipes, and heredoc operators
- * - Creates appropriate token nodes
- * - Updates tokenizer state
- * 
- * Returns:
- * - 1 on successful processing
- * - 0 on failure
- */
-// static int process_operator_token(char *input, t_vars *vars, t_tokentype token_type,
-//                                 int *heredoc_expecting_delim)
-// {
-//     handle_text(input, vars);
-//
-//     if (token_type == TYPE_HEREDOC)
-//     {
-//         maketoken("<<", TYPE_HEREDOC, vars);
-//         vars->pos += 2;
-//         vars->start = vars->pos;
-//         *heredoc_expecting_delim = 1;
-//     }
-//     else
-//     {
-//         if (!process_operator_char(input, &vars->pos, vars))
-//             return (0);
-//     }
-//     vars->next_flag = 1;
-//     return (1);
-// }
-
-// int	improved_tokenize(char *input, t_vars *vars)
-// {
-//     t_tokentype	token_type;
-//     int			moves;
-//     int			heredoc_expecting_delim;
-//     int			result;
-//
-//     heredoc_expecting_delim = 0;
-//     vars->pos = 0;
-//     vars->start = 0;
-//     vars->quote_depth = 0;
-//     if (vars->pipes->heredoc_delim)
-//     {
-//         free(vars->pipes->heredoc_delim);
-//         vars->pipes->heredoc_delim = NULL;
-//     }
-//     vars->pipes->hd_expand = 0;
-//     while (input && input[vars->pos])
-//     {
-//         vars->next_flag = 0;
-//         token_type = get_token_at(input, vars->pos, &moves);
-//         if (heredoc_expecting_delim)
-//         {
-//             result = process_heredoc_delimiter(input, vars);
-//             if (result == 0)
-//                 return (0);
-//             if (result == 2)
-//                 continue;
-//             heredoc_expecting_delim = 0;
-//         }
-//         else if (!vars->next_flag)
-//         {
-//             if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
-//                 tokenize_quote(input, vars);
-//             else if (input[vars->pos] == '$' && !vars->quote_depth)
-//                 tokenize_expan(input, vars);
-//             else if (is_operator_token(token_type))
-//             {
-//                 if (!process_operator_token(input, vars, token_type, &heredoc_expecting_delim))
-//                     return (0);
-//             }
-//             else if (ft_isspace(input[vars->pos]))
-//                 tokenize_white(input, vars);
-//         }
-//         if (vars->next_flag)
-//             continue;
-//         if (!heredoc_expecting_delim)
-//             vars->pos++;
-//     }
-//     if (heredoc_expecting_delim)
-//     {
-//         tok_syntax_error_msg("newline", vars);
-//         return (0);
-//     }
-//     handle_text(input, vars);
-//     // debug_token_list(vars);
-//     return (1);
-// }
-
-/*
 Helper function to link a new token node to the current node.
 - Sets the next pointer of the current node to the new node.
 - Sets the prev pointer of the new node to the current node.
 - Updates the current pointer to the new node.
 - Works with build_token_linklist().
 */
-void	token_link(t_node *node, t_vars *vars)
+// void	token_link(t_node *node, t_vars *vars)
+// {
+// 	vars->current->next = node;
+// 	node->prev = vars->current;
+// 	vars->current = node;
+// }
+void token_link(t_node *node, t_vars *vars)
 {
-	vars->current->next = node;
-	node->prev = vars->current;
-	vars->current = node;
+    fprintf(stderr, "[TOK_DBG] token_link: Entry with node=%p, type=%d, content='%s'\n",
+            (void*)node, node->type, node->args[0]);
+    
+    fprintf(stderr, "[TOK_DBG] token_link: Before - current=%p\n", 
+            (void*)vars->current);
+    
+    // Check if this is an operator token
+    if (is_operator_token(node->type)) {
+        fprintf(stderr, "[TOK_DBG] token_link: Linking OPERATOR token\n");
+    }
+    
+    vars->current->next = node;
+    node->prev = vars->current;
+    vars->current = node;
+    
+    fprintf(stderr, "[TOK_DBG] token_link: After - current=%p, prev=%p\n",
+            (void*)vars->current, (void*)vars->current->prev);
 }
 
 /*
@@ -665,26 +379,62 @@ Merges an argument node into a command node.
 Returns:
 - 1 to indicate node was merged and old arg node freed.
 */
-int	merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
-{
-	t_node	*cmd_node;
-	t_node	*next_node;
+// int	merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
+// {
+// 	t_node	*cmd_node;
+// 	t_node	*next_node;
 
-	cmd_node = vars->current;
-	next_node = arg_node->next;
-	append_arg(cmd_node, arg_node->args[0], 0);
-	if (next_node)
-	{
-		cmd_node->next = next_node;
-		next_node->prev = cmd_node;
-	}
-	else
-	{
-		cmd_node->next = NULL;
-		vars->current = cmd_node;
-	}
-	free_token_node(arg_node);
-	return (1);
+// 	cmd_node = vars->current;
+// 	next_node = arg_node->next;
+// 	append_arg(cmd_node, arg_node->args[0], 0);
+// 	if (next_node)
+// 	{
+// 		cmd_node->next = next_node;
+// 		next_node->prev = cmd_node;
+// 	}
+// 	else
+// 	{
+// 		cmd_node->next = NULL;
+// 		vars->current = cmd_node;
+// 	}
+// 	free_token_node(arg_node);
+// 	return (1);
+// }
+int merge_arg_with_cmd(t_vars *vars, t_node *arg_node)
+{
+    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Entry with arg_node=%p, content='%s'\n",
+            (void*)arg_node, arg_node->args[0]);
+    
+    t_node *cmd_node;
+    t_node *next_node;
+
+    cmd_node = vars->current;
+    next_node = arg_node->next;
+    
+    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: cmd_node=%p, args_count=%d\n",
+            (void*)cmd_node, count_args(cmd_node->args));
+    
+    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Calling append_arg with '%s'\n",
+            arg_node->args[0]);
+            
+    append_arg(cmd_node, arg_node->args[0], 0);
+    
+    if (next_node) {
+        fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Linking with next_node=%p\n",
+                (void*)next_node);
+        cmd_node->next = next_node;
+        next_node->prev = cmd_node;
+    }
+    else {
+        fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: No next node, cmd_node becomes current\n");
+        cmd_node->next = NULL;
+        vars->current = cmd_node;
+    }
+    
+    fprintf(stderr, "[TOK_DBG] merge_arg_with_cmd: Freeing arg_node=%p\n", 
+            (void*)arg_node);
+    free_token_node(arg_node);
+    return (1);
 }
 
 /*
@@ -700,64 +450,64 @@ Example: When adding command node
 */
 // int	build_token_linklist(t_vars *vars, t_node *node)
 // {
-//     t_node	*cmd_node;
-// 	t_node	*next_node;
-
-//     if (!vars || !node)
-//         return (0);
-//     if (!vars->head)
-//     {
-//         vars->head = node;
-//         vars->current = node;
-//         return (0);
-//     }
-//     if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS)
-//     {
-//         node->type = TYPE_CMD;
-//     }
-//     if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD)
-//     {
-//         cmd_node = vars->current;
-//         next_node = node->next;
-//         append_arg(cmd_node, node->args[0], 0);
-//         if (next_node)
-//         {
-//             cmd_node->next = next_node;
-//             next_node->prev = cmd_node;
-//         }
-// 		else
-// 		{
-//             cmd_node->next = NULL;
-//             vars->current = cmd_node;
-//         }
-//         free_token_node(node);
-//         return (1);
-//     }
-//     else
-//     {
-//         token_link(node, vars);
-//         return (0);
-//     }
+// 	if (!vars || !node)
+// 		return (0);
+// 	if (!vars->head)
+// 	{
+// 		vars->head = node;
+// 		vars->current = node;
+// 		return (0);
+// 	}
+// 	if (vars->current && vars->current->type == TYPE_PIPE
+// 		&& node->type == TYPE_ARGS)
+// 		node->type = TYPE_CMD;
+// 	if (node->type == TYPE_ARGS && vars->current
+// 		&& vars->current->type == TYPE_CMD)
+// 		return (merge_arg_with_cmd(vars, node));
+// 	else
+// 	{
+// 		token_link(node, vars);
+// 		return (0);
+// 	}
 // }
-int	build_token_linklist(t_vars *vars, t_node *node)
+int build_token_linklist(t_vars *vars, t_node *node)
 {
-	if (!vars || !node)
-		return (0);
-	if (!vars->head)
-	{
-		vars->head = node;
-		vars->current = node;
-		return (0);
-	}
-	if (vars->current && vars->current->type == TYPE_PIPE
-		&& node->type == TYPE_ARGS)
-		node->type = TYPE_CMD;
-	if (node->type == TYPE_ARGS && vars->current
-		&& vars->current->type == TYPE_CMD)
-		return (merge_arg_with_cmd(vars, node));
-	else
-	{
-		token_link(node, vars);
-		return (0);
-	}
+    fprintf(stderr, "[TOK_DBG] build_token_linklist: Entry with node=%p, type=%d, content='%s'\n",
+            (void*)node, node->type, node->args[0]);
+    
+    if (!vars || !node) {
+        fprintf(stderr, "[TOK_DBG] build_token_linklist: Early return, vars=%p, node=%p\n", 
+                vars, node);
+        return (0);
+    }
+    
+    if (!vars->head) {
+        fprintf(stderr, "[TOK_DBG] build_token_linklist: First token in list\n");
+        vars->head = node;
+        vars->current = node;
+        return (0);
+    }
+    
+    fprintf(stderr, "[TOK_DBG] build_token_linklist: Current head=%p, current=%p\n",
+            (void*)vars->head, (void*)vars->current);
+    
+    fprintf(stderr, "[TOK_DBG] build_token_linklist: Current->type=%d, node->type=%d\n",
+            vars->current->type, node->type);
+    
+    // Check if node after pipe should become a command
+    if (vars->current && vars->current->type == TYPE_PIPE && node->type == TYPE_ARGS) {
+        fprintf(stderr, "[TOK_DBG] build_token_linklist: Converting ARGS to CMD after PIPE\n");
+        node->type = TYPE_CMD;
+    }
+    
+    // Check if this is an argument that should be merged with a command
+    if (node->type == TYPE_ARGS && vars->current && vars->current->type == TYPE_CMD) {
+        fprintf(stderr, "[TOK_DBG] build_token_linklist: Merging arg with command\n");
+        return (merge_arg_with_cmd(vars, node)); // Returns 1 (node freed)
+    }
+    else {
+        fprintf(stderr, "[TOK_DBG] build_token_linklist: Linking node to list\n");
+        token_link(node, vars);
+        return (0); // Node not freed
+    }
 }

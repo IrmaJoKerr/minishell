@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/25 14:24:05 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/25 16:51:40 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -65,6 +65,7 @@ MINISHELL_SRCS = \
 			srcs/shell_level.c \
 			srcs/signals.c \
 			srcs/tmp_buf_reader.c \
+			srcs/improved_tokenize.c \
 			srcs/tokenize.c \
 			srcs/typeconvert.c \
 			 

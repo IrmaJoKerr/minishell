@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/24 19:16:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 15:19:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,14 +72,13 @@ int	export_with_args(char **args, t_vars *vars)
 		else
 		{
 			ft_putstr_fd("export: '", 2);
-            ft_putstr_fd(args[i], 2);
-            ft_putstr_fd("': not a valid identifier\n", 2);
+			ft_putstr_fd(args[i], 2);
+			ft_putstr_fd("': not a valid identifier\n", 2);
 			cmdcode = 1;
 		}
 		i++;
 	}
-	// vars->error_code = cmdcode;
-	return (cmdcode);
+	return (vars->error_code = cmdcode);
 }
 
 /*
@@ -90,26 +89,26 @@ Returns 0 on success, 1 on failure.
 */
 int	sort_env(int count, t_vars *vars)
 {
-    int		i;
-    int		cmdcode;
-    char	**sort_env;
+	int		i;
+	int		cmdcode;
+	char	**sort_env;
 
-    sort_env = make_sorted_env(count, vars);
-    if (!sort_env)
-        return (1);
-    i = 0;
-    cmdcode = 0;
-    while (sort_env[i])
-    {
-        cmdcode = process_export_var(sort_env[i]);
-        i++;
-    }
-    i = 0;
-    while (i < count)
-    {
-        free(sort_env[i]);
-        i++;
-    }
-    free(sort_env);
-    return (cmdcode);
+	sort_env = make_sorted_env(count, vars);
+	if (!sort_env)
+		return (1);
+	i = 0;
+	cmdcode = 0;
+	while (sort_env[i])
+	{
+		cmdcode = process_export_var(sort_env[i]);
+		i++;
+	}
+	i = 0;
+	while (i < count)
+	{
+		free(sort_env[i]);
+		i++;
+	}
+	free(sort_env);
+	return (cmdcode);
 }

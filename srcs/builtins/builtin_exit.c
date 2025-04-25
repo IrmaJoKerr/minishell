@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/13 01:53:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 15:21:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static int	ft_strisnum(const char *str)
 	return (1);
 }
 
-static int checking(char **args)
+static int	checking(char **args)
 {
 	int	cmdcode;
 
@@ -79,7 +79,7 @@ static int checking(char **args)
 /*Temporary testing debug version*/
 int	builtin_exit(char **args, t_vars *vars)
 {
-	int cmdcode;
+	int	cmdcode;
 
 	cmdcode = 0;
 	if (args[1])

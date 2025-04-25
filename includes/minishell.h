@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 15:06:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 16:46:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -735,10 +735,18 @@ void		process_buffer_command(t_read_buf *rb, t_vars *vars);
 void		tmp_buf_reader(t_vars *vars);
 
 /*
+Improved tokenize temp file
+In improved_tokenize.c
+*/
+int			improved_tokenize(char *input, t_vars *vars);
+
+/*
 Tokenizing functions.
 In tokenize.c
 */
-void 		set_token_type(t_vars *vars, char *input);
+void		set_token_type(t_vars *vars, char *input);
+int			count_args(char **args); //DEBUG
+void		debug_token_creation(char *function_name, char *token, t_tokentype type, t_vars *vars);// DEBUG
 void		free_if_orphan_node(t_node *node, t_vars *vars); //REMOVE DEBUG PRINTS LATER
 void		maketoken(char *token, t_tokentype type, t_vars *vars); //REMOVE DEBUG PRINTS LATER
 int			process_operator_char(char *input, int *i, t_vars *vars);
@@ -747,7 +755,6 @@ void		tokenize_quote(char *input, t_vars *vars);
 void		tokenize_expan(char *input, t_vars *vars);
 void		tokenize_white(char *input, t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
-int			improved_tokenize(char *input, t_vars *vars);
 void		token_link(t_node *node, t_vars *vars);
 int			merge_arg_with_cmd(t_vars *vars, t_node *arg_node);
 int			build_token_linklist(t_vars *vars, t_node *node);

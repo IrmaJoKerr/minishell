@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:56:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 15:32:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ char	*get_cmd_path(t_node *node, char **envp, t_vars *vars)
 	}
 	cmd = node->args[0];
 	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-		|| (cmd[1] == '.' && cmd[2] == '/'))))
+				|| (cmd[1] == '.' && cmd[2] == '/'))))
 	{
 		direct_path = handle_direct_path(cmd, vars);
 		return (direct_path);

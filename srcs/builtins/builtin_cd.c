@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/25 14:59:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 15:21:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,6 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 		ft_putstr_fd("cd: error retrieving current directory\n", 2);
 		return (1);
 	}
-
 	tmp = ft_strjoin("PWD=", cwd);
 	if (!tmp)
 	{
@@ -142,6 +141,5 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 	}
 	modify_env(&vars->env, 1, tmp);
 	free(tmp);
-
 	return (0);
 }
