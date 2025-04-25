@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 00:20:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/26 01:09:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,25 +63,6 @@ void	build_and_execute(t_vars *vars)
 	{
 		execute_cmd(vars->astroot, vars->env, vars);
 	}
-}
-
-/*
-Main entry point for tokenization and expansion. 
-Tokenizes input and processes expansions.
-Returns 1 on success, 0 on failure.
-Example: For input "echo "hello
-- Tokenizes the initial content
-- Detects unclosed quotes and prompts for completion
-- Returns completed command string with proper quotes
-*/
-int	process_input_tokens(char *command, t_vars *vars)
-{
-	if (!command || !*command)
-		return (0);
-	cleanup_token_list(vars);
-	if (!tokenizer(command, vars))
-		return (0);
-	return (1);
 }
 
 /*

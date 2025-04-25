@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/26 00:58:16 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/26 01:15:07 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,6 +66,7 @@ MINISHELL_SRCS = \
 			srcs/multiline_validation.c \
 			srcs/operators_utils.c \
 			srcs/operators.c \
+			srcs/parser.c \
 			srcs/paths_utils.c \
 			srcs/paths.c \
 			srcs/pipe_analysis.c \
@@ -84,6 +85,7 @@ MINISHELL_SRCS = \
 			srcs/signals.c \
 			srcs/terminal.c \
 			srcs/tmp_buf_reader.c \
+			srcs/tokenize_utils.c \
 			srcs/tokenize.c \
 			srcs/typeconvert.c \
 			 

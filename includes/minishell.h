@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 01:04:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/26 01:23:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -626,7 +626,6 @@ In minishell.c
 */
 char		*reader(void);
 void		build_and_execute(t_vars *vars);
-int			process_input_tokens(char *command, t_vars *vars);
 int			handle_pipe_syntax(t_vars *vars);
 void		process_command(char *command, t_vars *vars);
 int			main(int ac, char **av, char **envp);
@@ -666,6 +665,17 @@ int			is_operator_token(t_tokentype type);
 void		handle_string(char *input, t_vars *vars);
 int			handle_single_operator(char *input, t_vars *vars);
 int			handle_double_operator(char *input, t_vars *vars);
+
+/*
+Parsing functions.
+In parser.c
+*/
+void		set_token_type(t_vars *vars, char *input);
+int			proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim);
+int			proc_opr_token(char *input, t_vars *vars, int *hd_is_delim,
+				t_tokentype token_type);
+int			finish_tokenizing(char *input, t_vars *vars, int hd_is_delim);
+int			handle_quotes(char *input, t_vars *vars, int *adj_saved);
 
 /*
 Path finding utility functions.
@@ -833,23 +843,24 @@ void		process_buffer_command(t_read_buf *rb, t_vars *vars);
 void		tmp_buf_reader(t_vars *vars);
 
 /*
+Tokenizing utility functions.
+In tokenize_utils.c
+*/
+int			chk_move_pos(t_vars *vars, int hd_is_delim);
+void		handle_right_adj(char *input, t_vars *vars);
+char		*get_delim_str(char *input, t_vars *vars, int *error_code);
+void		handle_text(char *input, t_vars *vars);
+
+/*
 Tokenizing functions.
 In tokenize.c
 */
-void		set_token_type(t_vars *vars, char *input);
-void		handle_text(char *input, t_vars *vars);
+int			process_input_tokens(char *command, t_vars *vars);
+
 void		tokenize_quote(char *input, t_vars *vars);
 void		tokenize_expan(char *input, t_vars *vars);
 void		tokenize_white(char *input, t_vars *vars);
-void		handle_right_adj(char *input, t_vars *vars);
 void		init_tokenizer(t_vars *vars);
-char		*get_delim_str(char *input, t_vars *vars, int *error_code);
-int			proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim);
-int			handle_quotes(char *input, t_vars *vars, int *adj_saved);
-int			proc_opr_token(char *input, t_vars *vars, int *hd_is_delim,
-				t_tokentype token_type);
-int			finish_tokenizing(char *input, t_vars *vars, int hd_is_delim);
-int			chk_move_pos(t_vars *vars, int hd_is_delim);
 
 /*
 Type conversion functions.
