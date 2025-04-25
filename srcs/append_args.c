@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:29:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:36:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ Returns:
 int	*copy_int_arr(int *original, size_t length)
 {
 	int	*new_types;
-	
+
 	new_types = malloc(sizeof(int) * (length + 1));
 	if (!new_types)
 		return (NULL);
@@ -74,8 +74,8 @@ int	**dup_quote_types(t_node *node, size_t len)
 	size_t	i;
 	size_t	qlen;
 	int		**new_quote_types;
-	
-	new_quote_types = malloc(sizeof(int*) * (len + 2));
+
+	new_quote_types = malloc(sizeof(int *) * (len + 2));
 	if (!new_quote_types)
 		return (NULL);
 	i = 0;
@@ -95,7 +95,7 @@ int	**dup_quote_types(t_node *node, size_t len)
 			new_quote_types[i] = NULL;
 		i++;
 	}
-	return new_quote_types;
+	return (new_quote_types);
 }
 
 /*
@@ -108,12 +108,12 @@ Returns:
 - Pointer to the new quote_types array on success
 - NULL on failure
 */
-int *set_char_quote_types(char *arg_text, int quote_type)
+int	*set_char_quote_types(char *arg_text, int quote_type)
 {
 	int		*char_quote_types;
 	size_t	len;
 	size_t	i;
-	
+
 	if (!arg_text)
 		return (NULL);
 	len = ft_strlen(arg_text);
@@ -137,12 +137,12 @@ Returns:
 - A newly allocated 2D array of quote types with the new entry.
 - NULL (with proper cleanup of all related memory) on error.
 */
-int	**resize_quotype_arr(t_node *node, char *new_arg, int quote_type
-				,char **new_args)
+int	**resize_quotype_arr(t_node *node, char *new_arg, int quote_type,
+			char **new_args)
 {
 	int		**new_quote_types;
 	size_t	len;
-	
+
 	if (!node || !node->args || !new_args)
 		return (NULL);
 	len = ft_arrlen(node->args);
@@ -177,7 +177,7 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 	char	**new_args;
 	int		**new_quote_types;
 	size_t	len;
-	
+
 	if (!node || !new_arg || !node->args)
 		return ;
 	len = ft_arrlen(node->args);
@@ -216,13 +216,13 @@ Examples:
 - "'hello'world"  -> at 'hello', adjacency is [0,1]
 - "he'llo'wo"     -> at 'llo', adjacency is [1,1]
 */
-void check_token_adj(char *input, t_vars *vars)
+void	check_token_adj(char *input, t_vars *vars)
 {
 	int		has_left_adj;
 	int		has_right_adj;
 	char	left_char;
 	char	right_char;
-	
+
 	has_left_adj = 0;
 	has_right_adj = 0;
 	if (vars->pos > 0)
@@ -254,7 +254,7 @@ Returns:
 int	process_adj(int *i, t_vars *vars)
 {
 	int	result;
-	
+
 	if (vars->adj_state[0] && vars->adj_state[1])
 		result = 2;
 	else if (vars->adj_state[1])

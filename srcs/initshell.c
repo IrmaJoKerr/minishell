@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:51:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:57:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,24 +22,24 @@ Works with main() as program entry point.
 */
 void	init_shell(t_vars *vars, char **envp)
 {
-    ft_memset(vars, 0, sizeof(t_vars));
-    vars->env = dup_env(envp);
-    if (!vars->env)
-    {
-        crit_error(vars);
-    }
-    get_shell_level(vars);
-    incr_shell_level(vars);
-    init_vars(vars);
-    vars->pipes = init_pipes();
-    if (!vars->pipes)
-    {
-        crit_error(vars);
-    }
-    setup_terminal_mode(vars);
-    vars->error_code = 0;
-    load_signals();
-    load_history();
+	ft_memset(vars, 0, sizeof(t_vars));
+	vars->env = dup_env(envp);
+	if (!vars->env)
+	{
+		crit_error(vars);
+	}
+	get_shell_level(vars);
+	incr_shell_level(vars);
+	init_vars(vars);
+	vars->pipes = init_pipes();
+	if (!vars->pipes)
+	{
+		crit_error(vars);
+	}
+	setup_terminal_mode(vars);
+	vars->error_code = 0;
+	load_signals();
+	load_history();
 }
 
 /*
@@ -78,26 +78,26 @@ Allocates and sets up the pipes state.
 */
 t_pipe	*init_pipes(void)
 {
-    t_pipe	*pipes;
-    
-    pipes = (t_pipe *)malloc(sizeof(t_pipe));
-    if (!pipes)
-        return (NULL);
-    ft_memset(pipes, 0, sizeof(t_pipe));
-    pipes->saved_stdin = -1;
-    pipes->saved_stdout = -1;
-    pipes->heredoc_fd = -1;
-    pipes->heredoc_delim = NULL;
-    pipes->hd_expand = 0;
-    pipes->redirection_fd = -1;
-    pipes->last_cmd = NULL;
-    pipes->last_pipe = NULL;
-    pipes->pipe_root = NULL;
-    pipes->redir_root = NULL;
-    pipes->last_in_redir = NULL;
-    pipes->last_out_redir = NULL;
-    pipes->cmd_redir = NULL;
-    return (pipes);
+	t_pipe	*pipes;
+
+	pipes = (t_pipe *)malloc(sizeof(t_pipe));
+	if (!pipes)
+		return (NULL);
+	ft_memset(pipes, 0, sizeof(t_pipe));
+	pipes->saved_stdin = -1;
+	pipes->saved_stdout = -1;
+	pipes->heredoc_fd = -1;
+	pipes->heredoc_delim = NULL;
+	pipes->hd_expand = 0;
+	pipes->redirection_fd = -1;
+	pipes->last_cmd = NULL;
+	pipes->last_pipe = NULL;
+	pipes->pipe_root = NULL;
+	pipes->redir_root = NULL;
+	pipes->last_in_redir = NULL;
+	pipes->last_out_redir = NULL;
+	pipes->cmd_redir = NULL;
+	return (pipes);
 }
 
 /*
@@ -152,14 +152,14 @@ Sets up terminal mode for shell operation.
 */
 void	setup_terminal_mode(t_vars *vars)
 {
-    struct termios	term;
-    
-    if (isatty(STDIN_FILENO))
-    {
-        tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
-        vars->ori_term_saved = 1;
-        tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag &= ~ECHOCTL;
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
-    }
+	struct termios	term;
+
+	if (isatty(STDIN_FILENO))
+	{
+		tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
+		vars->ori_term_saved = 1;
+		tcgetattr(STDIN_FILENO, &term);
+		term.c_lflag &= ~ECHOCTL;
+		tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	}
 }

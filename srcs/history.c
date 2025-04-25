@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 06:29:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:30:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:52:33 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,13 @@ Example: init_history_fd(O_RDONLY)
 int	init_history_fd(int mode)
 {
 	int			fd;
-	struct stat	st = {0};
-	
+	struct stat	st;
+
+	ft_memset(&st, 0, sizeof(st));
 	if (stat("temp", &st) == -1)
 	{
-        mkdir("temp", 0755);
-    }
+		mkdir("temp", 0755);
+	}
 	if (access(HISTORY_FILE, F_OK) == -1)
 	{
 		fd = open(HISTORY_FILE, O_WRONLY | O_CREAT, 0644);

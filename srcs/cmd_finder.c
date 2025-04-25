@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:40:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/22 04:31:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:56:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@ Returns:
 t_node	*init_find_cmd(t_node *start, t_vars *vars)
 {
 	t_node	*result;
-	
+
 	if (vars->find_mode == FIND_ALL && vars)
 	{
 		vars->cmd_count = 0;
 		result = vars->head;
 	}
-	else 
+	else
 		result = start;
 	return (result);
 }
@@ -96,7 +96,7 @@ t_node	*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars)
 	t_node	*current;
 	t_node	*last_cmd;
 	t_node	*result;
-	
+
 	if ((!vars) || (!start && mode != FIND_ALL))
 		return (NULL);
 	last_cmd = NULL;

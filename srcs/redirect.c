@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 11:02:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 08:06:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,18 @@ Works with reset_redirect_fds() to restore original file descriptors.
 */
 void	restore_fd(int *saved_fd_ptr, int target_fd)
 {
-    if (*saved_fd_ptr > 2)
-    {
-		int result;
-		
-        result = dup2(*saved_fd_ptr, target_fd);
-        if (result == -1)
-        {
+	int	result;
+
+	if (*saved_fd_ptr > 2)
+	{
+		result = dup2(*saved_fd_ptr, target_fd);
+		if (result == -1)
+		{
 			perror("dup2");
-        }
-        close(*saved_fd_ptr);
-        *saved_fd_ptr = -1;
-    }
+		}
+		close(*saved_fd_ptr);
+		*saved_fd_ptr = -1;
+	}
 }
 
 /*
@@ -66,13 +66,13 @@ command execution or FD restoration.
 */
 void	reset_pipe_redir_state(t_pipe *pipes)
 {
-	if(!pipes)
+	if (!pipes)
 		return ;
-    pipes->out_mode = OUT_MODE_NONE;
-    pipes->current_redirect = NULL;
-    pipes->last_in_redir = NULL;
-    pipes->last_out_redir = NULL;
-    pipes->cmd_redir = NULL;
+	pipes->out_mode = OUT_MODE_NONE;
+	pipes->current_redirect = NULL;
+	pipes->last_in_redir = NULL;
+	pipes->last_out_redir = NULL;
+	pipes->cmd_redir = NULL;
 }
 
 /*
@@ -84,21 +84,21 @@ Works with execute_cmd() to clean up after command execution.
 */
 void	reset_redirect_fds(t_vars *vars)
 {
-    if (!vars || !vars->pipes)
-        return ;
-    restore_fd(&vars->pipes->saved_stdin, STDIN_FILENO);
-    restore_fd(&vars->pipes->saved_stdout, STDOUT_FILENO);
-    if (vars->pipes->heredoc_fd >= 0)
-    {
-        close(vars->pipes->heredoc_fd);
-        vars->pipes->heredoc_fd = -1;
-    }
-    if (vars->pipes->redirection_fd > 2)
-    {
-        close(vars->pipes->redirection_fd);
-        vars->pipes->redirection_fd = -1;
-    }
-    reset_pipe_redir_state(vars->pipes);
+	if (!vars || !vars->pipes)
+		return ;
+	restore_fd(&vars->pipes->saved_stdin, STDIN_FILENO);
+	restore_fd(&vars->pipes->saved_stdout, STDOUT_FILENO);
+	if (vars->pipes->heredoc_fd >= 0)
+	{
+		close(vars->pipes->heredoc_fd);
+		vars->pipes->heredoc_fd = -1;
+	}
+	if (vars->pipes->redirection_fd > 2)
+	{
+		close(vars->pipes->redirection_fd);
+		vars->pipes->redirection_fd = -1;
+	}
+	reset_pipe_redir_state(vars->pipes);
 }
 
 /*
@@ -116,17 +116,17 @@ multiple redirections applied to the same command.
 */
 t_node	*get_next_redir(t_node *current, t_node *cmd)
 {
-    t_node	*next;
-    
+	t_node	*next;
+
 	next = current->next;
-    while (next)
-    {
-        if (is_redirection(next->type) && 
-            get_redir_target(next, NULL) == cmd)
-        {
-            return (next);
-        }
-        next = next->next;
-    }
-    return (NULL);
+	while (next)
+	{
+		if (is_redirection(next->type)
+			&& get_redir_target(next, NULL) == cmd)
+		{
+			return (next);
+		}
+		next = next->next;
+	}
+	return (NULL);
 }

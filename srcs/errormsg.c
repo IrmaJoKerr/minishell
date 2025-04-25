@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 19:39:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:42:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,11 @@ Handles specific syntax error messages.
 */
 void	tok_syntax_error_msg(char *token_str, t_vars *vars)
 {
-    ft_putstr_fd("bleshell: syntax error near unexpected token `", 2);
-    ft_putstr_fd(token_str, 2);
-    ft_putendl_fd("'", 2);
-    if (vars)
-        vars->error_code = ERR_SYNTAX;
+	ft_putstr_fd("bleshell: syntax error near unexpected token `", 2);
+	ft_putstr_fd(token_str, 2);
+	ft_putendl_fd("'", 2);
+	if (vars)
+		vars->error_code = ERR_SYNTAX;
 }
 
 /*
@@ -121,8 +121,8 @@ Handles file error cleanup.
 */
 void	handle_fd_error(int fd, t_vars *vars, const char *error_msg)
 {
-    if (error_msg)
-        perror(error_msg);
-    close(fd);
-    vars->error_code = ERR_DEFAULT;
+	if (error_msg)
+		perror(error_msg);
+	close(fd);
+	vars->error_code = ERR_DEFAULT;
 }

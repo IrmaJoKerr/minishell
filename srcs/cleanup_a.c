@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:55:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:13:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Cleanup pipes struct variables.
 - Prevents memory leaks after pipeline processing.
 Works with cleanup_exit().
 */
-void cleanup_pipes(t_pipe *pipes)
+void	cleanup_pipes(t_pipe *pipes)
 {
 	if (!pipes)
 		return ;
@@ -91,14 +91,14 @@ Performs complete program cleanup before exit.
 - Clears readline history from memory
 Works with builtin_exit().
 */
-void cleanup_exit(t_vars *vars)
+void	cleanup_exit(t_vars *vars)
 {
 	if (!vars)
 		return ;
 	if (isatty(STDIN_FILENO) && vars->ori_term_saved)
-    {
-        tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
-    }
+	{
+		tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
+	}
 	save_history();
 	if (vars->head)
 	{
@@ -128,7 +128,7 @@ void	cleanup_token_list(t_vars *vars)
 {
 	t_node	*current;
 	t_node	*next;
-	
+
 	if (!vars || !vars->head)
 		return ;
 	current = vars->head;

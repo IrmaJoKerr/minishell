@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 19:21:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:02:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,16 @@ Returns:
 - 1 on success.
 - 0 on failure.
 */
-int	get_expn_name(char *input, t_vars *vars, char **token ,char **var_name)
+int	get_expn_name(char *input, t_vars *vars, char **token, char **var_name)
 {
 	char	*tokstr;
 	char	*var_str;
 	int		start;
-	
+
 	start = vars->pos + 1;
 	vars->pos++;
 	while (input[vars->pos] && (ft_isalnum(input[vars->pos])
-		||input[vars->pos] == '_'))
+			||input[vars->pos] == '_'))
 		vars->pos++;
 	tokstr = ft_substr(input, vars->start, vars->pos - vars->start);
 	if (!tokstr)
@@ -98,7 +98,7 @@ int	addon_quo_type_arr(int *dest, int *src, int new_len)
 {
 	int	j;
 	int	end_pos;
-	
+
 	j = 0;
 	while (src[j] != -1)
 	{
@@ -112,14 +112,14 @@ int	addon_quo_type_arr(int *dest, int *src, int new_len)
 		j++;
 	}
 	dest[j] = -1;
-	return j;
+	return (j);
 }
 
 int	sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
 				, char *token)
 {
 	if (vars->adj_state[0] && vars->current && (vars->current->type == TYPE_CMD
-		|| vars->current->type == TYPE_ARGS))
+			|| vars->current->type == TYPE_ARGS))
 	{
 		if (handle_tok_join(input, vars, expanded_val, token))
 		{
@@ -147,13 +147,13 @@ Returns:
 - 1 on success
 - 0 on failure
 */
-int make_exp_token(char *input, t_vars *vars)
+int	make_exp_token(char *input, t_vars *vars)
 {
 	char	*token;
 	char	*expanded_val;
 	char	*var_name;
 	int		result;
-	
+
 	token = NULL;
 	expanded_val = NULL;
 	var_name = NULL;

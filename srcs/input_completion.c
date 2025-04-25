@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 19:09:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:57:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ char	*append_input(char *original, char *additional)
 {
 	char	*temp;
 	char	*result;
-	
+
 	temp = ft_strjoin(original, "\n");
 	if (!temp)
 		return (NULL);

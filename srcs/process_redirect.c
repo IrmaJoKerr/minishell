@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 16:00:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 15:06:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,21 +25,21 @@ Works with proc_token_list.
 */
 t_node	*proc_redir(t_vars *vars)
 {
-    if (!vars || !vars->head || !vars->pipes)
-        return (NULL);
-    reset_redir_tracking(vars->pipes);
-    build_redir_ast(vars);
-    if (vars->error_code == 2)
-    {
-        return NULL;
-    }
-    if (vars->pipes->pipe_root)
-        link_redirs_pipes(vars);
-    if (vars->pipes->redir_root)
-    {
-        vars->astroot = vars->pipes->redir_root;
-    }
-    return vars->pipes->redir_root;
+	if (!vars || !vars->head || !vars->pipes)
+		return (NULL);
+	reset_redir_tracking(vars->pipes);
+	build_redir_ast(vars);
+	if (vars->error_code == 2)
+	{
+		return (NULL);
+	}
+	if (vars->pipes->pipe_root)
+		link_redirs_pipes(vars);
+	if (vars->pipes->redir_root)
+	{
+		vars->astroot = vars->pipes->redir_root;
+	}
+	return (vars->pipes->redir_root);
 }
 
 /*
@@ -48,7 +48,7 @@ Resets redirection tracking state in the pipes structure.
 - Prepares pipes structure for new redirection processing.
 Works with proc_redir to clean state before processing.
 */
-void reset_redir_tracking(t_pipe *pipes)
+void	reset_redir_tracking(t_pipe *pipes)
 {
 	if (!pipes)
 		return ;
@@ -68,25 +68,25 @@ Works with proc_redir for redirection structure building.
 */
 void	build_redir_ast(t_vars *vars)
 {
-    t_node	*current;
-    
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-            vars->pipes->last_cmd = current;
-        else if (is_redirection(current->type))
-        {
-            if (!is_valid_redir_node(current) || !current->next->args
+	t_node	*current;
+
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+			vars->pipes->last_cmd = current;
+		else if (is_redirection(current->type))
+		{
+			if (!is_valid_redir_node(current) || !current->next->args
 				|| !current->next->args[0])
-            {
-                tok_syntax_error_msg("newline", vars);
-                return ;
-            }
-            process_redir_node(current, vars);
-        }
-        current = current->next;
-    }
+			{
+				tok_syntax_error_msg("newline", vars);
+				return ;
+			}
+			process_redir_node(current, vars);
+		}
+		current = current->next;
+	}
 }
 
 /*
@@ -100,20 +100,20 @@ Returns:
 */
 int	chk_redir_nodes(t_vars *vars, t_node *current)
 {
-    t_node	*chain_head;
-    t_node	*target_cmd;
-    
-    chain_head = find_redir_chain_head(current, vars->pipes->last_cmd);
-    if (chain_head != current)
-    {
-        return (0);
-    }
-    target_cmd = get_redir_target(current, vars->pipes->last_cmd);
-    if (target_cmd && vars->pipes->pipe_root)
-    {
-        upd_pipe_redir(vars->pipes->pipe_root, target_cmd, current);
-    }
-    return (1);
+	t_node	*chain_head;
+	t_node	*target_cmd;
+
+	chain_head = find_redir_chain_head(current, vars->pipes->last_cmd);
+	if (chain_head != current)
+	{
+		return (0);
+	}
+	target_cmd = get_redir_target(current, vars->pipes->last_cmd);
+	if (target_cmd && vars->pipes->pipe_root)
+	{
+		upd_pipe_redir(vars->pipes->pipe_root, target_cmd, current);
+	}
+	return (1);
 }
 
 /*
@@ -127,25 +127,25 @@ Works with link_redirs_pipes().
 */
 t_node	*find_redir_chain_head(t_node *current, t_node *last_cmd)
 {
-    t_node	*chain_head;
-    t_node	*prev_redir;
-    t_node	*current_target;
-    t_node	*prev_target;
-    int		same_target;
-    
+	t_node	*chain_head;
+	t_node	*prev_redir;
+	t_node	*current_target;
+	t_node	*prev_target;
+	int		same_target;
+
 	chain_head = current;
 	prev_redir = current->prev;
-    current_target = get_redir_target(current, last_cmd);
-    while (prev_redir)
-    {
-        prev_target = get_redir_target(prev_redir, last_cmd);
-        same_target = (prev_target == current_target);
-        if (!is_redirection(prev_redir->type) || !same_target)
-            break ;
-        chain_head = prev_redir;
-        prev_redir = prev_redir->prev;
-    }
-    return (chain_head);
+	current_target = get_redir_target(current, last_cmd);
+	while (prev_redir)
+	{
+		prev_target = get_redir_target(prev_redir, last_cmd);
+		same_target = (prev_target == current_target);
+		if (!is_redirection(prev_redir->type) || !same_target)
+			break ;
+		chain_head = prev_redir;
+		prev_redir = prev_redir->prev;
+	}
+	return (chain_head);
 }
 
 /*
@@ -157,28 +157,28 @@ Works with proc_redir() when pipe nodes exist.
 */
 void	link_redirs_pipes(t_vars *vars)
 {
-    t_node	*current;
-    
-    if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
-        return ;
-    vars->pipes->last_cmd = NULL;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-        {
-            vars->pipes->last_cmd = current;
-        }
-        else if (is_redirection(current->type) && current->next)
-        {
-            if (!chk_redir_nodes(vars, current))
-            {
-                current = current->next;
-                continue ;
-            }
-        }
-        current = current->next;
-    }
-}	
+	t_node	*current;
+
+	if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
+		return ;
+	vars->pipes->last_cmd = NULL;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+		{
+			vars->pipes->last_cmd = current;
+		}
+		else if (is_redirection(current->type) && current->next)
+		{
+			if (!chk_redir_nodes(vars, current))
+			{
+				current = current->next;
+				continue ;
+			}
+		}
+		current = current->next;
+	}
+}
 
 /*
 Configures a redirection node with source and target commands.
@@ -234,12 +234,10 @@ void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
 	{
 		if (pipe_node->left == cmd)
 		{
-			fprintf(stderr, "DEBUG: Updating left branch of pipe to use redirection\n");
 			pipe_node->left = redir;
 		}
 		else if (pipe_node->right == cmd)
 		{
-			fprintf(stderr, "DEBUG: Updating right branch of pipe to use redirection\n");
 			pipe_node->right = redir;
 		}
 		if (pipe_node->right && pipe_node->right->type == TYPE_PIPE)
@@ -263,7 +261,7 @@ int	is_valid_redir_node(t_node *current)
 	if (!is_redirection(current->type))
 		return (0);
 	if (!current->next || (current->next->type != TYPE_CMD
-		&& current->next->type != TYPE_ARGS))
+			&& current->next->type != TYPE_ARGS))
 		return (0);
 	return (1);
 }

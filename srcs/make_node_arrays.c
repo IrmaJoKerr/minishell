@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 21:07:33 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:48:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:02:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Returns:
 char	**setup_args(char *token)
 {
 	char	**args;
-	
+
 	args = malloc(sizeof(char *) * 2);
 	if (!args)
 		return (NULL);
@@ -45,7 +45,7 @@ int	**setup_quotes(int len)
 {
 	int	**quote_types;
 	int	i;
-	
+
 	quote_types = malloc(sizeof(int *) * 2);
 	if (!quote_types)
 		return (NULL);
@@ -74,7 +74,7 @@ Also allocates character-level quote type arrays for each argument.
 void	make_node_arrays(t_node *node, char *token)
 {
 	int	len;
-	
+
 	node->args = setup_args(token);
 	if (!node->args)
 		return ;

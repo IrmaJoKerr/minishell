@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 06:38:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:51:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ char	*hd_expander(char *line, t_vars *vars)
 	int		pos;
 	char	*result;
 	char	*segment;
-	
+
 	if (!line || !vars)
 		return (ft_strdup(""));
 	result = NULL;
@@ -144,8 +144,8 @@ void	strip_outer_quotes(char **delimiter, t_vars *vars)
 	len = ft_strlen(str);
 	if (len < 2)
 		return ;
-	if ((str[0] == '"' && str[len - 1] == '"') ||
-		(str[0] == '\'' && str[len - 1] == '\''))
+	if ((str[0] == '"' && str[len - 1] == '"')
+		|| (str[0] == '\'' && str[len - 1] == '\''))
 	{
 		new_str = ft_substr(str, 1, len - 2);
 		if (!new_str)
@@ -204,14 +204,13 @@ Returns:
 char	*prepare_hd_line(char *line, t_vars *vars)
 {
 	char	*result;
-	
+
 	if (!line || !vars || !vars->pipes)
 		return (NULL);
 	if (vars->pipes->hd_expand == 1)
 		result = hd_expander(line, vars);
 	else
 		result = ft_strdup(line);
-		
 	return (result);
 }
 
@@ -222,7 +221,7 @@ Returns:
 - 1 on success.
 - 0 on failure.
 */
-int write_to_hd(int fd, char *line, t_vars *vars)
+int	write_to_hd(int fd, char *line, t_vars *vars)
 {
 	char	*expanded_line;
 	int		write_result;
@@ -298,7 +297,7 @@ int	handle_heredoc(t_node *node, t_vars *vars)
 	}
 	if (vars->pipes->heredoc_fd < 0)
 	{
-		return (0) ;
+		return (0);
 	}
 	if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1)
 	{
@@ -376,8 +375,8 @@ Returns:
 - 1 if a valid quoted delimiter was processed.
 - 0 if otherwise.
 */
-int	chk_quoted_delim(char *orig_delim, size_t len
-	,char **clean_delim_ptr, int *quoted_ptr)
+int	chk_quoted_delim(char *orig_delim, size_t len,
+		char **clean_delim_ptr, int *quoted_ptr)
 {
 	if (len == 2 && orig_delim[0] == '\"' && orig_delim[1] == '\"')
 	{
@@ -444,8 +443,8 @@ Works with process_heredoc_path to centralize error handling.
 */
 void	cleanup_heredoc_fd(int write_fd)
 {
-    close(write_fd);
-    unlink(TMP_BUF);
+	close(write_fd);
+	unlink(TMP_BUF);
 }
 
 /*

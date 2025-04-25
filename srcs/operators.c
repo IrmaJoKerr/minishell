@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 15:54:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:05:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 Checks if a token is an operator (pipe or redirection).
 Returns 1 if token is an operator, 0 otherwise.
 */
-int is_operator_token(t_tokentype type)
+int	is_operator_token(t_tokentype type)
 {
 	if (type == TYPE_PIPE)
 		return (1);
@@ -39,12 +39,12 @@ Creates string token for text preceding an operator.
 Returns:
 - Current position (unchanged).
 */
-void handle_string(char *input, t_vars *vars)
+void	handle_string(char *input, t_vars *vars)
 {
 	char		*token;
 	int			moves;
 	t_tokentype	token_type;
-	
+
 	if (vars->pos > vars->start)
 	{
 		token = ft_substr(input, vars->start, vars->pos - vars->start);
@@ -137,12 +137,12 @@ t_tokentype	get_token_at(char *input, int pos, int *moves)
 	token_type = is_double_token(input, pos, moves);
 	if (token_type != 0)
 	{
-		return token_type;
+		return (token_type);
 	}
 	token_type = is_single_token(input, pos, moves);
 	if (token_type != 0)
 	{
-		return token_type;
+		return (token_type);
 	}
 	*moves = 1;
 	return (0);
@@ -159,7 +159,7 @@ Returns:
 int	handle_single_operator(char *input, t_vars *vars)
 {
 	char	*token;
-	
+
 	token = ft_substr(input, vars->pos, 1);
 	if (!token)
 		return (vars->pos);
@@ -183,7 +183,7 @@ int	handle_double_operator(char *input, t_vars *vars)
 {
 	char	*token;
 	int		moves;
-	
+
 	moves = 2;
 	token = ft_substr(input, vars->pos, moves);
 	if (!token)

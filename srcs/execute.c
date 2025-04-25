@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 05:25:50 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:55:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Works with exec_external_cmd() and execute_pipes().
 int	handle_cmd_status(int status, t_vars *vars)
 {
 	int	exit_code;
-	
+
 	exit_code = 0;
 	if (WIFEXITED(status))
 	{
@@ -52,7 +52,7 @@ Works with setup_redirection().
 int	setup_in_redir(t_node *node, t_vars *vars)
 {
 	char	*file;
-	
+
 	if (!node->right || !node->right->args || !node->right->args[0])
 		return (0);
 	file = node->right->args[0];
@@ -90,7 +90,7 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 {
 	char	*file;
 	int		flags;
-	
+
 	if (!node->right || !node->right->args || !node->right->args[0])
 		return (0);
 	flags = O_WRONLY | O_CREAT;
@@ -128,15 +128,15 @@ Works with redir_mode_setup().
 int	setup_heredoc_redir(t_node *node, t_vars *vars)
 {
 	int	result;
-	
+
 	result = 1;
-    if (!vars->hd_text_ready)
-    {
-        if (!interactive_hd_mode(vars))
-            return (0);
-    }
+	if (!vars->hd_text_ready)
+	{
+		if (!interactive_hd_mode(vars))
+			return (0);
+	}
 	result = handle_heredoc(node, vars);
-    return (result);
+	return (result);
 }
 
 /*
@@ -175,26 +175,26 @@ Works with setup_redirection().
 */
 int	redir_mode_setup(t_node *node, t_vars *vars)
 {
-    int	result;
-    
+	int	result;
+
 	result = 0;
-    if (node->type == TYPE_IN_REDIRECT)
-        result = setup_in_redir(node, vars);
-    else if (node->type == TYPE_OUT_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-        result = setup_out_redir(node, vars);
-    }
-    else if (node->type == TYPE_APPEND_REDIRECT)
-    {
-        vars->pipes->out_mode = OUT_MODE_APPEND;
-        result = setup_out_redir(node, vars);
-    }
-    else if (node->type == TYPE_HEREDOC)
-        result = setup_heredoc_redir(node, vars);
-    if (!result)
-        vars->error_code = ERR_DEFAULT;
-    return (result);
+	if (node->type == TYPE_IN_REDIRECT)
+		result = setup_in_redir(node, vars);
+	else if (node->type == TYPE_OUT_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+		result = setup_out_redir(node, vars);
+	}
+	else if (node->type == TYPE_APPEND_REDIRECT)
+	{
+		vars->pipes->out_mode = OUT_MODE_APPEND;
+		result = setup_out_redir(node, vars);
+	}
+	else if (node->type == TYPE_HEREDOC)
+		result = setup_heredoc_redir(node, vars);
+	if (!result)
+		vars->error_code = ERR_DEFAULT;
+	return (result);
 }
 
 /*
@@ -208,18 +208,18 @@ Returns:
 */
 int	proc_redir_target(t_node *node, t_vars *vars)
 {
-    if (node->right && node->right->args && node->right->args[0])
-    {
-        if (node->type != TYPE_HEREDOC)
-            strip_outer_quotes(&node->right->args[0], vars);
-        return (1);
-    }
-    else if (node->type != TYPE_HEREDOC)
-    {
-        tok_syntax_error_msg("newline", vars);
-        return (0);
-    }
-    return (1);
+	if (node->right && node->right->args && node->right->args[0])
+	{
+		if (node->type != TYPE_HEREDOC)
+			strip_outer_quotes(&node->right->args[0], vars);
+		return (1);
+	}
+	else if (node->type != TYPE_HEREDOC)
+	{
+		tok_syntax_error_msg("newline", vars);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -232,30 +232,30 @@ Returns:
 - 0 on failure.
 Works with exec_redirect_cmd().
 */
-int setup_redirection(t_node *node, t_vars *vars)
+int	setup_redirection(t_node *node, t_vars *vars)
 {
-    int		result;
-    t_node	*cmd_node;
+	int		result;
+	t_node	*cmd_node;
 
-    vars->pipes->current_redirect = node;
-    cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-    if (!cmd_node)
-    {
-        vars->error_code = ERR_DEFAULT;
-        return (0);
-    }
-    vars->pipes->cmd_redir = cmd_node;
-    if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
-        vars->pipes->last_in_redir = node;
-    else if (node->type == TYPE_OUT_REDIRECT
+	vars->pipes->current_redirect = node;
+	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+	if (!cmd_node)
+	{
+		vars->error_code = ERR_DEFAULT;
+		return (0);
+	}
+	vars->pipes->cmd_redir = cmd_node;
+	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+		vars->pipes->last_in_redir = node;
+	else if (node->type == TYPE_OUT_REDIRECT
 		|| node->type == TYPE_APPEND_REDIRECT)
 	{
-        vars->pipes->last_out_redir = node;
+		vars->pipes->last_out_redir = node;
 	}
-    if (!proc_redir_target(node, vars))
-        return (0);
-    result = redir_mode_setup(node, vars);
-    return (result);
+	if (!proc_redir_target(node, vars))
+		return (0);
+	result = redir_mode_setup(node, vars);
+	return (result);
 }
 
 /*
@@ -272,7 +272,7 @@ int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
 {
 	t_node	*current_node;
 	t_node	*next_redir;
-	
+
 	current_node = start_node;
 	while (current_node && is_redirection(current_node->type))
 	{
@@ -338,7 +338,7 @@ Works with execute_cmd().
 int	exec_cmd_node(t_node *node, char **envp, t_vars *vars)
 {
 	int	result;
-	
+
 	if (node->args && node->args[0])
 	{
 		if (is_builtin(node->args[0]))
@@ -364,7 +364,7 @@ Exit code which is also stored in vars->error_code.
 int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
 	int	result;
-	
+
 	result = 0;
 	if (!node)
 		return (vars->error_code = 1);
@@ -395,7 +395,7 @@ Note: This function never returns (it either executes or exits)
 void	exec_child(char *cmd_path, char **args, char **envp)
 {
 	int	error_code;
-	
+
 	execve(cmd_path, args, envp);
 	if (errno == EACCES)
 		error_code = ERR_PERMISSIONS;
@@ -427,24 +427,24 @@ Example: For "ls -la"
 */
 int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    pid_t	pid;
-    int		status;
-    int		return_code;
-    char	*cmd_path;
+	pid_t	pid;
+	int		status;
+	int		return_code;
+	char	*cmd_path;
 
-    cmd_path = get_cmd_path(node, envp, vars);
-    if (!cmd_path)
-        return (vars->error_code);
-    pid = fork();
-    if (pid < 0)
-    {
-        free(cmd_path);
-        return (vars->error_code = 1);
-    }
-    if (pid == 0)
-        exec_child(cmd_path, node->args, envp);
-    free(cmd_path);
-    waitpid(pid, &status, 0);
-    return_code = handle_cmd_status(status, vars);
-    return (return_code);
+	cmd_path = get_cmd_path(node, envp, vars);
+	if (!cmd_path)
+		return (vars->error_code);
+	pid = fork();
+	if (pid < 0)
+	{
+		free(cmd_path);
+		return (vars->error_code = 1);
+	}
+	if (pid == 0)
+		exec_child(cmd_path, node->args, envp);
+	free(cmd_path);
+	waitpid(pid, &status, 0);
+	return_code = handle_cmd_status(status, vars);
+	return (return_code);
 }

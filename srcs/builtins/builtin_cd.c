@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/13 01:52:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:59:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,11 @@ int	builtin_cd(char **args, t_vars *vars)
 	char	*oldpwd;
 	int		cmdcode;
 
+	if (args[1] && args[2])
+		return (1);
 	oldpwd = ft_strdup(get_env_val("OLDPWD", vars->env));
 	if (!oldpwd)
-	{
-		printf("cd: ft_strdup error\n");
 		return (1);
-	}
 	cmdcode = handle_cd_path(args, vars);
 	if (cmdcode != 0)
 	{
@@ -42,6 +41,7 @@ int	builtin_cd(char **args, t_vars *vars)
 	if (cmdcode != 0)
 	{
 		free(oldpwd);
+		vars->error_code = cmdcode;
 		return (1);
 	}
 	free(oldpwd);
@@ -72,7 +72,6 @@ int	handle_cd_special(char **args, t_vars *vars)
 		}
 		return (0);
 	}
-
 	path_value = get_env_val("OLDPWD", vars->env);
 	cmdcode = chdir(path_value);
 	if (cmdcode != 0)
@@ -102,7 +101,8 @@ int	handle_cd_path(char **args, t_vars *vars)
 	cmdcode = chdir(args[1]);
 	if (cmdcode != 0)
 	{
-		printf("cd: no such file or directory: %s\n", args[1]);
+		// printf("cd: no such file or directory: %s\n", args[1]);
+		shell_error(args[1], ERR_CMD_NOT_FOUND, vars);
 		return (1);
 	}
 	return (0);

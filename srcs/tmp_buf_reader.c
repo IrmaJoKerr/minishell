@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 21:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 21:47:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 08:07:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ void	tmp_buf_reader(t_vars *vars)
 {
 	t_read_buf	rb;
 	int			i;
-	
+
 	if (!init_read_buf(&rb))
 		return ;
 	i = 0;

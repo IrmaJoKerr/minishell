@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 16:29:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:01:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	new_exp_token(t_vars *vars, char *expanded_val, char *token)
 {
 	t_node		*exp_node;
 	t_tokentype	token_type;
-	
+
 	token_type = TYPE_ARGS;
 	if (!vars->head)
 	{
@@ -68,24 +68,24 @@ Returns:
 */
 int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 {
-    int	arg_idx;
-    
-    if (!vars->current->args || !vars->current->args[0])
+	int	arg_idx;
+
+	if (!vars->current->args || !vars->current->args[0])
 		return (0);
-    arg_idx = proc_join_args(vars, expanded_val);
-    if (arg_idx == -1)
+	arg_idx = proc_join_args(vars, expanded_val);
+	if (arg_idx == -1)
 		return (0);
-    if (vars->current->arg_quote_type
+	if (vars->current->arg_quote_type
 		&& vars->current->arg_quote_type[arg_idx])
-    {
-        if (!update_quote_types(vars, arg_idx, expanded_val))
+	{
+		if (!update_quote_types(vars, arg_idx, expanded_val))
 			return (0);
-    }
-    free(expanded_val);
-    free(token);
-    if (vars->adj_state[1])
-        process_right_adj(input, vars);
-    return (1);
+	}
+	free(expanded_val);
+	free(token);
+	if (vars->adj_state[1])
+		process_right_adj(input, vars);
+	return (1);
 }
 
 /*
@@ -119,9 +119,9 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
 	int	new_len;
 	int	*new_quo_type;
 	int	*old_quo_type;
-	
+
 	if (!vars->current->arg_quote_type
-			|| !vars->current->arg_quote_type[arg_idx])
+		|| !vars->current->arg_quote_type[arg_idx])
 	{
 		return (0);
 	}

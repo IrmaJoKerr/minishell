@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 06:15:43 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 06:18:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:22:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,15 @@ Returns 1 on success, 0 if directory creation failed.
 */
 int	chk_and_make_folder(const char *path)
 {
-    struct stat	st = {0};
-    
-    if (stat(path, &st) == -1)
-    {
-        return (mkdir(path, 0755) == 0);
-    }
-    return (1);
+	struct stat	st;
+
+	// st = {0};
+	ft_memset(&st, 0, sizeof(st));
+	if (stat(path, &st) == -1)
+	{
+		return (mkdir(path, 0755) == 0);
+	}
+	return (1);
 }
 
 /*

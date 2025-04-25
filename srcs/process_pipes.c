@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 07:18:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:42:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ void	setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
 {
 	if (!pipe_node || !left_cmd || !right_cmd)
 		return ;
-	// Set commands as children of the pipe
 	pipe_node->left = left_cmd;
 	pipe_node->right = right_cmd;
 }
@@ -118,7 +117,7 @@ Works with proc_token_list.
 t_node	*proc_pipes(t_vars *vars)
 {
 	t_node	*pipe_root;
-	
+
 	if (!vars || !vars->head || !vars->pipes)
 		return (NULL);
 	vars->pipes->pipe_root = NULL;

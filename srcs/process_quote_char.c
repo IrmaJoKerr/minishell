@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 15:19:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:29:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,21 @@ Return :
  - NULL on error.
 Works with expand_quoted_str().
 */
-char	*expand_quoted_var(char *expanded, char *content, int *pos
-                ,t_vars *vars)
+char	*expand_quoted_var(char *expanded, char *content, int *pos,
+				t_vars *vars)
 {
-    char	*var_value;
-    char	*temp;
-    
-    var_value = expand_variable(content, pos, NULL, vars);
-    if (!var_value)
-        return (expanded);
-    temp = ft_strjoin(expanded, var_value);
-    free(expanded);
-    free(var_value);
-    if (!temp)
-        return (NULL);
-    return (temp);
+	char	*var_value;
+	char	*temp;
+
+	var_value = expand_variable(content, pos, NULL, vars);
+	if (!var_value)
+		return (expanded);
+	temp = ft_strjoin(expanded, var_value);
+	free(expanded);
+	free(var_value);
+	if (!temp)
+		return (NULL);
+	return (temp);
 }
 
 /*
@@ -75,7 +75,7 @@ char	*expand_quoted_str(char *content, t_vars *vars)
 {
 	char	*expanded;
 	int		pos;
-	
+
 	pos = 0;
 	expanded = ft_strdup("");
 	if (!expanded)
@@ -97,6 +97,7 @@ char	*expand_quoted_str(char *content, t_vars *vars)
 	}
 	return (expanded);
 }
+
 /*
 Appends a substring to an existing string.
 Handles:
@@ -111,7 +112,7 @@ char	*append_substr(char *dest, char *src, int start, int len)
 {
 	char	*chunk;
 	char	*result;
-	
+
 	if (!dest || !src)
 		return (NULL);
 	chunk = ft_substr(src, start, len);
@@ -135,31 +136,31 @@ Returns:
 */
 char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 {
-    char	quote_char;
-    char	*content;
+	char	quote_char;
+	char	*content;
 	int		start;
-    int		len;
-    
-    quote_char = input[vars->pos];
-    if (quote_char == '\'')
-        *quote_type = TYPE_SINGLE_QUOTE;
-    else
-        *quote_type = TYPE_DOUBLE_QUOTE;
-    check_token_adj(input, vars);
-    start = ++(vars->pos);
-    while (input[vars->pos] && input[vars->pos] != quote_char)
-        (vars->pos)++;
-    if (!input[vars->pos])
-    {
-        vars->pos = start - 1;
-        return (NULL);
-    }
-    len = vars->pos - start;
-    content = ft_substr(input, start, len);
-    if (!content)
-        return (NULL);
-    (vars->pos)++;
-    return (content);
+	int		len;
+
+	quote_char = input[vars->pos];
+	if (quote_char == '\'')
+		*quote_type = TYPE_SINGLE_QUOTE;
+	else
+		*quote_type = TYPE_DOUBLE_QUOTE;
+	check_token_adj(input, vars);
+	start = ++(vars->pos);
+	while (input[vars->pos] && input[vars->pos] != quote_char)
+		(vars->pos)++;
+	if (!input[vars->pos])
+	{
+		vars->pos = start - 1;
+		return (NULL);
+	}
+	len = vars->pos - start;
+	content = ft_substr(input, start, len);
+	if (!content)
+		return (NULL);
+	(vars->pos)++;
+	return (content);
 }
 
 /*
@@ -172,18 +173,19 @@ Returns:
 */
 t_node	*process_quoted_str(char **content_ptr, int quote_type, t_vars *vars)
 {
-    t_node	*cmd_node;
-    
-    if (quote_type == TYPE_DOUBLE_QUOTE && ft_strchr(*content_ptr, '$'))
-    {
-        char *expanded = expand_quoted_str(*content_ptr, vars);
-        free(*content_ptr);
-        if (!expanded)
-            return (NULL);
-        *content_ptr = expanded;
-    }
-    cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
-    return (cmd_node);
+	t_node	*cmd_node;
+	char	*expanded;
+
+	if (quote_type == TYPE_DOUBLE_QUOTE && ft_strchr(*content_ptr, '$'))
+	{
+		expanded = expand_quoted_str(*content_ptr, vars);
+		free(*content_ptr);
+		if (!expanded)
+			return (NULL);
+		*content_ptr = expanded;
+	}
+	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+	return (cmd_node);
 }
 
 /*
@@ -194,26 +196,26 @@ Returns:
 */
 int	merge_quoted_token(char *input, char *content, t_vars *vars)
 {
-    char	*dummy_token;
+	char	*dummy_token;
 	int		join_success;
-    
-    if (!vars->adj_state[0])
-        return (0);
-    dummy_token = ft_strdup("");
-    if (!dummy_token)
-        return (0);
-    join_success = handle_tok_join(input, vars, content, dummy_token);
-    if (!join_success)
-    {
-        free(dummy_token);
-    }
-    else
-    {
-        if (vars->adj_state[1])
-            process_right_adj(input, vars);
-        process_adj(NULL, vars);
-    }
-    return (join_success);
+
+	if (!vars->adj_state[0])
+		return (0);
+	dummy_token = ft_strdup("");
+	if (!dummy_token)
+		return (0);
+	join_success = handle_tok_join(input, vars, content, dummy_token);
+	if (!join_success)
+	{
+		free(dummy_token);
+	}
+	else
+	{
+		if (vars->adj_state[1])
+			process_right_adj(input, vars);
+		process_adj(NULL, vars);
+	}
+	return (join_success);
 }
 
 /*
@@ -225,15 +227,15 @@ Works with handle_redir_target().
 */
 void	link_file_to_redir(t_node *redir_node, t_node *file_node, t_vars *vars)
 {
-    redir_node->right = file_node;
-    if (redir_node->next)
-    {
-        file_node->next = redir_node->next;
-        redir_node->next->prev = file_node;
-    }
-    redir_node->next = file_node;
-    file_node->prev = redir_node;
-    vars->current = file_node;
+	redir_node->right = file_node;
+	if (redir_node->next)
+	{
+		file_node->next = redir_node->next;
+		redir_node->next->prev = file_node;
+	}
+	redir_node->next = file_node;
+	file_node->prev = redir_node;
+	vars->current = file_node;
 }
 
 /*
@@ -246,9 +248,9 @@ Returns:
 */
 int	token_cleanup_error(char *content, t_vars *vars)
 {
-    free(content);
-    process_adj(NULL, vars);
-    return (0);
+	free(content);
+	process_adj(NULL, vars);
+	return (0);
 }
 
 /*
@@ -259,10 +261,10 @@ Cleans up after token processing and handles adjacency states.
 */
 void	cleanup_and_process_adj(char *content, char *input, t_vars *vars)
 {
-    free(content);
-    if (vars->adj_state[1])
-        process_right_adj(input, vars);
-    process_adj(NULL, vars);
+	free(content);
+	if (vars->adj_state[1])
+		process_right_adj(input, vars);
+	process_adj(NULL, vars);
 }
 
 /*
@@ -280,25 +282,25 @@ Example:
 */
 int	handle_redir_target(char *content, t_vars *vars)
 {
-    t_node	*redir_node;
-    t_node	*file_node;
+	t_node	*redir_node;
+	t_node	*file_node;
 
-    redir_node = find_last_redir(vars);
-    if (redir_node && is_redirection(redir_node->type))
-    {
-        file_node = initnode(TYPE_ARGS, content);
-        if (!file_node)
-        {
-            free(content);
-            return (0);
-        }
-        link_file_to_redir(redir_node, file_node, vars);
-        free(content);
-        return (1);
-    }
-    free(content);
-    vars->error_code = ERR_SYNTAX;
-    return (0);
+	redir_node = find_last_redir(vars);
+	if (redir_node && is_redirection(redir_node->type))
+	{
+		file_node = initnode(TYPE_ARGS, content);
+		if (!file_node)
+		{
+			free(content);
+			return (0);
+		}
+		link_file_to_redir(redir_node, file_node, vars);
+		free(content);
+		return (1);
+	}
+	free(content);
+	vars->error_code = ERR_SYNTAX;
+	return (0);
 }
 
 /*
@@ -312,16 +314,16 @@ Returns:
 */
 int	make_quoted_cmd(char *content, char *input, t_vars *vars)
 {
-    t_node	*cmd_node;
-    
-    cmd_node = initnode(TYPE_CMD, content);
-    if (!cmd_node)
-    {
-        return (token_cleanup_error(content, vars));
-    }
-    build_token_linklist(vars, cmd_node);
-    cleanup_and_process_adj(content, input, vars);
-    return (1);
+	t_node	*cmd_node;
+
+	cmd_node = initnode(TYPE_CMD, content);
+	if (!cmd_node)
+	{
+		return (token_cleanup_error(content, vars));
+	}
+	build_token_linklist(vars, cmd_node);
+	cleanup_and_process_adj(content, input, vars);
+	return (1);
 }
 
 /*
@@ -342,30 +344,30 @@ Example flows:
 */
 int	process_quote_char(char *input, t_vars *vars, int is_redir_target)
 {
-    int		quote_type;
-    char	*content;
-    t_node	*cmd_node;
+	int		quote_type;
+	char	*content;
+	t_node	*cmd_node;
 
-    content = get_quoted_str(input, vars, &quote_type);
-    if (!content)
-        return (0);
-    if (is_redir_target)
-        return handle_redir_target(content, vars);
-    cmd_node = process_quoted_str(&content, quote_type, vars);
-    if (!cmd_node && vars->adj_state[0] == 0)
-        return make_quoted_cmd(content, input, vars);
-    else if (!cmd_node)
-    {
-        if (!merge_quoted_token(input, content, vars))
-            return token_cleanup_error(content, vars);
-        return (1);
-    }
-    if (!merge_quoted_token(input, content, vars))
-    {
-        append_arg(cmd_node, content, quote_type);
-        cleanup_and_process_adj(content, input, vars);
-    }
-    return (1);
+	content = get_quoted_str(input, vars, &quote_type);
+	if (!content)
+		return (0);
+	if (is_redir_target)
+		return (handle_redir_target(content, vars));
+	cmd_node = (process_quoted_str(&content, quote_type, vars));
+	if (!cmd_node && vars->adj_state[0] == 0)
+		return (make_quoted_cmd(content, input, vars));
+	else if (!cmd_node)
+	{
+		if (!merge_quoted_token(input, content, vars))
+			return (token_cleanup_error(content, vars));
+		return (1);
+	}
+	if (!merge_quoted_token(input, content, vars))
+	{
+		append_arg(cmd_node, content, quote_type);
+		cleanup_and_process_adj(content, input, vars);
+	}
+	return (1);
 }
 
 /*
@@ -381,30 +383,30 @@ Works with process_quote_char() for redirection target handling.
 */
 t_node	*find_last_redir(t_vars *vars)
 {
-    t_node	*current;
+	t_node	*current;
 	t_node	*last_redir;
-    int		i;
+	int		i;
 
 	last_redir = NULL;
-    if (vars->current && is_redirection(vars->current->type))
-        return (vars->current);
-    current = vars->current;
-    i = 0;
-    while (current && current->prev && i < 3)
+	if (vars->current && is_redirection(vars->current->type))
+		return (vars->current);
+	current = vars->current;
+	i = 0;
+	while (current && current->prev && i < 3)
 	{
-        current = current->prev;
-        i++;
-        if (is_redirection(current->type))
-            return (current);
-    }
-    current = vars->head;
-    while (current)
+		current = current->prev;
+		i++;
+		if (is_redirection(current->type))
+			return (current);
+	}
+	current = vars->head;
+	while (current)
 	{
-        if (is_redirection(current->type))
-            last_redir = current;
-        current = current->next;
-    }
-    return (last_redir);
+		if (is_redirection(current->type))
+			last_redir = current;
+		current = current->next;
+	}
+	return (last_redir);
 }
 
 /*
@@ -418,23 +420,23 @@ Returns:
 */
 int	validate_single_redir(t_node *redir_node, t_vars *vars)
 {
-    t_node	*next;
-    
-    next = redir_node->next;
-    if (!next)
-    {
-        tok_syntax_error_msg("newline", vars);
-        return (0);
-    }
-    else if (is_redirection(next->type) || next->type == TYPE_PIPE)
-    {
-        if (next->args[0])
-            tok_syntax_error_msg(next->args[0], vars);
-        else
-            tok_syntax_error_msg("operator", vars);
-        return (0);
-    }
-    return (1);
+	t_node	*next;
+
+	next = redir_node->next;
+	if (!next)
+	{
+		tok_syntax_error_msg("newline", vars);
+		return (0);
+	}
+	else if (is_redirection(next->type) || next->type == TYPE_PIPE)
+	{
+		if (next->args[0])
+			tok_syntax_error_msg(next->args[0], vars);
+		else
+			tok_syntax_error_msg("operator", vars);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -448,17 +450,17 @@ Returns:
 */
 int	validate_redir_targets(t_vars *vars)
 {
-    t_node	*current;
-    
-    current = vars->head;
-    while (current)
-    {
-        if (is_redirection(current->type))
-        {
-            if (!validate_single_redir(current, vars))
-                return (0);
-        }
-        current = current->next;
-    }
-    return (1);
+	t_node	*current;
+
+	current = vars->head;
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			if (!validate_single_redir(current, vars))
+				return (0);
+		}
+		current = current->next;
+	}
+	return (1);
 }

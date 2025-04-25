@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/24 08:34:36 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/25 14:24:05 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,7 +50,6 @@ MINISHELL_SRCS = \
 			srcs/make_exp_token_utils.c \
 			srcs/make_exp_token.c \
 			srcs/make_node_arrays.c \
-			srcs/memory_debug.c \
 			srcs/minishell.c \
 			srcs/operators.c \
 			srcs/paths.c \

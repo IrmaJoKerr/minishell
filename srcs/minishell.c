@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 15:02:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:51:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,10 @@ Example: When user types "echo "hello
 char	*handle_quote_completion(char *cmd, t_vars *vars)
 {
 	char	*new_cmd;
-	
+
 	vars->quote_depth = 0;
 	if (validate_quotes(cmd, vars))
-		return cmd;
+		return (cmd);
 	new_cmd = fix_open_quotes(cmd, vars);
 	if (!new_cmd)
 		return (NULL);
@@ -137,23 +137,25 @@ Example: When user types "ls |"
 */
 int	finalize_pipes(t_vars *vars)
 {
-    char *completed_cmd = complete_pipe_cmd(vars->partial_input, vars);
-    if (!completed_cmd)
-    {
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-        return (0);
-    }
-    free(vars->partial_input);
-    vars->partial_input = completed_cmd;
-    cleanup_token_list(vars);
-    if (!process_input_tokens(vars->partial_input, vars))
-    {
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-        return (0);
-    }
-    return (1);
+	char	*completed_cmd;
+
+	completed_cmd = complete_pipe_cmd(vars->partial_input, vars);
+	if (!completed_cmd)
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return (0);
+	}
+	free(vars->partial_input);
+	vars->partial_input = completed_cmd;
+	cleanup_token_list(vars);
+	if (!process_input_tokens(vars->partial_input, vars))
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -167,23 +169,23 @@ Returns:
 */
 int	handle_pipe_syntax(t_vars *vars)
 {
-    int pipe_result;
-    
-    pipe_result = analyze_pipe_syntax(vars);
-    if (pipe_result == 2)
-    {
-        if (!finalize_pipes(vars))
-            return (0);
-    }
-    else if (pipe_result == 1)
-    {
-        cleanup_token_list(vars);
-        vars->error_code = 2;
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-        return (0);
-    }
-    return (1);
+	int	pipe_result;
+
+	pipe_result = analyze_pipe_syntax(vars);
+	if (pipe_result == 2)
+	{
+		if (!finalize_pipes(vars))
+			return (0);
+	}
+	else if (pipe_result == 1)
+	{
+		cleanup_token_list(vars);
+		vars->error_code = 2;
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -198,27 +200,27 @@ Example: When user types a complex command
 */
 void	process_command(char *command, t_vars *vars)
 {
-    vars->error_code = 0;
-    vars->partial_input = ft_strdup(command);
-    if (!vars->partial_input)
-        return ;
-    vars->partial_input = handle_quote_completion(vars->partial_input, vars);
-    if (!vars->partial_input)
-        return ;
-    if (!process_input_tokens(vars->partial_input, vars))
-    {
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-        return ;
-    }
-    if (!handle_pipe_syntax(vars))
-        return ;
-    build_and_execute(vars);
-    if (vars->partial_input)
-    {
-        free(vars->partial_input);
-        vars->partial_input = NULL;
-    }
+	vars->error_code = 0;
+	vars->partial_input = ft_strdup(command);
+	if (!vars->partial_input)
+		return ;
+	vars->partial_input = handle_quote_completion(vars->partial_input, vars);
+	if (!vars->partial_input)
+		return ;
+	if (!process_input_tokens(vars->partial_input, vars))
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return ;
+	}
+	if (!handle_pipe_syntax(vars))
+		return ;
+	build_and_execute(vars);
+	if (vars->partial_input)
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+	}
 }
 
 /*
@@ -228,22 +230,22 @@ Works with reset_terminal_after_heredoc().
 */
 void	restore_terminal_fd(int target_fd, int source_fd, int mode)
 {
-    char	*tty_path;
-    int		fd;
-    
-    if (!isatty(target_fd))
-    {
-        tty_path = ttyname(source_fd);
-        if (tty_path)
-        {
-            fd = open(tty_path, mode);
-            if (fd >= 0)
-            {
-                dup2(fd, target_fd);
-                close(fd);
-            }
-        }
-    }
+	char	*tty_path;
+	int		fd;
+
+	if (!isatty(target_fd))
+	{
+		tty_path = ttyname(source_fd);
+		if (tty_path)
+		{
+			fd = open(tty_path, mode);
+			if (fd >= 0)
+			{
+				dup2(fd, target_fd);
+				close(fd);
+			}
+		}
+	}
 }
 
 /*
@@ -260,17 +262,17 @@ Example: After a heredoc redirects stdin
 */
 void	reset_terminal_after_heredoc(void)
 {
-    struct termios	term;
-    
-    restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
-    restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
-    if (isatty(STDIN_FILENO))
-    {
-        tcgetattr(STDIN_FILENO, &term);
-        term.c_lflag |= (ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
-        rl_on_new_line();
-    }
+	struct termios	term;
+
+	restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
+	restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
+	if (isatty(STDIN_FILENO))
+	{
+		tcgetattr(STDIN_FILENO, &term);
+		term.c_lflag |= (ICANON | ECHO);
+		tcsetattr(STDIN_FILENO, TCSANOW, &term);
+		rl_on_new_line();
+	}
 }
 
 /*
@@ -285,8 +287,10 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_vars	vars;
 	char	*input;
-	char	*exit_args[2] = {NULL, NULL};
+	char	*exit_args[2];
 
+	exit_args[0] = NULL;
+	exit_args[1] = NULL;
 	(void)argc;
 	(void)argv;
 	ft_memset(&vars, 0, sizeof(t_vars));

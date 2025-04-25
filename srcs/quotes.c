@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 05:03:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:30:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,14 @@ Returns:
 - 1 if all quotes are balanced.
 - 0 if unclosed quotes are found.
 */
-int validate_quotes(char *input, t_vars *vars)
+int	validate_quotes(char *input, t_vars *vars)
 {
-	int     i;
-	char    in_quote;
-	 
+	int		i;
+	char	in_quote;
+
 	i = 0;
 	in_quote = 0;
-	vars->quote_depth = 0; 
+	vars->quote_depth = 0;
 	while (input[i])
 	{
 		if (!in_quote && (input[i] == '\'' || input[i] == '"'))
@@ -58,7 +58,7 @@ int validate_quotes(char *input, t_vars *vars)
 			vars->quote_depth--;
 		}
 		i++;
-	} 
+	}
 	return (in_quote == 0);
 }
 
@@ -70,9 +70,9 @@ Returns:
 */
 char	*quote_prompt(char quote_type)
 {
-	char *prompt;
-	char *addon_input;
-	
+	char	*prompt;
+	char	*addon_input;
+
 	if (quote_type == '\'')
 		prompt = "SQUOTE> ";
 	else
@@ -95,7 +95,8 @@ char	*fix_open_quotes(char *original_input, t_vars *vars)
 {
 	char	*addon_input;
 	char	*merged_input;
-	
+	char	*temp;
+
 	if (!vars->quote_depth)
 		return (ft_strdup(original_input));
 	addon_input = quote_prompt(vars->quote_ctx[vars->quote_depth - 1].type);
@@ -107,7 +108,7 @@ char	*fix_open_quotes(char *original_input, t_vars *vars)
 		return (NULL);
 	if (!validate_quotes(merged_input, vars))
 	{
-		char *temp = merged_input;
+		temp = merged_input;
 		merged_input = fix_open_quotes(temp, vars);
 		free(temp);
 	}

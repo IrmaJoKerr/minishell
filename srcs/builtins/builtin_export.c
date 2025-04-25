@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/05 04:08:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/24 19:16:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,12 +71,14 @@ int	export_with_args(char **args, t_vars *vars)
 			modify_env(&vars->env, 1, args[i]);
 		else
 		{
-			printf("export: '%s': not a valid identifier\n", args[i]);
+			ft_putstr_fd("export: '", 2);
+            ft_putstr_fd(args[i], 2);
+            ft_putstr_fd("': not a valid identifier\n", 2);
 			cmdcode = 1;
 		}
 		i++;
 	}
-	vars->error_code = cmdcode;
+	// vars->error_code = cmdcode;
 	return (cmdcode);
 }
 

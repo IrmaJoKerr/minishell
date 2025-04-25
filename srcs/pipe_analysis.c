@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 15:10:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:34:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	check_pipe_at_start(t_vars *vars)
 	if (vars->head->type == TYPE_PIPE)
 	{
 		tok_syntax_error_msg("|", vars);
-    	return (1);
+		return (1);
 	}
 	return (0);
 }
@@ -58,7 +58,7 @@ int	check_consecutive_pipes(t_vars *vars)
 			if (expecting_command)
 			{
 				tok_syntax_error_msg("|", vars);
-            	return (1);
+				return (1);
 			}
 			expecting_command = 1;
 		}
@@ -96,7 +96,7 @@ int	check_pipe_completion_needed(t_vars *vars)
 			expecting_command = 1;
 		}
 		else if ((current->type == TYPE_CMD || current->type == TYPE_ARGS)
-				&& expecting_command)
+			&& expecting_command)
 		{
 			expecting_command = 0;
 		}
@@ -119,7 +119,7 @@ Works with process_command() to validate and prepare input.
 */
 int	analyze_pipe_syntax(t_vars *vars)
 {
-	int result;
+	int	result;
 
 	if (!vars || !vars->head)
 		return (0);
@@ -149,12 +149,12 @@ char	*complete_pipe_cmd(char *command, t_vars *vars)
 	char	*pipe_cmd;
 	char	*temp;
 	int		syntax_result;
-	
+
 	if (!command || !vars)
 		return (NULL);
 	syntax_result = analyze_pipe_syntax(vars);
 	if (syntax_result != 2)
-		return (ft_strdup(command)); 
+		return (ft_strdup(command));
 	pipe_cmd = ft_strdup(command);
 	if (!pipe_cmd)
 		return (NULL);

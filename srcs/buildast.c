@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:18:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:38:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Returns:
 - NULL if invalid syntax or no commands found.
 Works with build_and_execute().
 */
-t_node *proc_token_list(t_vars *vars)
+t_node	*proc_token_list(t_vars *vars)
 {
 	if (!vars || !vars->head || !vars->pipes)
 		return (NULL);
@@ -39,7 +39,7 @@ t_node *proc_token_list(t_vars *vars)
 		return (NULL);
 	vars->pipes->pipe_root = NULL;
 	vars->pipes->redir_root = NULL;
-	vars->pipes->pipe_root = proc_pipes(vars); 
+	vars->pipes->pipe_root = proc_pipes(vars);
 	vars->pipes->redir_root = proc_redir(vars);
 	if (vars->pipes->pipe_root)
 		return (vars->pipes->pipe_root);
@@ -47,5 +47,5 @@ t_node *proc_token_list(t_vars *vars)
 		return (vars->pipes->redir_root);
 	else if (vars->cmd_count > 0)
 		return (vars->cmd_nodes[0]);
-	return NULL;
+	return (NULL);
 }

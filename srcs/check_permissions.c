@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 08:28:42 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:24:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:17:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,22 +25,22 @@ Works with file permission checks and path operations.
 */
 char	*extract_dir_path(char *filename)
 {
-    char	*dir_path;
-    char	*last_slash;
-    
+	char	*dir_path;
+	char	*last_slash;
+
 	dir_path = ft_strdup(filename);
-    if (!dir_path)
-        return (NULL);
-    last_slash = ft_strrchr(dir_path, '/');
-    if (last_slash)
-    {
-        *last_slash = '\0';
-        if (*dir_path == '\0')
-            ft_strlcpy(dir_path, "/", 2);
-    }
-    else
-        ft_strlcpy(dir_path, ".", 2);
-    return (dir_path);
+	if (!dir_path)
+		return (NULL);
+	last_slash = ft_strrchr(dir_path, '/');
+	if (last_slash)
+	{
+		*last_slash = '\0';
+		if (*dir_path == '\0')
+			ft_strlcpy(dir_path, "/", 2);
+	}
+	else
+		ft_strlcpy(dir_path, ".", 2);
+	return (dir_path);
 }
 
 /*
@@ -54,15 +54,15 @@ Works with chk_permissions for read mode checks.
 */
 int	chk_read_permission(char *filename, t_vars *vars)
 {
-    if (access(filename, F_OK | R_OK) == -1)
-    {
-        if (access(filename, F_OK) == -1)
-            not_found_error(filename, vars);
-        else
-            shell_error(filename, ERR_PERMISSIONS, vars);
-        return (0);
-    }
-    return (1);
+	if (access(filename, F_OK | R_OK) == -1)
+	{
+		if (access(filename, F_OK) == -1)
+			not_found_error(filename, vars);
+		else
+			shell_error(filename, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -76,12 +76,12 @@ Works with chk_permissions for write mode on existing files.
 */
 int	chk_file_write_permission(char *filename, t_vars *vars)
 {
-    if (access(filename, W_OK) == -1)
-    {
-        shell_error(filename, ERR_PERMISSIONS, vars);
-        return (0);
-    }
-    return (1);
+	if (access(filename, W_OK) == -1)
+	{
+		shell_error(filename, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -96,20 +96,20 @@ Works with chk_permissions for write mode on new files.
 */
 int	chk_dir_write_permission(char *filename, t_vars *vars)
 {
-    char	*dir_path;
-    int		result;
-    
-    dir_path = extract_dir_path(filename);
-    if (!dir_path)
-        return (0);
-    result = 1;
-    if (access(dir_path, W_OK) == -1)
-    {
-        shell_error(filename, ERR_PERMISSIONS, vars);
-        result = 0;
-    }
-    free(dir_path);
-    return (result);
+	char	*dir_path;
+	int		result;
+
+	dir_path = extract_dir_path(filename);
+	if (!dir_path)
+		return (0);
+	result = 1;
+	if (access(dir_path, W_OK) == -1)
+	{
+		shell_error(filename, ERR_PERMISSIONS, vars);
+		result = 0;
+	}
+	free(dir_path);
+	return (result);
 }
 
 /*
@@ -125,24 +125,26 @@ Works with redirection setup to validate file operations.
 int	chk_permissions(char *filename, int mode, t_vars *vars)
 {
 	int	result;
-	
-    if (mode == O_RDONLY)
+
+	if (mode == O_RDONLY)
 	{
 		result = chk_read_permission(filename, vars);
-        return (result);
+		return (result);
 	}
-    else if (mode & O_WRONLY)
-    {
-        if (access(filename, F_OK) == 0)
+	else if (mode & O_WRONLY)
+	{
+		if (access(filename, F_OK) == 0)
 		{
 			result = chk_file_write_permission(filename, vars);
-            return (result);
+			return (result);
 		}
-        else
+		else
 		{
 			result = chk_dir_write_permission(filename, vars);
-            return (result);
+			return (result);
 		}
-    }
-    return (1);
+	}
+	else if (mode & O_RDWR)
+		return (1);
+	return (0);
 }

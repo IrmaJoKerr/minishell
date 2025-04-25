@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 00:21:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/13 00:34:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:31:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ ft_free_void_2d((void **)arrays, length);
 void	ft_free_void_2d(void **array, size_t length)
 {
 	size_t	i;
-	
+
 	if (!array)
 		return ;
 	i = 0;

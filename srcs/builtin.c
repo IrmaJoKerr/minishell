@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:33:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/18 21:42:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:41:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,19 +58,23 @@ Example: For "cd /home"
 */
 int	execute_builtin(char *cmd, char **args, t_vars *vars)
 {
+	int	errcode;
+
+	errcode = 0;
 	if (!ft_strcmp(cmd, "cd"))
-		return (builtin_cd(args, vars));
-	if (!ft_strcmp(cmd, "echo"))
-		return (builtin_echo(args, vars));
-	if (!ft_strcmp(cmd, "env"))
-		return (builtin_env(vars));
-	if (!ft_strcmp(cmd, "exit"))
-		return (builtin_exit(args, vars));
-	if (!ft_strcmp(cmd, "export"))
-		return (builtin_export(args, vars));
-	if (!ft_strcmp(cmd, "pwd"))
-		return (builtin_pwd(vars));
-	if (!ft_strcmp(cmd, "unset"))
-		return (builtin_unset(args, vars));
-	return (1);
+		errcode = builtin_cd(args, vars);
+	else if (!ft_strcmp(cmd, "echo"))
+		errcode = builtin_echo(args, vars);
+	else if (!ft_strcmp(cmd, "env"))
+		errcode = builtin_env(vars);
+	else if (!ft_strcmp(cmd, "exit"))
+		errcode = builtin_exit(args, vars);
+	else if (!ft_strcmp(cmd, "export"))
+		errcode = builtin_export(args, vars);
+	else if (!ft_strcmp(cmd, "pwd"))
+		errcode = builtin_pwd(vars);
+	else if (!ft_strcmp(cmd, "unset"))
+		errcode = builtin_unset(args, vars);
+	vars->error_code = errcode;
+	return (errcode);
 }

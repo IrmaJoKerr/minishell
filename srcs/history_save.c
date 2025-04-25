@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 14:35:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 06:19:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:54:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,20 @@ Returns:
 - 1 on success, 0 on failure
 Works with save_history().
 */
-int prepare_history_entries(HIST_ENTRY ***hist_list, int *history_count
+int	prepare_history_entries(HIST_ENTRY ***hist_list, int *history_count
 					, int *start_idx)
 {
-	int excess_lines;
-	
-    *hist_list = history_list();
-    if (!*hist_list)
-        return (0);
-    *history_count = history_length;
-    excess_lines = *history_count - HISTORY_FILE_MAX;
-    *start_idx = 0;
-    if (excess_lines > 0)
-        *start_idx = excess_lines;
-    return (1);
+	int	excess_lines;
+
+	*hist_list = history_list();
+	if (!*hist_list)
+		return (0);
+	*history_count = history_length;
+	excess_lines = *history_count - HISTORY_FILE_MAX;
+	*start_idx = 0;
+	if (excess_lines > 0)
+		*start_idx = excess_lines;
+	return (1);
 }
 
 /*
@@ -58,29 +58,29 @@ Example: When shell exits with 1500 history entries and HISTORY_FILE_MAX=1000
 */
 void	save_history(void)
 {
-    int			fd;
-    HIST_ENTRY	**hist_list;
-    int			history_count;
-    int			start_idx;
-    int			saved_count;
-    
-    if (!chk_and_make_folder("temp"))
-        return ;
-    fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd == -1)
-        return ;
-    if (!prepare_history_entries(&hist_list, &history_count, &start_idx))
-    {
-        close(fd);
-        return;
-    }
-    saved_count = save_history_entries(fd, hist_list, start_idx
-							, history_count);
-    close(fd);
-    if (saved_count > HISTORY_FILE_MAX)
-    {
-        trim_history(saved_count - HISTORY_FILE_MAX);
-    }
+	int			fd;
+	HIST_ENTRY	**hist_list;
+	int			history_count;
+	int			start_idx;
+	int			saved_count;
+
+	if (!chk_and_make_folder("temp"))
+		return ;
+	fd = open(HISTORY_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+		return ;
+	if (!prepare_history_entries(&hist_list, &history_count, &start_idx))
+	{
+		close(fd);
+		return ;
+	}
+	saved_count = save_history_entries(fd, hist_list, start_idx,
+			history_count);
+	close(fd);
+	if (saved_count > HISTORY_FILE_MAX)
+	{
+		trim_history(saved_count - HISTORY_FILE_MAX);
+	}
 }
 
 /*

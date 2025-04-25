@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:12:20 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 15:13:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 07:42:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,26 +24,25 @@ Returns:
 */
 int	process_multiline_input(char *input, t_vars *vars)
 {
-    char	*first_line_end;
-    char	*content_start;
-	
-    first_line_end = ft_strchr(input, '\n');
-    if (!first_line_end)
-    {
-        process_command(input, vars);
-        return (1);
-    }
-    content_start = first_line_end + 1;
-    if (!proc_first_line(input, first_line_end, vars))
-        return (0);
-        
-    if (vars->pipes->heredoc_delim != NULL)
-        return process_heredoc_path(input, first_line_end, 
-                                  content_start, vars);
-    else
-    {
-        return (process_standard(input, vars));
-    }
+	char	*first_line_end;
+	char	*content_start;
+
+	first_line_end = ft_strchr(input, '\n');
+	if (!first_line_end)
+	{
+		process_command(input, vars);
+		return (1);
+	}
+	content_start = first_line_end + 1;
+	if (!proc_first_line(input, first_line_end, vars))
+		return (0);
+	if (vars->pipes->heredoc_delim != NULL)
+		return (process_heredoc_path(input, first_line_end,
+				content_start, vars));
+	else
+	{
+		return (process_standard(input, vars));
+	}
 }
 
 /*
@@ -59,12 +58,12 @@ Works with process_multiline_input as preprocessing step.
 int	proc_first_line(char *input, char *first_line_end, t_vars *vars)
 {
 	int	status;
-    
-    reset_shell(vars);
-    status = tokenize_first_line(input, first_line_end, vars);
-    if (!status || vars->error_code == ERR_SYNTAX)
-        return (0);
-    return (1);
+
+	reset_shell(vars);
+	status = tokenize_first_line(input, first_line_end, vars);
+	if (!status || vars->error_code == ERR_SYNTAX)
+		return (0);
+	return (1);
 }
 
 /*
@@ -77,34 +76,34 @@ Returns:
 - Result from heredoc processing (1 on success, 0 on error).
 Works with process_multiline_input for heredoc branch.
 */
-int	process_heredoc_path(char *input, char *first_line_end, 
-                        char *content_start, t_vars *vars)
+int	process_heredoc_path(char *input, char *first_line_end,
+			char *content_start, t_vars *vars)
 {
-    int	write_fd;
-    int	found_in_buf;
-    int	status;
-    int	first_line_len;
-    
-    first_line_len = first_line_end - input;
-    status = chk_hd_first_line(input, first_line_len, vars);
-    if (!status)
-        return (0);
-    write_fd = open_hd_tmp_buf(vars);
-    if (write_fd == -1)
-        return (0);
-    found_in_buf = proc_hd_buffer(write_fd, content_start, vars);
-    if (found_in_buf == -1)
-    {
-        cleanup_heredoc_fd(write_fd);
-        return (0);
-    }
-    status = handle_interactive_hd(write_fd, found_in_buf, vars);
-    if (status == -1)
-    {
-        cleanup_heredoc_fd(write_fd);
-        return (0);
-    }
-    return hd_proc_end(write_fd, input, first_line_end, vars);
+	int	write_fd;
+	int	found_in_buf;
+	int	status;
+	int	first_line_len;
+
+	first_line_len = first_line_end - input;
+	status = chk_hd_first_line(input, first_line_len, vars);
+	if (!status)
+		return (0);
+	write_fd = open_hd_tmp_buf(vars);
+	if (write_fd == -1)
+		return (0);
+	found_in_buf = proc_hd_buffer(write_fd, content_start, vars);
+	if (found_in_buf == -1)
+	{
+		cleanup_heredoc_fd(write_fd);
+		return (0);
+	}
+	status = handle_interactive_hd(write_fd, found_in_buf, vars);
+	if (status == -1)
+	{
+		cleanup_heredoc_fd(write_fd);
+		return (0);
+	}
+	return (hd_proc_end(write_fd, input, first_line_end, vars));
 }
 
 /*
@@ -168,8 +167,8 @@ char	*find_raw_delim(char *line_start, int len, const char *delim)
 {
 	char	*hd_operator_ptr;
 	char	*raw_ptr;
-	int 	offset;
-	int 	rem_len;
+	int		offset;
+	int		rem_len;
 
 	hd_operator_ptr = ft_strnstr(line_start, "<<", len);
 	if (!hd_operator_ptr)
@@ -188,7 +187,8 @@ Returns:
 - 1 if only whitespace (or end of string) follows.
 - 0 otherwise.
 */
-int	chk_hd_tail(char *line_start, char *raw_delim_ptr, char *delim, t_vars *vars)
+int	chk_hd_tail(char *line_start, char *raw_delim_ptr, char *delim,
+				t_vars *vars)
 {
 	int		pos_after;
 	char	current_char;
@@ -246,7 +246,7 @@ int	chk_hd_first_line(char *line_start, int len, t_vars *vars)
 	char	*delim_arg;
 	char	original_char;
 	int		is_ok;
-	
+
 	delim_node = find_delim_token(vars->head);
 	if (!delim_node || !delim_node->args || !delim_node->args[0])
 	{
@@ -254,7 +254,7 @@ int	chk_hd_first_line(char *line_start, int len, t_vars *vars)
 		return (0);
 	}
 	delim_arg = delim_node->args[0];
-	raw_delim_ptr = chk_raw_delim(line_start, len,delim_arg, vars);
+	raw_delim_ptr = chk_raw_delim(line_start, len, delim_arg, vars);
 	if (!raw_delim_ptr)
 		return (0);
 	original_char = line_start[len];
@@ -274,7 +274,7 @@ Returns:
  */
 int	open_hd_tmp_buf(t_vars *vars)
 {
-	int write_fd;
+	int	write_fd;
 
 	write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (write_fd == -1)

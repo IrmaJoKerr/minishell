@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/24 14:31:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 06:56:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ t_node	*initnode(t_tokentype type, char *token)
 {
 	t_node	*node;
 	int		quote_type;
-	
+
 	quote_type = 0;
 	node = malloc(sizeof(t_node));
 	if (!node)

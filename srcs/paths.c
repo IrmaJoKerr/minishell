@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/23 17:56:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 14:56:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,22 +124,22 @@ Works with get_cmd_path() for direct path handling.
 char	*handle_direct_path(char *cmd, t_vars *vars)
 {
 	struct stat	statbuf;
-    
-    if (stat(cmd, &statbuf) == 0)
-    {
-        if (S_ISDIR(statbuf.st_mode))
-        {
-            shell_error(cmd, ERR_ISDIRECTORY, vars);
-            return (NULL);
-        }
-        if (access(cmd, X_OK) == 0)
-            return (ft_strdup(cmd));
-        shell_error(cmd, ERR_PERMISSIONS, vars);
-    }
-    else
-        shell_error(cmd, ERR_CMD_NOT_FOUND, vars);
-    vars->error_code = 127;
-    return (NULL);
+
+	if (stat(cmd, &statbuf) == 0)
+	{
+		if (S_ISDIR(statbuf.st_mode))
+		{
+			shell_error(cmd, ERR_ISDIRECTORY, vars);
+			return (NULL);
+		}
+		if (access(cmd, X_OK) == 0)
+			return (ft_strdup(cmd));
+		shell_error(cmd, ERR_PERMISSIONS, vars);
+	}
+	else
+		shell_error(cmd, ERR_CMD_NOT_FOUND, vars);
+	vars->error_code = 127;
+	return (NULL);
 }
 
 /*
@@ -163,26 +163,26 @@ Example: For "ls" command
 */
 char	*get_cmd_path(t_node *node, char **envp, t_vars *vars)
 {
-    char	*cmd;
-    char	*path;
+	char	*cmd;
+	char	*path;
 	char	*direct_path;
-    
-    if (!node || !node->args || !node->args[0])
-    {
-        vars->error_code = 1;
-        return (NULL);
-    }
-    cmd = node->args[0];
-    if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
-		||(cmd[1] == '.' && cmd[2] == '/'))))
-    {
-        direct_path = handle_direct_path(cmd, vars);
+
+	if (!node || !node->args || !node->args[0])
+	{
+		vars->error_code = 1;
+		return (NULL);
+	}
+	cmd = node->args[0];
+	if (cmd[0] == '/' || (cmd[0] == '.' && (cmd[1] == '/'
+		|| (cmd[1] == '.' && cmd[2] == '/'))))
+	{
+		direct_path = handle_direct_path(cmd, vars);
 		return (direct_path);
-    }
-    path = search_in_env(cmd, envp, vars);
-    if (!path)
-        vars->error_code = 127;
-    return (path);
+	}
+	path = search_in_env(cmd, envp, vars);
+	if (!path)
+		vars->error_code = 127;
+	return (path);
 }
 
 /*
