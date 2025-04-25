@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 21:47:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/26 00:20:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,41 +37,6 @@ char	*reader(void)
 	if (*line)
 		add_history(line);
 	return (line);
-}
-
-/*
-Processes input with quotes that need completion.
-- Gets additional input for unclosed quotes.
-- Re-tokenizes the completed command.
-- Updates token list with completed input.
-Returns:
-Newly allocated complete command string.
-NULL on memory allocation failure.
-Works with process_command().
-
-Example: When user types "echo "hello
-- Prompts for completion of the double quote
-- User types "world" and Enter
-- Returns combined string: echo "hello world"
-*/
-char	*handle_quote_completion(char *cmd, t_vars *vars)
-{
-	char	*new_cmd;
-
-	vars->quote_depth = 0;
-	if (validate_quotes(cmd, vars))
-		return (cmd);
-	new_cmd = fix_open_quotes(cmd, vars);
-	if (!new_cmd)
-		return (NULL);
-	if (new_cmd != cmd)
-	{
-		free(cmd);
-		cmd = new_cmd;
-	}
-	cleanup_token_list(vars);
-	tokenizer(cmd, vars);
-	return (cmd);
 }
 
 /*
@@ -116,45 +81,6 @@ int	process_input_tokens(char *command, t_vars *vars)
 	cleanup_token_list(vars);
 	if (!tokenizer(command, vars))
 		return (0);
-	return (1);
-}
-
-/*
-Master control function for completing an incomplete pipe command by
-getting additional input.
-- Gets continuation input for commands ending with a pipe
-- Updates partial_input with the complete command
-- Re-tokenizes the completed command
-Returns:
-- 1 on successful pipe completion.
-- 0 on memory allocation or tokenization error.
-Works with handle_pipe_syntax().
-
-Example: When user types "ls |"
-- Prompts for continuation after the pipe.
-- User inputs "grep hello".
-- Creates and tokenizes "ls | grep hello".
-*/
-int	finalize_pipes(t_vars *vars)
-{
-	char	*completed_cmd;
-
-	completed_cmd = complete_pipe_cmd(vars->partial_input, vars);
-	if (!completed_cmd)
-	{
-		free(vars->partial_input);
-		vars->partial_input = NULL;
-		return (0);
-	}
-	free(vars->partial_input);
-	vars->partial_input = completed_cmd;
-	cleanup_token_list(vars);
-	if (!process_input_tokens(vars->partial_input, vars))
-	{
-		free(vars->partial_input);
-		vars->partial_input = NULL;
-		return (0);
-	}
 	return (1);
 }
 
@@ -220,58 +146,6 @@ void	process_command(char *command, t_vars *vars)
 	{
 		free(vars->partial_input);
 		vars->partial_input = NULL;
-	}
-}
-
-/*
-Restores a file descriptor to the terminal if it's not already connected.
-Can handle STDIN, STDOUT, or STDERR.
-Works with reset_terminal_after_heredoc().
-*/
-void	restore_terminal_fd(int target_fd, int source_fd, int mode)
-{
-	char	*tty_path;
-	int		fd;
-
-	if (!isatty(target_fd))
-	{
-		tty_path = ttyname(source_fd);
-		if (tty_path)
-		{
-			fd = open(tty_path, mode);
-			if (fd >= 0)
-			{
-				dup2(fd, target_fd);
-				close(fd);
-			}
-		}
-	}
-}
-
-/*
-Restores terminal settings after heredoc processing.
-- Reconnects STDIN and STDOUT to the terminal if redirected.
-- Restores canonical mode and echo settings.
-- Ensures readline library knows about the restored terminal state.
-Works with heredoc processing to maintain proper terminal behavior.
-
-Example: After a heredoc redirects stdin
-- Restores STDIN from STDOUT's terminal
-- Restores STDOUT from STDERR's terminal
-- Resets terminal attributes to interactive mode
-*/
-void	reset_terminal_after_heredoc(void)
-{
-	struct termios	term;
-
-	restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
-	restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
-	if (isatty(STDIN_FILENO))
-	{
-		tcgetattr(STDIN_FILENO, &term);
-		term.c_lflag |= (ICANON | ECHO);
-		tcsetattr(STDIN_FILENO, TCSANOW, &term);
-		rl_on_new_line();
 	}
 }
 

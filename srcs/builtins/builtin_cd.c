@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/25 15:21:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 23:47:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ int	handle_cd_path(char **args, t_vars *vars)
 	cmdcode = chdir(args[1]);
 	if (cmdcode != 0)
 	{
-		// printf("cd: no such file or directory: %s\n", args[1]);
 		shell_error(args[1], ERR_CMD_NOT_FOUND, vars);
 		return (1);
 	}

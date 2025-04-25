@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:04:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:30:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 23:15:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,34 +83,4 @@ char	*quote_prompt(char quote_type)
 	if (*addon_input)
 		add_history(addon_input);
 	return (addon_input);
-}
-
-/*
-Recursively reads additional input to complete unclosed quotes.
-Returns:
-- Completed input string.
-- NULL on error.
-*/
-char	*fix_open_quotes(char *original_input, t_vars *vars)
-{
-	char	*addon_input;
-	char	*merged_input;
-	char	*temp;
-
-	if (!vars->quote_depth)
-		return (ft_strdup(original_input));
-	addon_input = quote_prompt(vars->quote_ctx[vars->quote_depth - 1].type);
-	if (!addon_input)
-		return (NULL);
-	merged_input = append_input(original_input, addon_input);
-	free(addon_input);
-	if (!merged_input)
-		return (NULL);
-	if (!validate_quotes(merged_input, vars))
-	{
-		temp = merged_input;
-		merged_input = fix_open_quotes(temp, vars);
-		free(temp);
-	}
-	return (merged_input);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:35:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:52:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,64 +89,6 @@ void	handle_input(char *input, t_vars *vars)
 		vars->pipes->heredoc_delim = NULL;
 	}
 	reset_redirect_fds(vars);
-}
-
-/*
-Sets up terminal settings specifically for heredoc input.
-- Modifies termios structure to disable ECHO and ICANON flags.
-- Uses the original terminal settings as a base.
-- Makes user input invisible when entering heredoc content.
-- Disables canonical mode for raw character input.
-Works with manage_terminal_state() to provide special input handling
-for heredocs.
-*/
-void	term_heredoc(t_vars *vars)
-{
-	struct termios	heredoc_term;
-
-	heredoc_term = vars->ori_term_settings;
-	heredoc_term.c_lflag &= ~(ECHO | ICANON);
-	tcsetattr(STDIN_FILENO, TCSANOW, &heredoc_term);
-}
-
-/*
-Manages terminal states throughout different operations in the shell.
-- Handles saving the original terminal settings (TERM_SAVE)
-- Sets up special heredoc input mode with echo/canonical disabled
-  (TERM_HEREDOC)
-- Restores saved terminal settings when needed (TERM_RESTORE)
-- Safely checks if settings were previously saved before operations
-- Ensures terminal state consistency during command execution
-
-Example:
-- manage_terminal_state(vars, TERM_SAVE); == Save original settings
-- manage_terminal_state(vars, TERM_HEREDOC); == Set up heredoc mode
-- manage_terminal_state(vars, TERM_RESTORE); == Restore original settings
-Works with interactive prompt handling and heredoc processing.
-*/
-void	manage_terminal_state(t_vars *vars, int action)
-{
-	if (action == TERM_SAVE)
-	{
-		if (!vars->ori_term_saved)
-		{
-			tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
-			vars->ori_term_saved = 1;
-		}
-	}
-	else if (action == TERM_HEREDOC)
-	{
-		term_heredoc(vars);
-	}
-	else if (action == TERM_RESTORE)
-	{
-		if (vars->ori_term_saved)
-		{
-			tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
-			rl_on_new_line();
-		}
-	}
-	return ;
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:56:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 23:33:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,26 +104,53 @@ void	link_in_out_redirs(t_vars *vars)
 }
 
 /*
-Master control function for processing an individual redirection node.
-- Finds the target command for the redirection
-- Links the redirection node to command and target
-- Chains with previous redirections
-- Updates type-specific redirection trackers
-- Sets the redirection root if this is the first redirection
-Works with build_redir_ast() during AST construction.
+Retrieves the target command for a redirection node.
+- Checks if the previous node is a command.
+- If not, uses the last command seen in the pipe structure.
+- Ensures the target command is valid.
+Returns:
+- Pointer to the target command node.
+- NULL if no valid target found.
 */
-void	process_redir_node(t_node *redir_node, t_vars *vars)
+t_node	*get_redir_target(t_node *current, t_node *last_cmd)
 {
-	t_node	*cmd;
+	t_node	*target;
 
-	cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
-	if (cmd && redir_node->next)
+	target = NULL;
+	if (current->prev && current->prev->type == TYPE_CMD)
+		target = current->prev;
+	else
+		target = last_cmd;
+	return (target);
+}
+
+/*
+Updates pipe structure when commands are redirected.
+- Traverses pipe chain looking for references to the command.
+- Replaces command references with redirection node references.
+- Preserves pipe structure while incorporating redirections.
+- Handles both left and right side command replacements.
+*/
+void	upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir)
+{
+	t_node	*pipe_node;
+
+	if (!pipe_root || !cmd || !redir)
+		return ;
+	pipe_node = pipe_root;
+	while (pipe_node)
 	{
-		set_redir_node(redir_node, cmd, redir_node->next);
-		link_prev_redirs(redir_node, cmd, vars);
-		track_redirs(redir_node, cmd, vars);
-		link_in_out_redirs(vars);
-		if (!vars->pipes->redir_root)
-			vars->pipes->redir_root = redir_node;
+		if (pipe_node->left == cmd)
+		{
+			pipe_node->left = redir;
+		}
+		else if (pipe_node->right == cmd)
+		{
+			pipe_node->right = redir;
+		}
+		if (pipe_node->right && pipe_node->right->type == TYPE_PIPE)
+			pipe_node = pipe_node->right;
+		else
+			break ;
 	}
 }

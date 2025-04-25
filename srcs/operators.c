@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:05:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 23:42:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,89 +63,6 @@ void	handle_string(char *input, t_vars *vars)
 		free(token);
 		vars->start = vars->pos;
 	}
-}
-
-/* 
-Checks if character at position is a single-character token
-Returns the token type enum value, 0 if not a special token
-Handles: ', ", <, >, $, |
-*/
-int	is_single_token(char *input, int pos, int *moves)
-{
-	t_tokentype	token_type;
-
-	token_type = 0;
-	*moves = 0;
-	if (!input || !input[pos])
-		return (token_type);
-	if (input[pos] == '\'')
-		token_type = TYPE_SINGLE_QUOTE;
-	else if (input[pos] == '\"')
-		token_type = TYPE_DOUBLE_QUOTE;
-	else if (input[pos] == '<')
-		token_type = TYPE_IN_REDIRECT;
-	else if (input[pos] == '>')
-		token_type = TYPE_OUT_REDIRECT;
-	else if (input[pos] == '$')
-		token_type = TYPE_EXPANSION;
-	else if (input[pos] == '|')
-		token_type = TYPE_PIPE;
-	if (token_type != 0)
-	{
-		*moves = 1;
-	}
-	return (token_type);
-}
-
-/* 
-Checks if characters at position form a double-character token
-Returns the token type enum value, 0 if not a double token
-Handles: >>, <<, $?
-*/
-int	is_double_token(char *input, int pos, int *moves)
-{
-	t_tokentype	token_type;
-
-	token_type = 0;
-	*moves = 0;
-	if (!input || !input[pos] || !input[pos + 1])
-		return (token_type);
-	if (input[pos] == '>' && input[pos + 1] == '>')
-		token_type = TYPE_APPEND_REDIRECT;
-	else if (input[pos] == '<' && input[pos + 1] == '<')
-		token_type = TYPE_HEREDOC;
-	else if (input[pos] == '$' && input[pos + 1] == '?')
-		token_type = TYPE_EXIT_STATUS;
-	if (token_type != 0)
-	{
-		*moves = 2;
-	}
-	return (token_type);
-}
-
-/* 
-Master function to get token type at current position
-Checks double tokens first, then single tokens
-Returns token type and updates position via moves parameter
-*/
-t_tokentype	get_token_at(char *input, int pos, int *moves)
-{
-	t_tokentype	token_type;
-
-	token_type = 0;
-	*moves = 0;
-	token_type = is_double_token(input, pos, moves);
-	if (token_type != 0)
-	{
-		return (token_type);
-	}
-	token_type = is_single_token(input, pos, moves);
-	if (token_type != 0)
-	{
-		return (token_type);
-	}
-	*moves = 1;
-	return (0);
 }
 
 /*

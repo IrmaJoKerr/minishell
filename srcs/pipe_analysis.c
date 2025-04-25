@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:34:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 23:14:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,34 +136,40 @@ int	analyze_pipe_syntax(t_vars *vars)
 }
 
 /*
-Process pipe input for completion when needed.
-- Prompts for and handles additional input when pipe at end.
-- Manages integration with the tokenizer.
+Master control function for completing an incomplete pipe command by
+getting additional input.
+- Gets continuation input for commands ending with a pipe
+- Updates partial_input with the complete command
+- Re-tokenizes the completed command
 Returns:
-- Updated command string with pipe completion.
-- NULL on error.
-Works with process_command() to handle unfinished pipes.
-*/
-char	*complete_pipe_cmd(char *command, t_vars *vars)
-{
-	char	*pipe_cmd;
-	char	*temp;
-	int		syntax_result;
+- 1 on successful pipe completion.
+- 0 on memory allocation or tokenization error.
+Works with handle_pipe_syntax().
 
-	if (!command || !vars)
-		return (NULL);
-	syntax_result = analyze_pipe_syntax(vars);
-	if (syntax_result != 2)
-		return (ft_strdup(command));
-	pipe_cmd = ft_strdup(command);
-	if (!pipe_cmd)
-		return (NULL);
-	if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
+Example: When user types "ls |"
+- Prompts for continuation after the pipe.
+- User inputs "grep hello".
+- Creates and tokenizes "ls | grep hello".
+*/
+int	finalize_pipes(t_vars *vars)
+{
+	char	*completed_cmd;
+
+	completed_cmd = complete_pipe_cmd(vars->partial_input, vars);
+	if (!completed_cmd)
 	{
-		free(pipe_cmd);
-		return (NULL);
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return (0);
 	}
-	temp = ft_strdup(pipe_cmd);
-	free(pipe_cmd);
-	return (temp);
+	free(vars->partial_input);
+	vars->partial_input = completed_cmd;
+	cleanup_token_list(vars);
+	if (!process_input_tokens(vars->partial_input, vars))
+	{
+		free(vars->partial_input);
+		vars->partial_input = NULL;
+		return (0);
+	}
+	return (1);
 }

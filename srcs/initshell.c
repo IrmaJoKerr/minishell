@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 06:57:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:51:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,24 +142,4 @@ void	reset_shell(t_vars *vars)
 		reset_pipe_vars(vars);
 	}
 	init_vars(vars);
-}
-
-/*
-Sets up terminal mode for shell operation.
-- Saves original terminal settings
-- Configures terminal for interactive shell use
-- Disables control character echoing
-*/
-void	setup_terminal_mode(t_vars *vars)
-{
-	struct termios	term;
-
-	if (isatty(STDIN_FILENO))
-	{
-		tcgetattr(STDIN_FILENO, &vars->ori_term_settings);
-		vars->ori_term_saved = 1;
-		tcgetattr(STDIN_FILENO, &term);
-		term.c_lflag &= ~ECHOCTL;
-		tcsetattr(STDIN_FILENO, TCSANOW, &term);
-	}
 }

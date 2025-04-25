@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:19:33 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:45:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,25 +64,6 @@ char	*get_var_value(const char *var_name, t_vars *vars)
 			result = ft_strdup("");
 	}
 	return (result);
-}
-
-/*
-Handles empty variable names in expansion.
-- For non-NULL but empty var_name: Returns "$"
-- For NULL var_name: Returns NULL
-Returns:
-- Newly allocated string with "$" when var_name exists but is empty.
-- NULL when var_name is NULL.
-Example:
-empty_var("") -> "$"
-empty_var(NULL) -> NULL
-*/
-char	*empty_var(char *var_name)
-{
-	if (var_name)
-		return (ft_strdup("$"));
-	else
-		return (NULL);
 }
 
 /*

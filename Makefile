@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/25 16:51:40 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/26 00:58:16 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,8 +27,8 @@ INCLUDE_DIRS = includes $(LIBFT_DIR)/includes
 INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 
 MINISHELL_SRCS = \
+			srcs/append_args_utils.c \
 			srcs/append_args.c \
-			srcs/arguments.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
 			srcs/check_permissions.c \
@@ -36,8 +36,16 @@ MINISHELL_SRCS = \
 			srcs/cleanup_b.c \
 			srcs/cmd_finder.c \
 			srcs/errormsg.c \
+			srcs/execute_pipes.c \
+			srcs/execute_redirects.c \
+			srcs/execute_utils.c \
 			srcs/execute.c \
+			srcs/expansion_utils.c \
 			srcs/expansion.c \
+			srcs/heredoc_delim_utils.c \
+			srcs/heredoc_delim.c \
+			srcs/heredoc_expansion.c \
+			srcs/heredoc_utils.c \
 			srcs/heredoc.c \
 			srcs/history_load.c \
 			srcs/history_save.c \
@@ -47,25 +55,35 @@ MINISHELL_SRCS = \
 			srcs/initshell.c \
 			srcs/input_completion.c \
 			srcs/input_handlers.c \
+			srcs/lexer.c \
 			srcs/make_exp_token_utils.c \
 			srcs/make_exp_token.c \
 			srcs/make_node_arrays.c \
+			srcs/make_quo_token.c \
+			srcs/maketoken.c \
 			srcs/minishell.c \
+			srcs/multiline_input_buffer.c \
+			srcs/multiline_validation.c \
+			srcs/operators_utils.c \
 			srcs/operators.c \
+			srcs/paths_utils.c \
 			srcs/paths.c \
 			srcs/pipe_analysis.c \
 			srcs/pipes.c \
 			srcs/process_multiline_input.c \
 			srcs/process_pipes.c \
+			srcs/process_quote_char_utils.c \
 			srcs/process_quote_char.c \
 			srcs/process_redir_node.c \
+			srcs/process_redirect_utils.c \
 			srcs/process_redirect.c \
+			srcs/quoted_expansion.c \
 			srcs/quotes.c \
 			srcs/redirect.c \
 			srcs/shell_level.c \
 			srcs/signals.c \
+			srcs/terminal.c \
 			srcs/tmp_buf_reader.c \
-			srcs/improved_tokenize.c \
 			srcs/tokenize.c \
 			srcs/typeconvert.c \
 			 

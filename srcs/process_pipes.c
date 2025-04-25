@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 07:42:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/25 22:24:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,32 +101,4 @@ void	process_addon_pipes(t_vars *vars)
 		}
 		current = current->next;
 	}
-}
-
-/*
-Master function for pipe node processing in token list.
-- Initializes pipe tracking structures.
-- Identifies and processes the first pipe.
-- Processes any additional pipes in sequence.
-- Builds a complete pipe chain structure.
-Returns:
-Root pipe node for AST if pipes found.
-NULL if no valid pipes in token stream.
-Works with proc_token_list.
-*/
-t_node	*proc_pipes(t_vars *vars)
-{
-	t_node	*pipe_root;
-
-	if (!vars || !vars->head || !vars->pipes)
-		return (NULL);
-	vars->pipes->pipe_root = NULL;
-	vars->pipes->last_pipe = NULL;
-	vars->pipes->last_cmd = NULL;
-	pipe_root = process_first_pipe(vars);
-	if (!pipe_root)
-		return (NULL);
-	vars->pipes->pipe_root = pipe_root;
-	process_addon_pipes(vars);
-	return (pipe_root);
 }
