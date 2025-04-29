@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:51:05 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:34:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,9 +127,13 @@ Reset the shell state.
 - Cleans up heredoc lines and counts.
 - Resets the pipes state.
 - Resets vars struct.
+Note: Does NOT reset error_code to preserve exit status between commands.
 */
 void	reset_shell(t_vars *vars)
 {
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] reset_shell called with error_code=%d\n", vars ? vars->error_code : -1); //DEBUG PRINT
+	
 	if (!vars)
 		return ;
 	cleanup_token_list(vars);
@@ -142,4 +146,7 @@ void	reset_shell(t_vars *vars)
 		reset_pipe_vars(vars);
 	}
 	init_vars(vars);
+	
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] After reset_shell, error_code=%d (preserved)\n", vars->error_code); //DEBUG PRINT
 }

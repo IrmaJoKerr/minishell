@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 00:20:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:20:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,19 @@ int	execute_pipes(t_node *pipe_node, t_vars *vars)
 
 	if (init_pipe_exec(pipe_fd, &r_status, &l_status))
 		return (1);
+	if (DEBUG_PIPES) // DEBUG PRINT
+	{ //DEBUG PRINT
+		fprintf(stderr, "In execute_pipes().Executing pipe between:\n  Left: "); //DEBUG PRINT
+		if (pipe_node->left && pipe_node->left->args) //DEBUG PRINT
+			fprintf(stderr, "%s\n", pipe_node->left->args[0]); //DEBUG PRINT
+		else //DEBUG PRINT
+			fprintf(stderr, "NULL\n"); //DEBUG PRINT
+		fprintf(stderr, "  Right: "); //DEBUG PRINT
+		if (pipe_node->right && pipe_node->right->args) //DEBUG PRINT
+			fprintf(stderr, "%s\n", pipe_node->right->args[0]); // DEBUG PRINT
+		else //DEBUG PRINT
+			fprintf(stderr, "NULL\n"); //DEBUG PRINT
+	} //DEBUG PRINT
 	if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
 		return (1);
 	right_pid = fork();
@@ -140,5 +153,7 @@ int	execute_pipes(t_node *pipe_node, t_vars *vars)
 	close(pipe_fd[0]);
 	waitpid(left_pid, &l_status, 0);
 	waitpid(right_pid, &r_status, 0);
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] In execute_pipes() before calling handle_cmd_status\n"); //DEBUG PRINT;
 	return (handle_cmd_status(r_status, vars));
 }

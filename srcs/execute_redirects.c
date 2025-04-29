@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:40:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:35:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,11 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 	if (vars->pipes->redirection_fd == -1)
 	{
 		shell_error(file, ERR_PERMISSIONS, vars);
+    	if (DEBUG_ERROR) //DEBUG PRINT
+		{
+        	fprintf(stderr, "[DEBUG] setup_out_redir() cannot open: %s, error_code=%d\n", 
+                file, vars->error_code); //DEBUG PRINT
+		}
 		return (0);
 	}
 	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)

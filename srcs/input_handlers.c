@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:52:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:34:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,9 @@ Main entry point for all command input processing in the shell.
 */
 void	handle_input(char *input, t_vars *vars)
 {
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] handle_input called with error_code=%d\n", vars->error_code); //DEBUG PRINT
+	
 	if (ft_strchr(input, '\n'))
 	{
 		process_multiline_input(input, vars);
@@ -89,6 +92,9 @@ void	handle_input(char *input, t_vars *vars)
 		vars->pipes->heredoc_delim = NULL;
 	}
 	reset_redirect_fds(vars);
+	
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] handle_input finished with error_code=%d\n", vars->error_code); //DEBUG PRINT
 }
 
 /*

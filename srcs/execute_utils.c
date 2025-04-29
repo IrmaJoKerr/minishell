@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:36:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:20:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,13 @@ int	setup_redirection(t_node *node, t_vars *vars)
 	int		result;
 	t_node	*cmd_node;
 
+	if (DEBUG_REDIR) //DEBUG PRINT
+	{ //DEBUG PRINT
+		fprintf(stderr, "In setup_redirection().Setting up redirection type: %s\n", //DEBUG PRINT
+			get_token_str(node->type)); // DEBUG PRINT
+		if (node->right && node->right->args) //DEBUG PRINT
+			fprintf(stderr, "  Target: %s\n", node->right->args[0]); //DEBUG PRINT
+	} //debug print
 	vars->pipes->current_redirect = node;
 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
 	if (!cmd_node)
@@ -71,6 +78,8 @@ int	setup_redirection(t_node *node, t_vars *vars)
 	if (!proc_redir_target(node, vars))
 		return (0);
 	result = redir_mode_setup(node, vars);
+	if (DEBUG_REDIR) //DEBUG PRINT
+		fprintf(stderr, "In setup_redirection().Redirection setup result: %d\n", result); //DEBUG PRINT
 	return (result);
 }
 

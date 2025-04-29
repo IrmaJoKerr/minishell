@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/26 01:15:07 by bleow            ###   ########.fr        #
+#    Updated: 2025/04/29 16:49:35 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,6 +35,7 @@ MINISHELL_SRCS = \
 			srcs/cleanup_a.c \
 			srcs/cleanup_b.c \
 			srcs/cmd_finder.c \
+			srcs/debug.c \
 			srcs/errormsg.c \
 			srcs/execute_pipes.c \
 			srcs/execute_redirects.c \

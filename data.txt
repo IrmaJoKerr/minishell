@@ -1,0 +1,7 @@
+keep this line
+skip this line
+this one is fine
+SKIP this line
+another good line
+sKiP this tricky line
+final line

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:21:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 00:24:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 19:05:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,25 @@ int	is_valid_redir_node(t_node *current)
 			&& current->next->type != TYPE_ARGS))
 		return (0);
 	return (1);
+}
+
+
+t_node *find_cmd_redirection(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+{
+    t_node *current;
+    
+    if (!redir_root || !cmd_node)
+        return (NULL);
+    
+    current = redir_root;
+    // Traverse the redirect chain
+    while (current)
+    {
+        if (is_redirection(current->type) && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+            return (current);
+        
+        current = current->next;
+    }
+    
+    return (NULL);
 }

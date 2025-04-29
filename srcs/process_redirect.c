@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 00:24:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 19:11:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,29 +78,79 @@ Integrates redirection nodes with the pipe structure.
 - Makes pipe commands output to redirections correctly.
 Works with proc_redir() when pipe nodes exist.
 */
+// void	link_redirs_pipes(t_vars *vars)
+// {
+// 	t_node	*current;
+
+// 	if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
+// 		return ;
+// 	vars->pipes->last_cmd = NULL;
+// 	while (current)
+// 	{
+// 		if (current->type == TYPE_CMD)
+// 		{
+// 			vars->pipes->last_cmd = current;
+// 		}
+// 		else if (is_redirection(current->type) && current->next)
+// 		{
+// 			if (!chk_redir_nodes(vars, current))
+// 			{
+// 				current = current->next;
+// 				continue ;
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// }
 void	link_redirs_pipes(t_vars *vars)
 {
-	t_node	*current;
-
-	if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
-		return ;
-	vars->pipes->last_cmd = NULL;
-	while (current)
-	{
-		if (current->type == TYPE_CMD)
-		{
-			vars->pipes->last_cmd = current;
-		}
-		else if (is_redirection(current->type) && current->next)
-		{
-			if (!chk_redir_nodes(vars, current))
-			{
-				current = current->next;
-				continue ;
-			}
-		}
-		current = current->next;
-	}
+	t_node	*redir_node;
+	t_node	*current_pipe;
+	
+    if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head || !vars->pipes->redir_root)
+        return ;
+    if (vars->pipes->pipe_root->left && vars->pipes->pipe_root->left->type == TYPE_CMD)
+    {
+        redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+                                                vars->pipes->pipe_root->left, vars);
+        if (redir_node)
+            vars->pipes->pipe_root->left = redir_node;
+    }
+    if (vars->pipes->pipe_root->right)
+    {
+        if (vars->pipes->pipe_root->right->type == TYPE_CMD)
+        {
+            redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+                                                    vars->pipes->pipe_root->right, vars);
+            if (redir_node)
+                vars->pipes->pipe_root->right = redir_node;
+        }
+        else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
+        {
+            current_pipe = vars->pipes->pipe_root->right;
+            while (current_pipe)
+            {
+                if (current_pipe->left && current_pipe->left->type == TYPE_CMD)
+                {
+                    redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+                                                            current_pipe->left, vars);
+                    if (redir_node)
+                        current_pipe->left = redir_node;
+                }
+                if (current_pipe->right && current_pipe->right->type == TYPE_CMD)
+                {
+                    redir_node = find_cmd_redirection(vars->pipes->redir_root,
+                                                            current_pipe->right, vars);
+                    if (redir_node)
+                        current_pipe->right = redir_node;
+                }
+                if (current_pipe->right && current_pipe->right->type == TYPE_PIPE)
+                    current_pipe = current_pipe->right;
+                else
+                    break ;
+            }
+        }
+    }
 }
 
 /*

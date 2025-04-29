@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 01:23:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 19:06:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,29 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/stat.h>
+
+/* Debug flags - controlled via MINISHELL_DEBUG environment variable */
+# ifndef DEBUG_AST
+#  define DEBUG_AST 1
+# endif
+# ifndef DEBUG_EXEC
+#  define DEBUG_EXEC 1
+# endif
+# ifndef DEBUG_PIPES
+#  define DEBUG_PIPES 1
+# endif
+# ifndef DEBUG_REDIR
+#  define DEBUG_REDIR 1
+# endif
+# ifndef DEBUG_ERROR
+#  define DEBUG_ERROR 1
+# endif
+# ifndef DEBUG_EXPAND
+#  define DEBUG_EXPAND 1
+# endif
+# ifndef DEBUG_VERBOSE
+#  define DEBUG_VERBOSE 1
+# endif
 
 extern volatile sig_atomic_t	g_signal_received;
 
@@ -374,6 +397,16 @@ t_node		*mode_action(t_node *current, t_node **last_cmd, t_vars *vars);
 void		reset_find_cmd(t_vars *vars, t_node *start, t_node *target,
 				int mode);
 t_node		*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
+
+/*
+DEBUG FUNCTIONS
+In debug.c
+*/
+void setup_debug_flags(void);
+void print_node_content(FILE *fp, t_node *node);
+void print_ast_node(FILE *fp, t_node *node, int indent_level);
+void print_ast(t_node *root, const char *filename);
+void print_token_list(t_node *head, const char *filename);
 
 /*
 Error handling.
@@ -767,6 +800,8 @@ In process_redirect_utils.c
 */
 void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
+t_node		*find_cmd_redirection(t_node *redir_root, t_node *cmd_node,
+				t_vars *vars);
 
 /*
 Redirection processing functions.

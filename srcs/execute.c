@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:40:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 16:20:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ int	handle_cmd_status(int status, t_vars *vars)
 {
 	int	exit_code;
 
+	if (DEBUG_EXEC) //DEBUG PRINT
+		fprintf(stderr, "In handle_cmd_status().Processing command status: %d\n", status); //DEBUG PRINT
 	exit_code = 0;
 	if (WIFEXITED(status))
 	{
@@ -36,6 +38,8 @@ int	handle_cmd_status(int status, t_vars *vars)
 	}
 	if (vars)
 		vars->error_code = exit_code;
+	if (DEBUG_EXEC) //DEBUG PRINT
+		fprintf(stderr, "In handle_cmd_status().Final exit code: %d\n", exit_code); //DEBUG PRINT
 	return (exit_code);
 }
 
@@ -82,8 +86,14 @@ int	exec_cmd_node(t_node *node, char **envp, t_vars *vars)
 {
 	int	result;
 
-	if (node->args && node->args[0])
-	{
+	if (node->args && node->args[0]) //DEBUG PRINT
+	{ //DEBUG PRINT
+		if (DEBUG_EXEC && node->args && node->args[0]) //DEBUG PRINT
+		{ //DEBUG PRINT
+			fprintf(stderr, "In exec_cmd_node().Executing command: %s\n", node->args[0]); //DEBUG PRINT
+			fprintf(stderr, "In exec_cmd_node(). Is builtin: %s\n", //DEBUG PRINT
+				is_builtin(node->args[0]) ? "yes" : "no"); //DEBUG PRINT
+		} //DEBUG PRINT
 		if (is_builtin(node->args[0]))
 			result = execute_builtin(node->args[0], node->args, vars);
 		else
@@ -94,6 +104,8 @@ int	exec_cmd_node(t_node *node, char **envp, t_vars *vars)
 		vars->error_code = 1;
 		result = 1;
 	}
+	if (DEBUG_EXEC) //DEBUG PRINT
+		fprintf(stderr, "In exec_cmd_node().Command result: %d\n", result); //DEBUG PRINT
 	return (result);
 }
 
@@ -106,6 +118,16 @@ Exit code which is also stored in vars->error_code.
 */
 int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] In execute_cmd(%s) before start: error_code=%d\n", //DEBUG PRINT
+			node->args ? node->args[0] : "NULL", vars->error_code); //DEBUG PRINT
+	if (DEBUG_AST) //DEBUG_PRINT
+	{ //DEBUG_PRINT
+		fprintf(stderr, "In execute_cmd().Executing node type: %s\n", get_token_str(node->type));  //DEBUG_PRINT
+		if (node->args && node->args[0]) //DEBUG_PRINT
+			fprintf(stderr, "Command: %s\n", node->args[0]); //DEBUG_PRINT
+	} //DEBUG_PRINT
+	
 	int	result;
 
 	result = 0;
@@ -124,6 +146,8 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	else
 		result = 1;
 	vars->error_code = result;
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] In execute_cmd() at end: error_code=%d\n", vars->error_code);
 	return (result);
 }
 
@@ -150,6 +174,12 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 	char	*cmd_path;
 
 	cmd_path = get_cmd_path(node, envp, vars);
+	if (DEBUG_EXEC) //DEBUG PRINT
+	{ //DEBUG PRINT
+		fprintf(stderr, "In exec_external_cmd().External command execution:\n"); //DEBUG PRINT
+		fprintf(stderr, "  Command: %s\n", node->args[0]); //DEBUG PRINT
+		fprintf(stderr, "  Path: %s\n", cmd_path ? cmd_path : "(not found)"); //DEBUG PRINT
+	} //DEBUG PRINT
 	if (!cmd_path)
 		return (vars->error_code);
 	pid = fork();
@@ -163,5 +193,10 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 	free(cmd_path);
 	waitpid(pid, &status, 0);
 	return_code = handle_cmd_status(status, vars);
+	if (DEBUG_EXEC) //DEBUG PRINT
+		fprintf(stderr, "In exec_external_cmd().Command exit code: %d\n", return_code); //DEBUG PRINT
+	if (DEBUG_ERROR) //DEBUG PRINT
+		fprintf(stderr, "[DEBUG] In exec_external_cmd(%s) set error_code=%d\n", 
+			node->args[0], return_code);
 	return (return_code);
 }
