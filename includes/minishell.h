@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 19:06:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/29 21:27:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -402,11 +402,11 @@ t_node		*find_cmd(t_node *start, t_node *target, int mode, t_vars *vars);
 DEBUG FUNCTIONS
 In debug.c
 */
-void setup_debug_flags(void);
-void print_node_content(FILE *fp, t_node *node);
-void print_ast_node(FILE *fp, t_node *node, int indent_level);
-void print_ast(t_node *root, const char *filename);
-void print_token_list(t_node *head, const char *filename);
+void		setup_debug_flags(void);
+void		print_node_content(FILE *fp, t_node *node);
+void		print_ast_node(FILE *fp, t_node *node, int indent_level);
+void		print_ast(t_node *root, const char *filename);
+void		print_token_list(t_node *head, const char *filename);
 
 /*
 Error handling.

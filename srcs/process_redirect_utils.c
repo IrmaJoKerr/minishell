@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:21:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 19:05:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/30 16:53:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ t_node *find_cmd_redirection(t_node *redir_root, t_node *cmd_node, t_vars *vars)
     // Traverse the redirect chain
     while (current)
     {
-        if (is_redirection(current->type) && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+        if (is_redirection(current->type) &&
+			get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
             return (current);
         
         current = current->next;

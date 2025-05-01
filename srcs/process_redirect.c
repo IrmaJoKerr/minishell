@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 19:11:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/02 03:17:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,55 +102,111 @@ Works with proc_redir() when pipe nodes exist.
 // 		current = current->next;
 // 	}
 // }
-void	link_redirs_pipes(t_vars *vars)
-{
-	t_node	*redir_node;
-	t_node	*current_pipe;
+// void	link_redirs_pipes(t_vars *vars)
+// {
+// 	t_node	*redir_node;
+// 	t_node	*current_pipe;
 	
-    if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head || !vars->pipes->redir_root)
-        return ;
-    if (vars->pipes->pipe_root->left && vars->pipes->pipe_root->left->type == TYPE_CMD)
+//     if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head || !vars->pipes->redir_root)
+//         return ;
+//     if (vars->pipes->pipe_root->left && vars->pipes->pipe_root->left->type == TYPE_CMD)
+//     {
+//         redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+//                                                 vars->pipes->pipe_root->left, vars);
+//         if (redir_node)
+//             vars->pipes->pipe_root->left = redir_node;
+//     }
+//     if (vars->pipes->pipe_root->right)
+//     {
+//         if (vars->pipes->pipe_root->right->type == TYPE_CMD)
+//         {
+//             redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+//                                                     vars->pipes->pipe_root->right, vars);
+//             if (redir_node)
+//                 vars->pipes->pipe_root->right = redir_node;
+//         }
+//         else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
+//         {
+//             current_pipe = vars->pipes->pipe_root->right;
+//             while (current_pipe)
+//             {
+//                 if (current_pipe->left && current_pipe->left->type == TYPE_CMD)
+//                 {
+//                     redir_node = find_cmd_redirection(vars->pipes->redir_root, 
+//                                                             current_pipe->left, vars);
+//                     if (redir_node)
+//                         current_pipe->left = redir_node;
+//                 }
+//                 if (current_pipe->right && current_pipe->right->type == TYPE_CMD)
+//                 {
+//                     redir_node = find_cmd_redirection(vars->pipes->redir_root,
+//                                                             current_pipe->right, vars);
+//                     if (redir_node)
+//                         current_pipe->right = redir_node;
+//                 }
+//                 if (current_pipe->right && current_pipe->right->type == TYPE_PIPE)
+//                     current_pipe = current_pipe->right;
+//                 else
+//                     break ;
+//             }
+//         }
+//     }
+// }
+/*
+ * Process a command node by finding and applying any redirections targeting it
+ * Updates the node pointer if a redirection is found
+ */
+static void process_cmd_node(t_node **node_ptr, t_node *redir_root, t_vars *vars)
+{
+    t_node *redir_node;
+    
+    if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
     {
-        redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-                                                vars->pipes->pipe_root->left, vars);
+        redir_node = find_cmd_redirection(redir_root, *node_ptr, vars);
         if (redir_node)
-            vars->pipes->pipe_root->left = redir_node;
+            *node_ptr = redir_node;
     }
-    if (vars->pipes->pipe_root->right)
+}
+
+/*
+ * Recursively process a pipe node and all its nested pipes
+ * Replaces command nodes with their corresponding redirection nodes
+ */
+static void process_pipe_node(t_node *pipe_node, t_node *redir_root, t_vars *vars)
+{
+    if (!pipe_node)
+        return;
+        
+    // Process left side (always a command in valid pipes)
+    process_cmd_node(&pipe_node->left, redir_root, vars);
+    
+    // Process right side (can be command or another pipe)
+    if (pipe_node->right)
     {
-        if (vars->pipes->pipe_root->right->type == TYPE_CMD)
+        if (pipe_node->right->type == TYPE_CMD)
         {
-            redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-                                                    vars->pipes->pipe_root->right, vars);
-            if (redir_node)
-                vars->pipes->pipe_root->right = redir_node;
+            process_cmd_node(&pipe_node->right, redir_root, vars);
         }
-        else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
+        else if (pipe_node->right->type == TYPE_PIPE)
         {
-            current_pipe = vars->pipes->pipe_root->right;
-            while (current_pipe)
-            {
-                if (current_pipe->left && current_pipe->left->type == TYPE_CMD)
-                {
-                    redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-                                                            current_pipe->left, vars);
-                    if (redir_node)
-                        current_pipe->left = redir_node;
-                }
-                if (current_pipe->right && current_pipe->right->type == TYPE_CMD)
-                {
-                    redir_node = find_cmd_redirection(vars->pipes->redir_root,
-                                                            current_pipe->right, vars);
-                    if (redir_node)
-                        current_pipe->right = redir_node;
-                }
-                if (current_pipe->right && current_pipe->right->type == TYPE_PIPE)
-                    current_pipe = current_pipe->right;
-                else
-                    break ;
-            }
+            process_pipe_node(pipe_node->right, redir_root, vars);
         }
     }
+}
+
+/*
+ * Main function to connect redirections to commands in the pipe structure
+ * Identifies commands in the pipe tree and replaces them with redirection nodes
+ */
+void link_redirs_pipes(t_vars *vars)
+{
+    // Validation
+    if (!vars || !vars->pipes || !vars->pipes->pipe_root || 
+        !vars->head || !vars->pipes->redir_root)
+        return;
+        
+    // Process the entire pipe structure recursively
+    process_pipe_node(vars->pipes->pipe_root, vars->pipes->redir_root, vars);
 }
 
 /*
