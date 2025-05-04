@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 16:34:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/02 03:32:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,15 @@ Error codes:
 */
 void	shell_error(char *element, int error_code, t_vars *vars)
 {
-	if (DEBUG_ERROR) //DEBUG PRINT
-	{ //DEBUG PRINT
-		if (vars) //DEBUG PRINT
-			fprintf(stderr, "[DEBUG] shell_error called with element '%s', error_code=%d, current error_code=%d\n",  //DEBUG PRINT
-				element, error_code, vars->error_code); //DEBUG PRINT
-		else //DEBUG PRINT
-			fprintf(stderr, "[DEBUG] shell_error called with element '%s', error_code=%d, vars=NULL\n",  //DEBUG PRINT
-				element, error_code); //DEBUG PRINT
-	} //DEBUG PRINT
+	// if (DEBUG_ERROR) //DEBUG PRINT
+	// { //DEBUG PRINT
+	//	if (vars) //DEBUG PRINT
+	//		fprintf(stderr, "[DEBUG] shell_error called with element '%s', error_code=%d, current error_code=%d\n",  //DEBUG PRINT
+	//			element, error_code, vars->error_code); //DEBUG PRINT
+	//	else //DEBUG PRINT
+	//		fprintf(stderr, "[DEBUG] shell_error called with element '%s', error_code=%d, vars=NULL\n",  //DEBUG PRINT
+	//			element, error_code); //DEBUG PRINT
+	// } //DEBUG PRINT
 	
 	ft_putstr_fd("bleshell: ", 2);
 	if (error_code == ERR_PERMISSIONS)
@@ -60,8 +60,8 @@ void	shell_error(char *element, int error_code, t_vars *vars)
 	if (vars)
 	{
 		vars->error_code = error_code;
-		if (DEBUG_ERROR) //DEBUG PRINT
-			fprintf(stderr, "[DEBUG] shell_error setting error_code to %d\n", error_code); //DEBUG PRINT
+		// if (DEBUG_ERROR) //DEBUG PRINT
+		//	fprintf(stderr, "[DEBUG] shell_error setting error_code to %d\n", error_code); //DEBUG PRINT
 	}
 }
 
@@ -77,9 +77,9 @@ Handles specific syntax error messages.
 */
 void	tok_syntax_error_msg(char *token_str, t_vars *vars)
 {
-	if (DEBUG_ERROR) //DEBUG PRINT
-		fprintf(stderr, "[DEBUG] tok_syntax_error_msg called with token '%s', current error_code=%d\n",  //DEBUG PRINT
-			token_str, vars ? vars->error_code : -1); //DEBUG PRINT
+	// if (DEBUG_ERROR) //DEBUG PRINT
+	//	fprintf(stderr, "[DEBUG] tok_syntax_error_msg called with token '%s', current error_code=%d\n",  //DEBUG PRINT
+	//		token_str, vars ? vars->error_code : -1); //DEBUG PRINT
 	
 	ft_putstr_fd("bleshell: syntax error near unexpected token `", 2);
 	ft_putstr_fd(token_str, 2);
@@ -87,8 +87,8 @@ void	tok_syntax_error_msg(char *token_str, t_vars *vars)
 	if (vars)
 	{
 		vars->error_code = ERR_SYNTAX;
-		if (DEBUG_ERROR) //DEBUG PRINT
-			fprintf(stderr, "[DEBUG] tok_syntax_error_msg setting error_code to %d\n", ERR_SYNTAX); //DEBUG PRINT
+		// if (DEBUG_ERROR) //DEBUG PRINT
+		//	fprintf(stderr, "[DEBUG] tok_syntax_error_msg setting error_code to %d\n", ERR_SYNTAX); //DEBUG PRINT
 	}
 }
 

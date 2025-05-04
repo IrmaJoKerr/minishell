@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 16:34:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/04 22:50:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ t_pipe	*init_pipes(void)
 	pipes->heredoc_delim = NULL;
 	pipes->hd_expand = 0;
 	pipes->redirection_fd = -1;
+	pipes->in_redir_context = 0;  // Initialize redirection context tracking
+    pipes->last_redir_target = NULL;  // Initialize cached target
 	pipes->last_cmd = NULL;
 	pipes->last_pipe = NULL;
 	pipes->pipe_root = NULL;
@@ -111,6 +113,8 @@ void	reset_pipe_vars(t_vars *vars)
 	vars->pipes->pipe_count = 0;
 	vars->pipes->out_mode = OUT_MODE_NONE;
 	vars->pipes->current_redirect = NULL;
+	vars->pipes->in_redir_context = 0;  // Reset redirection context
+    vars->pipes->last_redir_target = NULL;  // Reset cached target
 	vars->pipes->last_cmd = NULL;
 	vars->pipes->last_pipe = NULL;
 	vars->pipes->pipe_root = NULL;
@@ -131,8 +135,8 @@ Note: Does NOT reset error_code to preserve exit status between commands.
 */
 void	reset_shell(t_vars *vars)
 {
-	if (DEBUG_ERROR) //DEBUG PRINT
-		fprintf(stderr, "[DEBUG] reset_shell called with error_code=%d\n", vars ? vars->error_code : -1); //DEBUG PRINT
+	// if (DEBUG_ERROR) //DEBUG PRINT
+	// 	fprintf(stderr, "[DEBUG] reset_shell called with error_code=%d\n", vars ? vars->error_code : -1); //DEBUG PRINT
 	
 	if (!vars)
 		return ;
@@ -147,6 +151,6 @@ void	reset_shell(t_vars *vars)
 	}
 	init_vars(vars);
 	
-	if (DEBUG_ERROR) //DEBUG PRINT
-		fprintf(stderr, "[DEBUG] After reset_shell, error_code=%d (preserved)\n", vars->error_code); //DEBUG PRINT
+	// if (DEBUG_ERROR) //DEBUG PRINT
+	// 	fprintf(stderr, "[DEBUG] After reset_shell, error_code=%d (preserved)\n", vars->error_code); //DEBUG PRINT
 }

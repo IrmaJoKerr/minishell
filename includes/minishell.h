@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/29 21:27:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/05 01:54:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,6 +204,8 @@ typedef struct s_pipe
 	int			hd_expand;
 	int			redirection_fd;
 	int			out_mode;
+	int			in_redir_context;     // Flag for redirection target context
+    t_node		*last_redir_target;   // Caches the last redirection target node
 	t_node		*current_redirect;
 	t_node		*last_cmd;
 	t_node		*last_pipe;
@@ -354,6 +356,8 @@ t_node		*proc_pipes(t_vars *vars);
 t_node		*proc_redir(t_vars *vars);
 void		build_redir_ast(t_vars *vars);
 void		process_redir_node(t_node *redir_node, t_vars *vars);
+int			is_redir_target(t_node *head, t_node *node);
+void		attach_orphaned_args(t_vars *vars);
 
 /*
 Builtin control handling.
@@ -641,7 +645,8 @@ Make quoted token functions.
 In make_quo_token.c
 */
 int			merge_quoted_token(char *input, char *content, t_vars *vars);
-int			make_quoted_cmd(char *content, char *input, t_vars *vars);
+// int			make_quoted_cmd(char *content, char *input, t_vars *vars);
+int 		make_quoted_cmd(char *content, t_vars *vars);
 
 /*
 Token creation core functions.
@@ -771,6 +776,7 @@ int			token_cleanup_error(char *content, t_vars *vars);
 void		cleanup_and_process_adj(char *content, char *input, t_vars *vars);
 t_node		*find_last_redir(t_vars *vars);
 int			validate_single_redir(t_node *redir_node, t_vars *vars);
+t_node		*find_redir_for_target(t_node *target_node, t_vars *vars);
 
 /*
 Process quote characters.
@@ -783,6 +789,7 @@ void		link_file_to_redir(t_node *redir_node, t_node *file_node,
 int			handle_redir_target(char *content, t_vars *vars);
 int			process_quote_char(char *input, t_vars *vars, int is_redir_target);
 int			validate_redir_targets(t_vars *vars);
+int			add_token(char *content, t_tokentype type, t_vars *vars);
 
 /*
 Process redirection nodes functions.

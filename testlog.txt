@@ -1,0 +1,165 @@
+
+                                                                                             
+[0;33mTest  59: ❌[38;5;244m echo hi < ./test_files/infile bye bye 
+[0mmini output = (hi)
+bash output = (hi bye bye)
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi < < ./test_files/infile echo hi [DEBUG-TARGET] Processing redirection target './test_files/infile' './test_files/infile' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  61: ❌[38;5;244m echo <"./test_files/infile" "bonjour       42" 
+[0mmini output = ()
+bash output = (bonjour 42)
+mini exit code = 1
+bash exit code = 0
+mini error = ( './test_files/infile' < [DEBUG-QUOTE] Successfully linked file to redirection 'bonjour 42' < [DEBUG-QUOTE] Successfully linked file to redirection [DEBUG-CHAIN] Processing redirection chain echo < < bonjour 42 echo [DEBUG-TARGET] Processing redirection target 'bonjour 42' 'bonjour 42' No such file or directory 0 [DEBUG-CHAIN] Redirection setup failed)
+bash error = ()
+
+[0;33mTest  63: ❌[38;5;244m cat <./test_files/infile_big ./test_files/infile 
+[0mmini output = (The Project Gutenberg eBook of Alice’s Adventures in Wonderland,  
+bash output = (hi hello world 42)
+mini error = ([DEBUG-CHAIN] Processing redirection chain cat < < ./test_files/infile_big cat [DEBUG-TARGET] Processing redirection target './test_files/infile_big' './test_files/infile_big' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  80: ❌[38;5;244m echo <123 <456 hi | echo 42 
+[0mmini output = ()
+bash output = (42)
+mini exit code = 1
+bash exit code = 0
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo < < 123 echo [DEBUG-TARGET] Processing redirection target '123' '123' No such file or directory 0 [DEBUG-CHAIN] Redirection setup failed [DEBUG-CHAIN] Processing redirection chain echo < < 456 echo [DEBUG-TARGET] Processing redirection target '456' '456' No such file or directory 0 [DEBUG-CHAIN] Redirection setup failed)
+bash error = ( No such file or directory)
+
+[0;33mTest  83: ❌[38;5;244m echo hi >         ./outfiles/outfile01 bye 
+[0mFiles ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
+mini outfiles:
+hi
+bash outfiles:
+hi bye
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi > > ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  87: ❌[38;5;244m ls >"./outfiles/outfile""1""2""3""4""5" 
+[0mOnly in ./bash_outfiles: outfile12345
+mini outfiles:
+bash outfiles:
+2
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+testlog.txt
+wildcards
+mini error = ( './outfiles/outfile' > [DEBUG-QUOTE] Successfully linked file to redirection '1' > [DEBUG-QUOTE] Successfully linked file to redirection '2' > [DEBUG-QUOTE] Successfully linked file to redirection [DEBUG-CHAIN] Processing redirection chain ls > > 2 ls [DEBUG-TARGET] Processing redirection target '2' '2' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  92: ❌[38;5;244m echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye 
+[0mmini output = ()
+bash output = (bye)
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi > > ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' [DEBUG-CHAIN] Processing redirection chain 1 > > ./outfiles/outfile02 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile02' './outfiles/outfile02' echo hi > > ./outfiles/outfile02 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile02' './outfiles/outfile02' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  93: ❌[38;5;244m echo hi | echo >./outfiles/outfile01 bye 
+[0mFiles ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
+mini outfiles:
+
+bash outfiles:
+bye
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo > > ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest  96: ❌[38;5;244m echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye 
+[0mmini output = ()
+bash output = (bye)
+mini exit code = 1
+bash exit code = 0
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi > > ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 > > ./test_files/invalid_permission echo hi [DEBUG-TARGET] Processing redirection target './test_files/invalid_permission' './test_files/invalid_permission' Permission denied 0 [DEBUG-CHAIN] Redirection setup failed [DEBUG-CHAIN] Processing redirection chain echo hi > > ./test_files/invalid_permission echo hi [DEBUG-TARGET] Processing redirection target './test_files/invalid_permission' './test_files/invalid_permission' Permission denied 0 [DEBUG-CHAIN] Redirection setup failed)
+bash error = ( Permission denied)
+
+[0;33mTest  98: ❌[38;5;244m echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+[0mOnly in ./mini_outfiles: outfile01
+mini outfiles:
+hi
+bash outfiles:
+mini output = ()
+bash output = (bye)
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi > > ./test_files/invalid_permission echo hi [DEBUG-TARGET] Processing redirection target './test_files/invalid_permission' './test_files/invalid_permission' Permission denied 0 [DEBUG-CHAIN] Redirection setup failed [DEBUG-CHAIN] Processing redirection chain echo hi > > ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ( Permission denied)
+
+[0;33mTest 100: ❌[38;5;244m echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission 
+[0mOnly in ./bash_outfiles: outfile01
+mini outfiles:
+bash outfiles:
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi > > ./outfiles/outfile01 echo hi [DEBUG-REDIR] No command found for redirection [DEBUG-CHAIN] Redirection setup failed)
+bash error = ( Permission denied)
+
+[0;33mTest 122: ❌[38;5;244m echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye 
+[0mFiles ./mini_outfiles/outfile02 and ./bash_outfiles/outfile02 differ
+mini outfiles:
+hhi
+i
+bash outfiles:
+hi
+mini output = ()
+bash output = (bye)
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo hi >> >> ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 >> >> ./outfiles/outfile02 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile02' './outfiles/outfile02' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully [DEBUG-CHAIN] Processing redirection chain echo hi >> >> ./outfiles/outfile02 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile02' './outfiles/outfile02' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest 123: ❌[38;5;244m echo hi | echo >>./outfiles/outfile01 bye 
+[0mFiles ./mini_outfiles/outfile01 and ./bash_outfiles/outfile01 differ
+mini outfiles:
+
+bash outfiles:
+bye
+mini error = ([DEBUG-CHAIN] Processing redirection chain echo >> >> ./outfiles/outfile01 echo hi [DEBUG-TARGET] Processing redirection target './outfiles/outfile01' './outfiles/outfile01' 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ()
+
+[0;33mTest 127: ❌[38;5;244m echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+[0mOnly in ./mini_outfiles: outfile01
+mini outfiles:
+hi
+bash outfiles:
+mini output = ()
+bash output = (bye)
+mini error = ([DEBUG-CHAIN] Processing redirection chain [DEBUG-CHAIN] Processing redirection chain echo hi echo hi >> >> > > ./test_files/invalid_permission ./outfiles/outfile01 echo echo hi hi [DEBUG-TARGET] Processing redirection target [DEBUG-TARGET] Processing redirection target './test_files/invalid_permission' './outfiles/outfile01' './test_files/invalid_permission' './outfiles/outfile01' Permission denied 0 [DEBUG-CHAIN] Redirection setup failed 1 [DEBUG-CHAIN] Preserving command arguments [DEBUG-CHAIN] Redirection chain processed successfully)
+bash error = ( Permission denied)
+
+[0m[0;33mTest 133: ❌[38;5;244m $PWD 
+[0mmini exit code = 2
+bash exit code = 126
+
+[0;33mTest 134: ❌[38;5;244m $EMPTY 
+[0mmini exit code = 127
+bash exit code = 0
+mini error = ( Permission denied)
+bash error = ()
+
+[0;33mTest 135: ❌[38;5;244m $EMPTY echo hi 
+[0mmini output = ()
+bash output = (hi)
+mini exit code = 127
+bash exit code = 0
+mini error = ( Permission denied)
+bash error = ()
+
+[0;33mTest 136: ❌[38;5;244m ./test_files/invalid_permission 
+[0mmini exit code = 127
+bash exit code = 126
+
+[0;33mTest 141: ❌[38;5;244m ./test_files 
+[0mmini exit code = 2
+bash exit code = 126
+

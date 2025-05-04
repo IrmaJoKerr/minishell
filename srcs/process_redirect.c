@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/02 03:17:34 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/02 03:32:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,87 +71,6 @@ t_node	*find_redir_chain_head(t_node *current, t_node *last_cmd)
 	return (chain_head);
 }
 
-/*
-Integrates redirection nodes with the pipe structure.
-- Updates pipe node references to point to redirection nodes.
-- Ensures pipes use redirection nodes instead of direct commands.
-- Makes pipe commands output to redirections correctly.
-Works with proc_redir() when pipe nodes exist.
-*/
-// void	link_redirs_pipes(t_vars *vars)
-// {
-// 	t_node	*current;
-
-// 	if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head)
-// 		return ;
-// 	vars->pipes->last_cmd = NULL;
-// 	while (current)
-// 	{
-// 		if (current->type == TYPE_CMD)
-// 		{
-// 			vars->pipes->last_cmd = current;
-// 		}
-// 		else if (is_redirection(current->type) && current->next)
-// 		{
-// 			if (!chk_redir_nodes(vars, current))
-// 			{
-// 				current = current->next;
-// 				continue ;
-// 			}
-// 		}
-// 		current = current->next;
-// 	}
-// }
-// void	link_redirs_pipes(t_vars *vars)
-// {
-// 	t_node	*redir_node;
-// 	t_node	*current_pipe;
-	
-//     if (!vars || !vars->pipes || !vars->pipes->pipe_root || !vars->head || !vars->pipes->redir_root)
-//         return ;
-//     if (vars->pipes->pipe_root->left && vars->pipes->pipe_root->left->type == TYPE_CMD)
-//     {
-//         redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-//                                                 vars->pipes->pipe_root->left, vars);
-//         if (redir_node)
-//             vars->pipes->pipe_root->left = redir_node;
-//     }
-//     if (vars->pipes->pipe_root->right)
-//     {
-//         if (vars->pipes->pipe_root->right->type == TYPE_CMD)
-//         {
-//             redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-//                                                     vars->pipes->pipe_root->right, vars);
-//             if (redir_node)
-//                 vars->pipes->pipe_root->right = redir_node;
-//         }
-//         else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
-//         {
-//             current_pipe = vars->pipes->pipe_root->right;
-//             while (current_pipe)
-//             {
-//                 if (current_pipe->left && current_pipe->left->type == TYPE_CMD)
-//                 {
-//                     redir_node = find_cmd_redirection(vars->pipes->redir_root, 
-//                                                             current_pipe->left, vars);
-//                     if (redir_node)
-//                         current_pipe->left = redir_node;
-//                 }
-//                 if (current_pipe->right && current_pipe->right->type == TYPE_CMD)
-//                 {
-//                     redir_node = find_cmd_redirection(vars->pipes->redir_root,
-//                                                             current_pipe->right, vars);
-//                     if (redir_node)
-//                         current_pipe->right = redir_node;
-//                 }
-//                 if (current_pipe->right && current_pipe->right->type == TYPE_PIPE)
-//                     current_pipe = current_pipe->right;
-//                 else
-//                     break ;
-//             }
-//         }
-//     }
-// }
 /*
  * Process a command node by finding and applying any redirections targeting it
  * Updates the node pointer if a redirection is found
