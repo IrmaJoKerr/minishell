@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 01:18:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/26 01:23:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,49 +105,20 @@ char	*get_delim_str(char *input, t_vars *vars, int *error_code)
 Process any accumulated text before a special character.
 Creates a token from the text between vars->start and vars->pos.
 */
-// void	handle_text(char *input, t_vars *vars)
-// {
-// 	char	*token_preview;
-
-// 	token_preview = NULL;
-// 	if (vars->pos > vars->start)
-// 	{
-// 		token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-// 		set_token_type(vars, token_preview);
-// 		handle_string(input, vars);
-// 		if (token_preview)
-// 		{
-// 			free(token_preview);
-// 		}
-// 		vars->start = vars->pos;
-// 	}
-// }
 void	handle_text(char *input, t_vars *vars)
 {
-    char	*token_preview;
+	char	*token_preview;
 
-    token_preview = NULL;
-    if (vars->pos > vars->start)
-    {
-        // --- ADDED DEBUG ---
-        fprintf(stderr, "[DEBUG-HANDLE-TEXT] Found text '%.*s'. Current prev_type=%s, curr_type=%s\n",
-                vars->pos - vars->start, input + vars->start,
-                get_token_str(vars->prev_type), get_token_str(vars->curr_type));
-        // --- END ADDED ---
-
-        token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
-        set_token_type(vars, token_preview); // <<< This updates types
-
-        // --- ADDED DEBUG ---
-        fprintf(stderr, "[DEBUG-HANDLE-TEXT] After set_token_type. New prev_type=%s, curr_type=%s\n",
-                 get_token_str(vars->prev_type), get_token_str(vars->curr_type));
-        // --- END ADDED ---
-
-        handle_string(input, vars); // This calls maketoken
-        if (token_preview)
-        {
-            free(token_preview);
-        }
-        vars->start = vars->pos;
-    }
+	token_preview = NULL;
+	if (vars->pos > vars->start)
+	{
+		token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
+		set_token_type(vars, token_preview);
+		handle_string(input, vars);
+		if (token_preview)
+		{
+			free(token_preview);
+		}
+		vars->start = vars->pos;
+	}
 }

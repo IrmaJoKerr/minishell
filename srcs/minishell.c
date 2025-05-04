@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/03 15:24:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/05 05:03:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,26 +52,17 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
-void build_and_execute(t_vars *vars)
+void	build_and_execute(t_vars *vars)
 {
-    if (!validate_redir_targets(vars))
-    {
-        return;
-    }
-    
-    // Debug print the token list before AST construction
-    fprintf(stderr, "\n[DEBUG-AST] Token list before AST construction:\n");
-    print_token_list(vars->head, NULL);  // Change root to vars->head to print initial tokens
-    
-    vars->astroot = proc_token_list(vars);
-    
-    if (vars->astroot)
-    {
-        // After AST construction
-        fprintf(stderr, "\n[DEBUG-TOKENS] Final AST for execution:\n");
-        print_ast(vars->astroot, NULL);
-        execute_cmd(vars->astroot, vars->env, vars);
-    }
+	if (!validate_redir_targets(vars))
+	{
+		return ;
+	}
+	vars->astroot = proc_token_list(vars);
+	if (vars->astroot)
+	{
+		execute_cmd(vars->astroot, vars->env, vars);
+	}
 }
 
 /*
@@ -116,43 +107,23 @@ Example: When user types a complex command
 */
 void	process_command(char *command, t_vars *vars)
 {
-	// if (DEBUG_ERROR) //DEBUG PRINT
-	//	fprintf(stderr, "[DEBUG] Starting process_command: error_code=%d\n", vars->error_code); //DEBUG PRINT
-	// vars->error_code = 0; // I think this is the source of the reset of vars->error_code = 0; // Reset error code
 	vars->partial_input = ft_strdup(command);
 	if (!vars->partial_input)
 		return ;
-	// fprintf(stderr, "[DEBUG] process_command() - before line calling handle_quote_completion(): pre-tokenization error_code=%d\n", vars->error_code); //DEBUG PRINT
 	vars->partial_input = handle_quote_completion(vars->partial_input, vars);
-	// fprintf(stderr, "[DEBUG] process_command - after calling handle_quote_completion(): post-tokenization error_code=%d\n", vars->error_code); //DEBUG PRINT
 	if (!vars->partial_input)
 		return ;
-	// if (DEBUG_ERROR) //DEBUG PRINT
-	//	fprintf(stderr, "[DEBUG] Before tokenization: error_code=%d\n", vars->error_code); //DEBUG PRINT
-	// fprintf(stderr, "[DEBUG] process_command() - before line calling process_input_token(): pre-tokenization error_code=%d\n", vars->error_code); //DEBUG PRINT
 	if (!process_input_tokens(vars->partial_input, vars))
 	{
-		// if (DEBUG_ERROR) //DEBUG PRINT
-		//	fprintf(stderr, "[DEBUG] Tokenization failed: error_code=%d\n", vars->error_code); //DEBUG PRINT
 		free(vars->partial_input);
 		vars->partial_input = NULL;
 		return ;
 	}
-	// fprintf(stderr, "[DEBUG] process_command - after line calling process_input_tokens(): post-tokenization error_code=%d\n", vars->error_code); //DEBUG PRINT
-	// if (DEBUG_ERROR) //DEBUG PRINT
-	//	fprintf(stderr, "[DEBUG] Before pipe syntax handling: error_code=%d\n", vars->error_code); //DEBUG PRINT
 	if (!handle_pipe_syntax(vars))
 	{
-		// if (DEBUG_ERROR) //DEBUG PRINT
-		//	fprintf(stderr, "[DEBUG] Pipe syntax handling failed: error_code=%d\n", vars->error_code); //DEBUG PRINT
 		return ;
 	}
-	// fprintf(stderr, "[DEBUG] process_command - after line calling handle_pipe_syntax(): post-tokenization error_code=%d\n", vars->error_code); //DEBUG PRINT
-	// if (DEBUG_ERROR) //DEBUG PRINT
-	//	fprintf(stderr, "[DEBUG] Before build_and_execute: error_code=%d\n", vars->error_code); //DEBUG PRINT
 	build_and_execute(vars);
-	// if (DEBUG_ERROR) //DEBUG PRINT
-	//	fprintf(stderr, "[DEBUG] After build_and_execute: error_code=%d\n", vars->error_code); //DEBUG PRINT
 	if (vars->partial_input)
 	{
 		free(vars->partial_input);
@@ -180,7 +151,7 @@ int	main(int argc, char **argv, char **envp)
 	(void)argv;
 	ft_memset(&vars, 0, sizeof(t_vars));
 	init_shell(&vars, envp);
-	setup_debug_flags(); // Initialize debug flags
+	setup_debug_flags();
 	while (1)
 	{
 		input = reader();

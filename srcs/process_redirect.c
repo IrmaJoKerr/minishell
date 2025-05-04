@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/02 03:32:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/05 04:54:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,73 +72,70 @@ t_node	*find_redir_chain_head(t_node *current, t_node *last_cmd)
 }
 
 /*
- * Process a command node by finding and applying any redirections targeting it
- * Updates the node pointer if a redirection is found
- */
-static void process_cmd_node(t_node **node_ptr, t_node *redir_root, t_vars *vars)
-{
-    t_node *redir_node;
-    
-    if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-    {
-        redir_node = find_cmd_redirection(redir_root, *node_ptr, vars);
-        if (redir_node)
-            *node_ptr = redir_node;
-    }
-}
-
-/*
- * Recursively process a pipe node and all its nested pipes
- * Replaces command nodes with their corresponding redirection nodes
- */
-static void process_pipe_node(t_node *pipe_node, t_node *redir_root, t_vars *vars)
-{
-    if (!pipe_node)
-        return;
-        
-    // Process left side (always a command in valid pipes)
-    process_cmd_node(&pipe_node->left, redir_root, vars);
-    
-    // Process right side (can be command or another pipe)
-    if (pipe_node->right)
-    {
-        if (pipe_node->right->type == TYPE_CMD)
-        {
-            process_cmd_node(&pipe_node->right, redir_root, vars);
-        }
-        else if (pipe_node->right->type == TYPE_PIPE)
-        {
-            process_pipe_node(pipe_node->right, redir_root, vars);
-        }
-    }
-}
-
-/*
- * Main function to connect redirections to commands in the pipe structure
- * Identifies commands in the pipe tree and replaces them with redirection nodes
- */
-void link_redirs_pipes(t_vars *vars)
-{
-    // Validation
-    if (!vars || !vars->pipes || !vars->pipes->pipe_root || 
-        !vars->head || !vars->pipes->redir_root)
-        return;
-        
-    // Process the entire pipe structure recursively
-    process_pipe_node(vars->pipes->pipe_root, vars->pipes->redir_root, vars);
-}
-
-/*
-Configures a redirection node with source and target commands.
-- Sets left child to source command node.
-- Sets right child to target command/filename node.
-- Establishes the redirection relationship in the AST.
-Works with proc_redir().
+Swaps a command node with its associated redirection node in the AST.
+This function integrates redirections with pipe structures.
+- Checks if the current node is a command node.
+- Finds any redirection nodes targeting this command.
+- Replaces the command node reference with the redirection node.
+- Uses double pointer to modify the original node reference.
 */
-void	set_redir_node(t_node *redir, t_node *cmd, t_node *target)
+void	swap_cmd_redir(t_node **node_ptr, t_vars *vars)
 {
-	if (!redir || !cmd || !target)
+	t_node	*redir_node;
+
+	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
+	{
+		redir_node = find_cmd_redir(vars->pipes->redir_root,
+				*node_ptr, vars);
+		if (redir_node)
+			*node_ptr = redir_node;
+	}
+}
+
+/*
+Processes a chain of pipe nodes to link with redirection nodes.
+- Recursively traverses the pipe chain, processing one pipe node at a time.
+- Replaces commands on left side with their associated redirections.
+- Handles right side either as command or as next pipe in chain.
+Works with link_redirs_pipes() to process all levels of the pipe structure.
+*/
+void	proc_pipe_chain(t_node *start_pipe, t_vars *vars)
+{
+	t_node	*current_pipe;
+
+	current_pipe = start_pipe;
+	while (current_pipe)
+	{
+		swap_cmd_redir(&(current_pipe->left), vars);
+		if (current_pipe->right && current_pipe->right->type == TYPE_CMD)
+			swap_cmd_redir(&(current_pipe->right), vars);
+		else if (current_pipe->right && current_pipe->right->type == TYPE_PIPE)
+		{
+			current_pipe = current_pipe->right;
+			continue ;
+		}
+		break ;
+	}
+}
+
+/*
+Integrates redirection nodes with the pipe structure.
+- Updates pipe node references to point to redirection nodes.
+- Ensures pipes use redirection nodes instead of direct commands.
+- Makes pipe commands output to redirections correctly.
+Works with proc_redir() when pipe nodes exist.
+*/
+void	link_redirs_pipes(t_vars *vars)
+{
+	if (!vars || !vars->pipes || !vars->pipes->pipe_root
+		|| !vars->head || !vars->pipes->redir_root)
 		return ;
-	redir->left = cmd;
-	redir->right = target;
+	swap_cmd_redir(&(vars->pipes->pipe_root->left), vars);
+	if (vars->pipes->pipe_root->right)
+	{
+		if (vars->pipes->pipe_root->right->type == TYPE_CMD)
+			swap_cmd_redir(&(vars->pipes->pipe_root->right), vars);
+		else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
+			proc_pipe_chain(vars->pipes->pipe_root->right, vars);
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:47:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/03 14:52:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/04/26 00:51:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,59 +60,21 @@ Return :
  - NULL on error.
 Works with expand_quoted_str().
 */
-// char	*expand_quoted_var(char *expanded, char *content, int *pos,
-// 				t_vars *vars)
-// {
-// 	char	*var_value;
-// 	char	*temp;
-
-// 	var_value = expand_variable(content, pos, NULL, vars);
-// 	if (!var_value)
-// 		return (expanded);
-// 	temp = ft_strjoin(expanded, var_value);
-// 	free(expanded);
-// 	free(var_value);
-// 	if (!temp)
-// 		return (NULL);
-// 	return (temp);
-// }
-char *expand_quoted_var(char *expanded, char *content, int *pos, t_vars *vars)
+char	*expand_quoted_var(char *expanded, char *content, int *pos,
+				t_vars *vars)
 {
-    char *var_value;
-    char *temp;
+	char	*var_value;
+	char	*temp;
 
-    fprintf(stderr, "[DEBUG-EXP] Expanding var in quoted string at pos %d: '%.10s...'\n", 
-        *pos, content + *pos);
-    
-    // Special handling for $?
-    if (content[*pos] == '$' && content[*pos + 1] == '?')
-    {
-        var_value = ft_itoa(vars->error_code);
-        fprintf(stderr, "[DEBUG-EXP] Found $? in double quotes, value=%s\n", var_value);
-        *pos += 2;  // Skip past the $?
-    }
-    else 
-    {
-        var_value = expand_variable(content, pos, NULL, vars);
-    }
-    
-    if (!var_value)
-    {
-        fprintf(stderr, "[DEBUG-EXP] Variable expansion failed\n");
-        return (expanded);
-    }
-    
-    fprintf(stderr, "[DEBUG-EXP] Expanded to: '%s'\n", var_value);
-    
-    temp = ft_strjoin(expanded, var_value);
-    free(expanded);
-    free(var_value);
-    if (!temp)
-    {
-        fprintf(stderr, "[DEBUG-EXP] Memory allocation failed in expand_quoted_var\n");
-        return (NULL);
-    }
-    return (temp);
+	var_value = expand_variable(content, pos, NULL, vars);
+	if (!var_value)
+		return (expanded);
+	temp = ft_strjoin(expanded, var_value);
+	free(expanded);
+	free(var_value);
+	if (!temp)
+		return (NULL);
+	return (temp);
 }
 
 /*
