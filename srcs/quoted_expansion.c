@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:47:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 00:51:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/16 03:58:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,38 @@ Example: Input "$USER lives in $HOME"
  - Expands to "john lives in /home/john"
 Works with process_quote_char().
 */
+// char	*expand_quoted_str(char *content, t_vars *vars) PRE ADDING DEBUG PRINTS
+// {
+// 	char	*expanded;
+// 	int		pos;
+
+// 	pos = 0;
+// 	expanded = ft_strdup("");
+// 	if (!expanded)
+// 		return (NULL);
+// 	while (content[pos])
+// 	{
+// 		if (content[pos] == '$')
+// 		{
+// 			expanded = expand_quoted_var(expanded, content, &pos, vars);
+// 			if (!expanded)
+// 				return (NULL);
+// 		}
+// 		else
+// 		{
+// 			expanded = append_basic_strs(expanded, content, &pos);
+// 			if (!expanded)
+// 				return (NULL);
+// 		}
+// 	}
+// 	return (expanded);
+// }
 char	*expand_quoted_str(char *content, t_vars *vars)
 {
 	char	*expanded;
 	int		pos;
 
+	fprintf(stderr, "DEBUG-QEXPAND: Processing quoted string: '%s'\n", content ? content : "NULL");
 	pos = 0;
 	expanded = ft_strdup("");
 	if (!expanded)
@@ -38,6 +65,7 @@ char	*expand_quoted_str(char *content, t_vars *vars)
 	{
 		if (content[pos] == '$')
 		{
+			fprintf(stderr, "DEBUG-QEXPAND: Found $ at position %d\n", pos);
 			expanded = expand_quoted_var(expanded, content, &pos, vars);
 			if (!expanded)
 				return (NULL);
@@ -49,6 +77,7 @@ char	*expand_quoted_str(char *content, t_vars *vars)
 				return (NULL);
 		}
 	}
+	fprintf(stderr, "DEBUG-QEXPAND: Final expanded result: '%s'\n", expanded ? expanded : "NULL");
 	return (expanded);
 }
 
@@ -60,13 +89,30 @@ Return :
  - NULL on error.
 Works with expand_quoted_str().
 */
-char	*expand_quoted_var(char *expanded, char *content, int *pos,
-				t_vars *vars)
+// char	*expand_quoted_var(char *expanded, char *content, int *pos, PRE ADDING DEBUG PRINTS
+// 				t_vars *vars)
+// {
+// 	char	*var_value;
+// 	char	*temp;
+
+// 	var_value = expand_variable(content, pos, NULL, vars);
+// 	if (!var_value)
+// 		return (expanded);
+// 	temp = ft_strjoin(expanded, var_value);
+// 	free(expanded);
+// 	free(var_value);
+// 	if (!temp)
+// 		return (NULL);
+// 	return (temp);
+// }
+char	*expand_quoted_var(char *expanded, char *content, int *pos, t_vars *vars)
 {
 	char	*var_value;
 	char	*temp;
 
+	fprintf(stderr, "DEBUG-QVAR: Found $ at position %d in '%s'\n", *pos, content + *pos);
 	var_value = expand_variable(content, pos, NULL, vars);
+	fprintf(stderr, "DEBUG-QVAR: Expansion result: '%s'\n", var_value ? var_value : "NULL");
 	if (!var_value)
 		return (expanded);
 	temp = ft_strjoin(expanded, var_value);

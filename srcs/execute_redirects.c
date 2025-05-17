@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 04:09:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/16 04:06:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,30 +122,74 @@ Returns:
 - 0 on failure (at least one redirection failed)
 Works with exec_redirect_cmd().
 */
+// int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars) PRE ADDED DEBUG PRINTS
+// {
+// 	t_node	*current_node;
+// 	t_node	*next_redir;
+
+// 	current_node = start_node;
+// 	while (current_node && is_redirection(current_node->type))
+// 	{
+// 		vars->pipes->current_redirect = current_node;
+// 		if (!setup_redirection(current_node, vars))
+// 		{
+// 			reset_redirect_fds(vars);
+// 			return (0);
+// 		}
+// 		if (current_node->redir)
+// 			current_node = current_node->redir;
+// 		else
+// 		{
+// 			next_redir = get_next_redir(current_node, cmd_node);
+// 			if (next_redir)
+// 				current_node = next_redir;
+// 			else
+// 				break ;
+// 		}
+// 	}
+// 	return (1);
+// }
 int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
 {
 	t_node	*current_node;
 	t_node	*next_redir;
 
+	fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain starting with node type=%d\n", 
+		start_node->type);
 	current_node = start_node;
 	while (current_node && is_redirection(current_node->type))
 	{
 		vars->pipes->current_redirect = current_node;
+		fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection node type=%d, target: %s\n", 
+			current_node->type, 
+			current_node->right && current_node->right->args ? 
+			current_node->right->args[0] : "NULL");
 		if (!setup_redirection(current_node, vars))
 		{
+			fprintf(stderr, "DEBUG-REDIR-CHAIN: Setup redirection failed\n");
 			reset_redirect_fds(vars);
 			return (0);
 		}
 		if (current_node->redir)
+		{
+			fprintf(stderr, "DEBUG-REDIR-CHAIN: Moving to linked redirection node\n");
 			current_node = current_node->redir;
+		}
 		else
 		{
 			next_redir = get_next_redir(current_node, cmd_node);
 			if (next_redir)
+			{
+				fprintf(stderr, "DEBUG-REDIR-CHAIN: Moving to next redirection node in list\n");
 				current_node = next_redir;
+			}
 			else
+			{
+				fprintf(stderr, "DEBUG-REDIR-CHAIN: No more redirections in chain\n");
 				break ;
+			}
 		}
 	}
+	fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection chain processing complete\n");
 	return (1);
 }

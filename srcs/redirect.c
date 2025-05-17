@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 08:06:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/16 04:02:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,19 +114,39 @@ Works with proce_redir_chain() redirection processing logic to handle
 multiple redirections applied to the same command.
 (e.g., cmd < in1 > out1 < in2).
 */
+// t_node	*get_next_redir(t_node *current, t_node *cmd) PRE ADDED DEBUG PRINTS
+// {
+// 	t_node	*next;
+
+// 	next = current->next;
+// 	while (next)
+// 	{
+// 		if (is_redirection(next->type)
+// 			&& get_redir_target(next, NULL) == cmd)
+// 		{
+// 			return (next);
+// 		}
+// 		next = next->next;
+// 	}
+// 	return (NULL);
+// }
 t_node	*get_next_redir(t_node *current, t_node *cmd)
 {
 	t_node	*next;
 
+	fprintf(stderr, "DEBUG-NEXT-REDIR: Looking for redirections after %p targeting %p\n", 
+		(void*)current, (void*)cmd); 
 	next = current->next;
 	while (next)
 	{
-		if (is_redirection(next->type)
-			&& get_redir_target(next, NULL) == cmd)
+		if (is_redirection(next->type) && get_redir_target(next, NULL) == cmd)
 		{
+			fprintf(stderr, "DEBUG-NEXT-REDIR: Found next redirection node %p of type %d\n", 
+				(void*)next, next->type);
 			return (next);
 		}
 		next = next->next;
 	}
+	fprintf(stderr, "DEBUG-NEXT-REDIR: No more redirections found for cmd %p\n", (void*)cmd);
 	return (NULL);
 }

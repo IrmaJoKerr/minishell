@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 05:04:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/16 06:28:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,8 +351,12 @@ In buildast.c
 */
 t_node		*proc_token_list(t_vars *vars);
 t_node		*proc_pipes(t_vars *vars);
+void		verify_command_args(t_vars *vars);
+t_node		*find_node_in_list(t_node *head, t_node *target);
+int			is_redirection_target(t_node *node, t_vars *vars);
 t_node		*proc_redir(t_vars *vars);
 void		build_redir_ast(t_vars *vars);
+void		collect_args_after_redir(t_node *redir_node, t_node *cmd_node);
 void		process_redir_node(t_node *redir_node, t_vars *vars);
 
 /*

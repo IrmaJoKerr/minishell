@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 01:23:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/16 03:58:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Processes right-adjacent text for the current token.
 - Updates token content to include adjacent characters
 Example: 
 For "echo hello"world, joins "world" to "hello"
-    to create a single argument "helloworld"
+	to create a single argument "helloworld"
 */
 void	handle_right_adj(char *input, t_vars *vars)
 {
@@ -105,6 +105,23 @@ char	*get_delim_str(char *input, t_vars *vars, int *error_code)
 Process any accumulated text before a special character.
 Creates a token from the text between vars->start and vars->pos.
 */
+// void	handle_text(char *input, t_vars *vars) PRE ADDED DEBUG PRINTS
+// {
+// 	char	*token_preview;
+
+// 	token_preview = NULL;
+// 	if (vars->pos > vars->start)
+// 	{
+// 		token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
+// 		set_token_type(vars, token_preview);
+// 		handle_string(input, vars);
+// 		if (token_preview)
+// 		{
+// 			free(token_preview);
+// 		}
+// 		vars->start = vars->pos;
+// 	}
+// }
 void	handle_text(char *input, t_vars *vars)
 {
 	char	*token_preview;
@@ -113,7 +130,9 @@ void	handle_text(char *input, t_vars *vars)
 	if (vars->pos > vars->start)
 	{
 		token_preview = ft_substr(input, vars->start, vars->pos - vars->start);
+		fprintf(stderr, "DEBUG-TOKEN: Creating token from '%s'\n", token_preview ? token_preview : "NULL");
 		set_token_type(vars, token_preview);
+		fprintf(stderr, "DEBUG-TOKEN: Token type set to %d\n", vars->curr_type);
 		handle_string(input, vars);
 		if (token_preview)
 		{
