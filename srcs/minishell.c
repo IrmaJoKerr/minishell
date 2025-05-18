@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 05:03:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 07:36:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,17 +52,51 @@ Example: For "echo hello | grep h"
 - Echo command on left branch, grep on right
 - Executes the pipeline with proper redirection
 */
-void	build_and_execute(t_vars *vars)
+// void	build_and_execute(t_vars *vars)
+// {
+// 	if (!validate_redir_targets(vars))
+// 	{
+// 		return ;
+// 	}
+// 	vars->astroot = proc_token_list(vars);
+// 	if (vars->astroot)
+// 	{
+// 		execute_cmd(vars->astroot, vars->env, vars);
+// 	}
+// }
+void build_and_execute(t_vars *vars)
 {
-	if (!validate_redir_targets(vars))
-	{
-		return ;
-	}
-	vars->astroot = proc_token_list(vars);
-	if (vars->astroot)
-	{
-		execute_cmd(vars->astroot, vars->env, vars);
-	}
+    t_node *root;
+
+    fprintf(stderr, "DEBUG-BUILD: Building AST from token list\n");
+    
+    // Print token list details for tracing
+    fprintf(stderr, "DEBUG-BUILD: Token list contents:\n");
+    t_node *temp = vars->head;
+    while (temp) {
+        fprintf(stderr, "  Token: type=%d ", temp->type);
+        if (temp->args) {
+            fprintf(stderr, "content=[");
+            for (int i = 0; temp->args[i]; i++) {
+                fprintf(stderr, "%s%s", i > 0 ? ", " : "", temp->args[i]);
+            }
+            fprintf(stderr, "]");
+        } else {
+            fprintf(stderr, "content=NULL");
+        }
+        fprintf(stderr, "\n");
+        temp = temp->next;
+    }
+    
+    root = proc_token_list(vars);
+    if (!root)
+    {
+        fprintf(stderr, "DEBUG-BUILD: No valid AST root returned\n");
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG-BUILD: Executing command tree\n");
+    execute_cmd(root, vars->env, vars);
 }
 
 /*

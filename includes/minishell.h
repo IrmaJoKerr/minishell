@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/16 06:28:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 09:22:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,6 +248,7 @@ typedef struct s_vars
 	struct termios	ori_term_settings;
 	int				ori_term_saved;
 	int				error_code;
+	int				empty_quote_flag;
 	t_pipe			*pipes;
 }	t_vars;
 
@@ -349,6 +350,7 @@ void		append_arg(t_node *node, char *new_arg, int quote_type);
 AST token processing and AST tree building.
 In buildast.c
 */
+int			is_arg_in_cmd(t_node *cmd, char *arg);
 t_node		*proc_token_list(t_vars *vars);
 t_node		*proc_pipes(t_vars *vars);
 void		verify_command_args(t_vars *vars);
