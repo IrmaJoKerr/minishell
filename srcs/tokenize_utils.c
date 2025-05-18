@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 10:38:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 14:31:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,97 @@ For "echo hello"world, joins "world" to "hello"
 //     }
 //     free(adjacent_text);
 //     fprintf(stderr, "DEBUG-RIGHT-ADJ: Exiting handle_right_adj.\n");
+// }
+// void handle_right_adj(char *input, t_vars *vars)
+// {
+//     char *adjacent_text;
+//     char *joined;
+//     int arg_idx;
+
+//     fprintf(stderr, "DEBUG-RIGHT-ADJ: Processing text from %d to %d\n", 
+//             vars->start, vars->pos);
+            
+//     if (vars->pos <= vars->start)
+//     {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: No text to process (pos %d <= start %d)\n", 
+//                 vars->pos, vars->start);
+//         return;
+//     }
+        
+//     adjacent_text = ft_substr(input, vars->start, vars->pos - vars->start);
+//     if (!adjacent_text)
+//     {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: Failed to extract adjacent text\n");
+//         return;
+//     }
+        
+//     fprintf(stderr, "DEBUG-RIGHT-ADJ: Found adjacent text: '%s'\n", adjacent_text);
+    
+//     // Add debug print to verify current token and its args
+//     if (vars->current) {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: Current token: %p, type: %s, has args: %d\n", 
+//                 (void*)vars->current, get_token_str(vars->current->type),
+//                 (vars->current->args && vars->current->args[0]) ? 1 : 0);
+//     } else {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: Current token is NULL\n");
+//     }
+    
+//     // Add fallback logic for when vars->current is not valid
+//     if (!vars->current || !vars->current->args || !vars->current->args[0])
+//     {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: No valid current token, finding last token\n");
+        
+//         // Find the last valid token in the list as fallback
+//         t_node *last = vars->head;
+//         if (last) {
+//             while (last->next)
+//                 last = last->next;
+            
+//             vars->current = last;
+//             fprintf(stderr, "DEBUG-RIGHT-ADJ: Found last token: %p ('%s')\n", 
+//                    (void*)last, (last && last->args) ? last->args[0] : "NULL");
+//         }
+        
+//         if (!vars->current || !vars->current->args || !vars->current->args[0])
+//         {
+//             fprintf(stderr, "DEBUG-RIGHT-ADJ: Still no valid token, aborting join\n");
+//             free(adjacent_text);
+//             return;
+//         }
+//     }
+    
+//     arg_idx = 0;
+//     while (vars->current->args[arg_idx + 1])
+//         arg_idx++;
+            
+//     fprintf(stderr, "DEBUG-RIGHT-ADJ: Joining '%s' with '%s'\n", 
+//             vars->current->args[arg_idx], adjacent_text);
+                
+//     joined = ft_strjoin(vars->current->args[arg_idx], adjacent_text);
+    
+//     fprintf(stderr, "DEBUG-RIGHT-ADJ: ft_strjoin result: %p\n", (void*)joined);
+    
+//     if (joined)
+//     {
+//         free(vars->current->args[arg_idx]);
+//         vars->current->args[arg_idx] = joined;
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: Result: '%s'\n", joined);
+        
+//         // Add this to update quote types when joining adjacent text
+//         if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
+//         {
+//             fprintf(stderr, "DEBUG-RIGHT-ADJ: Updating quote types for joined text\n");
+//             int result = update_quote_types(vars, arg_idx, adjacent_text);
+//             fprintf(stderr, "DEBUG-RIGHT-ADJ: update_quote_types result: %d\n", result);
+//         }
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG-RIGHT-ADJ: ft_strjoin failed\n");
+//     }
+    
+//     free(adjacent_text);
+//     fprintf(stderr, "DEBUG-RIGHT-ADJ: Exiting handle_right_adj\n");
 // }
 void handle_right_adj(char *input, t_vars *vars)
 {

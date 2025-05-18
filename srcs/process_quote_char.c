@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 10:52:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 14:49:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,27 +70,85 @@ Works with process_quote_char() for handling quoted filenames.
 Example:
 - For "echo > "file.txt"", creates file node for "file.txt".
 */
-int	handle_redir_target(char *content, t_vars *vars)
-{
-	t_node	*redir_node;
-	t_node	*file_node;
+// int	handle_redir_target(char *content, t_vars *vars)
+// {
+// 	t_node	*redir_node;
+// 	t_node	*file_node;
 
-	redir_node = find_last_redir(vars);
-	if (redir_node && is_redirection(redir_node->type))
-	{
-		file_node = initnode(TYPE_ARGS, content);
-		if (!file_node)
-		{
-			free(content);
-			return (0);
-		}
-		link_file_to_redir(redir_node, file_node, vars);
-		free(content);
-		return (1);
-	}
-	free(content);
-	vars->error_code = ERR_SYNTAX;
-	return (0);
+// 	redir_node = find_last_redir(vars);
+// 	if (redir_node && is_redirection(redir_node->type))
+// 	{
+// 		file_node = initnode(TYPE_ARGS, content);
+// 		if (!file_node)
+// 		{
+// 			free(content);
+// 			return (0);
+// 		}
+// 		link_file_to_redir(redir_node, file_node, vars);
+// 		free(content);
+// 		return (1);
+// 	}
+// 	free(content);
+// 	vars->error_code = ERR_SYNTAX;
+// 	return (0);
+// }
+int handle_redir_target(char *content, t_vars *vars)
+{
+    t_node  *redir_node;
+    t_node  *file_node;
+    t_node  *cmd_node;
+
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+    
+    redir_node = find_last_redir(vars);
+    if (!redir_node)
+    {
+        fprintf(stderr, "DEBUG-REDIR-TARGET: No valid redirection node found\n");
+        free(content);
+        vars->error_code = ERR_SYNTAX;
+        return (0);
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d\n", redir_node->type);
+    
+    // KEY FIX: Check if redirection already has a target
+    if (redir_node->right != NULL)
+    {
+        fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s', treating '%s' as command argument\n", 
+                (redir_node->right->args) ? redir_node->right->args[0] : "NULL", content);
+        
+        // Find the command to attach this argument to
+        cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+        if (cmd_node)
+        {
+            fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
+                    cmd_node->args ? cmd_node->args[0] : "NULL");
+            append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+            free(content);
+            return (1);
+        }
+        // If we couldn't find a command, fall through to error case
+    }
+    
+    if (redir_node && is_redirection(redir_node->type))
+    {
+        fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
+        file_node = initnode(TYPE_ARGS, content);
+        if (!file_node)
+        {
+            fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to create file node\n");
+            free(content);
+            return (0);
+        }
+        link_file_to_redir(redir_node, file_node, vars);
+        fprintf(stderr, "DEBUG-REDIR-TARGET: Linked file '%s' to redirection node\n", content);
+        free(content);
+        return (1);
+    }
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Invalid redirection syntax\n");
+    free(content);
+    vars->error_code = ERR_SYNTAX;
+    return (0);
 }
 
 /*

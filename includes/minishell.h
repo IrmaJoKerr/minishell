@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 09:22:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 14:35:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ Error code settings.
 # define ERR_ISDIRECTORY 2
 # define ERR_PERMISSIONS 126
 # define ERR_CMD_NOT_FOUND 127
+# define ERR_REDIRECTION 127
 
 /*
 This enum stores the possible token types.

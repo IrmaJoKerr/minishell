@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 04:09:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/18 14:52:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,30 +115,144 @@ Example: For "ls -l | grep txt"
 - Waits for both commands to complete
 - Returns final execution status
 */
-int	execute_pipes(t_node *pipe_node, t_vars *vars)
-{
-	int		pipe_fd[2];
-	pid_t	left_pid;
-	pid_t	right_pid;
-	int		r_status;
-	int		l_status;
+// int	execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+// 	int		pipe_fd[2];
+// 	pid_t	left_pid;
+// 	pid_t	right_pid;
+// 	int		r_status;
+// 	int		l_status;
 
-	if (init_pipe_exec(pipe_fd, &r_status, &l_status))
-		return (1);
-	if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
-		return (1);
-	right_pid = fork();
-	if (right_pid == -1)
-	{
-		ft_putendl_fd("fork: Creation failed (right)", 2);
-		close(pipe_fd[0]);
-		waitpid(left_pid, &l_status, 0);
-		return (1);
-	}
-	if (right_pid == 0)
-		exec_pipe_right(pipe_node->right, pipe_fd, vars);
-	close(pipe_fd[0]);
-	waitpid(left_pid, &l_status, 0);
-	waitpid(right_pid, &r_status, 0);
-	return (handle_cmd_status(r_status, vars));
+// 	if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+// 		return (1);
+// 	if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+// 		return (1);
+// 	right_pid = fork();
+// 	if (right_pid == -1)
+// 	{
+// 		ft_putendl_fd("fork: Creation failed (right)", 2);
+// 		close(pipe_fd[0]);
+// 		waitpid(left_pid, &l_status, 0);
+// 		return (1);
+// 	}
+// 	if (right_pid == 0)
+// 		exec_pipe_right(pipe_node->right, pipe_fd, vars);
+// 	close(pipe_fd[0]);
+// 	waitpid(left_pid, &l_status, 0);
+// 	waitpid(right_pid, &r_status, 0);
+// 	return (handle_cmd_status(r_status, vars));
+// }
+// int	execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int		pipe_fd[2];
+//     pid_t	left_pid;
+//     pid_t	right_pid;
+//     int		r_status;
+//     int		l_status;
+
+//     fprintf(stderr, "DEBUG-EXEC-PIPE: Starting pipe execution\n");
+//     if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+//         return (1);
+        
+//     fprintf(stderr, "DEBUG-EXEC-PIPE: Forking left child\n");
+//     if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+//         return (1);
+        
+//     fprintf(stderr, "DEBUG-EXEC-PIPE: Forking right child\n");
+//     right_pid = fork();
+//     if (right_pid == -1)
+//     {
+//         ft_putendl_fd("fork: Creation failed (right)", 2);
+//         close(pipe_fd[0]);
+//         waitpid(left_pid, &l_status, 0);
+//         return (1);
+//     }
+    
+//     if (right_pid == 0)
+//         exec_pipe_right(pipe_node->right, pipe_fd, vars);
+        
+//     close(pipe_fd[0]);
+    
+//     fprintf(stderr, "DEBUG-EXEC-PIPE: Waiting for left child (PID: %d)\n", left_pid);
+//     waitpid(left_pid, &l_status, 0);
+    
+//     // If the left command fails with a redirection error, still execute the right command
+//     if (WIFEXITED(l_status))
+//     {
+//         int exit_code = WEXITSTATUS(l_status);
+//         fprintf(stderr, "DEBUG-EXEC-PIPE: Left command exited with code %d\n", exit_code);
+//         if (exit_code == ERR_REDIRECTION)
+//         {
+//             fprintf(stderr, "DEBUG-EXEC-PIPE: Left command had redirection error, continuing with right command\n");
+//         }
+//     }
+    
+//     fprintf(stderr, "DEBUG-EXEC-PIPE: Waiting for right child (PID: %d)\n", right_pid);
+//     waitpid(right_pid, &r_status, 0);
+    
+//     if (WIFEXITED(r_status))
+//     {
+//         fprintf(stderr, "DEBUG-EXEC-PIPE: Right command exited with code %d\n", WEXITSTATUS(r_status));
+//     }
+    
+//     return (handle_cmd_status(r_status, vars));
+// }
+int execute_pipes(t_node *pipe_node, t_vars *vars)
+{
+    int     pipe_fd[2];
+    pid_t   left_pid;
+    pid_t   right_pid;
+    int     r_status;
+    int     l_status;
+
+    fprintf(stderr, "DEBUG-EXEC-PIPE: Starting pipe execution\n");
+    if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+        return (1);
+        
+    fprintf(stderr, "DEBUG-EXEC-PIPE: Forking left child\n");
+    if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+        return (1);
+        
+    fprintf(stderr, "DEBUG-EXEC-PIPE: Forking right child\n");
+    right_pid = fork();
+    if (right_pid == -1)
+    {
+        ft_putendl_fd("fork: Creation failed (right)", 2);
+        close(pipe_fd[0]);
+        waitpid(left_pid, &l_status, 0);
+        return (1);
+    }
+    
+    if (right_pid == 0)
+        exec_pipe_right(pipe_node->right, pipe_fd, vars);
+        
+    close(pipe_fd[0]);
+    
+    fprintf(stderr, "DEBUG-EXEC-PIPE: Waiting for left child (PID: %d)\n", left_pid);
+    waitpid(left_pid, &l_status, 0);
+    
+    // KEY FIX: Handle redirection errors in left command
+    if (WIFEXITED(l_status))
+    {
+        int exit_code = WEXITSTATUS(l_status);
+        fprintf(stderr, "DEBUG-EXEC-PIPE: Left command exited with code %d\n", exit_code);
+        
+        // Special case for redirection errors (code 127)
+        if (exit_code == 127)
+        {
+            fprintf(stderr, "DEBUG-EXEC-PIPE: Left command had redirection error, continuing with right command\n");
+            // No special action needed - just don't terminate the pipeline
+        }
+    }
+    
+    fprintf(stderr, "DEBUG-EXEC-PIPE: Waiting for right child (PID: %d)\n", right_pid);
+    waitpid(right_pid, &r_status, 0);
+    
+    if (WIFEXITED(r_status))
+    {
+        fprintf(stderr, "DEBUG-EXEC-PIPE: Right command exited with code %d\n", WEXITSTATUS(r_status));
+    }
+    
+    // Always use the right command's status for the pipeline result
+    return (handle_cmd_status(r_status, vars));
 }
