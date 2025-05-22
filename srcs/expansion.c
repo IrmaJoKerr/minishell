@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/16 03:55:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 17:10:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,31 +24,15 @@ Example: After a command exits with status 1:
 $? -> "1"
 $0 -> "bleshell"
 */
-// char	*handle_special_var(const char *var_name, t_vars *vars) PRE ADDING DEBUG PRINTS
-// {
-// 	if ((!var_name || !vars) || (var_name[0] == '\0'))
-// 		return (ft_strdup(""));
-// 	if (ft_strcmp(var_name, "?") == 0)
-// 	{
-// 		return (ft_itoa(vars->error_code));
-// 	}
-// 	if (ft_strcmp(var_name, "0") == 0)
-// 	{
-// 		return (ft_strdup("bleshell"));
-// 	}
-// 	return (NULL);
-// }
 char	*handle_special_var(const char *var_name, t_vars *vars)
 {
 	char	*result;
 
-	fprintf(stderr, "DEBUG-SPECIAL: Checking special var: '%s'\n", var_name ? var_name : "NULL");
 	if ((!var_name || !vars) || (var_name[0] == '\0'))
 		return (ft_strdup(""));
 	if (ft_strcmp(var_name, "?") == 0)
 	{
 		result = ft_itoa(vars->error_code);
-		fprintf(stderr, "DEBUG-SPECIAL: Exit status $? = %d\n", vars->error_code);
 		return (result);
 	}
 	if (ft_strcmp(var_name, "0") == 0)
@@ -90,34 +74,6 @@ Master control function for variable expansion.Handles all expansion cases.
 Returns:
 - Newly allocated string with expansion result.
 */
-// char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars) PRE ADDING DEBUG PRINTS
-// {
-// 	char	*local_var_name;
-// 	char	*result;
-// 	int		free_var_name;
-
-// 	local_var_name = NULL;
-// 	result = NULL;
-// 	free_var_name = 0;
-// 	if (!var_name && input && pos)
-// 	{
-// 		(*pos)++;
-// 		if (!input[*pos] || input[*pos] <= ' ' || input[*pos] == '\n')
-// 			return (ft_strdup("$"));
-// 		local_var_name = get_var_name(input, pos);
-// 		var_name = local_var_name;
-// 		free_var_name = 1;
-// 	}
-// 	if (!var_name || !*var_name)
-// 		result = empty_var(var_name);
-// 	else
-// 		result = get_var_value(var_name, vars);
-// 	if (!result)
-// 		result = ft_strdup("");
-// 	if (free_var_name && local_var_name)
-// 		free(local_var_name);
-// 	return (result);
-// }
 char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
 {
 	char	*local_var_name;
@@ -136,12 +92,10 @@ char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
 		var_name = local_var_name;
 		free_var_name = 1;
 	}
-	fprintf(stderr, "DEBUG-EXPAND: Expanding variable: '%s'\n", var_name ? var_name : "NULL");
 	if (!var_name || !*var_name)
 		result = empty_var(var_name);
 	else
 		result = get_var_value(var_name, vars);
-	fprintf(stderr, "DEBUG-EXPAND: Expansion result: '%s'\n", result ? result : "NULL");
 	if (!result)
 		result = ft_strdup("");
 	if (free_var_name && local_var_name)
@@ -196,34 +150,20 @@ Returns:
 Newly allocated string containing variable name.
 NULL on memory allocation failure.
 */
-// char	*get_var_name(char *input, int *pos) PRE ADDING DEBUG PRINTS
-// {
-// 	int		start;
-// 	char	*var_name;
-
-// 	start = *pos;
-// 	while (input[*pos] && (ft_isalnum(input[*pos]) || input[*pos] == '_'))
-// 		(*pos)++;
-// 	var_name = ft_substr(input, start, *pos - start);
-// 	return (var_name);
-// }
 char	*get_var_name(char *input, int *pos)
 {
 	int		start;
 	char	*var_name;
 
-	fprintf(stderr, "DEBUG-VAR: Extracting var name from '%s' at pos %d\n", input + *pos, *pos);
 	start = *pos;
 	if (input[*pos] == '?')
-	{  // Special handling for $?
+	{
 		(*pos)++;
 		var_name = ft_strdup("?");
-		fprintf(stderr, "DEBUG-VAR: Special case '?' detected\n");
 		return (var_name);
 	}
 	while (input[*pos] && (ft_isalnum(input[*pos]) || input[*pos] == '_'))
 		(*pos)++;
 	var_name = ft_substr(input, start, *pos - start);
-	fprintf(stderr, "DEBUG-VAR: Extracted var name: '%s'\n", var_name ? var_name : "NULL");
 	return (var_name);
 }

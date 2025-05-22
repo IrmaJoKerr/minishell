@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 09:42:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 17:30:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,82 +47,43 @@ Returns:
 - 1 on success.
 - 0 on error.
 */
-// int	tokenizer(char *input, t_vars *vars)
-// {
-// 	int	hd_is_delim;
-// 	int	result;
-
-// 	init_tokenizer(vars);
-// 	hd_is_delim = 0;
-// 	while (input && input[vars->pos])
-// 	{
-// 		vars->next_flag = 0;
-// 		if (hd_is_delim)
-// 		{
-// 			result = proc_hd_delim(input, vars, &hd_is_delim);
-// 			if (result == 0)
-// 				return (0);
-// 			if (result == 1)
-// 				continue ;
-// 		}
-// 		if (!vars->next_flag && !hd_is_delim)
-// 		{
-// 			if (!handle_token(input, vars, &hd_is_delim))
-// 				return (0);
-// 		}
-// 		if (chk_move_pos(vars, hd_is_delim))
-// 			continue ;
-// 	}
-// 	return (finish_tokenizing(input, vars, hd_is_delim));
-// }
-int tokenizer(char *input, t_vars *vars)
+int	tokenizer(char *input, t_vars *vars)
 {
-    int hd_is_delim;
-    int result;
+	int	hd_is_delim;
+	int	result;
 
-    fprintf(stderr, "DEBUG-TOKENIZE: Starting tokenization of input: '%s'\n", input);
-    if (!input || !*input)
-        return (0);
-    init_tokenizer(vars);
-    hd_is_delim = 0;
-    while (input && input[vars->pos])
-    {
-        fprintf(stderr, "DEBUG-TOKENIZE: Processing position %d, char '%c'\n", 
-                vars->pos, input[vars->pos]);
-        vars->next_flag = 0;
-        if (hd_is_delim)
-        {
-            result = proc_hd_delim(input, vars, &hd_is_delim);
-            if (result == 0)
-            {
-                fprintf(stderr, "DEBUG-TOKENIZE: Heredoc delimiter processing failed\n");
-                return (0);
-            }
-            if (result == 1)
-            {
-                fprintf(stderr, "DEBUG-TOKENIZE: Heredoc delimiter processed, continuing\n");
-                continue;
-            }
-        }
-        if (!vars->next_flag && !hd_is_delim)
-        {
-            if (!handle_token(input, vars, &hd_is_delim))
-            {
-                fprintf(stderr, "DEBUG-TOKENIZE: Failed to handle token at position %d\n", vars->pos);
-                return (0);
-            }
-        }
-        
-        // This is critical - we must continue only if it returns 1, NOT return on 0
-        if (chk_move_pos(vars, hd_is_delim))
-        {
-            fprintf(stderr, "DEBUG-TOKENIZE: Position check triggered continue\n");
-            continue;
-        }
-        fprintf(stderr, "DEBUG-TOKENIZE: Position advanced to %d\n", vars->pos);
-    }
-    fprintf(stderr, "DEBUG-TOKENIZE: Tokenization complete, finishing\n");
-    return (finish_tokenizing(input, vars, hd_is_delim));
+	if (!input || !*input)
+		return (0);
+	init_tokenizer(vars);
+	hd_is_delim = 0;
+	while (input && input[vars->pos])
+	{
+		vars->next_flag = 0;
+		if (hd_is_delim)
+		{
+			result = proc_hd_delim(input, vars, &hd_is_delim);
+			if (result == 0)
+			{
+				return (0);
+			}
+			if (result == 1)
+			{
+				continue;
+			}
+		}
+		if (!vars->next_flag && !hd_is_delim)
+		{
+			if (!handle_token(input, vars, &hd_is_delim))
+			{
+				return (0);
+			}
+		}
+		if (chk_move_pos(vars, hd_is_delim))
+		{
+			continue;
+		}
+	}
+	return (finish_tokenizing(input, vars, hd_is_delim));
 }
 
 /*
@@ -167,106 +128,25 @@ Returns:
 - The quoted string.
 - NULL on error.
 */
-// char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
-// {
-// 	char	quote_char;
-// 	char	*content;
-// 	int		start;
-// 	int		len;
-
-// 	quote_char = input[vars->pos];
-// 	if (quote_char == '\'')
-// 		*quote_type = TYPE_SINGLE_QUOTE;
-// 	else
-// 		*quote_type = TYPE_DOUBLE_QUOTE;
-// 	check_token_adj(input, vars);
-// 	start = ++(vars->pos);
-// 	while (input[vars->pos] && input[vars->pos] != quote_char)
-// 		(vars->pos)++;
-// 	if (!input[vars->pos])
-// 	{
-// 		vars->pos = start - 1;
-// 		return (NULL);
-// 	}
-// 	len = vars->pos - start;
-// 	content = ft_substr(input, start, len);
-// 	if (!content)
-// 		return (NULL);
-// 	(vars->pos)++;
-// 	return (content);
-// }
-// char *get_quoted_str(char *input, t_vars *vars, int *quote_type)
-// {
-// 	int     start;
-// 	int     end;
-// 	char    quote_char;
-// 	char    *content;
-
-// 	start = vars->pos;
-// 	quote_char = input[vars->pos];
-// 	fprintf(stderr, "DEBUG-QUOTE: Processing quoted string starting at position %d with %c\n", 
-// 			start, quote_char);
-// 	*quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
-// 	vars->pos++;
-// 	end = vars->pos;
-// 	while (input[end] && input[end] != quote_char)
-// 		end++;
-// 	if (!input[end])
-// 	{
-// 		fprintf(stderr, "DEBUG-QUOTE: Unclosed quote, initiating completion process\n");
-// 		return (handle_quote_completion(input, vars));
-// 	}
-// 	content = ft_substr(input, vars->pos, end - vars->pos);
-// 	fprintf(stderr, "DEBUG-QUOTE: Extracted content: '%s'\n", content ? content : "NULL");
-// 	vars->pos = end + 1;
-	
-// 	// Check if this might be a quoted redirection target
-// 	char next_char = 0;
-// 	int i = vars->pos;
-// 	while (input[i] && (input[i] == ' ' || input[i] == '\t'))
-// 		i++;
-// 	next_char = input[i];
-	
-// 	// Fixed version - use a ternary with a string description instead of a character
-// 	fprintf(stderr, "DEBUG-QUOTE: Next non-space character after quote: %s\n", 
-//         next_char ? (char[]){next_char, '\0'} : "NONE");
-	
-// 	return (content);
-// }
-char *get_quoted_str(char *input, t_vars *vars, int *quote_type)
+char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 {
-    int     start;
-    int     end;
-    char    quote_char;
-    char    *content;
+	int		end;
+	char	quote_char;
+	char	*content;
 
-    start = vars->pos;
-    quote_char = input[vars->pos];
-    fprintf(stderr, "DEBUG-QUOTE: Processing quoted string starting at position %d with %c\n", 
-            start, quote_char);
-    *quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
-    vars->pos++;
-    end = vars->pos;
-    while (input[end] && input[end] != quote_char)
-        end++;
-    if (!input[end])
-    {
-        fprintf(stderr, "DEBUG-QUOTE: Unclosed quote, initiating completion process\n");
-        return (handle_quote_completion(input, vars));
-    }
-    content = ft_substr(input, vars->pos, end - vars->pos);
-    fprintf(stderr, "DEBUG-QUOTE: Extracted content: '%s'\n", content ? content : "NULL");
-    vars->pos = end + 1;
-    
-    // Check next character after quote
-    int i = vars->pos;
-    while (input[i] && (input[i] == ' ' || input[i] == '\t'))
-        i++;
-        
-    fprintf(stderr, "DEBUG-QUOTE: Next non-space character after quote: %s\n", 
-            input[i] ? (char[]){input[i], '\0'} : "NONE");
-    
-    return (content);
+	quote_char = input[vars->pos];
+	*quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
+	vars->pos++;
+	end = vars->pos;
+	while (input[end] && input[end] != quote_char)
+		end++;
+	if (!input[end])
+	{
+		return (handle_quote_completion(input, vars));
+	}
+	content = ft_substr(input, vars->pos, end - vars->pos);
+	vars->pos = end + 1;
+	return (content);
 }
 
 /*

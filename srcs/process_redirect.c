@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 07:08:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,53 +79,18 @@ This function integrates redirections with pipe structures.
 - Replaces the command node reference with the redirection node.
 - Uses double pointer to modify the original node reference.
 */
-// void	swap_cmd_redir(t_node **node_ptr, t_vars *vars)
-// {
-// 	t_node	*redir_node;
-
-// 	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-// 	{
-// 		redir_node = find_cmd_redir(vars->pipes->redir_root,
-// 				*node_ptr, vars);
-// 		if (redir_node)
-// 			*node_ptr = redir_node;
-// 	}
-// }
-// void swap_cmd_redir(t_node **node_ptr, t_vars *vars)
-// {
-//     t_node *redir_node;
-
-//     if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-//     {
-//         redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
-//         if (redir_node)
-//         {
-//             // Instead of replacing the command with its redirection,
-//             // store the redirection in the command's redir field
-//             (*node_ptr)->redir = redir_node;
-            
-//             fprintf(stderr, "DEBUG-SWAP-REDIR: Associated command %p with redirection %p (type %d)\n", 
-//                    (void*)(*node_ptr), (void*)redir_node, redir_node->type);
-//         }
-//     }
-// }
-void swap_cmd_redir(t_node **node_ptr, t_vars *vars)
+void	swap_cmd_redir(t_node **node_ptr, t_vars *vars)
 {
-    t_node *redir_node;
+	t_node	*redir_node;
 
-    if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-    {
-        redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
-        if (redir_node)
-        {
-            // Instead of replacing the command with its redirection,
-            // store the redirection in the command's redir field
-            (*node_ptr)->redir = redir_node;
-            
-            fprintf(stderr, "DEBUG-SWAP-REDIR: Associated command %p with redirection %p (type %d)\n", 
-                   (void*)(*node_ptr), (void*)redir_node, redir_node->type);
-        }
-    }
+	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
+	{
+		redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
+		if (redir_node)
+		{
+			(*node_ptr)->redir = redir_node;
+		}
+	}
 }
 
 /*

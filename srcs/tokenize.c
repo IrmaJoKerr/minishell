@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 10:10:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 17:39:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,58 +39,30 @@ Processes quoted text in the input string.
 - Sets next_flag if processing succeeds
 - Restores original position on failure
 */
-// void	tokenize_quote(char *input, t_vars *vars)
-// {
-// 	int	is_redir_target;
-// 	int	saved_pos;
-
-// 	is_redir_target = 0;
-// 	if (vars->prev_type == TYPE_IN_REDIRECT
-// 		|| vars->prev_type == TYPE_OUT_REDIRECT
-// 		|| vars->prev_type == TYPE_APPEND_REDIRECT
-// 		|| vars->prev_type == TYPE_HEREDOC)
-// 	{
-// 		is_redir_target = 1;
-// 	}
-// 	handle_text(input, vars);
-// 	saved_pos = vars->pos;
-// 	if (process_quote_char(input, vars, is_redir_target))
-// 	{
-// 		vars->next_flag = 1;
-// 	}
-// 	else
-// 	{
-// 		vars->pos = saved_pos;
-// 	}
-// }
-void tokenize_quote(char *input, t_vars *vars)
+void	tokenize_quote(char *input, t_vars *vars)
 {
-    int is_redir_target;
-    int saved_pos;
+	int	is_redir_target;
+	int	saved_pos;
 
-    is_redir_target = 0;
-    if (vars->prev_type == TYPE_IN_REDIRECT
-        || vars->prev_type == TYPE_OUT_REDIRECT
-        || vars->prev_type == TYPE_APPEND_REDIRECT
-        || vars->prev_type == TYPE_HEREDOC)
-    {
-        is_redir_target = 1;
-    }
-    
-    // Added debug print to track how is_redir_target is determined
-    fprintf(stderr, "DEBUG-TOK-QUOTE: prev_type=%d, is_redir_target=%d\n", 
-            vars->prev_type, is_redir_target);
-    
-    handle_text(input, vars);
-    saved_pos = vars->pos;
-    if (process_quote_char(input, vars, is_redir_target))
-    {
-        vars->next_flag = 1;
-    }
-    else
-    {
-        vars->pos = saved_pos;
-    }
+	is_redir_target = 0;
+	if (vars->prev_type == TYPE_IN_REDIRECT
+		|| vars->prev_type == TYPE_OUT_REDIRECT
+		|| vars->prev_type == TYPE_APPEND_REDIRECT
+		|| vars->prev_type == TYPE_HEREDOC)
+	{
+		is_redir_target = 1;
+	}
+	
+	handle_text(input, vars);
+	saved_pos = vars->pos;
+	if (process_quote_char(input, vars, is_redir_target))
+	{
+		vars->next_flag = 1;
+	}
+	else
+	{
+		vars->pos = saved_pos;
+	}
 }
 
 /*
