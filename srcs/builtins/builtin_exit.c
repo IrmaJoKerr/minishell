@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/04/25 15:21:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 18:09:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,22 +61,6 @@ static int	checking(char **args)
 	return (cmdcode);
 }
 
-// int	builtin_exit(char **args, t_vars *vars)
-// {
-// 	int cmdcode;
-
-// 	cmdcode = 0;
-// 	if (args[1])
-// 		cmdcode = checking(args);
-// 	else
-// 		cmdcode = vars->error_code;
-// 	ft_putendl_fd("exit", STDOUT_FILENO);
-// 	cleanup_exit(vars);
-// 	exit(cmdcode);
-// 	return (0);
-// }
-
-/*Temporary testing debug version*/
 int	builtin_exit(char **args, t_vars *vars)
 {
 	int	cmdcode;

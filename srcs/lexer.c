@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:30:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 18:17:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,10 @@ char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 	char	*content;
 
 	quote_char = input[vars->pos];
-	*quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
+	if (quote_char == '\"')
+		*quote_type = TYPE_DOUBLE_QUOTE;
+	else
+		*quote_type = TYPE_SINGLE_QUOTE;
 	vars->pos++;
 	end = vars->pos;
 	while (input[end] && input[end] != quote_char)
