@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 07:36:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 03:57:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,21 +64,31 @@ Example: For "echo hello | grep h"
 // 		execute_cmd(vars->astroot, vars->env, vars);
 // 	}
 // }
-void build_and_execute(t_vars *vars)
+void	build_and_execute(t_vars *vars)
 {
     t_node *root;
 
-    fprintf(stderr, "DEBUG-BUILD: Building AST from token list\n");
+    fprintf(stderr, "DEBUG-EXEC: Building and executing command\n");
     
-    // Print token list details for tracing
-    fprintf(stderr, "DEBUG-BUILD: Token list contents:\n");
+    if (!validate_redir_targets(vars))
+    {
+        fprintf(stderr, "DEBUG-EXEC: Invalid redirection targets found\n");
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG-EXEC: Building AST from token list\n");
+    
+    // Print token list for tracing
+    fprintf(stderr, "DEBUG-EXEC: Token list contents:\n");
     t_node *temp = vars->head;
     while (temp) {
         fprintf(stderr, "  Token: type=%d ", temp->type);
         if (temp->args) {
             fprintf(stderr, "content=[");
             for (int i = 0; temp->args[i]; i++) {
-                fprintf(stderr, "%s%s", i > 0 ? ", " : "", temp->args[i]);
+                fprintf(stderr, "%s", temp->args[i]);
+                if (temp->args[i + 1])
+                    fprintf(stderr, ", ");
             }
             fprintf(stderr, "]");
         } else {
@@ -89,14 +99,29 @@ void build_and_execute(t_vars *vars)
     }
     
     root = proc_token_list(vars);
+    vars->astroot = root;
+    
     if (!root)
     {
-        fprintf(stderr, "DEBUG-BUILD: No valid AST root returned\n");
+        fprintf(stderr, "DEBUG-EXEC: No valid AST root returned\n");
         return;
     }
     
-    fprintf(stderr, "DEBUG-BUILD: Executing command tree\n");
+    // Print AST structure
+    fprintf(stderr, "DEBUG-EXEC: Root node type=%d\n", root->type);
+    if (root->type == TYPE_PIPE) {
+        fprintf(stderr, "DEBUG-EXEC: Pipe structure with left command: %s, right command: %s\n",
+            (root->left && root->left->args) ? root->left->args[0] : "NULL",
+            (root->right && root->right->args) ? root->right->args[0] : "NULL");
+    } else if (is_redirection(root->type)) {
+        fprintf(stderr, "DEBUG-EXEC: Redirection structure type=%d with target command: %s\n",
+            root->type, 
+            (root->left && root->left->args) ? root->left->args[0] : "NULL");
+    }
+    
+    fprintf(stderr, "DEBUG-EXEC: Executing command tree\n");
     execute_cmd(root, vars->env, vars);
+    fprintf(stderr, "DEBUG-EXEC: Command execution completed with error code %d\n", vars->error_code);
 }
 
 /*

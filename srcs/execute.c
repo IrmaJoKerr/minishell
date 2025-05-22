@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/16 04:13:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 07:48:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,39 +68,125 @@ Works with execute_cmd().
 // 	reset_terminal_after_heredoc();
 // 	return (result);
 // }
-int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
-{
-	int		result;
-	t_node	*cmd_node;
+// int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+// 	int		result;
+// 	t_node	*cmd_node;
 
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Executing redirection node type=%d\n", node->type);
-	if (!node->left || !node->right)
-	{
-		fprintf(stderr, "DEBUG-EXEC-REDIR: Invalid redirection node (missing left/right)\n");
-		return (1);
-	}
-	cmd_node = node->left;
-	while (cmd_node && is_redirection(cmd_node->type))
-		cmd_node = cmd_node->left;
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Target command node: %p (type %d)\n", 
-		(void*)cmd_node, cmd_node ? cmd_node->type : 0);
-	if (cmd_node && cmd_node->args)
-		fprintf(stderr, "DEBUG-EXEC-REDIR: Command to execute: %s with %zu args\n", 
-			cmd_node->args[0] ? cmd_node->args[0] : "NULL",
-			cmd_node->args ? ft_arrlen(cmd_node->args) - 1 : 0);
-	vars->pipes->saved_stdin = dup(STDIN_FILENO);
-	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-	if (!proc_redir_chain(node, cmd_node, vars))
-	{
-		fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection chain processing failed\n");
-		return (1);
-	}
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Executing command after redirection setup\n");
-	result = execute_cmd(cmd_node, envp, vars);
-	reset_redirect_fds(vars);
-	reset_terminal_after_heredoc();
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection command result: %d\n", result);
-	return (result);
+// 	fprintf(stderr, "DEBUG-EXEC-REDIR: Executing redirection node type=%d\n", node->type);
+// 	if (!node->left || !node->right)
+// 	{
+// 		fprintf(stderr, "DEBUG-EXEC-REDIR: Invalid redirection node (missing left/right)\n");
+// 		return (1);
+// 	}
+// 	cmd_node = node->left;
+// 	while (cmd_node && is_redirection(cmd_node->type))
+// 		cmd_node = cmd_node->left;
+// 	fprintf(stderr, "DEBUG-EXEC-REDIR: Target command node: %p (type %d)\n", 
+// 		(void*)cmd_node, cmd_node ? cmd_node->type : 0);
+// 	if (cmd_node && cmd_node->args)
+// 		fprintf(stderr, "DEBUG-EXEC-REDIR: Command to execute: %s with %zu args\n", 
+// 			cmd_node->args[0] ? cmd_node->args[0] : "NULL",
+// 			cmd_node->args ? ft_arrlen(cmd_node->args) - 1 : 0);
+// 	vars->pipes->saved_stdin = dup(STDIN_FILENO);
+// 	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+// 	if (!proc_redir_chain(node, cmd_node, vars))
+// 	{
+// 		fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection chain processing failed\n");
+// 		return (1);
+// 	}
+// 	fprintf(stderr, "DEBUG-EXEC-REDIR: Executing command after redirection setup\n");
+// 	result = execute_cmd(cmd_node, envp, vars);
+// 	reset_redirect_fds(vars);
+// 	reset_terminal_after_heredoc();
+// 	fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection command result: %d\n", result);
+// 	return (result);
+// }
+// int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+//     int     result;
+//     t_node  *cmd_node;
+
+//     fprintf(stderr, "DEBUG-EXEC-REDIR: Executing redirection node type=%d\n", node->type);
+    
+//     // Find the command node this redirection targets
+//     if (!node->left || !node->right)
+//         return (1);
+    
+//     cmd_node = node->left;
+//     while (cmd_node && is_redirection(cmd_node->type))
+//         cmd_node = cmd_node->left;
+    
+//     fprintf(stderr, "DEBUG-EXEC-REDIR: Target command node: %p (type %d)\n", 
+//         (void*)cmd_node, cmd_node ? cmd_node->type : 0);
+    
+//     if (cmd_node && cmd_node->args)
+//         fprintf(stderr, "DEBUG-EXEC-REDIR: Command to execute: %s with %zu args\n", 
+//             cmd_node->args[0], ft_arrlen(cmd_node->args) - 1);
+    
+//     // Save original file descriptors
+//     vars->pipes->saved_stdin = dup(STDIN_FILENO);
+//     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+    
+//     // Process redirection chain but continue even if it fails
+//     proc_redir_chain(node, cmd_node, vars);
+    
+//     // Execute the command regardless of redirection success
+//     fprintf(stderr, "DEBUG-EXEC-REDIR: Executing command after redirection setup\n");
+//     result = execute_cmd(cmd_node, envp, vars);
+    
+//     // Clean up
+//     reset_redirect_fds(vars);
+//     reset_terminal_after_heredoc();
+    
+//     fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection command result: %d\n", result);
+//     return (result);
+// }
+int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+{
+    int     result;
+    t_node  *cmd_node;
+
+    fprintf(stderr, "DEBUG-EXEC-REDIR: Executing redirection node type=%d\n", node->type);
+    
+    // Find the command node this redirection targets
+    if (!node->left || !node->right)
+        return (1);
+    
+    cmd_node = node->left;
+    while (cmd_node && is_redirection(cmd_node->type))
+        cmd_node = cmd_node->left;
+    
+    fprintf(stderr, "DEBUG-EXEC-REDIR: Target command node: %p (type %d)\n", 
+        (void*)cmd_node, cmd_node ? cmd_node->type : 0);
+    
+    if (cmd_node && cmd_node->args)
+        fprintf(stderr, "DEBUG-EXEC-REDIR: Command to execute: %s with %zu args\n", 
+            cmd_node->args[0], ft_arrlen(cmd_node->args) - 1);
+    
+    // Save original file descriptors
+    vars->pipes->saved_stdin = dup(STDIN_FILENO);
+    vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+    
+    // Process redirection chain - check the return value
+    if (!proc_redir_chain(node, cmd_node, vars))
+    {
+        fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection chain processing failed\n");
+        reset_redirect_fds(vars);
+        reset_terminal_after_heredoc();
+        return (vars->error_code); // Return the error code, don't execute command
+    }
+    
+    // Only execute command if proc_redir_chain succeeded
+    fprintf(stderr, "DEBUG-EXEC-REDIR: Executing command after redirection setup\n");
+    result = execute_cmd(cmd_node, envp, vars);
+    
+    // Clean up
+    reset_redirect_fds(vars);
+    reset_terminal_after_heredoc();
+    
+    fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection command result: %d\n", result);
+    return (result);
 }
 
 /*
@@ -192,37 +278,81 @@ Exit code which is also stored in vars->error_code.
 // 	vars->error_code = result;
 // 	return (result);
 // }
-int	execute_cmd(t_node *node, char **envp, t_vars *vars)
-{
-	int	result;
+// int	execute_cmd(t_node *node, char **envp, t_vars *vars)
+// {
+// 	int	result;
 
-	fprintf(stderr, "DEBUG-EXEC: Executing node type=%d at %p\n", node ? node->type : 0, (void*)node);
-	result = 0;
-	if (!node)
-	{
-		fprintf(stderr, "DEBUG-EXEC: NULL node, returning error\n");
-		return (vars->error_code = 1);
-	}
-	if (node->type == TYPE_CMD)
-		result = exec_cmd_node(node, envp, vars);
-	else if (is_redirection(node->type))
-		result = exec_redirect_cmd(node, envp, vars);
-	else if (node->type == TYPE_PIPE)
-	{
-		if (!node->left || !node->right) {
-			fprintf(stderr, "DEBUG-EXEC: Invalid pipe node (missing left/right)\n");
-			return (vars->error_code = 1);
-		}
-		result = execute_pipes(node, vars);
-	}
-	else
-	{
-		fprintf(stderr, "DEBUG-EXEC: Unknown node type %d\n", node->type);
-		result = 1;
-	}
-	vars->error_code = result;
-	fprintf(stderr, "DEBUG-EXEC: Command execution result: %d\n", result);
-	return (result);
+// 	fprintf(stderr, "DEBUG-EXEC: Executing node type=%d at %p\n", node ? node->type : 0, (void*)node);
+// 	result = 0;
+// 	if (!node)
+// 	{
+// 		fprintf(stderr, "DEBUG-EXEC: NULL node, returning error\n");
+// 		return (vars->error_code = 1);
+// 	}
+// 	if (node->type == TYPE_CMD)
+// 		result = exec_cmd_node(node, envp, vars);
+// 	else if (is_redirection(node->type))
+// 		result = exec_redirect_cmd(node, envp, vars);
+// 	else if (node->type == TYPE_PIPE)
+// 	{
+// 		if (!node->left || !node->right) {
+// 			fprintf(stderr, "DEBUG-EXEC: Invalid pipe node (missing left/right)\n");
+// 			return (vars->error_code = 1);
+// 		}
+// 		result = execute_pipes(node, vars);
+// 	}
+// 	else
+// 	{
+// 		fprintf(stderr, "DEBUG-EXEC: Unknown node type %d\n", node->type);
+// 		result = 1;
+// 	}
+// 	vars->error_code = result;
+// 	fprintf(stderr, "DEBUG-EXEC: Command execution result: %d\n", result);
+// 	return (result);
+// }
+int execute_cmd(t_node *node, char **envp, t_vars *vars)
+{
+    int result;
+    // Save current error code to detect redirection errors
+    int prev_error = vars->error_code;
+
+    fprintf(stderr, "DEBUG-EXEC: Executing node type=%d at %p\n", node ? node->type : 0, (void*)node);
+    result = 0;
+    if (!node)
+    {
+        fprintf(stderr, "DEBUG-EXEC: NULL node, returning error\n");
+        return (vars->error_code = 1);
+    }
+    if (node->type == TYPE_CMD)
+        result = exec_cmd_node(node, envp, vars);
+    else if (is_redirection(node->type))
+        result = exec_redirect_cmd(node, envp, vars);
+    else if (node->type == TYPE_PIPE)
+    {
+        if (!node->left || !node->right) {
+            fprintf(stderr, "DEBUG-EXEC: Invalid pipe node (missing left/right)\n");
+            return (vars->error_code = 1);
+        }
+        result = execute_pipes(node, vars);
+    }
+    else
+    {
+        fprintf(stderr, "DEBUG-EXEC: Unknown node type %d\n", node->type);
+        result = 1;
+    }
+    
+    // Preserve redirection errors that occurred before command execution
+    if (prev_error == ERR_REDIRECTION)
+    {
+        fprintf(stderr, "DEBUG-EXEC: Preserving previous redirection error code\n");
+        vars->error_code = prev_error;
+    }
+    else
+        vars->error_code = result;
+        
+    fprintf(stderr, "DEBUG-EXEC: Command execution result: %d (final error code: %d)\n", 
+            result, vars->error_code);
+    return (vars->error_code);
 }
 
 /*

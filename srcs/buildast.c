@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 07:46:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 03:57:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,33 +51,78 @@ Works with build_and_execute().
 // }
 t_node	*proc_token_list(t_vars *vars)
 {
-	fprintf(stderr, "DEBUG-AST: Building AST from token list\n");
-	if (!vars || !vars->head || !vars->pipes)
-		return (NULL);
-	find_cmd(NULL, NULL, FIND_ALL, vars);
-	fprintf(stderr, "DEBUG-AST: Found %d command nodes\n", vars->cmd_count);
-	if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args) {
-		fprintf(stderr, "DEBUG-AST: No valid commands found\n");
-		return (NULL);
-	}
-	vars->pipes->pipe_root = NULL;
-	vars->pipes->redir_root = NULL;
-	vars->pipes->pipe_root = proc_pipes(vars);
-	fprintf(stderr, "DEBUG-AST: Pipe processing complete, root: %p\n", (void*)vars->pipes->pipe_root);
-	vars->pipes->redir_root = proc_redir(vars);
-	fprintf(stderr, "DEBUG-AST: Redirection processing complete, root: %p\n", (void*)vars->pipes->redir_root);
-	fprintf(stderr, "DEBUG-FINAL-AST: Root node type=%d\n", 
-		vars->pipes->pipe_root ? vars->pipes->pipe_root->type :
-		(vars->pipes->redir_root ? vars->pipes->redir_root->type :
-			(vars->cmd_count > 0 ? vars->cmd_nodes[0]->type : 0)));
-	if (vars->pipes->pipe_root)
-		return (vars->pipes->pipe_root);
-	else if (vars->pipes->redir_root)
-		return (vars->pipes->redir_root);
-	else if (vars->cmd_count > 0)
-		return (vars->cmd_nodes[0]);
-	return (NULL);
+    fprintf(stderr, "DEBUG-AST: Building AST from token list\n");
+    
+    if (!vars || !vars->head || !vars->pipes)
+    {
+        fprintf(stderr, "DEBUG-AST: Invalid state for building AST\n");
+        return (NULL);
+    }
+    
+    // Find all command nodes
+    find_cmd(NULL, NULL, FIND_ALL, vars);
+    fprintf(stderr, "DEBUG-AST: Found %d command nodes\n", vars->cmd_count);
+    
+    if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args)
+    {
+        fprintf(stderr, "DEBUG-AST: No valid commands found\n");
+        return (NULL);
+    }
+    
+    // Print command nodes for debugging
+    for (int i = 0; i < vars->cmd_count; i++) {
+        if (vars->cmd_nodes[i] && vars->cmd_nodes[i]->args)
+            fprintf(stderr, "DEBUG-AST: Command %d: %s\n", i, vars->cmd_nodes[i]->args[0]);
+    }
+    
+    // Reset root nodes
+    vars->pipes->pipe_root = NULL;
+    vars->pipes->redir_root = NULL;
+    
+    // Process pipes
+    fprintf(stderr, "DEBUG-AST: Processing pipes\n");
+    vars->pipes->pipe_root = proc_pipes(vars);
+    if (vars->pipes->pipe_root)
+        fprintf(stderr, "DEBUG-AST: Pipe structure built with root node type %d\n", 
+                vars->pipes->pipe_root->type);
+    else
+        fprintf(stderr, "DEBUG-AST: No pipes found in command\n");
+    
+    // Process redirections
+    fprintf(stderr, "DEBUG-AST: Processing redirections\n");
+    vars->pipes->redir_root = proc_redir(vars);
+    if (vars->pipes->redir_root)
+        fprintf(stderr, "DEBUG-AST: Redirection structure built with root node type %d\n", 
+                vars->pipes->redir_root->type);
+    else
+        fprintf(stderr, "DEBUG-AST: No redirections found in command\n");
+    
+    // Verify command arguments
+    fprintf(stderr, "DEBUG-AST: Verifying all commands have proper arguments\n");
+    verify_command_args(vars);
+    
+    // Determine root node for AST
+    fprintf(stderr, "DEBUG-AST: Determining root node for execution\n");
+    if (vars->pipes->pipe_root)
+    {
+        fprintf(stderr, "DEBUG-AST: Root node is pipe structure\n");
+        return (vars->pipes->pipe_root);
+    }
+    else if (vars->pipes->redir_root)
+    {
+        fprintf(stderr, "DEBUG-AST: Root node is redirection structure\n");
+        return (vars->pipes->redir_root);
+    }
+    else if (vars->cmd_count > 0)
+    {
+        fprintf(stderr, "DEBUG-AST: Root node is single command\n");
+        return (vars->cmd_nodes[0]);
+    }
+    
+    fprintf(stderr, "DEBUG-AST: No valid root node found\n");
+    return (NULL);
 }
+
 /*
 Builds the redirection AST by connecting commands to redirection operators.
 - Traverses token list once, tracking commands and redirections.
@@ -214,59 +259,72 @@ t_node	*proc_pipes(t_vars *vars)
 // 		}
 // 	}
 // }
-void verify_command_args(t_vars *vars)
+void	verify_command_args(t_vars *vars)
 {
-	t_node *current;
-	int i;
-	
-	fprintf(stderr, "DEBUG-VERIFY: Checking for missed arguments\n");
-	
-	for (i = 0; i < vars->cmd_count; i++)
-	{
-		t_node *cmd = vars->cmd_nodes[i];
-		if (!cmd || !cmd->args)
-			continue;
-			
-		fprintf(stderr, "DEBUG-VERIFY: Checking command %s\n", 
-				cmd->args[0] ? cmd->args[0] : "NULL");
-				
-		fprintf(stderr, "DEBUG-VERIFY: Current arguments for command '%s':\n", 
-				cmd->args[0] ? cmd->args[0] : "NULL");
-		for (int a = 0; cmd->args[a]; a++) {
-			fprintf(stderr, "  Arg[%d]: '%s'\n", a, cmd->args[a]);
-		}
-		
-		current = find_node_in_list(vars->head, cmd);
-		if (!current)
-			continue;
-			
-		current = current->next;
-		while (current && current->type != TYPE_CMD && current->type != TYPE_PIPE)
-		{
-			if (current->type == TYPE_ARGS && !is_redirection_target(current, vars))
-			{
-				// Only add if not already present
-				if (!is_arg_in_cmd(cmd, current->args[0]))
-				{
-					fprintf(stderr, "DEBUG-VERIFY: Found missed argument '%s'\n", 
-							current->args[0] ? current->args[0] : "NULL");
-					append_arg(cmd, current->args[0], 0);
-				}
-				else
-				{
-					fprintf(stderr, "DEBUG-VERIFY: Skipping duplicate argument '%s'\n", 
-							current->args[0] ? current->args[0] : "NULL");
-				}
-			}
-			current = current->next;
-		}
-		
-		fprintf(stderr, "DEBUG-VERIFY: Final arguments for command '%s':\n", 
-				cmd->args[0] ? cmd->args[0] : "NULL");
-		for (int a = 0; cmd->args[a]; a++) {
-			fprintf(stderr, "  Arg[%d]: '%s'\n", a, cmd->args[a]);
-		}
-	}
+    t_node	*current;
+    t_node	*cmd;
+    int		i;
+    
+    fprintf(stderr, "DEBUG-VERIFY: Checking for missed arguments\n");
+    
+    // For each command, ensure we didn't miss any arguments
+    for (i = 0; i < vars->cmd_count; i++)
+    {
+        cmd = vars->cmd_nodes[i];
+        if (!cmd || !cmd->args)
+            continue;
+            
+        fprintf(stderr, "DEBUG-VERIFY: Checking command %s\n", 
+                cmd->args[0] ? cmd->args[0] : "NULL");
+        
+        // Print current arguments
+        fprintf(stderr, "DEBUG-VERIFY: Current arguments: ");
+        for (int j = 0; cmd->args[j]; j++) {
+            fprintf(stderr, "[%s] ", cmd->args[j]);
+        }
+        fprintf(stderr, "\n");
+        
+        // Verify all arguments between this command and next command/pipe
+        current = find_node_in_list(vars->head, cmd);
+        if (!current)
+            continue;
+            
+        current = current->next;
+        while (current && current->type != TYPE_CMD && current->type != TYPE_PIPE)
+        {
+            if (current->type == TYPE_ARGS && !is_redirection_target(current, vars))
+            {
+                fprintf(stderr, "DEBUG-VERIFY: Found potential argument '%s'\n", 
+                        current->args ? current->args[0] : "NULL");
+                
+                // Only add if not already present
+                if (!is_arg_in_cmd(cmd, current->args[0]))
+                {
+                    fprintf(stderr, "DEBUG-VERIFY: Adding missed argument '%s'\n", 
+                            current->args[0]);
+                    append_arg(cmd, current->args[0], 0);
+                }
+                else
+                {
+                    fprintf(stderr, "DEBUG-VERIFY: Skipping duplicate argument '%s'\n", 
+                            current->args[0]);
+                }
+            }
+            else if (is_redirection(current->type)) {
+                fprintf(stderr, "DEBUG-VERIFY: Skipping redirection node type=%d\n", current->type);
+            }
+            current = current->next;
+        }
+        
+        // Print final arguments after verification
+        fprintf(stderr, "DEBUG-VERIFY: Final arguments: ");
+        for (int j = 0; cmd->args[j]; j++) {
+            fprintf(stderr, "[%s] ", cmd->args[j]);
+        }
+        fprintf(stderr, "\n");
+    }
+    
+    fprintf(stderr, "DEBUG-VERIFY: Command argument verification complete\n");
 }
 
 // Helper function to check if an argument already exists in command's arguments
