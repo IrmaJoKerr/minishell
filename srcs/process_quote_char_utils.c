@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/26 01:01:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 08:55:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,32 +52,73 @@ Returns:
  - NULL if no redirection node exists
 Works with process_quote_char() for redirection target handling.
 */
+// t_node	*find_last_redir(t_vars *vars)
+// {
+// 	t_node	*current;
+// 	t_node	*last_redir;
+// 	int		i;
+
+// 	last_redir = NULL;
+// 	if (vars->current && is_redirection(vars->current->type))
+// 		return (vars->current);
+// 	current = vars->current;
+// 	i = 0;
+// 	while (current && current->prev && i < 3)
+// 	{
+// 		current = current->prev;
+// 		i++;
+// 		if (is_redirection(current->type))
+// 			return (current);
+// 	}
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type))
+// 			last_redir = current;
+// 		current = current->next;
+// 	}
+// 	return (last_redir);
+// }
 t_node	*find_last_redir(t_vars *vars)
 {
-	t_node	*current;
-	t_node	*last_redir;
-	int		i;
+    t_node	*current;
+    t_node	*last_redir;
+    int		i;
 
-	last_redir = NULL;
-	if (vars->current && is_redirection(vars->current->type))
-		return (vars->current);
-	current = vars->current;
-	i = 0;
-	while (current && current->prev && i < 3)
-	{
-		current = current->prev;
-		i++;
-		if (is_redirection(current->type))
-			return (current);
-	}
-	current = vars->head;
-	while (current)
-	{
-		if (is_redirection(current->type))
-			last_redir = current;
-		current = current->next;
-	}
-	return (last_redir);
+    fprintf(stderr, "DEBUG-FIND-REDIR: Looking for last redirection node\n");
+    
+    last_redir = NULL;
+    if (vars->current && is_redirection(vars->current->type))
+    {
+        fprintf(stderr, "DEBUG-FIND-REDIR: Current node is redirection (type %d)\n", 
+                vars->current->type);
+        return (vars->current);
+    }
+    
+    current = vars->current;
+    i = 0;
+    while (current && current->prev && i < 3)
+    {
+        current = current->prev;
+        i++;
+        if (is_redirection(current->type))
+        {
+            fprintf(stderr, "DEBUG-FIND-REDIR: Found redirection in previous nodes (type %d)\n", 
+                    current->type);
+            return (current);
+        }
+    }
+    
+    current = vars->head;
+    while (current)
+    {
+        if (is_redirection(current->type))
+            last_redir = current;
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-FIND-REDIR: Returning last_redir: %p\n", (void*)last_redir);
+    return (last_redir);
 }
 
 /*

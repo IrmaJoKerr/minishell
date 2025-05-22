@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 08:28:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 09:42:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,43 +195,78 @@ Returns:
 // 	(vars->pos)++;
 // 	return (content);
 // }
+// char *get_quoted_str(char *input, t_vars *vars, int *quote_type)
+// {
+// 	int     start;
+// 	int     end;
+// 	char    quote_char;
+// 	char    *content;
+
+// 	start = vars->pos;
+// 	quote_char = input[vars->pos];
+// 	fprintf(stderr, "DEBUG-QUOTE: Processing quoted string starting at position %d with %c\n", 
+// 			start, quote_char);
+// 	*quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
+// 	vars->pos++;
+// 	end = vars->pos;
+// 	while (input[end] && input[end] != quote_char)
+// 		end++;
+// 	if (!input[end])
+// 	{
+// 		fprintf(stderr, "DEBUG-QUOTE: Unclosed quote, initiating completion process\n");
+// 		return (handle_quote_completion(input, vars));
+// 	}
+// 	content = ft_substr(input, vars->pos, end - vars->pos);
+// 	fprintf(stderr, "DEBUG-QUOTE: Extracted content: '%s'\n", content ? content : "NULL");
+// 	vars->pos = end + 1;
+	
+// 	// Check if this might be a quoted redirection target
+// 	char next_char = 0;
+// 	int i = vars->pos;
+// 	while (input[i] && (input[i] == ' ' || input[i] == '\t'))
+// 		i++;
+// 	next_char = input[i];
+	
+// 	// Fixed version - use a ternary with a string description instead of a character
+// 	fprintf(stderr, "DEBUG-QUOTE: Next non-space character after quote: %s\n", 
+//         next_char ? (char[]){next_char, '\0'} : "NONE");
+	
+// 	return (content);
+// }
 char *get_quoted_str(char *input, t_vars *vars, int *quote_type)
 {
-	int     start;
-	int     end;
-	char    quote_char;
-	char    *content;
+    int     start;
+    int     end;
+    char    quote_char;
+    char    *content;
 
-	start = vars->pos;
-	quote_char = input[vars->pos];
-	fprintf(stderr, "DEBUG-QUOTE: Processing quoted string starting at position %d with %c\n", 
-			start, quote_char);
-	*quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
-	vars->pos++;
-	end = vars->pos;
-	while (input[end] && input[end] != quote_char)
-		end++;
-	if (!input[end])
-	{
-		fprintf(stderr, "DEBUG-QUOTE: Unclosed quote, initiating completion process\n");
-		return (handle_quote_completion(input, vars));
-	}
-	content = ft_substr(input, vars->pos, end - vars->pos);
-	fprintf(stderr, "DEBUG-QUOTE: Extracted content: '%s'\n", content ? content : "NULL");
-	vars->pos = end + 1;
-	
-	// Check if this might be a quoted redirection target
-	char next_char = 0;
-	int i = vars->pos;
-	while (input[i] && (input[i] == ' ' || input[i] == '\t'))
-		i++;
-	next_char = input[i];
-	
-	// Fixed version - use a ternary with a string description instead of a character
-	fprintf(stderr, "DEBUG-QUOTE: Next non-space character after quote: %s\n", 
-        next_char ? (char[]){next_char, '\0'} : "NONE");
-	
-	return (content);
+    start = vars->pos;
+    quote_char = input[vars->pos];
+    fprintf(stderr, "DEBUG-QUOTE: Processing quoted string starting at position %d with %c\n", 
+            start, quote_char);
+    *quote_type = (quote_char == '\"') ? TYPE_DOUBLE_QUOTE : TYPE_SINGLE_QUOTE;
+    vars->pos++;
+    end = vars->pos;
+    while (input[end] && input[end] != quote_char)
+        end++;
+    if (!input[end])
+    {
+        fprintf(stderr, "DEBUG-QUOTE: Unclosed quote, initiating completion process\n");
+        return (handle_quote_completion(input, vars));
+    }
+    content = ft_substr(input, vars->pos, end - vars->pos);
+    fprintf(stderr, "DEBUG-QUOTE: Extracted content: '%s'\n", content ? content : "NULL");
+    vars->pos = end + 1;
+    
+    // Check next character after quote
+    int i = vars->pos;
+    while (input[i] && (input[i] == ' ' || input[i] == '\t'))
+        i++;
+        
+    fprintf(stderr, "DEBUG-QUOTE: Next non-space character after quote: %s\n", 
+            input[i] ? (char[]){input[i], '\0'} : "NONE");
+    
+    return (content);
 }
 
 /*

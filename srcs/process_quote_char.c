@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 14:49:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 12:53:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,323 @@ Example:
 // 	vars->error_code = ERR_SYNTAX;
 // 	return (0);
 // }
+// int handle_redir_target(char *content, t_vars *vars)
+// {
+//     t_node  *redir_node;
+//     t_node  *file_node;
+//     t_node  *cmd_node;
+
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+    
+//     redir_node = find_last_redir(vars);
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: No valid redirection node found\n");
+//         free(content);
+//         vars->error_code = ERR_SYNTAX;
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d\n", redir_node->type);
+    
+//     // KEY FIX: Check if redirection already has a target
+//     if (redir_node->right != NULL)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s', treating '%s' as command argument\n", 
+//                 (redir_node->right->args) ? redir_node->right->args[0] : "NULL", content);
+        
+//         // Find the command to attach this argument to
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         if (cmd_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+//             free(content);
+//             return (1);
+//         }
+//         // If we couldn't find a command, fall through to error case
+//     }
+    
+//     if (redir_node && is_redirection(redir_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
+//         file_node = initnode(TYPE_ARGS, content);
+//         if (!file_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to create file node\n");
+//             free(content);
+//             return (0);
+//         }
+//         link_file_to_redir(redir_node, file_node, vars);
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Linked file '%s' to redirection node\n", content);
+//         free(content);
+//         return (1);
+//     }
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Invalid redirection syntax\n");
+//     free(content);
+//     vars->error_code = ERR_SYNTAX;
+//     return (0);
+// }
+// int handle_redir_target(char *content, t_vars *vars)
+// {
+//     t_node  *redir_node;
+//     t_node  *file_node;
+//     t_node  *cmd_node;
+
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+    
+//     redir_node = find_last_redir(vars);
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: No valid redirection node found\n");
+//         free(content);
+//         vars->error_code = ERR_SYNTAX;
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d\n", redir_node->type);
+    
+//     // Check if redirection already has a target - key part for handling adjacent quotes
+//     if (redir_node->right != NULL)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s'\n", 
+//                 (redir_node->right->args) ? redir_node->right->args[0] : "NULL");
+                
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if this is an adjacent quoted string that should be merged\n");
+        
+//         // If this is an adjacent quoted string AND has left adjacency, we should append to existing target
+//         if (vars->adj_state[0] && redir_node->right->args && redir_node->right->args[0])
+//         {
+//             char *existing = redir_node->right->args[0];
+//             char *merged = ft_strjoin(existing, content);
+            
+//             if (merged)
+//             {
+//                 fprintf(stderr, "DEBUG-REDIR-TARGET: Merging adjacent quoted content: '%s' + '%s' = '%s'\n",
+//                         existing, content, merged);
+                        
+//                 free(redir_node->right->args[0]);
+//                 redir_node->right->args[0] = merged;
+//                 free(content);
+//                 return (1);
+//             }
+//         }
+        
+//         // Otherwise treat as command argument (existing behavior)
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Treating '%s' as command argument\n", content);
+        
+//         // Find the command to attach this argument to
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         if (cmd_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+//             free(content);
+//             return (1);
+//         }
+//         // If we couldn't find a command, fall through to error case
+//     }
+    
+//     if (redir_node && is_redirection(redir_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
+//         file_node = initnode(TYPE_ARGS, content);
+//         if (!file_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to create file node\n");
+//             free(content);
+//             return (0);
+//         }
+//         link_file_to_redir(redir_node, file_node, vars);
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Linked file '%s' to redirection node\n", content);
+//         free(content);
+//         return (1);
+//     }
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Invalid redirection syntax\n");
+//     free(content);
+//     vars->error_code = ERR_SYNTAX;
+//     return (0);
+// }
+// int handle_redir_target(char *content, t_vars *vars)
+// {
+//     t_node  *redir_node;
+//     t_node  *file_node;
+//     t_node  *cmd_node;
+
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+    
+//     redir_node = find_last_redir(vars);
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: No valid redirection node found\n");
+//         free(content);
+//         vars->error_code = ERR_SYNTAX;
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d\n", redir_node->type);
+    
+//     // Check if redirection already has a target - key part for handling adjacent quotes
+//     if (redir_node->right != NULL)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s'\n", 
+//                 (redir_node->right->args) ? redir_node->right->args[0] : "NULL");
+                
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if this is an adjacent quoted string that should be merged\n");
+        
+//         // If this is an adjacent quoted string AND has left adjacency, we should append to existing target
+//         if (vars->adj_state[0] && redir_node->right->args && redir_node->right->args[0])
+//         {
+//             char *existing = redir_node->right->args[0];
+//             char *merged = ft_strjoin(existing, content);
+            
+//             if (merged)
+//             {
+//                 fprintf(stderr, "DEBUG-REDIR-TARGET: Merging adjacent quoted content: '%s' + '%s' = '%s'\n",
+//                         existing, content, merged);
+                        
+//                 free(redir_node->right->args[0]);
+//                 redir_node->right->args[0] = merged;
+//                 free(content);
+//                 return (1);
+//             }
+//         }
+        
+//         // Otherwise treat as command argument (existing behavior)
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Treating '%s' as command argument\n", content);
+        
+//         // Find the command to attach this argument to
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         if (cmd_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+//             free(content);
+//             return (1);
+//         }
+//         // If we couldn't find a command, fall through to error case
+//     }
+    
+//     if (redir_node && is_redirection(redir_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
+//         file_node = initnode(TYPE_ARGS, content);
+//         if (!file_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to create file node\n");
+//             free(content);
+//             return (0);
+//         }
+//         link_file_to_redir(redir_node, file_node, vars);
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Linked file '%s' to redirection node\n", content);
+//         free(content);
+//         return (1);
+//     }
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Invalid redirection syntax\n");
+//     free(content);
+//     vars->error_code = ERR_SYNTAX;
+//     return (0);
+// }
+// int handle_redir_target(char *content, t_vars *vars)
+// {
+//     t_node  *redir_node;
+//     t_node  *file_node;
+//     t_node  *cmd_node;
+
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Current adjacency state: {%d,%d}\n", 
+//             vars->adj_state[0], vars->adj_state[1]);
+    
+//     redir_node = find_last_redir(vars);
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: No valid redirection node found\n");
+//         free(content);
+//         vars->error_code = ERR_SYNTAX;
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d at %p\n", 
+//             redir_node->type, (void*)redir_node);
+    
+//     // Check if redirection already has a target - key part for handling adjacent quotes
+//     if (redir_node->right != NULL)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s'\n", 
+//                 (redir_node->right->args) ? redir_node->right->args[0] : "NULL");
+                
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if this is an adjacent quoted string that should be merged\n");
+        
+//         // If this is an adjacent quoted string AND has left adjacency, we should append to existing target
+//         if (vars->adj_state[0] && redir_node->right->args && redir_node->right->args[0])
+//         {
+//             char *existing = redir_node->right->args[0];
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Has left adjacency (%d). Attempting to merge with existing target: '%s'\n",
+//                     vars->adj_state[0], existing);
+                    
+//             char *merged = ft_strjoin(existing, content);
+            
+//             if (merged)
+//             {
+//                 fprintf(stderr, "DEBUG-REDIR-TARGET: Merging adjacent quoted content: '%s' + '%s' = '%s'\n",
+//                         existing, content, merged);
+                        
+//                 free(redir_node->right->args[0]);
+//                 redir_node->right->args[0] = merged;
+//                 free(content);
+//                 return (1);
+//             }
+//             else
+//             {
+//                 fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to allocate memory for merged string\n");
+//             }
+//         }
+//         else
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Not adjacent to target (adj_state[0]=%d)\n", 
+//                     vars->adj_state[0]);
+//         }
+        
+//         // Otherwise treat as command argument (existing behavior)
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Treating '%s' as command argument\n", content);
+        
+//         // Find the command to attach this argument to
+//         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
+//         if (cmd_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+//             free(content);
+//             return (1);
+//         }
+//         // If we couldn't find a command, fall through to error case
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: No command node found to attach argument\n");
+//     }
+    
+//     if (redir_node && is_redirection(redir_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
+//         file_node = initnode(TYPE_ARGS, content);
+//         if (!file_node)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-TARGET: Failed to create file node\n");
+//             free(content);
+//             return (0);
+//         }
+//         link_file_to_redir(redir_node, file_node, vars);
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Linked file '%s' to redirection node\n", content);
+//         free(content);
+//         return (1);
+//     }
+//     fprintf(stderr, "DEBUG-REDIR-TARGET: Invalid redirection syntax\n");
+//     free(content);
+//     vars->error_code = ERR_SYNTAX;
+//     return (0);
+// }
 int handle_redir_target(char *content, t_vars *vars)
 {
     t_node  *redir_node;
@@ -99,6 +416,8 @@ int handle_redir_target(char *content, t_vars *vars)
     t_node  *cmd_node;
 
     fprintf(stderr, "DEBUG-REDIR-TARGET: Handling quoted text '%s' as potential redirection target\n", content);
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Current adjacency state: {%d,%d}\n", 
+            vars->adj_state[0], vars->adj_state[1]);
     
     redir_node = find_last_redir(vars);
     if (!redir_node)
@@ -111,25 +430,43 @@ int handle_redir_target(char *content, t_vars *vars)
     
     fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection node type=%d\n", redir_node->type);
     
-    // KEY FIX: Check if redirection already has a target
+    // Check if redirection already has a target
     if (redir_node->right != NULL)
     {
-        fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s', treating '%s' as command argument\n", 
-                (redir_node->right->args) ? redir_node->right->args[0] : "NULL", content);
+        fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already has target '%s'\n", 
+                (redir_node->right->args) ? redir_node->right->args[0] : "NULL");
+                
+        // If this is an adjacent quoted string AND has left adjacency, we should append to existing target
+        if (vars->adj_state[0] && redir_node->right->args && redir_node->right->args[0])
+        {
+            char *existing = redir_node->right->args[0];
+            fprintf(stderr, "DEBUG-REDIR-TARGET: Has left adjacency. Merging with existing target: '%s'\n",
+                    existing);
+                    
+            char *merged = ft_strjoin(existing, content);
+            
+            if (merged)
+            {
+                fprintf(stderr, "DEBUG-REDIR-TARGET: Merged result: '%s'\n", merged);
+                        
+                free(redir_node->right->args[0]);
+                redir_node->right->args[0] = merged;
+                free(content);
+                return (1);
+            }
+        }
         
-        // Find the command to attach this argument to
+        // Otherwise treat as command argument
         cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
         if (cmd_node)
         {
-            fprintf(stderr, "DEBUG-REDIR-TARGET: Found command node '%s' to attach argument\n", 
-                    cmd_node->args ? cmd_node->args[0] : "NULL");
             append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
             free(content);
             return (1);
         }
-        // If we couldn't find a command, fall through to error case
     }
     
+    // Creating a new redirection target
     if (redir_node && is_redirection(redir_node->type))
     {
         fprintf(stderr, "DEBUG-REDIR-TARGET: Creating file node for redirection target\n");
@@ -414,12 +751,390 @@ Example flows:
     
 //     return (1);
 // }
+// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
+// {
+//     int     quote_type;
+//     char    *content;
+//     t_node  *cmd_node;
+//     int     saved_adj[3];  // Add this to save adjacency state
+
+//     // Save current position for proper adjacency check
+//     int saved_pos = vars->pos;
+    
+//     // Check adjacency BEFORE get_quoted_str modifies vars->pos
+//     check_token_adj(input, vars);
+    
+//     // Save the correctly determined adjacency state
+//     saved_adj[0] = vars->adj_state[0];
+//     saved_adj[1] = vars->adj_state[1];
+//     saved_adj[2] = vars->adj_state[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-START: Processing at pos %d with adjacency={%d,%d}\n", 
+//             vars->pos, vars->adj_state[0], vars->adj_state[1]);
+
+//     content = get_quoted_str(input, vars, &quote_type);
+//     if (!content)
+//     {
+//         vars->pos = saved_pos; // Restore position on error
+//         return (0);
+//     }
+
+//     // Restore the adjacency state detected at the quote character
+//     vars->adj_state[0] = saved_adj[0];
+//     vars->adj_state[1] = saved_adj[1]; 
+//     vars->adj_state[2] = saved_adj[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-RESTORED: Restored adjacency to {%d,%d} for content '%s'\n", 
+//             vars->adj_state[0], vars->adj_state[1], content);
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing quoted content: '%s' (type: %d)\n", 
+//             content, quote_type);
+    
+//     // Special handling for empty quotes with adjacency
+//     if (content && *content == '\0' && quote_type != 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes with adjacency={%d,%d}\n", 
+//                 vars->adj_state[0], vars->adj_state[1]);
+        
+//         // Both left and right adjacency means we need to connect tokens
+//         if (vars->adj_state[0] && vars->adj_state[1])
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes acting as join point\n");
+            
+//             // Find the last token in the list to join with
+//             t_node *last_token = vars->head;
+//             if (last_token) {
+//                 while (last_token->next)
+//                     last_token = last_token->next;
+                
+//                 // Save the current token pointer that process_right_adj expects
+//                 vars->current = last_token;
+//                 fprintf(stderr, "DEBUG-QUOTE-PROCESS: Set vars->current to last token: %p ('%s')\n", 
+//                        (void*)vars->current, vars->current->args ? vars->current->args[0] : "NULL");
+//             }
+            
+//             free(content);  // Content is empty, free it
+//             process_right_adj(input, vars);
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Returned from process_right_adj for empty quotes\n");
+//             return (1);
+//         }
+//     }
+    
+//     if (is_redir_target)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Handling as redirection target\n");
+//         int result = handle_redir_target(content, vars);
+//         return result;
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing as regular quoted string\n");
+//     cmd_node = process_quoted_str(&content, quote_type, vars);
+    
+//     if (!cmd_node && vars->adj_state[0] == 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Creating new quoted command\n");
+//         return (make_quoted_cmd(content, input, vars));
+//     }
+//     else if (!cmd_node)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: No command node found with adj_state=%d\n", 
+//                 vars->adj_state[0]);
+//         if (!merge_quoted_token(input, content, vars))
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge failed\n");
+//             return (token_cleanup_error(content, vars));
+//         }
+//         return (1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Found command node '%s'\n", 
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     if (!merge_quoted_token(input, content, vars))
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Appending as argument to command\n");
+//         append_arg(cmd_node, content, quote_type);
+        
+//         // If we have right adjacency and valid content, process it
+//         if (vars->adj_state[1] && content && *content != '\0')
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing right adjacency after quotes\n");
+//             cleanup_and_process_adj(content, input, vars);
+//         }
+//         else
+//         {
+//             // No right adjacency, just clean up
+//             free(content);
+//         }
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token was merged\n");
+//     }
+    
+//     return (1);
+// }
+// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
+// {
+//     int     quote_type;
+//     char    *content;
+//     t_node  *cmd_node;
+//     int     saved_adj[3];  // Save adjacency state
+
+//     // Save current position for proper adjacency check
+//     int saved_pos = vars->pos;
+    
+//     // Check adjacency BEFORE get_quoted_str modifies vars->pos
+//     check_token_adj(input, vars);
+    
+//     // Save the correctly determined adjacency state
+//     saved_adj[0] = vars->adj_state[0];
+//     saved_adj[1] = vars->adj_state[1];
+//     saved_adj[2] = vars->adj_state[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-START: Processing at pos %d with adjacency={%d,%d}\n", 
+//             vars->pos, vars->adj_state[0], vars->adj_state[1]);
+
+//     content = get_quoted_str(input, vars, &quote_type);
+//     if (!content)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-ERROR: Failed to get quoted string content\n");
+//         vars->pos = saved_pos; // Restore position on error
+//         return (0);
+//     }
+
+//     // Restore the adjacency state detected at the quote character
+//     vars->adj_state[0] = saved_adj[0];
+//     vars->adj_state[1] = saved_adj[1]; 
+//     vars->adj_state[2] = saved_adj[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-RESTORED: Restored adjacency to {%d,%d} for content '%s'\n", 
+//             vars->adj_state[0], vars->adj_state[1], content);
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing quoted content: '%s' (type: %d)\n", 
+//             content, quote_type);
+    
+//     // Special handling for empty quotes with adjacency
+//     if (content && *content == '\0' && quote_type != 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes with adjacency={%d,%d}\n", 
+//                 vars->adj_state[0], vars->adj_state[1]);
+        
+//         // Both left and right adjacency means we need to connect tokens
+//         if (vars->adj_state[0] && vars->adj_state[1])
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes acting as join point\n");
+            
+//             // Find the last token in the list to join with
+//             t_node *last_token = vars->head;
+//             if (last_token) {
+//                 while (last_token->next)
+//                     last_token = last_token->next;
+                
+//                 // Save the current token pointer that process_right_adj expects
+//                 vars->current = last_token;
+//                 fprintf(stderr, "DEBUG-QUOTE-PROCESS: Set vars->current to last token: %p ('%s')\n", 
+//                        (void*)vars->current, vars->current->args ? vars->current->args[0] : "NULL");
+//             }
+            
+//             free(content);  // Content is empty, free it
+//             process_right_adj(input, vars);
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Returned from process_right_adj for empty quotes\n");
+//             return (1);
+//         }
+//     }
+    
+//     if (is_redir_target)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Handling as redirection target\n");
+//         int result = handle_redir_target(content, vars);
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: handle_redir_target returned %d\n", result);
+//         return result;
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing as regular quoted string\n");
+//     cmd_node = process_quoted_str(&content, quote_type, vars);
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: process_quoted_str returned cmd_node: %p\n", (void*)cmd_node);
+    
+//     if (!cmd_node && vars->adj_state[0] == 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Creating new quoted command with '%s'\n", content);
+//         return (make_quoted_cmd(content, input, vars));
+//     }
+//     else if (!cmd_node)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: No command node found with left adjacency=%d\n", 
+//                 vars->adj_state[0]);
+//         if (!merge_quoted_token(input, content, vars))
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge failed\n");
+//             return (token_cleanup_error(content, vars));
+//         }
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge succeeded\n");
+//         return (1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Found command node '%s'\n", 
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     if (!merge_quoted_token(input, content, vars))
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Appending as argument to command\n");
+//         append_arg(cmd_node, content, quote_type);
+        
+//         // If we have right adjacency and valid content, process it
+//         if (vars->adj_state[1] && content && *content != '\0')
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing right adjacency after quotes\n");
+//             cleanup_and_process_adj(content, input, vars);
+//         }
+//         else
+//         {
+//             // No right adjacency, just clean up
+//             free(content);
+//         }
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token was merged successfully\n");
+//     }
+    
+//     return (1);
+// }
+// int process_quote_char(char *input, t_vars *vars, int is_redir_target)
+// {
+//     int     quote_type;
+//     char    *content;
+//     t_node  *cmd_node;
+//     int     saved_adj[3];  // Save adjacency state
+
+//     // Save current position for proper adjacency check
+//     int saved_pos = vars->pos;
+    
+//     // Check adjacency BEFORE get_quoted_str modifies vars->pos
+//     check_token_adj(input, vars);
+    
+//     // Save the correctly determined adjacency state
+//     saved_adj[0] = vars->adj_state[0];
+//     saved_adj[1] = vars->adj_state[1];
+//     saved_adj[2] = vars->adj_state[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-START: Processing at pos %d with adjacency={%d,%d}\n", 
+//             vars->pos, vars->adj_state[0], vars->adj_state[1]);
+
+//     content = get_quoted_str(input, vars, &quote_type);
+//     if (!content)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-ERROR: Failed to get quoted string content\n");
+//         vars->pos = saved_pos; // Restore position on error
+//         return (0);
+//     }
+
+//     // Restore the adjacency state detected at the quote character
+//     vars->adj_state[0] = saved_adj[0];
+//     vars->adj_state[1] = saved_adj[1]; 
+//     vars->adj_state[2] = saved_adj[2];
+
+//     fprintf(stderr, "DEBUG-QUOTE-RESTORED: Restored adjacency to {%d,%d} for content '%s'\n", 
+//             vars->adj_state[0], vars->adj_state[1], content);
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing quoted content: '%s' (type: %d)\n", 
+//             content, quote_type);
+    
+//     // Special handling for empty quotes with adjacency
+//     if (content && *content == '\0' && quote_type != 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes with adjacency={%d,%d}\n", 
+//                 vars->adj_state[0], vars->adj_state[1]);
+        
+//         // Both left and right adjacency means we need to connect tokens
+//         if (vars->adj_state[0] && vars->adj_state[1])
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Empty quotes acting as join point\n");
+            
+//             // Find the last token in the list to join with
+//             t_node *last_token = vars->head;
+//             if (last_token) {
+//                 while (last_token->next)
+//                     last_token = last_token->next;
+                
+//                 // Save the current token pointer that process_right_adj expects
+//                 vars->current = last_token;
+//                 fprintf(stderr, "DEBUG-QUOTE-PROCESS: Set vars->current to last token: %p ('%s')\n", 
+//                        (void*)vars->current, vars->current->args ? vars->current->args[0] : "NULL");
+//             }
+            
+//             free(content);  // Content is empty, free it
+//             process_right_adj(input, vars);
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Returned from process_right_adj for empty quotes\n");
+//             return (1);
+//         }
+//     }
+    
+//     // Added debug print to track redirection decision and adjacency state
+//     fprintf(stderr, "DEBUG-QUOTE-DECISION: is_redir_target=%d, adj_state={%d,%d}\n", 
+//             is_redir_target, vars->adj_state[0], vars->adj_state[1]);
+    
+//     if (is_redir_target)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Handling as redirection target\n");
+//         int result = handle_redir_target(content, vars);
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: handle_redir_target returned %d\n", result);
+//         return result;
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing as regular quoted string\n");
+//     cmd_node = process_quoted_str(&content, quote_type, vars);
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: process_quoted_str returned cmd_node: %p\n", (void*)cmd_node);
+    
+//     if (!cmd_node && vars->adj_state[0] == 0)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Creating new quoted command with '%s'\n", content);
+//         return (make_quoted_cmd(content, input, vars));
+//     }
+//     else if (!cmd_node)
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: No command node found with left adjacency=%d\n", 
+//                 vars->adj_state[0]);
+//         if (!merge_quoted_token(input, content, vars))
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge failed\n");
+//             return (token_cleanup_error(content, vars));
+//         }
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge succeeded\n");
+//         return (1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Found command node '%s'\n", 
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     if (!merge_quoted_token(input, content, vars))
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Appending as argument to command\n");
+//         append_arg(cmd_node, content, quote_type);
+        
+//         // If we have right adjacency and valid content, process it
+//         if (vars->adj_state[1] && content && *content != '\0')
+//         {
+//             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing right adjacency after quotes\n");
+//             cleanup_and_process_adj(content, input, vars);
+//         }
+//         else
+//         {
+//             // No right adjacency, just clean up
+//             free(content);
+//         }
+//     }
+//     else
+//     {
+//         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token was merged successfully\n");
+//     }
+    
+//     return (1);
+// }
 int process_quote_char(char *input, t_vars *vars, int is_redir_target)
 {
     int     quote_type;
     char    *content;
     t_node  *cmd_node;
-    int     saved_adj[3];  // Add this to save adjacency state
+    int     saved_adj[3];  // Save adjacency state
 
     // Save current position for proper adjacency check
     int saved_pos = vars->pos;
@@ -438,6 +1153,7 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
     content = get_quoted_str(input, vars, &quote_type);
     if (!content)
     {
+        fprintf(stderr, "DEBUG-QUOTE-ERROR: Failed to get quoted string content\n");
         vars->pos = saved_pos; // Restore position on error
         return (0);
     }
@@ -483,30 +1199,60 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
         }
     }
     
+    // First, check if this is an adjacent quoted string that should be merged with redirection target
+    // This happens regardless of is_redir_target flag
+    if (vars->adj_state[0]) // If this string has left adjacency
+    {
+        t_node *redir_node = find_last_redir(vars);
+        if (redir_node && redir_node->right && redir_node->right->args && redir_node->right->args[0])
+        {
+            char *existing = redir_node->right->args[0];
+            char *merged = ft_strjoin(existing, content);
+            
+            if (merged)
+            {
+                fprintf(stderr, "DEBUG-QUOTE-PROCESS: Merging adjacent quoted content with redirection target: '%s' + '%s' = '%s'\n",
+                        existing, content, merged);
+                        
+                free(redir_node->right->args[0]);
+                redir_node->right->args[0] = merged;
+                free(content);
+                return (1);
+            }
+        }
+    }
+    
+    // Added debug print to track redirection decision and adjacency state
+    fprintf(stderr, "DEBUG-QUOTE-DECISION: is_redir_target=%d, adj_state={%d,%d}\n", 
+            is_redir_target, vars->adj_state[0], vars->adj_state[1]);
+    
     if (is_redir_target)
     {
         fprintf(stderr, "DEBUG-QUOTE-PROCESS: Handling as redirection target\n");
         int result = handle_redir_target(content, vars);
+        fprintf(stderr, "DEBUG-QUOTE-PROCESS: handle_redir_target returned %d\n", result);
         return result;
     }
     
     fprintf(stderr, "DEBUG-QUOTE-PROCESS: Processing as regular quoted string\n");
     cmd_node = process_quoted_str(&content, quote_type, vars);
+    fprintf(stderr, "DEBUG-QUOTE-PROCESS: process_quoted_str returned cmd_node: %p\n", (void*)cmd_node);
     
     if (!cmd_node && vars->adj_state[0] == 0)
     {
-        fprintf(stderr, "DEBUG-QUOTE-PROCESS: Creating new quoted command\n");
+        fprintf(stderr, "DEBUG-QUOTE-PROCESS: Creating new quoted command with '%s'\n", content);
         return (make_quoted_cmd(content, input, vars));
     }
     else if (!cmd_node)
     {
-        fprintf(stderr, "DEBUG-QUOTE-PROCESS: No command node found with adj_state=%d\n", 
+        fprintf(stderr, "DEBUG-QUOTE-PROCESS: No command node found with left adjacency=%d\n", 
                 vars->adj_state[0]);
         if (!merge_quoted_token(input, content, vars))
         {
             fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge failed\n");
             return (token_cleanup_error(content, vars));
         }
+        fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token merge succeeded\n");
         return (1);
     }
     
@@ -531,7 +1277,7 @@ int process_quote_char(char *input, t_vars *vars, int is_redir_target)
     }
     else
     {
-        fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token was merged\n");
+        fprintf(stderr, "DEBUG-QUOTE-PROCESS: Token was merged successfully\n");
     }
     
     return (1);

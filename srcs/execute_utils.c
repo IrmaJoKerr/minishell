@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 04:10:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 08:55:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,20 +83,70 @@ Returns:
 - 1 if target is valid
 - 0 if target is invalid (with error_code set)
 */
-int	proc_redir_target(t_node *node, t_vars *vars)
+// int	proc_redir_target(t_node *node, t_vars *vars)
+// {
+// 	if (node->right && node->right->args && node->right->args[0])
+// 	{
+// 		if (node->type != TYPE_HEREDOC)
+// 			strip_outer_quotes(&node->right->args[0], vars);
+// 		return (1);
+// 	}
+// 	else if (node->type != TYPE_HEREDOC)
+// 	{
+// 		tok_syntax_error_msg("newline", vars);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+// int proc_redir_target(t_node *node, t_vars *vars)
+// {
+//     if (node->right && node->right->args && node->right->args[0])
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: Processing target: '%s'\n", 
+//                 node->right->args[0]);
+                
+//         if (node->type != TYPE_HEREDOC)
+//             strip_outer_quotes(&node->right->args[0], vars);
+            
+//         fprintf(stderr, "DEBUG-REDIR-TARGET: After quote processing: '%s'\n", 
+//                 node->right->args[0]);
+//         return (1);
+//     }
+//     else if (node->type != TYPE_HEREDOC)
+//     {
+//         tok_syntax_error_msg("newline", vars);
+//         return (0);
+//     }
+//     return (1);
+// }
+int proc_redir_target(t_node *node, t_vars *vars)
 {
-	if (node->right && node->right->args && node->right->args[0])
-	{
-		if (node->type != TYPE_HEREDOC)
-			strip_outer_quotes(&node->right->args[0], vars);
-		return (1);
-	}
-	else if (node->type != TYPE_HEREDOC)
-	{
-		tok_syntax_error_msg("newline", vars);
-		return (0);
-	}
-	return (1);
+    fprintf(stderr, "DEBUG-PREDIR-TARGET: Processing redirection target for node type %d\n", 
+            node ? node->type : 0);
+            
+    if (node && node->right && node->right->args && node->right->args[0])
+    {
+        fprintf(stderr, "DEBUG-PREDIR-TARGET: Target before processing: '%s'\n", 
+                node->right->args[0]);
+                
+        if (node->type != TYPE_HEREDOC)
+        {
+            fprintf(stderr, "DEBUG-PREDIR-TARGET: Calling strip_outer_quotes\n");
+            strip_outer_quotes(&node->right->args[0], vars);
+        }
+            
+        fprintf(stderr, "DEBUG-PREDIR-TARGET: Target after processing: '%s'\n", 
+                node->right->args[0]);
+        return (1);
+    }
+    else if (node && node->type != TYPE_HEREDOC)
+    {
+        fprintf(stderr, "DEBUG-PREDIR-TARGET: No target found, syntax error\n");
+        tok_syntax_error_msg("newline", vars);
+        return (0);
+    }
+    
+    return (1);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:16:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 22:19:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/22 09:42:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,28 +47,64 @@ Examples:
 - "'hello'world"  -> at 'hello', adjacency is [0,1]
 - "he'llo'wo"     -> at 'llo', adjacency is [1,1]
 */
-void	check_token_adj(char *input, t_vars *vars)
-{
-	int		has_left_adj;
-	int		has_right_adj;
-	char	left_char;
-	char	right_char;
+// void	check_token_adj(char *input, t_vars *vars)
+// {
+// 	int		has_left_adj;
+// 	int		has_right_adj;
+// 	char	left_char;
+// 	char	right_char;
 
-	has_left_adj = 0;
-	has_right_adj = 0;
-	if (vars->pos > 0)
-	{
-		left_char = input[vars->pos - 1];
-		has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
-	}
-	if (input[vars->pos + 1])
-	{
-		right_char = input[vars->pos + 1];
-		has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
-	}
-	vars->adj_state[0] = has_left_adj;
-	vars->adj_state[1] = has_right_adj;
-	vars->adj_state[2] = -1;
+// 	has_left_adj = 0;
+// 	has_right_adj = 0;
+// 	if (vars->pos > 0)
+// 	{
+// 		left_char = input[vars->pos - 1];
+// 		has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
+// 	}
+// 	if (input[vars->pos + 1])
+// 	{
+// 		right_char = input[vars->pos + 1];
+// 		has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
+// 	}
+// 	vars->adj_state[0] = has_left_adj;
+// 	vars->adj_state[1] = has_right_adj;
+// 	vars->adj_state[2] = -1;
+// }
+void check_token_adj(char *input, t_vars *vars)
+{
+    int     has_left_adj;
+    int     has_right_adj;
+    char    left_char;
+    char    right_char;
+
+    has_left_adj = 0;
+    has_right_adj = 0;
+    
+    fprintf(stderr, "DEBUG-ADJ: Checking adjacency at position %d ('%c')\n", 
+            vars->pos, input[vars->pos]);
+    
+    if (vars->pos > 0)
+    {
+        left_char = input[vars->pos - 1];
+        has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
+        fprintf(stderr, "DEBUG-ADJ: Left character is '%c', is_adjacent=%d\n", 
+                left_char, has_left_adj);
+    }
+    
+    if (input[vars->pos + 1])
+    {
+        right_char = input[vars->pos + 1];
+        has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
+        fprintf(stderr, "DEBUG-ADJ: Right character is '%c', is_adjacent=%d\n", 
+                right_char, has_right_adj);
+    }
+    
+    vars->adj_state[0] = has_left_adj;
+    vars->adj_state[1] = has_right_adj;
+    vars->adj_state[2] = -1;
+    
+    fprintf(stderr, "DEBUG-ADJ: Set adjacency state to {%d,%d}\n", 
+            vars->adj_state[0], vars->adj_state[1]);
 }
 
 /*
