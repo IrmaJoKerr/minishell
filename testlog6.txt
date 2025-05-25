@@ -1,0 +1,805 @@
+
+Test  57: ❌ grep hi <./test_files/infile 
+mini output = ()
+bash output = (hi)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'grep hi <./test_files/infile' 'g' Handling regular token 'r' Handling regular token 'e' Handling regular token 'p' Handling regular token ' ' Handling regular token Creating token type=CMD, content='grep' Created node with args[0]='grep' 'grep'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'grep'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 8, type=< Handling redirection type=< Handling redirection token at pos 8 '<' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' './test_files/infile' './test_files/infile' Redirection token handled successfully Redirection operator='<', filename='./test_files/infile' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/infile'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+
+Test  59: ❌ echo hi < ./test_files/infile bye bye 
+mini output = ()
+bash output = (hi bye bye)
+mini exit code = 1
+bash exit code = 0
+mini error = ( 'echo hi < ./test_files/infile bye bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 8, type=< Handling redirection type=< Handling redirection token at pos 8 '<' Looking for filename at position 9 Processing filename at pos 9 Skipping whitespace ' ' at pos 9 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' './test_files/infile' './test_files/infile' Redirection token handled successfully Redirection operator='<', filename='./test_files/infile' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Tokenization completed with result=1 'bye'] -> NULL Starting AST building Found 1 commands 'echo' Pipe processing complete, pipe_root=(nil) ./test_files/infile Processing redirection type=<, filename='./test_files/infile' Target command is 'echo' Set redir_root to redirection with filename './test_files/infile' Redirection processing complete, redir_root=0x637c01f552b0 Built AST with root type=< ===== AST STRUCTURE ===== < [./test_files/infile] ========================= <)
+bash error = ()
+Test  60: ❌ grep hi <./test_files/infile_big <./test_files/infile 
+mini output = ()
+bash output = (hi)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'grep hi <./test_files/infile_big <./test_files/infile' 'g' Handling regular token 'r' Handling regular token 'e' Handling regular token 'p' Handling regular token ' ' Handling regular token Creating token type=CMD, content='grep' Created node with args[0]='grep' 'grep'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'grep'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 8, type=< Handling redirection type=< Handling redirection token at pos 8 '<' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' './test_files/infile_big' './test_files/infile_big' Redirection token handled successfully Redirection operator='<', filename='./test_files/infile_big' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 33, type=< Handling redirection type=< Handling redirection token at pos 33 '<' Looking for filename at position 34 Processing filename at pos 34 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' './test_files/infile' './test_files/infile' Redirection token handled successfully Redirection operator='<', filename='./test_files/infile' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/infile'] -> NULL syntax error near unexpected token `./test_files/infile')
+bash error = ()
+Test  61: ❌ echo <"./test_files/infile" "bonjour       42" 
+mini output = ()
+bash output = (bonjour 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo <"./test_files/infile" "bonjour 42"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '"' Handling regular token Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test  62: ❌ cat <"./test_files/file name with spaces" 
+mini output = ()
+bash output = (😈 😈 😈 This will break your minishell 😈 😈 😈)
+mini exit code = 134
+bash exit code = 0
+mini error = ( 'cat <"./test_files/file name with spaces"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'f' 'i' 'l' 'e' '"./test_files/file' '"./test_files/file' Redirection token handled successfully Redirection operator='<', filename='"./test_files/file' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'n' Handling regular token 'a' Handling regular token 'm' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='name' Created node with args[0]='name' 'name'] -> NULL Position update indicated, continuing 'w' Handling regular token 'i' Handling regular token 't' Handling regular token 'h' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='with' Created node with args[0]='with' 'with'] -> NULL Position update indicated, continuing 's' Handling regular token 'p' Handling regular token 'a' Handling regular token 'c' Handling regular token 'e' Handling regular token 's' Handling regular token '"' Handling regular token Creating token type=ARGS, content='spaces' Created node with args[0]='spaces' 'spaces'] -> NULL Position update indicated, continuing Creating token type=ARGS, content='' Created node with args[0]='' ''] -> NULL Tokenization completed with result=1 ''] -> NULL Starting AST building Found 1 commands 'cat' Pipe processing complete, pipe_root=(nil) "./test_files/file Processing redirection type=<, filename='"./test_files/file' Target command is 'cat' Set redir_root to redirection with filename '"./test_files/file' Redirection processing complete, redir_root=0x596adfaee060 Built AST with root type=< ===== AST STRUCTURE ===== < ["./test_files/file] ========================= < double free detected in tcache 2)
+bash error = ()
+Test  63: ❌ cat <./test_files/infile_big ./test_files/infile 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 1
+bash exit code = 0
+mini error = ( 'cat <./test_files/infile_big ./test_files/infile' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' './test_files/infile_big' './test_files/infile_big' Redirection token handled successfully Redirection operator='<', filename='./test_files/infile_big' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '.' Handling regular token '/' Handling regular token 't' Handling regular token 'e' Handling regular token 's' Handling regular token 't' Handling regular token '_' Handling regular token 'f' Handling regular token 'i' Handling regular token 'l' Handling regular token 'e' Handling regular token 's' Handling regular token '/' Handling regular token 'i' Handling regular token 'n' Handling regular token 'f' Handling regular token 'i' Handling regular token 'l' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='./test_files/infile' Created node with args[0]='./test_files/infile' './test_files/infile'] -> NULL Tokenization completed with result=1 './test_files/infile'] -> NULL Starting AST building Found 1 commands 'cat' Pipe processing complete, pipe_root=(nil) ./test_files/infile_big Processing redirection type=<, filename='./test_files/infile_big' Target command is 'cat' Set redir_root to redirection with filename './test_files/infile_big' Redirection processing complete, redir_root=0x5f063ac81f40 Built AST with root type=< ===== AST STRUCTURE ===== < [./test_files/infile_big] ========================= <)
+bash error = ()
+Test  64: ❌ cat <"1""2""3""4""5" 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <"1""2""3""4""5"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '1' '"' '"' '2' '"' '"' '3' '"' '"' '4' '"' '"' '5' '"' '"1""2""3""4""5"' '"1""2""3""4""5"' Redirection token handled successfully Redirection operator='<', filename='"1""2""3""4""5"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"1""2""3""4""5"'] -> NULL syntax error near unexpected token `newline')
+bash error = ( No such file or directory)
+Test  65: ❌ echo <"./test_files/infile" <missing <"./test_files/infile" 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo <"./test_files/infile" <missing <"./test_files/infile"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 28, type=< Handling redirection type=< Handling redirection token at pos 28 '<' Looking for filename at position 29 Processing filename at pos 29 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 37, type=< Handling redirection type=< Handling redirection token at pos 37 '<' Looking for filename at position 38 Processing filename at pos 38 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `missing')
+bash error = ( No such file or directory)
+Test  66: ❌ echo <missing <"./test_files/infile" <missing 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo <missing <"./test_files/infile" <missing' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 14, type=< Handling redirection type=< Handling redirection token at pos 14 '<' Looking for filename at position 15 Processing filename at pos 15 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 37, type=< Handling redirection type=< Handling redirection token at pos 37 '<' Looking for filename at position 38 Processing filename at pos 38 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 'missing'] -> NULL syntax error near unexpected token `"./test_files/infile"')
+bash error = ( No such file or directory)
+Test  67: ❌ cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <"./test_files/infile"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test  68: ❌ echo <"./test_files/infile_big" | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo <"./test_files/infile_big" | cat <"./test_files/infile"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' '"' '"./test_files/infile_big"' '"./test_files/infile_big"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile_big"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 32, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 38, type=< Handling redirection type=< Handling redirection token at pos 38 '<' Looking for filename at position 39 Processing filename at pos 39 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  69: ❌ echo <"./test_files/infile_big" | cat "./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo <"./test_files/infile_big" | cat "./test_files/infile"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' '"' '"./test_files/infile_big"' '"./test_files/infile_big"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile_big"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 32, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '"' Handling regular token Position update indicated, continuing Tokenization completed with result=1 'cat'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  70: ❌ echo <"./test_files/infile_big" | echo <"./test_files/infile" 
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo <"./test_files/infile_big" | echo <"./test_files/infile"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' '"' '"./test_files/infile_big"' '"./test_files/infile_big"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile_big"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 32, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 39, type=< Handling redirection type=< Handling redirection token at pos 39 '<' Looking for filename at position 40 Processing filename at pos 40 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  71: ❌ echo hi | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi | cat <"./test_files/infile"' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 14, type=< Handling redirection type=< Handling redirection token at pos 14 '<' Looking for filename at position 15 Processing filename at pos 15 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+
+Test  73: ❌ cat <"./test_files/infile" | echo hi 
+mini output = ()
+bash output = (hi)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <"./test_files/infile" | echo hi' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 27, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ( Broken pipe)
+Test  74: ❌ cat <"./test_files/infile" | grep hello 
+mini output = ()
+bash output = (hello)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <"./test_files/infile" | grep hello' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 27, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'g' Handling regular token 'r' Handling regular token 'e' Handling regular token 'p' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='grep' Created node with args[0]='grep' 'grep'] -> NULL Position update indicated, continuing 'h' Handling regular token 'e' Handling regular token 'l' Handling regular token 'l' Handling regular token 'o' Handling regular token Creating token type=ARGS, content='hello' Created node with args[0]='hello' 'grep'] -> NULL Tokenization completed with result=1 'grep'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  75: ❌ cat <"./test_files/infile_big" | echo hi 
+mini output = ()
+bash output = (hi)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <"./test_files/infile_big" | echo hi' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '_' 'b' 'i' 'g' '"' '"./test_files/infile_big"' '"./test_files/infile_big"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile_big"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 31, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ( Broken pipe)
+Test  76: ❌ cat <missing 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <missing' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 'missing'] -> NULL syntax error near unexpected token `newline')
+bash error = ( No such file or directory)
+Test  77: ❌ cat <missing | cat 
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <missing | cat' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 13, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'c' Handling regular token 'a' Handling regular token 't' Handling regular token Creating token type=ARGS, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Tokenization completed with result=1 'cat'] -> NULL syntax error near unexpected token `|')
+bash error = ( No such file or directory)
+Test  78: ❌ cat <missing | echo oi 
+mini output = ()
+bash output = (oi)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <missing | echo oi' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 13, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'o' Handling regular token 'i' Handling regular token Creating token type=ARGS, content='oi' Created node with args[0]='oi' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ( No such file or directory)
+Test  79: ❌ cat <missing | cat <"./test_files/infile" 
+mini output = ()
+bash output = (hi hello world 42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <missing | cat <"./test_files/infile"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 13, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 19, type=< Handling redirection type=< Handling redirection token at pos 19 '<' Looking for filename at position 20 Processing filename at pos 20 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `|')
+bash error = ( No such file or directory)
+Test  80: ❌ echo <123 <456 hi | echo 42 
+mini output = ()
+bash output = (42)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo <123 <456 hi | echo 42' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 5, type=< Handling redirection type=< Handling redirection token at pos 5 '<' Looking for filename at position 6 Processing filename at pos 6 '1' '1' '2' '3' '123' '123' Redirection token handled successfully Redirection operator='<', filename='123' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 10, type=< Handling redirection type=< Handling redirection token at pos 10 '<' Looking for filename at position 11 Processing filename at pos 11 '4' '4' '5' '6' '456' '456' Redirection token handled successfully Redirection operator='<', filename='456' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'hi'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 18, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '4' Handling regular token '2' Handling regular token Creating token type=ARGS, content='42' Created node with args[0]='42' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `456')
+bash error = ( No such file or directory)
+Test  81: ❌ ls >./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test  82: ❌ ls >         ./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls > ./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 Skipping whitespace ' ' at pos 4 Skipping whitespace ' ' at pos 5 Skipping whitespace ' ' at pos 6 Skipping whitespace ' ' at pos 7 Skipping whitespace ' ' at pos 8 Skipping whitespace ' ' at pos 9 Skipping whitespace ' ' at pos 10 Skipping whitespace ' ' at pos 11 Skipping whitespace ' ' at pos 12 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test  83: ❌ echo hi >         ./outfiles/outfile01 bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi bye
+mini exit code = 1
+bash exit code = 0
+mini error = ( 'echo hi > ./outfiles/outfile01 bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 Skipping whitespace ' ' at pos 9 Skipping whitespace ' ' at pos 10 Skipping whitespace ' ' at pos 11 Skipping whitespace ' ' at pos 12 Skipping whitespace ' ' at pos 13 Skipping whitespace ' ' at pos 14 Skipping whitespace ' ' at pos 15 Skipping whitespace ' ' at pos 16 Skipping whitespace ' ' at pos 17 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Tokenization completed with result=1 'bye'] -> NULL Starting AST building Found 1 commands 'echo' Pipe processing complete, pipe_root=(nil) ./outfiles/outfile01 Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Set redir_root to redirection with filename './outfiles/outfile01' Redirection processing complete, redir_root=0x55c1103b9f60 Built AST with root type=> ===== AST STRUCTURE ===== > [./outfiles/outfile01] ========================= >)
+bash error = ()
+Test  84: ❌ ls >./outfiles/outfile01 >./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >./outfiles/outfile01 >./outfiles/outfile02' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 25, type=> Handling redirection type=> Handling redirection token at pos 25 '>' Looking for filename at position 26 Processing filename at pos 26 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test  85: ❌ ls >./outfiles/outfile01 >./test_files/invalid_permission 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >./outfiles/outfile01 >./test_files/invalid_permission' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 25, type=> Handling redirection type=> Handling redirection token at pos 25 '>' Looking for filename at position 26 Processing filename at pos 26 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test  86: ❌ ls >"./outfiles/outfile with spaces" 
+Only in ./bash_outfiles: outfile with spaces
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 134
+bash exit code = 0
+mini error = ( 'ls >"./outfiles/outfile with spaces"' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '"./outfiles/outfile' '"./outfiles/outfile' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'w' Handling regular token 'i' Handling regular token 't' Handling regular token 'h' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='with' Created node with args[0]='with' 'with'] -> NULL Position update indicated, continuing 's' Handling regular token 'p' Handling regular token 'a' Handling regular token 'c' Handling regular token 'e' Handling regular token 's' Handling regular token '"' Handling regular token Creating token type=ARGS, content='spaces' Created node with args[0]='spaces' 'spaces'] -> NULL Position update indicated, continuing Creating token type=ARGS, content='' Created node with args[0]='' ''] -> NULL Tokenization completed with result=1 ''] -> NULL Starting AST building Found 1 commands 'ls' Pipe processing complete, pipe_root=(nil) "./outfiles/outfile Processing redirection type=>, filename='"./outfiles/outfile' Target command is 'ls' Set redir_root to redirection with filename '"./outfiles/outfile' Redirection processing complete, redir_root=0x5d95c3cbd3a0 Built AST with root type=> ===== AST STRUCTURE ===== > ["./outfiles/outfile] ========================= > double free detected in tcache 2)
+bash error = ()
+Test  87: ❌ ls >"./outfiles/outfile""1""2""3""4""5" 
+Only in ./bash_outfiles: outfile12345
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >"./outfiles/outfile""1""2""3""4""5"' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '"' '"' '1' '"' '"' '2' '"' '"' '3' '"' '"' '4' '"' '"' '5' '"' '"./outfiles/outfile""1""2""3""4""5"' '"./outfiles/outfile""1""2""3""4""5"' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile""1""2""3""4""5"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./outfiles/outfile""1""2""3""4""5"'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test  88: ❌ ls >"./outfiles/outfile01" >./test_files/invalid_permission >"./outfiles/outfile02" 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >"./outfiles/outfile01" >./test_files/invalid_permission >"./outfiles/outfile02"' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' '"' '"./outfiles/outfile01"' '"./outfiles/outfile01"' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile01"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 27, type=> Handling redirection type=> Handling redirection token at pos 27 '>' Looking for filename at position 28 Processing filename at pos 28 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 60, type=> Handling redirection type=> Handling redirection token at pos 60 '>' Looking for filename at position 61 Processing filename at pos 61 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' '"' '"./outfiles/outfile02"' '"./outfiles/outfile02"' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile02"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./outfiles/outfile02"'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test  89: ❌ ls >./test_files/invalid_permission >"./outfiles/outfile01" >./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >./test_files/invalid_permission >"./outfiles/outfile01" >./test_files/invalid_permission' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 36, type=> Handling redirection type=> Handling redirection token at pos 36 '>' Looking for filename at position 37 Processing filename at pos 37 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' '"' '"./outfiles/outfile01"' '"./outfiles/outfile01"' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile01"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 60, type=> Handling redirection type=> Handling redirection token at pos 60 '>' Looking for filename at position 61 Processing filename at pos 61 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `"./outfiles/outfile01"')
+bash error = ( Permission denied)
+Test  90: ❌ cat <"./test_files/infile" >"./outfiles/outfile01" 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+hello
+world
+42
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <"./test_files/infile" >"./outfiles/outfile01"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 27, type=> Handling redirection type=> Handling redirection token at pos 27 '>' Looking for filename at position 28 Processing filename at pos 28 '"' '"' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' '"' '"./outfiles/outfile01"' '"./outfiles/outfile01"' Redirection token handled successfully Redirection operator='>', filename='"./outfiles/outfile01"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./outfiles/outfile01"'] -> NULL syntax error near unexpected token `"./outfiles/outfile01"')
+bash error = ()
+Test  91: ❌ echo hi >./outfiles/outfile01 | echo bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./outfiles/outfile01 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 30, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  92: ❌ echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 30, type=> Handling redirection type=> Handling redirection token at pos 30 '>' Looking for filename at position 31 Processing filename at pos 31 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 52, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test  93: ❌ echo hi | echo >./outfiles/outfile01 bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bye
+mini exit code = 1
+bash exit code = 0
+mini error = ( 'echo hi | echo >./outfiles/outfile01 bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 15, type=> Handling redirection type=> Handling redirection token at pos 15 '>' Looking for filename at position 16 Processing filename at pos 16 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Tokenization completed with result=1 'bye'] -> NULL Starting AST building Found 2 commands 'echo' 'echo' Pipe processing complete, pipe_root=0x5922618fba00 ./outfiles/outfile01 Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Set redir_root to redirection with filename './outfiles/outfile01' Redirection processing complete, redir_root=0x5922618fbbe0 Built AST with root type=| ===== AST STRUCTURE ===== | [|] ├─(left)-> CMD [echo hi] └─(right)-> CMD [echo bye] ├─(redir)-> > [./outfiles/outfile01] ========================= execute_pipes for 'echo | echo' left child created with pid=365219 right child created with pid=365220 parent closed pipe read end waiting for left child (pid=365219) right child created with pid=0 echo (pid=365220) echo echo ./outfiles/outfile01 syntax error near unexpected token `newline' Redirection failed for ./outfiles/outfile01 (error_code=2) Chain completed with status=0, in_count=0, out_count=1 Right cmd redirection failed, exiting with code 1 echo (pid=365219) echo 0 left child exited with raw status 0 waiting for right child (pid=365220) right child exited with raw status 256 1)
+bash error = ()
+Test  94: ❌ echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bye
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 19, type=> Handling redirection type=> Handling redirection token at pos 19 '>' Looking for filename at position 20 Processing filename at pos 20 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 41, type=> Handling redirection type=> Handling redirection token at pos 41 '>' Looking for filename at position 42 Processing filename at pos 42 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test  95: ❌ echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+bye
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 30, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 41, type=> Handling redirection type=> Handling redirection token at pos 41 '>' Looking for filename at position 42 Processing filename at pos 42 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test  96: ❌ echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 30, type=> Handling redirection type=> Handling redirection token at pos 30 '>' Looking for filename at position 31 Processing filename at pos 31 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 63, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test  97: ❌ echo hi >./test_files/invalid_permission | echo bye 
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./test_files/invalid_permission | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 41, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ( Permission denied)
+Test  98: ❌ echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >./test_files/invalid_permission >./outfiles/outfile01 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=> Handling redirection type=> Handling redirection token at pos 8 '>' Looking for filename at position 9 Processing filename at pos 9 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 41, type=> Handling redirection type=> Handling redirection token at pos 41 '>' Looking for filename at position 42 Processing filename at pos 42 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 63, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ( Permission denied)
+Test  99: ❌ echo hi | echo bye >./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo hi | echo bye >./test_files/invalid_permission' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 19, type=> Handling redirection type=> Handling redirection token at pos 19 '>' Looking for filename at position 20 Processing filename at pos 20 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `newline')
+bash error = ( Permission denied)
+Test 100: ❌ echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 10, type=> Handling redirection type=> Handling redirection token at pos 10 '>' Looking for filename at position 11 Processing filename at pos 11 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 41, type=> Handling redirection type=> Handling redirection token at pos 41 '>' Looking for filename at position 42 Processing filename at pos 42 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `newline')
+bash error = ( Permission denied)
+Test 101: ❌ echo hi | echo bye >./test_files/invalid_permission >./outfiles/outfile01 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo hi | echo bye >./test_files/invalid_permission >./outfiles/outfile01' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 19, type=> Handling redirection type=> Handling redirection token at pos 19 '>' Looking for filename at position 20 Processing filename at pos 20 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 52, type=> Handling redirection type=> Handling redirection token at pos 52 '>' Looking for filename at position 53 Processing filename at pos 53 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ( Permission denied)
+Test 102: ❌ cat <"./test_files/infile" >./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <"./test_files/infile" >./test_files/invalid_permission' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 27, type=> Handling redirection type=> Handling redirection token at pos 27 '>' Looking for filename at position 28 Processing filename at pos 28 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test 103: ❌ cat >./test_files/invalid_permission <"./test_files/infile" 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat >./test_files/invalid_permission <"./test_files/infile"' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 4, type=> Handling redirection type=> Handling redirection token at pos 4 '>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 37, type=< Handling redirection type=< Handling redirection token at pos 37 '<' Looking for filename at position 38 Processing filename at pos 38 '"' '"' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'f' 'i' 'l' 'e' '"' '"./test_files/infile"' '"./test_files/infile"' Redirection token handled successfully Redirection operator='<', filename='"./test_files/infile"' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 '"./test_files/infile"'] -> NULL syntax error near unexpected token `"./test_files/infile"')
+bash error = ( Permission denied)
+Test 104: ❌ cat <missing >./outfiles/outfile01 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <missing >./outfiles/outfile01' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 13, type=> Handling redirection type=> Handling redirection token at pos 13 '>' Looking for filename at position 14 Processing filename at pos 14 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ( No such file or directory)
+Test 105: ❌ cat >./outfiles/outfile01 <missing 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat >./outfiles/outfile01 <missing' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 4, type=> Handling redirection type=> Handling redirection token at pos 4 '>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 26, type=< Handling redirection type=< Handling redirection token at pos 26 '<' Looking for filename at position 27 Processing filename at pos 27 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 'missing'] -> NULL syntax error near unexpected token `missing')
+bash error = ( No such file or directory)
+Test 106: ❌ cat <missing >./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <missing >./test_files/invalid_permission' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 13, type=> Handling redirection type=> Handling redirection token at pos 13 '>' Looking for filename at position 14 Processing filename at pos 14 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( No such file or directory)
+Test 107: ❌ cat >./test_files/invalid_permission <missing 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat >./test_files/invalid_permission <missing' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 4, type=> Handling redirection type=> Handling redirection token at pos 4 '>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 37, type=< Handling redirection type=< Handling redirection token at pos 37 '<' Looking for filename at position 38 Processing filename at pos 38 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 'missing'] -> NULL syntax error near unexpected token `missing')
+bash error = ( Permission denied)
+Test 108: ❌ cat >./outfiles/outfile01 <missing >./test_files/invalid_permission 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat >./outfiles/outfile01 <missing >./test_files/invalid_permission' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 4, type=> Handling redirection type=> Handling redirection token at pos 4 '>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 26, type=< Handling redirection type=< Handling redirection token at pos 26 '<' Looking for filename at position 27 Processing filename at pos 27 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 35, type=> Handling redirection type=> Handling redirection token at pos 35 '>' Looking for filename at position 36 Processing filename at pos 36 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `missing')
+bash error = ( No such file or directory)
+Test 109: ❌ ls >>./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >>./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test 110: ❌ ls >>      ./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >> ./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 Skipping whitespace ' ' at pos 5 Skipping whitespace ' ' at pos 6 Skipping whitespace ' ' at pos 7 Skipping whitespace ' ' at pos 8 Skipping whitespace ' ' at pos 9 Skipping whitespace ' ' at pos 10 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `newline')
+bash error = ()
+Test 111: ❌ ls >>./outfiles/outfile01 >./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >>./outfiles/outfile01 >./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 26, type=> Handling redirection type=> Handling redirection token at pos 26 '>' Looking for filename at position 27 Processing filename at pos 27 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ()
+Test 112: ❌ ls >./outfiles/outfile01 >>./outfiles/outfile01 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >./outfiles/outfile01 >>./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 25, type=>> Handling redirection type=>> Handling redirection token at pos 25 '>>' Looking for filename at position 27 Processing filename at pos 27 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ()
+Test 113: ❌ ls >./outfiles/outfile01 >>./outfiles/outfile01 >./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >./outfiles/outfile01 >>./outfiles/outfile01 >./outfiles/outfile02' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 25, type=>> Handling redirection type=>> Handling redirection token at pos 25 '>>' Looking for filename at position 27 Processing filename at pos 27 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 48, type=> Handling redirection type=> Handling redirection token at pos 48 '>' Looking for filename at position 49 Processing filename at pos 49 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ()
+Test 114: ❌ ls >>./outfiles/outfile01 >>./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bash_outfiles
+bash.supp
+bonus
+bonus_bonus
+builtins
+extras
+local.supp
+loop.out
+manual_tests
+mini_outfiles
+minishell
+os_specific
+outfiles
+pipes
+README.md
+redirects
+syntax
+temp
+tester
+test_files
+wildcards
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'ls >>./outfiles/outfile01 >>./outfiles/outfile02' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 26, type=>> Handling redirection type=>> Handling redirection token at pos 26 '>>' Looking for filename at position 28 Processing filename at pos 28 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test 115: ❌ ls >>./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >>./test_files/invalid_permission' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `newline')
+bash error = ( Permission denied)
+Test 116: ❌ ls >>./test_files/invalid_permission >>./outfiles/outfile01 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >>./test_files/invalid_permission >>./outfiles/outfile01' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 37, type=>> Handling redirection type=>> Handling redirection token at pos 37 '>>' Looking for filename at position 39 Processing filename at pos 39 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile01'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ( Permission denied)
+Test 117: ❌ ls >>./outfiles/outfile01 >>./test_files/invalid_permission 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >>./outfiles/outfile01 >>./test_files/invalid_permission' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 26, type=>> Handling redirection type=>> Handling redirection token at pos 26 '>>' Looking for filename at position 28 Processing filename at pos 28 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test 118: ❌ ls >./outfiles/outfile01 >>./test_files/invalid_permission >>./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >./outfiles/outfile01 >>./test_files/invalid_permission >>./outfiles/outfile02' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=> Handling redirection type=> Handling redirection token at pos 3 '>' Looking for filename at position 4 Processing filename at pos 4 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 25, type=>> Handling redirection type=>> Handling redirection token at pos 25 '>>' Looking for filename at position 27 Processing filename at pos 27 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 59, type=>> Handling redirection type=>> Handling redirection token at pos 59 '>>' Looking for filename at position 61 Processing filename at pos 61 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( Permission denied)
+Test 119: ❌ ls <missing >>./test_files/invalid_permission >>./outfiles/outfile02 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls <missing >>./test_files/invalid_permission >>./outfiles/outfile02' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 3, type=< Handling redirection type=< Handling redirection token at pos 3 '<' Looking for filename at position 4 Processing filename at pos 4 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 12, type=>> Handling redirection type=>> Handling redirection token at pos 12 '>>' Looking for filename at position 14 Processing filename at pos 14 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 46, type=>> Handling redirection type=>> Handling redirection token at pos 46 '>>' Looking for filename at position 48 Processing filename at pos 48 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./test_files/invalid_permission')
+bash error = ( No such file or directory)
+Test 120: ❌ ls >>./test_files/invalid_permission >>./outfiles/outfile02 <missing 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'ls >>./test_files/invalid_permission >>./outfiles/outfile02 <missing' 'l' Handling regular token 's' Handling regular token ' ' Handling regular token Creating token type=CMD, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 3, type=>> Handling redirection type=>> Handling redirection token at pos 3 '>>' Looking for filename at position 5 Processing filename at pos 5 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 37, type=>> Handling redirection type=>> Handling redirection token at pos 37 '>>' Looking for filename at position 39 Processing filename at pos 39 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 60, type=< Handling redirection type=< Handling redirection token at pos 60 '<' Looking for filename at position 61 Processing filename at pos 61 'm' 'm' 'i' 's' 's' 'i' 'n' 'g' 'missing' 'missing' Redirection token handled successfully Redirection operator='<', filename='missing' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 'missing'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ( Permission denied)
+Test 121: ❌ echo hi >>./outfiles/outfile01 | echo bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >>./outfiles/outfile01 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=>> Handling redirection type=>> Handling redirection token at pos 8 '>>' Looking for filename at position 10 Processing filename at pos 10 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 31, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test 122: ❌ echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=>> Handling redirection type=>> Handling redirection token at pos 8 '>>' Looking for filename at position 10 Processing filename at pos 10 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 31, type=>> Handling redirection type=>> Handling redirection token at pos 31 '>>' Looking for filename at position 33 Processing filename at pos 33 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 54, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test 123: ❌ echo hi | echo >>./outfiles/outfile01 bye 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bye
+mini exit code = 1
+bash exit code = 0
+mini error = ( 'echo hi | echo >>./outfiles/outfile01 bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 15, type=>> Handling redirection type=>> Handling redirection token at pos 15 '>>' Looking for filename at position 17 Processing filename at pos 17 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Tokenization completed with result=1 'bye'] -> NULL Starting AST building Found 2 commands 'echo' 'echo' Pipe processing complete, pipe_root=0x605ea8c86990 ./outfiles/outfile01 Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Set redir_root to redirection with filename './outfiles/outfile01' Redirection processing complete, redir_root=0x605ea8c86b70 Built AST with root type=| ===== AST STRUCTURE ===== | [|] ├─(left)-> CMD [echo hi] └─(right)-> CMD [echo bye] ├─(redir)-> >> [./outfiles/outfile01] ========================= execute_pipes for 'echo | echo' left child created with pid=366421 echo (pid=366421) echo right child created with pid=366422 0 parent closed pipe read end waiting for left child (pid=366421) right child created with pid=0 echo (pid=366422) echo echo ./outfiles/outfile01 syntax error near unexpected token `newline' Redirection failed for ./outfiles/outfile01 (error_code=2) Chain completed with status=0, in_count=0, out_count=1 Right cmd redirection failed, exiting with code 1 left child exited with raw status 0 waiting for right child (pid=366422) right child exited with raw status 256 1)
+bash error = ()
+Test 124: ❌ echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+bye
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 19, type=>> Handling redirection type=>> Handling redirection token at pos 19 '>>' Looking for filename at position 21 Processing filename at pos 21 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 42, type=>> Handling redirection type=>> Handling redirection token at pos 42 '>>' Looking for filename at position 44 Processing filename at pos 44 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `./outfiles/outfile02')
+bash error = ()
+Test 125: ❌ echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02 
+Only in ./bash_outfiles: outfile01
+Only in ./bash_outfiles: outfile02
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+hi
+bye
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=>> Handling redirection type=>> Handling redirection token at pos 8 '>>' Looking for filename at position 10 Processing filename at pos 10 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 31, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 42, type=>> Handling redirection type=>> Handling redirection token at pos 42 '>>' Looking for filename at position 44 Processing filename at pos 44 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '2' './outfiles/outfile02' './outfiles/outfile02' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile02' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile02'] -> NULL syntax error near unexpected token `|')
+bash error = ()
+Test 126: ❌ echo hi >>./test_files/invalid_permission | echo bye 
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >>./test_files/invalid_permission | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=>> Handling redirection type=>> Handling redirection token at pos 8 '>>' Looking for filename at position 10 Processing filename at pos 10 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 42, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `|')
+bash error = ( Permission denied)
+Test 127: ❌ echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye 
+mini output = ()
+bash output = (bye)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'echo hi >>./test_files/invalid_permission >./outfiles/outfile01 | echo bye' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 8, type=>> Handling redirection type=>> Handling redirection token at pos 8 '>>' Looking for filename at position 10 Processing filename at pos 10 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 42, type=> Handling redirection type=> Handling redirection token at pos 42 '>' Looking for filename at position 43 Processing filename at pos 43 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 64, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Tokenization completed with result=1 'echo'] -> NULL syntax error near unexpected token `./outfiles/outfile01')
+bash error = ( Permission denied)
+Test 128: ❌ echo hi | echo bye >>./test_files/invalid_permission 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo hi | echo bye >>./test_files/invalid_permission' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 19, type=>> Handling redirection type=>> Handling redirection token at pos 19 '>>' Looking for filename at position 21 Processing filename at pos 21 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `newline')
+bash error = ( Permission denied)
+Test 129: ❌ echo hi | echo >>./outfiles/outfile01 bye >./test_files/invalid_permission 
+Only in ./bash_outfiles: outfile01
+mini outfiles:
+cat: './mini_outfiles/*': No such file or directory
+bash outfiles:
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'echo hi | echo >>./outfiles/outfile01 bye >./test_files/invalid_permission' 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=CMD, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing 'h' Handling regular token 'i' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='hi' Created node with args[0]='hi' 'echo'] -> NULL Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 8, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'e' Handling regular token 'c' Handling regular token 'h' Handling regular token 'o' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='echo' Created node with args[0]='echo' 'echo'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 15, type=>> Handling redirection type=>> Handling redirection token at pos 15 '>>' Looking for filename at position 17 Processing filename at pos 17 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' '0' '1' './outfiles/outfile01' './outfiles/outfile01' Redirection token handled successfully Redirection operator='>>', filename='./outfiles/outfile01' handle_redirection_token returned 1 Position update indicated, continuing ' ' Handling regular token Position update indicated, continuing 'b' Handling regular token 'y' Handling regular token 'e' Handling regular token ' ' Handling regular token Creating token type=ARGS, content='bye' Created node with args[0]='bye' 'bye'] -> NULL Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 42, type=> Handling redirection type=> Handling redirection token at pos 42 '>' Looking for filename at position 43 Processing filename at pos 43 '.' '.' '/' 't' 'e' 's' 't' '_' 'f' 'i' 'l' 'e' 's' '/' 'i' 'n' 'v' 'a' 'l' 'i' 'd' '_' 'p' 'e' 'r' 'm' 'i' 's' 's' 'i' 'o' 'n' './test_files/invalid_permission' './test_files/invalid_permission' Redirection token handled successfully Redirection operator='>', filename='./test_files/invalid_permission' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './test_files/invalid_permission'] -> NULL syntax error near unexpected token `newline')
+bash error = ( Permission denied)
+Test 130: ❌ cat <minishell.h>./outfiles/outfile 
+mini exit code = 2
+bash exit code = 1
+mini error = ( 'cat <minishell.h>./outfiles/outfile' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 'n' 'i' 's' 'h' 'e' 'l' 'l' '.' 'h' 'minishell.h' 'minishell.h' Redirection token handled successfully Redirection operator='<', filename='minishell.h' handle_redirection_token returned 1 Position update indicated, continuing '>' Handling regular token Processing operator '>' at pos 16, type=> Handling redirection type=> Handling redirection token at pos 16 '>' Looking for filename at position 17 Processing filename at pos 17 '.' '.' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' 's' '/' 'o' 'u' 't' 'f' 'i' 'l' 'e' './outfiles/outfile' './outfiles/outfile' Redirection token handled successfully Redirection operator='>', filename='./outfiles/outfile' handle_redirection_token returned 1 Position update indicated, continuing Tokenization completed with result=1 './outfiles/outfile'] -> NULL syntax error near unexpected token `./outfiles/outfile')
+bash error = ( No such file or directory)
+Test 131: ❌ cat <minishell.h|ls 
+mini output = ()
+bash output = (bash_outfiles bash.supp bonus bonus_bonus builtins extras local.supp loop.out manual_tests mini_outfiles minishell os_specific outfiles pipes README.md redirects syntax temp tester test_files wildcards)
+mini exit code = 2
+bash exit code = 0
+mini error = ( 'cat <minishell.h|ls' 'c' Handling regular token 'a' Handling regular token 't' Handling regular token ' ' Handling regular token Creating token type=CMD, content='cat' Created node with args[0]='cat' 'cat'] -> NULL Position update indicated, continuing '<' Handling regular token Processing operator '<' at pos 4, type=< Handling redirection type=< Handling redirection token at pos 4 '<' Looking for filename at position 5 Processing filename at pos 5 'm' 'm' 'i' 'n' 'i' 's' 'h' 'e' 'l' 'l' '.' 'h' 'minishell.h' 'minishell.h' Redirection token handled successfully Redirection operator='<', filename='minishell.h' handle_redirection_token returned 1 Position update indicated, continuing '|' Handling regular token Processing operator '|' at pos 16, type=| Creating token type=|, content='|' Created node with args[0]='|' '|'] -> NULL Position update indicated, continuing 'l' Handling regular token 's' Handling regular token Creating token type=ARGS, content='ls' Created node with args[0]='ls' 'ls'] -> NULL Tokenization completed with result=1 'ls'] -> NULL syntax error near unexpected token `|')
+bash error = ( No such file or directory)

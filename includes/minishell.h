@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/18 14:35:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 09:03:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,6 +197,7 @@ Has variables tracking:
 typedef struct s_pipe
 {
 	int			pipe_count;
+	int			redir_count;
 	pid_t		*pids;
 	int			saved_stdin;
 	int			saved_stdout;
@@ -442,8 +443,12 @@ Redirect execution processing functions
 In execute_redirects.c
 */
 int			setup_in_redir(t_node *node, t_vars *vars);
+int			setup_input_redirection(char *file, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
+int			setup_output_redirection(char *file, t_vars *vars);
 int			setup_heredoc_redir(t_node *node, t_vars *vars);
+int			check_input_file_access(char *file, struct stat *file_stat, t_vars *vars);
+int			handle_missing_input(t_vars *vars);
 int			proc_redir_chain(t_node *start_node, t_node *cmd_node,
 				t_vars *vars);
 
@@ -810,7 +815,8 @@ int			is_valid_redir_node(t_node *current);
 void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node,
 				t_vars *vars);
-
+int			handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type);
+int			process_redir_filename(char *input, int *i, t_node *redir_node);
 /*
 Redirection processing functions.
 In process_redirect.c

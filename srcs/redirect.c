@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:36:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 17:36:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,4 +129,298 @@ t_node	*get_next_redir(t_node *current, t_node *cmd)
 		next = next->next;
 	}
 	return (NULL);
+}
+
+/*
+Handles creation of a redirection token and its filename.
+Creates the redirection node and extracts the filename.
+*/
+// int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+// {
+//     char *redir_str;
+//     t_node *redir_node;
+//     int moves;
+    
+//     // Create the redirection token
+//     moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
+//     redir_str = ft_substr(input, *i, moves);
+//     if (!redir_str)
+//         return (0);
+        
+//     // Create redirection node without a filename yet
+//     redir_node = initnode(type, redir_str);
+//     free(redir_str);
+    
+//     if (!redir_node)
+//         return (0);
+    
+//     // Move past the redirection operator
+//     *i += moves;
+    
+//     // Process the filename
+//     if (!process_redir_filename(input, i, redir_node))
+//     {
+//         free_token_node(redir_node);
+//         return (0);
+//     }
+    
+//     // Add the node to the token list
+//     build_token_linklist(vars, redir_node);
+    
+//     // Update vars for next token
+//     vars->start = *i;
+    
+//     return (1);
+// }
+// int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+// {
+//     char *redir_str;
+//     t_node *redir_node;
+//     int moves;
+//     // int original_pos = *i;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Handling redirection token at pos %d\n", *i);
+    
+//     // Create the redirection token
+//     moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
+//     redir_str = ft_substr(input, *i, moves);
+//     if (!redir_str)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to create redirection string\n");
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Created redirection string: '%s'\n", redir_str);
+    
+//     // Create redirection node without a filename yet
+//     redir_node = initnode(type, redir_str);
+//     free(redir_str);
+    
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to initialize redirection node\n");
+//         return (0);
+//     }
+    
+//     // Move past the redirection operator
+//     *i += moves;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Looking for filename at position %d\n", *i);
+    
+//     // Process the filename
+//     if (!process_redir_filename(input, i, redir_node))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to process redirection filename\n");
+//         free_token_node(redir_node);
+//         return (0);
+//     }
+    
+//     // Add the node to the token list
+//     build_token_linklist(vars, redir_node);
+    
+//     // Update vars for next token
+//     vars->start = *i;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection token handled successfully\n");
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection operator='%s', filename='%s'\n", 
+//             get_token_str(type), redir_node->args ? redir_node->args[0] : "NULL");
+    
+//     return (1);
+// }
+int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+{
+    char *redir_str;
+    t_node *redir_node;
+    int moves;
+    
+    fprintf(stderr, "DEBUG-REDIR-TOKEN: Handling redirection token at pos %d\n", *i);
+    
+    // Create the redirection token
+    moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
+    redir_str = ft_substr(input, *i, moves);
+    if (!redir_str)
+    {
+        fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to create redirection string\n");
+        return (0);
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-TOKEN: Created redirection string: '%s'\n", redir_str);
+    
+    // Create redirection node without a filename yet
+    redir_node = initnode(type, redir_str);
+    free(redir_str);
+    
+    if (!redir_node)
+    {
+        fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to initialize redirection node\n");
+        return (0);
+    }
+    
+    // Move past the redirection operator
+    *i += moves;
+    
+    fprintf(stderr, "DEBUG-REDIR-TOKEN: Looking for filename at position %d\n", *i);
+    
+    // Process the filename
+    if (!process_redir_filename(input, i, redir_node))
+    {
+        fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to process redirection filename\n");
+        free_token_node(redir_node);
+        return (0);
+    }
+    
+    // Add the node to the token list
+    build_token_linklist(vars, redir_node);
+    
+    // Update vars for next token
+    vars->start = *i;
+    
+    fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection token handled successfully\n");
+    fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection operator='%s', filename='%s'\n", 
+            get_token_str(type), redir_node->args ? redir_node->args[0] : "NULL");
+    
+    return (1);
+}
+
+/*
+Processes and extracts the filename for a redirection token.
+Skips whitespace and extracts the filename.
+*/
+// int process_redir_filename(char *input, int *i, t_node *redir_node)
+// {
+//     int start;
+//     char *filename;
+    
+//     // Skip whitespace
+//     while (input[*i] && ft_isspace(input[*i]))
+//         (*i)++;
+    
+//     // Check if we have a filename
+//     if (!input[*i])
+//         return (1); // This will be caught later as a syntax error
+    
+//     // Find the end of the filename
+//     start = *i;
+//     while (input[*i] && !ft_isspace(input[*i]) && 
+//            !is_operator_token(get_token_at(input, *i, &(int){0})))
+//         (*i)++;
+    
+//     // Extract the filename
+//     filename = ft_substr(input, start, *i - start);
+//     if (!filename)
+//         return (0);
+    
+//     // Store filename directly in args[0]
+//     free(redir_node->args[0]); // Free the original token string
+//     redir_node->args[0] = filename;
+    
+//     return (1);
+// }
+// int process_redir_filename(char *input, int *i, t_node *redir_node)
+// {
+//     int start;
+//     char *filename;
+    
+//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Processing filename at pos %d\n", *i);
+    
+//     // Skip whitespace
+//     while (input[*i] && ft_isspace(input[*i]))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Skipping whitespace '%c' at pos %d\n", 
+//                 input[*i], *i);
+//         (*i)++;
+//     }
+    
+//     // Check if we have a filename
+//     if (!input[*i])
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-FILENAME: End of input reached, no filename found\n");
+//         return (1); // This will be caught later as a syntax error
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Found potential filename starting at pos %d: '%c'\n", 
+//             *i, input[*i]);
+    
+//     // Find the end of the filename
+//     start = *i;
+//     while (input[*i] && !ft_isspace(input[*i]) && 
+//            !is_operator_token(get_token_at(input, *i, &(int){0})))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Including char at pos %d: '%c'\n", 
+//                 *i, input[*i]);
+//         (*i)++;
+//     }
+    
+//     // Extract the filename
+//     filename = ft_substr(input, start, *i - start);
+//     if (!filename)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Failed to extract filename\n");
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted filename: '%s'\n", filename);
+    
+//     // Store filename directly in args[0] - THIS IS THE KEY CHANGE
+//     free(redir_node->args[0]); // Free the original redirection operator string
+//     redir_node->args[0] = filename;
+    
+//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Set redirection node args[0] to filename: '%s'\n", 
+//             redir_node->args[0]);
+    
+//     return (1);
+// }
+int process_redir_filename(char *input, int *i, t_node *redir_node)
+{
+    int start;
+    char *filename;
+    
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Processing filename at pos %d\n", *i);
+    
+    // Skip whitespace
+    while (input[*i] && ft_isspace(input[*i]))
+    {
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Skipping whitespace '%c' at pos %d\n", 
+                input[*i], *i);
+        (*i)++;
+    }
+    
+    // Check if we have a filename
+    if (!input[*i])
+    {
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: End of input reached, no filename found\n");
+        return (1); // This will be caught later as a syntax error
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Found potential filename starting at pos %d: '%c'\n", 
+            *i, input[*i]);
+    
+    // Find the end of the filename
+    start = *i;
+    while (input[*i] && !ft_isspace(input[*i]) && 
+           !is_operator_token(get_token_at(input, *i, &(int){0})))
+    {
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Including char at pos %d: '%c'\n", 
+                *i, input[*i]);
+        (*i)++;
+    }
+    
+    // Extract the filename
+    filename = ft_substr(input, start, *i - start);
+    if (!filename)
+    {
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Failed to extract filename\n");
+        return (0);
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted filename: '%s'\n", filename);
+    
+    // Store filename directly in args[0]
+    free(redir_node->args[0]); // Free the original token string
+    redir_node->args[0] = filename;
+    
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Set node args[0] to filename: '%s'\n", 
+            redir_node->args[0]);
+    
+    return (1);
 }

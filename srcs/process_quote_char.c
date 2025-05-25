@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 18:03:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,19 +251,86 @@ Returns:
 - 1 if all redirections have valid targets
 - 0 otherwise (with error_code set)
 */
-int	validate_redir_targets(t_vars *vars)
-{
-	t_node	*current;
+// int	validate_redir_targets(t_vars *vars)
+// {
+// 	t_node	*current;
 
-	current = vars->head;
-	while (current)
-	{
-		if (is_redirection(current->type))
-		{
-			if (!validate_single_redir(current, vars))
-				return (0);
-		}
-		current = current->next;
-	}
-	return (1);
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type))
+// 		{
+// 			if (!validate_single_redir(current, vars))
+// 				return (0);
+// 		}
+// 		current = current->next;
+// 	}
+// 	return (1);
+// }
+// int validate_redir_targets(t_vars *vars)
+// {
+//     t_node *current;
+    
+//     fprintf(stderr, "DEBUG-VALIDATE-REDIR: Validating redirection targets\n");
+    
+//     current = vars->head;
+//     while (current)
+//     {
+//         if (is_redirection(current->type))
+//         {
+//             fprintf(stderr, "DEBUG-VALIDATE-REDIR: Checking redirection node type=%s\n", 
+//                     get_token_str(current->type));
+            
+//             // Check if redirection has a filename
+//             if (!current->args || !current->args[0])
+//             {
+//                 fprintf(stderr, "DEBUG-VALIDATE-REDIR: Missing filename for redirection\n");
+//                 tok_syntax_error_msg("newline", vars);
+//                 return (0);
+//             }
+            
+//             // Check if the next token is another operator (invalid syntax)
+//             if (current->next && is_operator_token(current->next->type))
+//             {
+//                 fprintf(stderr, "DEBUG-VALIDATE-REDIR: Invalid token after redirection: %s\n", 
+//                         get_token_str(current->next->type));
+                
+//                 tok_syntax_error_msg(current->next->args[0], vars);
+//                 return (0);
+//             }
+//         }
+//         current = current->next;
+//     }
+    
+//     fprintf(stderr, "DEBUG-VALIDATE-REDIR: All redirection targets valid\n");
+//     return (1);
+// }
+int validate_redir_targets(t_vars *vars)
+{
+    t_node *current;
+    
+    fprintf(stderr, "DEBUG-VALIDATE-REDIR: Validating redirection targets\n");
+    
+    current = vars->head;
+    while (current)
+    {
+        if (is_redirection(current->type))
+        {
+            fprintf(stderr, "DEBUG-VALIDATE-REDIR: Checking redirection node type=%s, filename='%s'\n", 
+                    get_token_str(current->type), 
+                    current->args ? current->args[0] : "NULL");
+            
+            // Check if redirection has a filename
+            if (!current->args || !current->args[0])
+            {
+                fprintf(stderr, "DEBUG-VALIDATE-REDIR: Missing filename for redirection\n");
+                tok_syntax_error_msg("newline", vars);
+                return (0);
+            }
+        }
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-VALIDATE-REDIR: All redirection targets valid\n");
+    return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 18:03:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,23 +96,76 @@ Returns:
 - 1 if the redirection has a valid target
 - 0 otherwise (with error message shown)
 */
-int	validate_single_redir(t_node *redir_node, t_vars *vars)
-{
-	t_node	*next;
+// int	validate_single_redir(t_node *redir_node, t_vars *vars)
+// {
+// 	t_node	*next;
 
-	next = redir_node->next;
-	if (!next)
-	{
-		tok_syntax_error_msg("newline", vars);
-		return (0);
-	}
-	else if (is_redirection(next->type) || next->type == TYPE_PIPE)
-	{
-		if (next->args[0])
-			tok_syntax_error_msg(next->args[0], vars);
-		else
-			tok_syntax_error_msg("operator", vars);
-		return (0);
-	}
-	return (1);
+// 	next = redir_node->next;
+// 	if (!next)
+// 	{
+// 		tok_syntax_error_msg("newline", vars);
+// 		return (0);
+// 	}
+// 	else if (is_redirection(next->type) || next->type == TYPE_PIPE)
+// 	{
+// 		if (next->args[0])
+// 			tok_syntax_error_msg(next->args[0], vars);
+// 		else
+// 			tok_syntax_error_msg("operator", vars);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+// int validate_single_redir(t_node *redir_node, t_vars *vars)
+// {
+//     // Check if redirection has a filename
+//     if (!redir_node->args || !redir_node->args[0])
+//     {
+//         fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Missing filename for redirection\n");
+//         tok_syntax_error_msg("newline", vars);
+//         return (0);
+//     }
+    
+//     // Check if next token is an operator (invalid syntax)
+//     t_node *next = redir_node->next;
+//     if (next && (is_redirection(next->type) || next->type == TYPE_PIPE))
+//     {
+//         fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Invalid token after redirection: %s\n", 
+//                 get_token_str(next->type));
+        
+//         if (next->args && next->args[0])
+//             tok_syntax_error_msg(next->args[0], vars);
+//         else
+//             tok_syntax_error_msg("operator", vars);
+//         return (0);
+//     }
+    
+//     return (1);
+// }
+int validate_single_redir(t_node *redir_node, t_vars *vars)
+{
+    // Check if redirection has a filename
+    if (!redir_node->args || !redir_node->args[0])
+    {
+        fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Missing filename for redirection\n");
+        tok_syntax_error_msg("newline", vars);
+        return (0);
+    }
+    
+    // Check if next token is a pipe (invalid syntax)
+    // Note: We allow another redirection to follow this one
+    t_node *next = redir_node->next;
+    if (next && next->type == TYPE_PIPE)
+    {
+        fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Invalid pipe after redirection: %s\n", 
+                get_token_str(next->type));
+        
+        if (next->args && next->args[0])
+            tok_syntax_error_msg(next->args[0], vars);
+        else
+            tok_syntax_error_msg("operator", vars);
+        return (0);
+    }
+    
+    return (1);
 }

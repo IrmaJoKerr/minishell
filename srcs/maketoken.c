@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:26:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 09:20:11 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,31 +22,74 @@ Example: When tokenizing "echo hello"
 - Creates separate nodes for "echo" and "hello"
 - Links them in sequence with proper type assignment.
 */
-void	maketoken(char *token, t_tokentype type, t_vars *vars)
-{
-	t_node	*node;
-	t_node	*curr;
-	int		node_freed;
+// void	maketoken(char *token, t_tokentype type, t_vars *vars)
+// {
+// 	t_node	*node;
+// 	t_node	*curr;
+// 	int		node_freed;
 
-	if (!token || !vars)
-	{
-		return ;
-	}
-	node = initnode(type, token);
-	if (!node)
-	{
-		return ;
-	}
-	node_freed = build_token_linklist(vars, node);
-	if (!node_freed)
-	{
-		free_if_orphan_node(node, vars);
-	}
-	curr = vars->head;
-	while (curr)
-	{
-		curr = curr->next;
-	}
+// 	if (!token || !vars)
+// 	{
+// 		return ;
+// 	}
+// 	node = initnode(type, token);
+// 	if (!node)
+// 	{
+// 		return ;
+// 	}
+// 	node_freed = build_token_linklist(vars, node);
+// 	if (!node_freed)
+// 	{
+// 		free_if_orphan_node(node, vars);
+// 	}
+// 	curr = vars->head;
+// 	while (curr)
+// 	{
+// 		curr = curr->next;
+// 	}
+// }
+void maketoken(char *token, t_tokentype type, t_vars *vars)
+{
+    t_node *node;
+    t_node *curr;
+    int node_freed;
+
+    fprintf(stderr, "DEBUG-TOKEN: Creating token type=%s, content='%s'\n", 
+            get_token_str(type), token);
+    
+    if (!token || !vars)
+    {
+        fprintf(stderr, "DEBUG-TOKEN: NULL token or vars\n");
+        return;
+    }
+    
+    node = initnode(type, token);
+    if (!node)
+    {
+        fprintf(stderr, "DEBUG-TOKEN: Failed to initialize node\n");
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG-TOKEN: Created node with args[0]='%s'\n", 
+            node->args ? node->args[0] : "NULL");
+    
+    node_freed = build_token_linklist(vars, node);
+    if (!node_freed)
+    {
+        free_if_orphan_node(node, vars);
+    }
+    
+    // Print current token list state
+    curr = vars->head;
+    fprintf(stderr, "DEBUG-TOKEN: Current token list: ");
+    while (curr)
+    {
+        fprintf(stderr, "[%s: '%s'] -> ", 
+                get_token_str(curr->type), 
+                curr->args ? curr->args[0] : "NULL");
+        curr = curr->next;
+    }
+    fprintf(stderr, "NULL\n");
 }
 
 /*

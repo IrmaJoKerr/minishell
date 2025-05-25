@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 18:17:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 09:30:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,43 +47,113 @@ Returns:
 - 1 on success.
 - 0 on error.
 */
-int	tokenizer(char *input, t_vars *vars)
-{
-	int	hd_is_delim;
-	int	result;
+// int	tokenizer(char *input, t_vars *vars)
+// {
+// 	int	hd_is_delim;
+// 	int	result;
 
-	if (!input || !*input)
-		return (0);
-	init_tokenizer(vars);
-	hd_is_delim = 0;
-	while (input && input[vars->pos])
-	{
-		vars->next_flag = 0;
-		if (hd_is_delim)
-		{
-			result = proc_hd_delim(input, vars, &hd_is_delim);
-			if (result == 0)
-			{
-				return (0);
-			}
-			if (result == 1)
-			{
-				continue;
-			}
-		}
-		if (!vars->next_flag && !hd_is_delim)
-		{
-			if (!handle_token(input, vars, &hd_is_delim))
-			{
-				return (0);
-			}
-		}
-		if (chk_move_pos(vars, hd_is_delim))
-		{
-			continue;
-		}
-	}
-	return (finish_tokenizing(input, vars, hd_is_delim));
+// 	if (!input || !*input)
+// 		return (0);
+// 	init_tokenizer(vars);
+// 	hd_is_delim = 0;
+// 	while (input && input[vars->pos])
+// 	{
+// 		vars->next_flag = 0;
+// 		if (hd_is_delim)
+// 		{
+// 			result = proc_hd_delim(input, vars, &hd_is_delim);
+// 			if (result == 0)
+// 			{
+// 				return (0);
+// 			}
+// 			if (result == 1)
+// 			{
+// 				continue;
+// 			}
+// 		}
+// 		if (!vars->next_flag && !hd_is_delim)
+// 		{
+// 			if (!handle_token(input, vars, &hd_is_delim))
+// 			{
+// 				return (0);
+// 			}
+// 		}
+// 		if (chk_move_pos(vars, hd_is_delim))
+// 		{
+// 			continue;
+// 		}
+// 	}
+// 	return (finish_tokenizing(input, vars, hd_is_delim));
+// }
+int tokenizer(char *input, t_vars *vars)
+{
+    int hd_is_delim;
+    int result;
+
+    fprintf(stderr, "DEBUG-TOKENIZE: Starting tokenization for input: '%s'\n", input);
+    
+    if (!input || !*input)
+        return (0);
+        
+    init_tokenizer(vars);
+    hd_is_delim = 0;
+    
+    while (input && input[vars->pos])
+    {
+        fprintf(stderr, "DEBUG-TOKENIZE: Processing at pos %d: '%c'\n", 
+                vars->pos, input[vars->pos]);
+        
+        vars->next_flag = 0;
+        
+        if (hd_is_delim)
+        {
+            fprintf(stderr, "DEBUG-TOKENIZE: Processing heredoc delimiter\n");
+            result = proc_hd_delim(input, vars, &hd_is_delim);
+            if (result == 0)
+            {
+                fprintf(stderr, "DEBUG-TOKENIZE: Heredoc delimiter processing failed\n");
+                return (0);
+            }
+            if (result == 1)
+            {
+                fprintf(stderr, "DEBUG-TOKENIZE: Continuing after heredoc delimiter\n");
+                continue;
+            }
+        }
+        
+        if (!vars->next_flag && !hd_is_delim)
+        {
+            fprintf(stderr, "DEBUG-TOKENIZE: Handling regular token\n");
+            if (!handle_token(input, vars, &hd_is_delim))
+            {
+                fprintf(stderr, "DEBUG-TOKENIZE: Token handling failed\n");
+                return (0);
+            }
+        }
+        
+        if (chk_move_pos(vars, hd_is_delim))
+        {
+            fprintf(stderr, "DEBUG-TOKENIZE: Position update indicated, continuing\n");
+            continue;
+        }
+    }
+    
+    result = finish_tokenizing(input, vars, hd_is_delim);
+    
+    // Print final token list
+    fprintf(stderr, "DEBUG-TOKENIZE: Tokenization completed with result=%d\n", result);
+    t_node *curr = vars->head;
+    fprintf(stderr, "DEBUG-TOKENIZE: Final token list: ");
+    while (curr)
+    {
+        fprintf(stderr, "[%s: '%s'] -> ", 
+                get_token_str(curr->type), 
+                curr->args ? curr->args[0] : "NULL");
+        curr = curr->next;
+    }
+    fprintf(stderr, "NULL\n");
+    
+    return result;
 }
 
 /*
@@ -166,24 +236,79 @@ Example: For input "cmd > file"
 - Creates redirect token.
 - Returns 1 to indicate operator was handled.
 */
-int	process_operator_char(char *input, int *i, t_vars *vars)
-{
-	int			moves;
-	t_tokentype	token_type;
+// int	process_operator_char(char *input, int *i, t_vars *vars)
+// {
+// 	int			moves;
+// 	t_tokentype	token_type;
 
-	token_type = get_token_at(input, *i, &moves);
-	if (token_type == 0)
-	{
-		return (0);
-	}
-	vars->curr_type = token_type;
-	if (moves == 2)
-	{
-		handle_double_operator(input, vars);
-	}
-	else
-	{
-		handle_single_operator(input, vars);
-	}
-	return (1);
+// 	token_type = get_token_at(input, *i, &moves);
+// 	if (token_type == 0)
+// 	{
+// 		return (0);
+// 	}
+// 	vars->curr_type = token_type;
+// 	if (moves == 2)
+// 	{
+// 		handle_double_operator(input, vars);
+// 	}
+// 	else
+// 	{
+// 		handle_single_operator(input, vars);
+// 	}
+// 	return (1);
+// }
+// int process_operator_char(char *input, int *i, t_vars *vars)
+// {
+//     int moves;
+//     t_tokentype token_type;
+    
+//     token_type = get_token_at(input, *i, &moves);
+//     if (token_type == 0)
+//         return (0);
+        
+//     vars->curr_type = token_type;
+    
+//     // If it's a redirection, create node and grab the filename
+//     if (is_redirection(token_type)) {
+//         return handle_redirection_token(input, i, vars, token_type);
+//     }
+//     else if (moves == 2) {
+//         handle_double_operator(input, vars);
+//     }
+//     else {
+//         handle_single_operator(input, vars);
+//     }
+    
+//     return (1);
+// }
+int process_operator_char(char *input, int *i, t_vars *vars)
+{
+    int moves;
+    t_tokentype token_type;
+    
+    token_type = get_token_at(input, *i, &moves);
+    if (token_type == 0)
+        return (0);
+        
+    vars->curr_type = token_type;
+    
+    fprintf(stderr, "DEBUG-OPERATOR: Processing operator '%c' at pos %d, type=%s\n", 
+            input[*i], *i, get_token_str(token_type));
+    
+    // If it's a redirection, create node and grab the filename
+    if (is_redirection(token_type)) {
+        fprintf(stderr, "DEBUG-OPERATOR: Handling redirection type=%s\n", 
+                get_token_str(token_type));
+        int result = handle_redirection_token(input, i, vars, token_type);
+        fprintf(stderr, "DEBUG-OPERATOR: handle_redirection_token returned %d\n", result);
+        return result;
+    }
+    else if (moves == 2) {
+        handle_double_operator(input, vars);
+    }
+    else {
+        handle_single_operator(input, vars);
+    }
+    
+    return (1);
 }
