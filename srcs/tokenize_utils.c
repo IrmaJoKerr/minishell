@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:39:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:07:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ void	handle_right_adj(char *input, t_vars *vars)
 	char	*adjacent_text;
 	char	*joined;
 	int		arg_idx;
+	t_node	*last;
 
 	if (vars->pos <= vars->start)
 		return ;
@@ -53,8 +54,9 @@ void	handle_right_adj(char *input, t_vars *vars)
 
 	if (!vars->current || !vars->current->args || !vars->current->args[0])
 	{
-		t_node *last = vars->head;
-		if (last) {
+		last = vars->head;
+		if (last)
+		{
 			while (last->next)
 				last = last->next;
 			vars->current = last;
@@ -63,21 +65,17 @@ void	handle_right_adj(char *input, t_vars *vars)
 		if (!vars->current || !vars->current->args || !vars->current->args[0])
 		{
 			free(adjacent_text);
-			return;
+			return ;
 		}
 	}
-
 	arg_idx = 0;
 	while (vars->current->args[arg_idx + 1])
 		arg_idx++;
-
 	joined = ft_strjoin(vars->current->args[arg_idx], adjacent_text);
-
 	if (joined)
 	{
 		free(vars->current->args[arg_idx]);
 		vars->current->args[arg_idx] = joined;
-
 		if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
 		{
 			update_quote_types(vars, arg_idx, adjacent_text);

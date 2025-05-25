@@ -1,0 +1,51 @@
+./test_files/invalid_permission
+./missing.out
+./missing.out
+echo $?
+exit
+./missing.out
+missing.out
+missing.out
+echo $?
+exit
+missing.out
+"aaa"
+"aaa"
+echo $?
+exit
+"aaa"
+test_files
+test_files
+echo $?
+exit
+test_files
+./test_files
+./test_files
+echo $?
+exit
+./test_files
+/test_files
+/test_files
+echo $?
+exit
+/test_files
+minishell.h
+minishell.h
+echo $?
+exit
+minishell.h
+$
+$
+echo $?
+exit
+$
+$?
+$?
+echo $?
+exit
+$?
+README.md
+README.md
+echo $?
+exit
+README.md

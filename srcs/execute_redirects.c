@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 21:08:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 01:09:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,50 +72,27 @@ int setup_in_redir(t_node *node, t_vars *vars)
     char *file;
     struct stat file_stat;
     
-    fprintf(stderr, "DEBUG-INREDIR: ===== INPUT REDIRECTION START =====\n");
-    
     if (!node || !node->args || !node->args[0]) {
-        fprintf(stderr, "DEBUG-INREDIR: Invalid node or missing filename\n");
-        fprintf(stderr, "DEBUG-INREDIR: ===== INPUT REDIRECTION END (FAILED) =====\n");
         return (0);
     }
     
     file = node->args[0];
-    fprintf(stderr, "DEBUG-INREDIR: File: '%s'\n", file);
-    
-    // Debug initial state
-    fprintf(stderr, "DEBUG-INREDIR: FDs before: stdin=%d, redirection_fd=%d\n",
-            fileno(stdin), vars->pipes->redirection_fd);
     
     // Close any previously opened redirection file descriptor
     if (vars->pipes->redirection_fd >= 0)
     {
-        fprintf(stderr, "DEBUG-INREDIR: Closing previous fd %d\n", 
-                vars->pipes->redirection_fd);
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
     }
     
     // Check file accessibility
-    fprintf(stderr, "DEBUG-INREDIR: Checking file access for '%s'\n", file);
     if (!check_input_file_access(file, &file_stat, vars))
     {
-        fprintf(stderr, "DEBUG-INREDIR: File access check failed\n");
-        fprintf(stderr, "DEBUG-INREDIR: ===== INPUT REDIRECTION END (FAILED) =====\n");
         return (0);
     }
     
     // Set up the redirection
     int result = setup_input_redirection(file, vars);
-    
-    // Debug final state
-    fprintf(stderr, "DEBUG-INREDIR: FDs after: stdin=%d, redirection_fd=%d\n",
-            fileno(stdin), vars->pipes->redirection_fd);
-    
-    if (result)
-        fprintf(stderr, "DEBUG-INREDIR: ===== INPUT REDIRECTION END (SUCCESS) =====\n");
-    else
-        fprintf(stderr, "DEBUG-INREDIR: ===== INPUT REDIRECTION END (FAILED) =====\n");
     
     return result;
 }
@@ -162,54 +139,30 @@ Opens input file and sets up stdin redirection.
 // }
 int setup_input_redirection(char *file, t_vars *vars)
 {
-    fprintf(stderr, "DEBUG-SETUP-INFILE: ===== SETUP INPUT FILE START =====\n");
-    fprintf(stderr, "DEBUG-SETUP-INFILE: File: '%s'\n", file);
-    
-    // Debug initial state
-    fprintf(stderr, "DEBUG-SETUP-INFILE: Initial FDs: stdin=%d, redirection_fd=%d\n",
-            fileno(stdin), vars->pipes->redirection_fd);
-    
     // Close any previous file descriptor
     if (vars->pipes->redirection_fd >= 0)
     {
-        fprintf(stderr, "DEBUG-SETUP-INFILE: Closing previous fd %d\n", 
-                vars->pipes->redirection_fd);
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
     }
     
     // Open the file
-    fprintf(stderr, "DEBUG-SETUP-INFILE: Opening file '%s'\n", file);
     vars->pipes->redirection_fd = open(file, O_RDONLY);
     if (vars->pipes->redirection_fd == -1)
     {
-        fprintf(stderr, "DEBUG-SETUP-INFILE: Failed to open file: %s\n", strerror(errno));
         vars->error_code = ERR_REDIRECTION;
-        fprintf(stderr, "DEBUG-SETUP-INFILE: ===== SETUP INPUT FILE END (FAILED) =====\n");
         return (0);
     }
     
-    fprintf(stderr, "DEBUG-SETUP-INFILE: Opened file with fd=%d\n", 
-            vars->pipes->redirection_fd);
-    
     // Redirect stdin to the file
-    fprintf(stderr, "DEBUG-SETUP-INFILE: Redirecting stdin to fd %d\n", 
-            vars->pipes->redirection_fd);
     if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
     {
-        fprintf(stderr, "DEBUG-SETUP-INFILE: dup2 failed: %s\n", strerror(errno));
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
         vars->error_code = ERR_REDIRECTION;
-        fprintf(stderr, "DEBUG-SETUP-INFILE: ===== SETUP INPUT FILE END (FAILED) =====\n");
         return (0);
     }
     
-    // Debug final state
-    fprintf(stderr, "DEBUG-SETUP-INFILE: Final FDs: stdin=%d, redirection_fd=%d\n",
-            fileno(stdin), vars->pipes->redirection_fd);
-    
-    fprintf(stderr, "DEBUG-SETUP-INFILE: ===== SETUP INPUT FILE END (SUCCESS) =====\n");
     return (1);
 }
 
@@ -247,20 +200,11 @@ int setup_out_redir(t_node *node, t_vars *vars)
     char *file;
     int mode;
     
-    fprintf(stderr, "DEBUG-OUTREDIR: ===== OUTPUT REDIRECTION START =====\n");
-    
     if (!node || !node->args || !node->args[0]) {
-        fprintf(stderr, "DEBUG-OUTREDIR: Invalid node or missing filename\n");
-        fprintf(stderr, "DEBUG-OUTREDIR: ===== OUTPUT REDIRECTION END (FAILED) =====\n");
         return (0);
     }
     
     file = node->args[0];
-    fprintf(stderr, "DEBUG-OUTREDIR: File: '%s'\n", file);
-    
-    // Debug initial state
-    fprintf(stderr, "DEBUG-OUTREDIR: FDs before: stdout=%d, redirection_fd=%d, out_mode=%d\n",
-            fileno(stdout), vars->pipes->redirection_fd, vars->pipes->out_mode);
     
     // Set mode based on redirection type
     mode = O_WRONLY | O_CREAT | O_TRUNC;
@@ -269,40 +213,23 @@ int setup_out_redir(t_node *node, t_vars *vars)
     if (node->type == TYPE_APPEND_REDIRECT) {
         mode = O_WRONLY | O_CREAT | O_APPEND;
         vars->pipes->out_mode = OUT_MODE_APPEND;
-        fprintf(stderr, "DEBUG-OUTREDIR: Using append mode\n");
-    } else {
-        fprintf(stderr, "DEBUG-OUTREDIR: Using truncate mode\n");
     }
     
     // Close any previously opened redirection file descriptor
     if (vars->pipes->redirection_fd >= 0)
     {
-        fprintf(stderr, "DEBUG-OUTREDIR: Closing previous fd %d\n", 
-                vars->pipes->redirection_fd);
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
     }
     
     // Check permissions
-    fprintf(stderr, "DEBUG-OUTREDIR: Checking permissions for '%s'\n", file);
     if (!chk_permissions(file, mode, vars))
     {
-        fprintf(stderr, "DEBUG-OUTREDIR: Permission check failed\n");
-        fprintf(stderr, "DEBUG-OUTREDIR: ===== OUTPUT REDIRECTION END (FAILED) =====\n");
         return (0);
     }
     
     // Set up the redirection
     int result = setup_output_redirection(file, vars);
-    
-    // Debug final state
-    fprintf(stderr, "DEBUG-OUTREDIR: FDs after: stdout=%d, redirection_fd=%d, out_mode=%d\n",
-            fileno(stdout), vars->pipes->redirection_fd, vars->pipes->out_mode);
-    
-    if (result)
-        fprintf(stderr, "DEBUG-OUTREDIR: ===== OUTPUT REDIRECTION END (SUCCESS) =====\n");
-    else
-        fprintf(stderr, "DEBUG-OUTREDIR: ===== OUTPUT REDIRECTION END (FAILED) =====\n");
     
     return result;
 }
@@ -355,19 +282,9 @@ int setup_output_redirection(char *file, t_vars *vars)
 {
     int mode;
     
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: ===== SETUP OUTPUT FILE START =====\n");
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: File: '%s'\n", file);
-    
-    // Debug initial state
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Initial FDs: stdout=%d, redirection_fd=%d\n",
-            fileno(stdout), vars->pipes->redirection_fd);
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Output mode: %d\n", vars->pipes->out_mode);
-    
     // Close any previous file descriptor
     if (vars->pipes->redirection_fd >= 0)
     {
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: Closing previous fd %d\n", 
-                vars->pipes->redirection_fd);
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
     }
@@ -376,46 +293,29 @@ int setup_output_redirection(char *file, t_vars *vars)
     if (vars->pipes->out_mode == OUT_MODE_APPEND)
     {
         mode = O_WRONLY | O_CREAT | O_APPEND;
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: Using append mode\n");
     }
     else
     {
         mode = O_WRONLY | O_CREAT | O_TRUNC;
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: Using truncate mode\n");
     }
     
     // Open the file
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Opening file '%s' with mode %d\n", file, mode);
     vars->pipes->redirection_fd = open(file, mode, 0666);
     if (vars->pipes->redirection_fd == -1)
     {
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: Failed to open file: %s\n", strerror(errno));
         vars->error_code = ERR_REDIRECTION;
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: ===== SETUP OUTPUT FILE END (FAILED) =====\n");
         return (0);
     }
     
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Opened file with fd=%d\n", 
-            vars->pipes->redirection_fd);
-    
     // Redirect stdout to the file
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Redirecting stdout to fd %d\n", 
-            vars->pipes->redirection_fd);
     if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
     {
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: dup2 failed: %s\n", strerror(errno));
         close(vars->pipes->redirection_fd);
         vars->pipes->redirection_fd = -1;
         vars->error_code = ERR_REDIRECTION;
-        fprintf(stderr, "DEBUG-SETUP-OUTFILE: ===== SETUP OUTPUT FILE END (FAILED) =====\n");
         return (0);
     }
     
-    // Debug final state
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: Final FDs: stdout=%d, redirection_fd=%d\n",
-            fileno(stdout), vars->pipes->redirection_fd);
-    
-    fprintf(stderr, "DEBUG-SETUP-OUTFILE: ===== SETUP OUTPUT FILE END (SUCCESS) =====\n");
     return (1);
 }
 
@@ -497,13 +397,9 @@ Checks if input file exists and has correct permissions.
 // }
 int check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
 {
-    fprintf(stderr, "DEBUG-FILE-ACCESS: Checking access for file: '%s'\n", file);
-    
     // Check if file exists
     if (access(file, F_OK) != 0)
     {
-        // Only log on failure
-        fprintf(stderr, "DEBUG-FILE-ACCESS: File '%s' not found\n", file);
         not_found_error(file, vars);
         vars->error_code = ERR_REDIRECTION;
         
@@ -513,8 +409,6 @@ int check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
     // Check if file is a directory
     if (stat(file, file_stat) == 0 && S_ISDIR(file_stat->st_mode))
     {
-        // Only log on failure
-        fprintf(stderr, "DEBUG-FILE-ACCESS: '%s' is a directory\n", file);
         shell_error(file, ERR_ISDIRECTORY, vars);
         vars->error_code = ERR_REDIRECTION;
         
@@ -524,14 +418,11 @@ int check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
     // Check permissions
     if (!chk_permissions(file, O_RDONLY, vars))
     {
-        // Only log on failure
-        fprintf(stderr, "DEBUG-FILE-ACCESS: No permission for '%s'\n", file);
         vars->error_code = ERR_REDIRECTION;
         
         return handle_missing_input(vars);
     }
     
-    fprintf(stderr, "DEBUG-FILE-ACCESS: File '%s' exists and is accessible\n", file);
     return (1);
 }
 
@@ -616,71 +507,26 @@ int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
     t_node *next_redir;
     int redir_status = 1;
     
-    fprintf(stderr, "DEBUG-REDIR-CHAIN: ===== REDIRECTION CHAIN START =====\n");
-    fprintf(stderr, "DEBUG-REDIR-CHAIN: For command: %s (pid=%d)\n", 
-            cmd_node->args ? cmd_node->args[0] : "NULL", getpid());
-    
-    if (start_node && start_node->args)
-        fprintf(stderr, "DEBUG-REDIR-CHAIN: First redirection: %s [%s]\n", 
-                get_token_str(start_node->type), start_node->args[0]);
-    
-    // Dump FD state before redirection
-    fprintf(stderr, "DEBUG-REDIR-CHAIN: FDs before chain: stdin=%d, stdout=%d, stderr=%d\n",
-            fileno(stdin), fileno(stdout), fileno(stderr));
-    
+    (void)cmd_node; // Suppress unused parameter warning
     current_node = start_node;
     
     while (current_node && is_redirection(current_node->type))
     {
-        // Print current redirection details
-        fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing %s redirection for file: '%s'\n", 
-                get_token_str(current_node->type),
-                current_node->args ? current_node->args[0] : "NULL");
-        
-        // Debug: Current state before this redirection
-        if (vars->pipes) {
-            fprintf(stderr, "DEBUG-REDIR-CHAIN: Current redirection_fd=%d, out_mode=%d\n", 
-                    vars->pipes->redirection_fd, vars->pipes->out_mode);
-        }
-        
         // Setup this redirection
         if (!setup_redirection(current_node, vars))
         {
-            fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection failed for file '%s'\n", 
-                    current_node->args ? current_node->args[0] : "NULL");
-            fprintf(stderr, "DEBUG-REDIR-CHAIN: FD state after failure: stdin=%d, stdout=%d\n",
-                    fileno(stdin), fileno(stdout));
-            fprintf(stderr, "DEBUG-REDIR-CHAIN: Error code=%d\n", vars->error_code);
-            
             redir_status = 0;
             break;
         }
         
         // Find next redirection in the chain
         next_redir = current_node->redir;
-        fprintf(stderr, "DEBUG-REDIR-CHAIN: Next redirection in chain: %p\n", 
-                (void*)next_redir);
-        if (next_redir)
-            fprintf(stderr, "DEBUG-REDIR-CHAIN: Next is %s [%s]\n", 
-                    get_token_str(next_redir->type), 
-                    next_redir->args ? next_redir->args[0] : "NULL");
         
         if (!next_redir)
             break;
             
         current_node = next_redir;
     }
-    
-    // Dump FD state after redirection chain
-    fprintf(stderr, "DEBUG-REDIR-CHAIN: FDs after chain: stdin=%d, stdout=%d, stderr=%d\n",
-            fileno(stdin), fileno(stdout), fileno(stderr));
-    
-    if (redir_status)
-        fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain completed successfully\n");
-    else
-        fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain failed\n");
-    
-    fprintf(stderr, "DEBUG-REDIR-CHAIN: ===== REDIRECTION CHAIN END =====\n");
     
     return redir_status;
 }

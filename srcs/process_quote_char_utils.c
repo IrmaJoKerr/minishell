@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 18:03:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 00:50:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,6 @@ int validate_single_redir(t_node *redir_node, t_vars *vars)
     // Check if redirection has a filename
     if (!redir_node->args || !redir_node->args[0])
     {
-        fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Missing filename for redirection\n");
         tok_syntax_error_msg("newline", vars);
         return (0);
     }
@@ -157,9 +156,6 @@ int validate_single_redir(t_node *redir_node, t_vars *vars)
     t_node *next = redir_node->next;
     if (next && next->type == TYPE_PIPE)
     {
-        fprintf(stderr, "DEBUG-VALIDATE-SINGLE: Invalid pipe after redirection: %s\n", 
-                get_token_str(next->type));
-        
         if (next->args && next->args[0])
             tok_syntax_error_msg(next->args[0], vars);
         else

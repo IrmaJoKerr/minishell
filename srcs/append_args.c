@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 22:08:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:11:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,55 +180,31 @@ Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 // 	node->args = new_args;
 // 	node->arg_quote_type = new_quote_types;
 // }
-void append_arg(t_node *node, char *new_arg, int quote_type)
+void	append_arg(t_node *node, char *new_arg, int quote_type)
 {
-    char **new_args;
-    int **new_quote_types;
-    size_t len;
+	char	**new_args;
+	int		**new_quote_types;
+	size_t	len;
 
-    fprintf(stderr, "DEBUG-APPEND-ARG: Starting append_arg\n");
-    print_node_debug(node, "NODE-BEFORE", "append_arg");
-    fprintf(stderr, "DEBUG-APPEND-ARG: Adding arg='%s', quote_type=%d\n", 
-            new_arg ? new_arg : "NULL", quote_type);
-
-    if (!node || !new_arg || !node->args) {
-        fprintf(stderr, "DEBUG-APPEND-ARG: Invalid input parameters\n");
-        return;
-    }
-
-    len = ft_arrlen(node->args);
-    fprintf(stderr, "DEBUG-APPEND-ARG: Current args count: %zu\n", len);
-
-    new_args = dup_node_args(node, len);
-    if (!new_args) {
-        fprintf(stderr, "DEBUG-APPEND-ARG: Failed to duplicate arguments\n");
-        return;
-    }
-
-    new_args[len] = ft_strdup(new_arg);
-    if (!new_args[len]) {
-        fprintf(stderr, "DEBUG-APPEND-ARG: Failed to duplicate new argument\n");
-        ft_free_2d(new_args, len);
-        return;
-    }
-
-    new_args[len + 1] = NULL;
-    fprintf(stderr, "DEBUG-APPEND-ARG: New args array created\n");
-
-    new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
-    if (!new_quote_types) {
-        fprintf(stderr, "DEBUG-APPEND-ARG: Failed to resize quote types\n");
-        return;
-    }
-
-    fprintf(stderr, "DEBUG-APPEND-ARG: Freeing old arrays and assigning new ones\n");
-    ft_free_2d(node->args, len);
-    if (node->arg_quote_type)
-        ft_free_int_2d(node->arg_quote_type, len);
-
-    node->args = new_args;
-    node->arg_quote_type = new_quote_types;
-
-    print_node_debug(node, "NODE-AFTER", "append_arg");
-    fprintf(stderr, "DEBUG-APPEND-ARG: Successfully appended argument\n");
+	if (!node || !new_arg || !node->args)
+		return ;
+	len = ft_arrlen(node->args);
+	new_args = dup_node_args(node, len);
+	if (!new_args)
+		return ;
+	new_args[len] = ft_strdup(new_arg);
+	if (!new_args[len])
+	{
+		ft_free_2d(new_args, len);
+		return ;
+	}
+	new_args[len + 1] = NULL;
+	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
+	if (!new_quote_types)
+		return ;
+	ft_free_2d(node->args, len);
+	if (node->arg_quote_type)
+		ft_free_int_2d(node->arg_quote_type, len);
+	node->args = new_args;
+	node->arg_quote_type = new_quote_types;
 }

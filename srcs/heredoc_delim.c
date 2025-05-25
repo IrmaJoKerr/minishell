@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:52:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 19:56:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 01:09:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,44 +178,28 @@ void strip_outer_quotes(char **delimiter, t_vars *vars)
 
     if (!delimiter || !*delimiter)
     {
-        fprintf(stderr, "DEBUG-STRIP-QUOTES: NULL delimiter pointer\n");
         return;
     }
     
     str = *delimiter;
     len = ft_strlen(str);
     
-    fprintf(stderr, "DEBUG-STRIP-QUOTES: Processing string: '%s' (len=%zu)\n", 
-            str, len);
-    
     if (len < 2)
     {
-        fprintf(stderr, "DEBUG-STRIP-QUOTES: String too short for quotes\n");
         return;
     }
     
     if ((str[0] == '"' && str[len - 1] == '"') || 
         (str[0] == '\'' && str[len - 1] == '\''))
     {
-        fprintf(stderr, "DEBUG-STRIP-QUOTES: Found matching quotes: %c...%c\n", 
-                str[0], str[len-1]);
-        
         new_str = ft_substr(str, 1, len - 2);
         if (!new_str)
         {
-            fprintf(stderr, "DEBUG-STRIP-QUOTES: Failed to allocate memory for stripped string\n");
             vars->error_code = ERR_DEFAULT;
             return;
         }
         
-        fprintf(stderr, "DEBUG-STRIP-QUOTES: Original: '%s', Stripped: '%s'\n", 
-                str, new_str);
-        
         free(*delimiter);
         *delimiter = new_str;
-    }
-    else
-    {
-        fprintf(stderr, "DEBUG-STRIP-QUOTES: No matching outer quotes found\n");
     }
 }

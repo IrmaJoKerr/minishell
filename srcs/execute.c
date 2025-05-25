@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 23:19:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 01:52:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,18 +46,14 @@ int handle_cmd_status(int status, t_vars *vars)
     if (WIFEXITED(status))
     {
         exit_code = WEXITSTATUS(status);
-        fprintf(stderr, "DEBUG-STATUS: Process exited normally with code %d\n", exit_code);
     }
     else if (WIFSIGNALED(status))
     {
         exit_code = 128 + WTERMSIG(status);
-        fprintf(stderr, "DEBUG-STATUS: Process terminated by signal %d (exit code %d)\n", 
-                WTERMSIG(status), exit_code);
     }
     
     if (vars)
     {
-        fprintf(stderr, "DEBUG-STATUS: Setting error_code to %d\n", exit_code);
         vars->error_code = exit_code;
     }
     
@@ -151,10 +147,6 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     int     result;
     t_node  *cmd_node;
 
-    // Minimal debug output with essential info
-    if (node->args && node->args[0])
-        fprintf(stderr, "DEBUG: Exec redir: '%s'\n", node->args[0]);
-    
     if (!node->left)
         return (1);
     
@@ -167,8 +159,6 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     // Process redirection chain - check the return value
     if (!proc_redir_chain(node, cmd_node, vars))
     {
-        // Only log failure
-        fprintf(stderr, "DEBUG: Redir failed: err=%d\n", vars->error_code);
         reset_redirect_fds(vars);
         reset_terminal_after_heredoc();
         return (vars->error_code);
@@ -221,18 +211,21 @@ Exit code which is also stored in vars->error_code.
 */
 int execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int result;
+    int	result;
+	int	prev_error;
     // Save current error code to detect redirection errors
-    int prev_error = vars->error_code;
-
+    prev_error = vars->error_code;
     result = 0;
     if (!node)
         return (vars->error_code = 1);
-    
     if (node->type == TYPE_CMD)
+    {
         result = exec_cmd_node(node, envp, vars);
+    }
     else if (is_redirection(node->type))
+    {
         result = exec_redirect_cmd(node, envp, vars);
+    }
     else if (node->type == TYPE_PIPE)
     {
         if (!node->left || !node->right)
@@ -240,14 +233,13 @@ int execute_cmd(t_node *node, char **envp, t_vars *vars)
         result = execute_pipes(node, vars);
     }
     else
+    {
         result = 1;
-    
+    }
     // Preserve redirection errors that occurred before command execution
     if (prev_error == ERR_REDIRECTION)
         vars->error_code = prev_error;
-    else
-        vars->error_code = result;
-    
+    vars->error_code = result;
     return (vars->error_code);
 }
 

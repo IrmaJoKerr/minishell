@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 22:00:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 00:50:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,36 +19,14 @@ Sets up pipe node connections by linking to command nodes.
 - Updates the pipes structure for tracking.
 Works with process_first_pipe and process_addon_pipes.
 */
-// void	setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
-// {
-// 	if (!pipe_node || !left_cmd || !right_cmd)
-// 		return ;
-// 	pipe_node->left = left_cmd;
-// 	pipe_node->right = right_cmd;
-// }
 void setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
 {
-    fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: ===== SETTING UP PIPE NODE =====\n");
-    
-    fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: Initial pipe node:\n");
-    print_node_debug(pipe_node, "PIPE", "setup_pipe_node");
-    
-    fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: Left command:\n");
-    print_node_debug(left_cmd, "LEFT", "setup_pipe_node");
-    
-    fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: Right command:\n");
-    print_node_debug(right_cmd, "RIGHT", "setup_pipe_node");
-    
     if (!pipe_node || !left_cmd || !right_cmd) {
-        fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: Missing required nodes, setup aborted\n");
         return;
     }
     
     pipe_node->left = left_cmd;
     pipe_node->right = right_cmd;
-    
-    fprintf(stderr, "DEBUG-PIPE-SETUP-DETAILED: Final pipe node after setup:\n");
-    print_node_debug(pipe_node, "PIPE-FINAL", "setup_pipe_node");
 }
 
 /*
