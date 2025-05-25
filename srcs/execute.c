@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 18:36:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 23:19:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,47 @@ Returns:
 - The final error code stored in vars->error_code.
 Works with exec_external_cmd() and execute_pipes().
 */
-int	handle_cmd_status(int status, t_vars *vars)
-{
-	int	exit_code;
+// int	handle_cmd_status(int status, t_vars *vars)
+// {
+// 	int	exit_code;
 
-	exit_code = 0;
-	if (WIFEXITED(status))
-	{
-		exit_code = WEXITSTATUS(status);
-	}
-	else if (WIFSIGNALED(status))
-	{
-		exit_code = 128 + WTERMSIG(status);
-	}
-	if (vars)
-		vars->error_code = exit_code;
-	return (exit_code);
+// 	exit_code = 0;
+// 	if (WIFEXITED(status))
+// 	{
+// 		exit_code = WEXITSTATUS(status);
+// 	}
+// 	else if (WIFSIGNALED(status))
+// 	{
+// 		exit_code = 128 + WTERMSIG(status);
+// 	}
+// 	if (vars)
+// 		vars->error_code = exit_code;
+// 	return (exit_code);
+// }
+int handle_cmd_status(int status, t_vars *vars)
+{
+    int exit_code;
+
+    exit_code = 0;
+    if (WIFEXITED(status))
+    {
+        exit_code = WEXITSTATUS(status);
+        fprintf(stderr, "DEBUG-STATUS: Process exited normally with code %d\n", exit_code);
+    }
+    else if (WIFSIGNALED(status))
+    {
+        exit_code = 128 + WTERMSIG(status);
+        fprintf(stderr, "DEBUG-STATUS: Process terminated by signal %d (exit code %d)\n", 
+                WTERMSIG(status), exit_code);
+    }
+    
+    if (vars)
+    {
+        fprintf(stderr, "DEBUG-STATUS: Setting error_code to %d\n", exit_code);
+        vars->error_code = exit_code;
+    }
+    
+    return (exit_code);
 }
 
 /*

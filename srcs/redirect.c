@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 17:36:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 20:25:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,60 @@ Creates the redirection node and extracts the filename.
     
 //     return (1);
 // }
+// int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+// {
+//     char *redir_str;
+//     t_node *redir_node;
+//     int moves;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Handling redirection token at pos %d\n", *i);
+    
+//     // Create the redirection token
+//     moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
+//     redir_str = ft_substr(input, *i, moves);
+//     if (!redir_str)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to create redirection string\n");
+//         return (0);
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Created redirection string: '%s'\n", redir_str);
+    
+//     // Create redirection node without a filename yet
+//     redir_node = initnode(type, redir_str);
+//     free(redir_str);
+    
+//     if (!redir_node)
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to initialize redirection node\n");
+//         return (0);
+//     }
+    
+//     // Move past the redirection operator
+//     *i += moves;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Looking for filename at position %d\n", *i);
+    
+//     // Process the filename
+//     if (!process_redir_filename(input, i, redir_node))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-TOKEN: Failed to process redirection filename\n");
+//         free_token_node(redir_node);
+//         return (0);
+//     }
+    
+//     // Add the node to the token list
+//     build_token_linklist(vars, redir_node);
+    
+//     // Update vars for next token
+//     vars->start = *i;
+    
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection token handled successfully\n");
+//     fprintf(stderr, "DEBUG-REDIR-TOKEN: Redirection operator='%s', filename='%s'\n", 
+//             get_token_str(type), redir_node->args ? redir_node->args[0] : "NULL");
+    
+//     return (1);
+// }
 int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
 {
     char *redir_str;
@@ -235,7 +289,7 @@ int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
     
     fprintf(stderr, "DEBUG-REDIR-TOKEN: Handling redirection token at pos %d\n", *i);
     
-    // Create the redirection token
+    // Create the redirection token string
     moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
     redir_str = ft_substr(input, *i, moves);
     if (!redir_str)
@@ -246,9 +300,9 @@ int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
     
     fprintf(stderr, "DEBUG-REDIR-TOKEN: Created redirection string: '%s'\n", redir_str);
     
-    // Create redirection node without a filename yet
+    // Initialize the redirection node
     redir_node = initnode(type, redir_str);
-    free(redir_str);
+    free(redir_str); // Safe to free after initnode copies it
     
     if (!redir_node)
     {
@@ -286,94 +340,12 @@ int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
 Processes and extracts the filename for a redirection token.
 Skips whitespace and extracts the filename.
 */
-// int process_redir_filename(char *input, int *i, t_node *redir_node)
-// {
-//     int start;
-//     char *filename;
-    
-//     // Skip whitespace
-//     while (input[*i] && ft_isspace(input[*i]))
-//         (*i)++;
-    
-//     // Check if we have a filename
-//     if (!input[*i])
-//         return (1); // This will be caught later as a syntax error
-    
-//     // Find the end of the filename
-//     start = *i;
-//     while (input[*i] && !ft_isspace(input[*i]) && 
-//            !is_operator_token(get_token_at(input, *i, &(int){0})))
-//         (*i)++;
-    
-//     // Extract the filename
-//     filename = ft_substr(input, start, *i - start);
-//     if (!filename)
-//         return (0);
-    
-//     // Store filename directly in args[0]
-//     free(redir_node->args[0]); // Free the original token string
-//     redir_node->args[0] = filename;
-    
-//     return (1);
-// }
-// int process_redir_filename(char *input, int *i, t_node *redir_node)
-// {
-//     int start;
-//     char *filename;
-    
-//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Processing filename at pos %d\n", *i);
-    
-//     // Skip whitespace
-//     while (input[*i] && ft_isspace(input[*i]))
-//     {
-//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Skipping whitespace '%c' at pos %d\n", 
-//                 input[*i], *i);
-//         (*i)++;
-//     }
-    
-//     // Check if we have a filename
-//     if (!input[*i])
-//     {
-//         fprintf(stderr, "DEBUG-REDIR-FILENAME: End of input reached, no filename found\n");
-//         return (1); // This will be caught later as a syntax error
-//     }
-    
-//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Found potential filename starting at pos %d: '%c'\n", 
-//             *i, input[*i]);
-    
-//     // Find the end of the filename
-//     start = *i;
-//     while (input[*i] && !ft_isspace(input[*i]) && 
-//            !is_operator_token(get_token_at(input, *i, &(int){0})))
-//     {
-//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Including char at pos %d: '%c'\n", 
-//                 *i, input[*i]);
-//         (*i)++;
-//     }
-    
-//     // Extract the filename
-//     filename = ft_substr(input, start, *i - start);
-//     if (!filename)
-//     {
-//         fprintf(stderr, "DEBUG-REDIR-FILENAME: Failed to extract filename\n");
-//         return (0);
-//     }
-    
-//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted filename: '%s'\n", filename);
-    
-//     // Store filename directly in args[0] - THIS IS THE KEY CHANGE
-//     free(redir_node->args[0]); // Free the original redirection operator string
-//     redir_node->args[0] = filename;
-    
-//     fprintf(stderr, "DEBUG-REDIR-FILENAME: Set redirection node args[0] to filename: '%s'\n", 
-//             redir_node->args[0]);
-    
-//     return (1);
-// }
 int process_redir_filename(char *input, int *i, t_node *redir_node)
 {
     int start;
     char *filename;
+    int in_quotes = 0;
+    char quote_type = 0;
     
     fprintf(stderr, "DEBUG-REDIR-FILENAME: Processing filename at pos %d\n", *i);
     
@@ -392,21 +364,65 @@ int process_redir_filename(char *input, int *i, t_node *redir_node)
         return (1); // This will be caught later as a syntax error
     }
     
-    fprintf(stderr, "DEBUG-REDIR-FILENAME: Found potential filename starting at pos %d: '%c'\n", 
-            *i, input[*i]);
-    
-    // Find the end of the filename
     start = *i;
-    while (input[*i] && !ft_isspace(input[*i]) && 
-           !is_operator_token(get_token_at(input, *i, &(int){0})))
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Starting filename extraction at pos %d: '%c'\n", 
+            start, input[start]);
+    
+    // Check if filename starts with a quote
+    if (input[*i] == '"' || input[*i] == '\'')
     {
+        quote_type = input[*i];
+        in_quotes = 1;
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Found opening %c quote\n", 
+                quote_type);
+        (*i)++; // Skip the opening quote
+    }
+    
+    // Extract until end of filename
+    while (input[*i])
+    {
+        if (in_quotes)
+        {
+            // If in quotes, extract until closing quote
+            if (input[*i] == quote_type)
+            {
+                fprintf(stderr, "DEBUG-REDIR-FILENAME: Found closing %c quote at pos %d\n", 
+                        quote_type, *i);
+                (*i)++; // Skip the closing quote
+                break;
+            }
+        }
+        else 
+        {
+            // If not in quotes, extract until whitespace or operator
+            if (ft_isspace(input[*i]) || 
+                is_operator_token(get_token_at(input, *i, &(int){0})))
+            {
+                break;
+            }
+        }
+        
         fprintf(stderr, "DEBUG-REDIR-FILENAME: Including char at pos %d: '%c'\n", 
                 *i, input[*i]);
         (*i)++;
     }
     
-    // Extract the filename
-    filename = ft_substr(input, start, *i - start);
+    // Extract the complete filename
+    if (in_quotes)
+    {
+        // For quoted filenames, extract without the quotes
+        filename = ft_substr(input, start + 1, *i - start - 2);
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted quoted filename from pos %d to %d\n", 
+                start + 1, *i - 2);
+    }
+    else
+    {
+        // For non-quoted filenames, extract normally
+        filename = ft_substr(input, start, *i - start);
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted non-quoted filename from pos %d to %d\n", 
+                start, *i - 1);
+    }
+    
     if (!filename)
     {
         fprintf(stderr, "DEBUG-REDIR-FILENAME: Failed to extract filename\n");
@@ -416,11 +432,50 @@ int process_redir_filename(char *input, int *i, t_node *redir_node)
     fprintf(stderr, "DEBUG-REDIR-FILENAME: Extracted filename: '%s'\n", filename);
     
     // Store filename directly in args[0]
-    free(redir_node->args[0]); // Free the original token string
-    redir_node->args[0] = filename;
+    if (redir_node->args[0])
+    {
+        fprintf(stderr, "DEBUG-REDIR-FILENAME: Freeing original args[0]: '%s'\n", 
+                redir_node->args[0]);
+        free(redir_node->args[0]);
+    }
     
-    fprintf(stderr, "DEBUG-REDIR-FILENAME: Set node args[0] to filename: '%s'\n", 
+    redir_node->args[0] = filename;
+    fprintf(stderr, "DEBUG-REDIR-FILENAME: Set redirection node args[0] to filename: '%s'\n", 
             redir_node->args[0]);
     
     return (1);
 }
+// int process_redir_filename(char *input, int *i, t_node *redir_node)
+// {
+//     int start;
+//     char *filename;
+    
+//     // Skip whitespace as before
+//     while (input[*i] && ft_isspace(input[*i]))
+//         (*i)++;
+    
+//     if (!input[*i])
+//         return (1); // Will be caught later as syntax error
+    
+//     start = *i;
+    
+//     // Extract the entire token until whitespace or operator
+//     // This automatically handles adjacent quoted segments like "file""name"
+//     while (input[*i] && !ft_isspace(input[*i]) && 
+//            !is_operator_token(get_token_at(input, *i, &(int){0})))
+//     {
+//         (*i)++;
+//     }
+    
+//     // Extract the filename with quotes intact
+//     filename = ft_substr(input, start, *i - start);
+//     if (!filename)
+//         return (0);
+    
+//     // Store in args[0] directly
+//     if (redir_node->args[0])
+//         free(redir_node->args[0]);
+//     redir_node->args[0] = filename;
+    
+//     return (1);
+// }

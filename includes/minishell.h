@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 09:03:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 23:51:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,6 +415,8 @@ void		print_node_content(FILE *fp, t_node *node);
 void		print_ast_node(FILE *fp, t_node *node, int indent_level);
 void		print_ast(t_node *root, const char *filename);
 void		print_token_list(t_node *head, const char *filename);
+void		print_node_debug(t_node *node, const char *prefix, const char *location);
+void		print_node_args(t_node *node, const char *prefix);
 
 /*
 Error handling.

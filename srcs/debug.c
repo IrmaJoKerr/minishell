@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 12:18:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/05 05:02:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 23:51:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,4 +190,67 @@ void	print_token_list(t_node *head, const char *filename)
 	fprintf(fp, "=================\n");
 	if (filename)
 		fclose(fp);
+}
+
+/*
+Prints complete details about a node's structure and contents
+*/
+void print_node_debug(t_node *node, const char *prefix, const char *location)
+{
+    fprintf(stderr, "DEBUG-NODE[%s@%s]: ", prefix, location);
+    
+    if (!node) {
+        fprintf(stderr, "NULL node\n");
+        return;
+    }
+    
+    // Print node type
+    fprintf(stderr, "Type=%s", get_token_str(node->type));
+    
+    // Print arguments
+    fprintf(stderr, ", Args=[");
+    if (node->args) {
+        int i = 0;
+        while (node->args[i]) {
+            fprintf(stderr, "'%s'", node->args[i]);
+            if (node->args[i+1])
+                fprintf(stderr, ", ");
+            i++;
+        }
+    } else {
+        fprintf(stderr, "NULL");
+    }
+    fprintf(stderr, "]");
+    
+    // Print connections
+    fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
+        (void*)node->left, (void*)node->right, (void*)node->redir, 
+        (void*)node->prev, (void*)node->next);
+}
+
+/*
+Prints detailed information about a node's arguments
+*/
+void print_node_args(t_node *node, const char *prefix)
+{
+    if (!node) {
+        fprintf(stderr, "DEBUG-%s: NULL node\n", prefix);
+        return;
+    }
+    
+    fprintf(stderr, "DEBUG-%s: Node type=%s, Args=[", 
+            prefix, get_token_str(node->type));
+    
+    if (node->args) {
+        int i = 0;
+        while (node->args[i]) {
+            fprintf(stderr, "'%s'", node->args[i]);
+            if (node->args[i+1])
+                fprintf(stderr, ", ");
+            i++;
+        }
+    } else {
+        fprintf(stderr, "NULL");
+    }
+    fprintf(stderr, "]\n");
 }

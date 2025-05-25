@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 23:15:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,27 +18,84 @@ Finds and links previous redirections targeting the same command.
 - Links earlier redirections to this one if they target the same command
 Works with process_redir_node().
 */
-void	link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
-{
-	t_node	*prev_redir;
+// void	link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
+// {
+// 	t_node	*prev_redir;
 
-	prev_redir = redir_node->prev;
-	while (prev_redir)
-	{
-		if (prev_redir == redir_node)
-		{
-			prev_redir = prev_redir->prev;
-			continue ;
-		}
-		if (is_redirection(prev_redir->type)
-			&& get_redir_target(prev_redir, vars->pipes->last_cmd) == cmd
-			&& prev_redir->redir == NULL)
-		{
-			prev_redir->redir = redir_node;
-			break ;
-		}
-		prev_redir = prev_redir->prev;
-	}
+// 	prev_redir = redir_node->prev;
+// 	while (prev_redir)
+// 	{
+// 		if (prev_redir == redir_node)
+// 		{
+// 			prev_redir = prev_redir->prev;
+// 			continue ;
+// 		}
+// 		if (is_redirection(prev_redir->type)
+// 			&& get_redir_target(prev_redir, vars->pipes->last_cmd) == cmd
+// 			&& prev_redir->redir == NULL)
+// 		{
+// 			prev_redir->redir = redir_node;
+// 			break ;
+// 		}
+// 		prev_redir = prev_redir->prev;
+// 	}
+// }
+// void link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
+// {
+//     t_node *prev_redir;
+    
+//     fprintf(stderr, "DEBUG-LINK-REDIRS: Linking previous redirections for command '%s'\n",
+//             cmd->args ? cmd->args[0] : "NULL");
+    
+//     prev_redir = vars->head;
+//     while (prev_redir && prev_redir != redir_node)
+//     {
+//         if (is_redirection(prev_redir->type) && 
+//             get_redir_target(prev_redir, vars->pipes->last_cmd) == cmd &&
+//             prev_redir->redir == NULL)
+//         {
+//             fprintf(stderr, "DEBUG-LINK-REDIRS: Linking %s redirection '%s' to %s redirection '%s'\n",
+//                     get_token_str(prev_redir->type), 
+//                     prev_redir->args ? prev_redir->args[0] : "NULL",
+//                     get_token_str(redir_node->type),
+//                     redir_node->args ? redir_node->args[0] : "NULL");
+                    
+//             prev_redir->redir = redir_node;
+//             break;
+//         }
+//         prev_redir = prev_redir->next;
+//     }
+// }
+void link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars)
+{
+    t_node *prev_redir;
+    
+    fprintf(stderr, "DEBUG-LINK-REDIRS: Linking previous redirections for command '%s'\n",
+            cmd && cmd->args ? cmd->args[0] : "NULL");
+    
+    prev_redir = redir_node->prev;
+    while (prev_redir)
+    {
+        if (prev_redir == redir_node)
+        {
+            prev_redir = prev_redir->prev;
+            continue;
+        }
+        if (is_redirection(prev_redir->type)
+            && get_redir_target(prev_redir, vars->pipes->last_cmd) == cmd
+            && prev_redir->redir == NULL)
+        {
+            fprintf(stderr, "DEBUG-LINK-REDIRS: Linking %s redirection '%s' to %s redirection '%s'\n",
+                    get_token_str(prev_redir->type), 
+                    prev_redir->args ? prev_redir->args[0] : "NULL",
+                    get_token_str(redir_node->type),
+                    redir_node->args ? redir_node->args[0] : "NULL");
+            
+            prev_redir->redir = redir_node;
+            break;
+        }
+        prev_redir = prev_redir->prev;
+    }
 }
 
 /*

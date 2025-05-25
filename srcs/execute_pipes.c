@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 07:43:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 23:46:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,79 +22,99 @@ Handles execution within the left child process of a pipe.
 */
 // void exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 // {
-//     close(pipe_fd[0]);
-//     if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-//     {
-//         perror("dup2 error in left child");
-//         exit(1);
-//     }
-//     close(pipe_fd[1]);
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: ===== LEFT PIPE EXECUTION DETAILS =====\n");
+//     print_node_debug(cmd_node, "CMD", "exec_pipe_left");
     
-//     int had_redir_error = 0;
-    
-//     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
-//     {
-//         proc_redir_chain(cmd_node->redir, cmd_node, vars);
-        
-//         if (vars->error_code == ERR_REDIRECTION)
-//         {
-//             had_redir_error = 1;
+//     // Print arguments as a flat list for easy verification
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Command arguments list: ");
+//     if (cmd_node && cmd_node->args) {
+//         int i = 0;
+//         while (cmd_node->args[i]) {
+//             fprintf(stderr, "[%d]='%s' ", i, cmd_node->args[i]);
+//             i++;
 //         }
+//     } else {
+//         fprintf(stderr, "No arguments");
 //     }
+//     fprintf(stderr, "\n");
     
-//     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
-    
-//     if (had_redir_error)
-//     {
-//         exit(1);
+//     // Print redirections
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Redirections: ");
+//     if (cmd_node && cmd_node->redir) {
+//         t_node *redir = cmd_node->redir;
+//         while (redir) {
+//             fprintf(stderr, "%s[%s] ", get_token_str(redir->type),
+//                     redir->args ? redir->args[0] : "NULL");
+//             redir = redir->redir;
+//         }
+//     } else {
+//         fprintf(stderr, "None");
 //     }
-//     else
-//     {
-//         exit(cmd_result);
-//     }
-// }
-// void exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
-// {
-//     fprintf(stderr, "DEBUG: exec_pipe_left start for cmd: %s (pid=%d)\n", 
-//             cmd_node->args[0], getpid());
+//     fprintf(stderr, "\n");
     
+//     // Continue with original function...
+//     // Close read end of pipe - we're only writing to the pipe
 //     close(pipe_fd[0]);
+    
+//     // Setup pipe redirection for stdout
 //     if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
 //     {
-//         fprintf(stderr, "DEBUG: dup2 failed in left child\n");
+//         fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: dup2 failed\n");
+//         close(pipe_fd[1]);
 //         exit(1);
 //     }
-//     close(pipe_fd[1]);
     
-//     // Save original error code before redirection
-//     int redir_success = 1;
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Left stdout redirected to pipe write end\n");
+//     close(pipe_fd[1]);
     
 //     // Process redirections if any
+//     int redir_success = 1;
 //     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
 //     {
-//         fprintf(stderr, "DEBUG: Processing redirections for left cmd: %s\n", 
-//                 cmd_node->args[0]);
-                
+//         fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Processing redirections\n");
 //         redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
         
 //         if (!redir_success || vars->error_code == ERR_REDIRECTION)
 //         {
-//             fprintf(stderr, "DEBUG: Left cmd redirection failed, exiting with code 1\n");
-//             exit(1);  // Exit with error if redirection failed
+//             fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Redirection failed, writing empty output to pipe\n");
+//             exit(0);  // Exit with success so pipe continues
 //         }
 //     }
     
 //     // Only execute command if redirections succeeded
-//     fprintf(stderr, "DEBUG: Executing left cmd: %s\n", cmd_node->args[0]);
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Executing command with args: ");
+//     if (cmd_node && cmd_node->args) {
+//         int i = 0;
+//         while (cmd_node->args[i]) {
+//             fprintf(stderr, "'%s' ", cmd_node->args[i]);
+//             i++;
+//         }
+//     }
+//     fprintf(stderr, "\n");
+    
 //     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
     
-//     fprintf(stderr, "DEBUG: Left cmd completed with result: %d\n", cmd_result);
+//     fprintf(stderr, "DEBUG-PIPE-LEFT-DETAILED: Command completed with result: %d\n", cmd_result);
 //     exit(cmd_result);
 // }
 void exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 {
-    fprintf(stderr, "DEBUG: exec_pipe_left start for cmd: %s (pid=%d)\n", 
-            cmd_node->args[0], getpid());
+    fprintf(stderr, "DEBUG-PIPE-LEFT: Starting left child (pid=%d) for '%s'\n", 
+            getpid(), cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+    // Print redirections if any
+    if (cmd_node->redir)
+    {
+        t_node *redir = cmd_node->redir;
+        while (redir)
+        {
+            fprintf(stderr, "DEBUG-PIPE-LEFT: %s[%s] ", 
+                    get_token_str(redir->type), 
+                    redir->args ? redir->args[0] : "NULL");
+            redir = redir->redir;
+        }
+        fprintf(stderr, "\n");
+    }
     
     // Close read end of pipe - we're only writing to the pipe
     close(pipe_fd[0]);
@@ -102,34 +122,30 @@ void exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
     // Setup pipe redirection for stdout
     if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
     {
-        fprintf(stderr, "DEBUG: dup2 failed in left child\n");
+        fprintf(stderr, "DEBUG-PIPE-LEFT: dup2 failed\n");
         close(pipe_fd[1]);
         exit(1);
     }
+    
+    fprintf(stderr, "DEBUG-PIPE-LEFT: Left stdout redirected to pipe write end\n");
     close(pipe_fd[1]);
     
     // Process redirections if any
     int redir_success = 1;
     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
     {
-        fprintf(stderr, "DEBUG: Processing redirections for left cmd: %s\n", 
-                cmd_node->args[0]);
-                
+        fprintf(stderr, "DEBUG-PIPE-LEFT: Processing redirections for left cmd\n");
         redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
         
-        // Critical fix: Skip command execution if redirection failed
         if (!redir_success || vars->error_code == ERR_REDIRECTION)
         {
-            fprintf(stderr, "DEBUG: Left cmd redirection failed, exiting with code 1\n");
-            exit(1);  // Exit with error if redirection failed
+            fprintf(stderr, "DEBUG-PIPE-LEFT: Redirection failed, writing empty output to pipe\n");
+            exit(0);  // Exit with success so the pipeline continues
         }
     }
     
     // Only execute command if redirections succeeded
-    fprintf(stderr, "DEBUG: Executing left cmd: %s\n", cmd_node->args[0]);
     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
-    
-    fprintf(stderr, "DEBUG: Left cmd completed with result: %d\n", cmd_result);
     exit(cmd_result);
 }
 
@@ -143,109 +159,108 @@ Handles execution within the right child process of a pipe.
 */
 // void exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 // {
-//     if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
-//     {
-//         perror("dup2 error in right child");
-//         exit(1);
-//     }
-//     close(pipe_fd[0]);
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: ===== RIGHT PIPE EXECUTION DETAILS =====\n");
+//     print_node_debug(cmd_node, "CMD", "exec_pipe_right");
     
-//     int had_redir_error = 0;
-    
-//     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
-//     {
-//         proc_redir_chain(cmd_node->redir, cmd_node, vars);
-        
-//         if (vars->error_code == ERR_REDIRECTION)
-//         {
-//             had_redir_error = 1;
+//     // Print arguments as a flat list for easy verification
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Command arguments list: ");
+//     if (cmd_node && cmd_node->args) {
+//         int i = 0;
+//         while (cmd_node->args[i]) {
+//             fprintf(stderr, "[%d]='%s' ", i, cmd_node->args[i]);
+//             i++;
 //         }
+//     } else {
+//         fprintf(stderr, "No arguments");
 //     }
+//     fprintf(stderr, "\n");
     
-//     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
-    
-//     if (had_redir_error)
-//     {
-//         exit(1);
+//     // Print redirections
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Redirections: ");
+//     if (cmd_node && cmd_node->redir) {
+//         t_node *redir = cmd_node->redir;
+//         while (redir) {
+//             fprintf(stderr, "%s[%s] ", get_token_str(redir->type),
+//                     redir->args ? redir->args[0] : "NULL");
+//             redir = redir->redir;
+//         }
+//     } else {
+//         fprintf(stderr, "None");
 //     }
-//     else
-//     {
-//         exit(cmd_result);
-//     }
-// }
-// void exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
-// {
-//     fprintf(stderr, "DEBUG: exec_pipe_right start for cmd: %s (pid=%d)\n", 
-//             cmd_node->args[0], getpid());
+//     fprintf(stderr, "\n");
     
+//     // Setup pipe redirection for stdin
 //     if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
 //     {
-//         fprintf(stderr, "DEBUG: dup2 failed in right child\n");
+//         fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: dup2 failed\n");
+//         close(pipe_fd[0]);
 //         exit(1);
 //     }
-//     close(pipe_fd[0]);
     
-//     // Save original error code before redirection
-//     int redir_success = 1;
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Stdin redirected from pipe read end\n");
+//     close(pipe_fd[0]);
     
 //     // Process redirections if any
+//     int redir_success = 1;
 //     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
 //     {
-//         fprintf(stderr, "DEBUG: Processing redirections for right cmd: %s\n", 
-//                 cmd_node->args[0]);
-                
+//         fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Processing redirections\n");
 //         redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
         
 //         if (!redir_success || vars->error_code == ERR_REDIRECTION)
 //         {
-//             fprintf(stderr, "DEBUG: Right cmd redirection failed, exiting with code 1\n");
-//             exit(1);  // Exit with error if redirection failed
+//             fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Redirection failed, exiting\n");
+//             exit(1);
 //         }
 //     }
     
 //     // Only execute command if redirections succeeded
-//     fprintf(stderr, "DEBUG: Executing right cmd: %s\n", cmd_node->args[0]);
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Executing command with args: ");
+//     if (cmd_node && cmd_node->args) {
+//         int i = 0;
+//         while (cmd_node->args[i]) {
+//             fprintf(stderr, "'%s' ", cmd_node->args[i]);
+//             i++;
+//         }
+//     }
+//     fprintf(stderr, "\n");
+    
 //     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
     
-//     fprintf(stderr, "DEBUG: Right cmd completed with result: %d\n", cmd_result);
+//     fprintf(stderr, "DEBUG-PIPE-RIGHT-DETAILED: Command completed with result: %d\n", cmd_result);
 //     exit(cmd_result);
 // }
 void exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 {
-    fprintf(stderr, "DEBUG: exec_pipe_right start for cmd: %s (pid=%d)\n", 
-            cmd_node->args[0], getpid());
+    fprintf(stderr, "DEBUG-PIPE-RIGHT: Starting right child (pid=%d) for '%s'\n", 
+            getpid(), cmd_node->args ? cmd_node->args[0] : "NULL");
     
     // Setup pipe redirection for stdin
     if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
     {
-        fprintf(stderr, "DEBUG: dup2 failed in right child\n");
+        fprintf(stderr, "DEBUG-PIPE-RIGHT: dup2 failed\n");
         close(pipe_fd[0]);
         exit(1);
     }
+    
+    fprintf(stderr, "DEBUG-PIPE-RIGHT: Stdin redirected from pipe read end\n");
     close(pipe_fd[0]);
     
     // Process redirections if any
-    int redir_success = 1;
     if (cmd_node->redir && is_redirection(cmd_node->redir->type))
     {
-        fprintf(stderr, "DEBUG: Processing redirections for right cmd: %s\n", 
-                cmd_node->args[0]);
-                
-        redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
+        fprintf(stderr, "DEBUG-PIPE-RIGHT: Processing redirections\n");
+        int redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
         
-        // Critical fix: Skip command execution if redirection failed
         if (!redir_success || vars->error_code == ERR_REDIRECTION)
         {
-            fprintf(stderr, "DEBUG: Right cmd redirection failed, exiting with code 1\n");
-            exit(1);  // Exit with error if redirection failed
+            fprintf(stderr, "DEBUG-PIPE-RIGHT: Redirection failed, exiting\n");
+            exit(1);
         }
     }
     
-    // Only execute command if redirections succeeded
-    fprintf(stderr, "DEBUG: Executing right cmd: %s\n", cmd_node->args[0]);
+    // Execute command
     int cmd_result = execute_cmd(cmd_node, vars->env, vars);
-    
-    fprintf(stderr, "DEBUG: Right cmd completed with result: %d\n", cmd_result);
     exit(cmd_result);
 }
 
@@ -313,106 +328,338 @@ Example: For "ls -l | grep txt"
 - Waits for both commands to complete
 - Returns final execution status
 */
-// int	execute_pipes(t_node *pipe_node, t_vars *vars)
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
 // {
-//     int		pipe_fd[2];
-//     pid_t	left_pid;
-//     pid_t	right_pid;
-//     int		r_status;
-//     int		l_status;
+//     int     pipe_fd[2];
+//     pid_t   left_pid;
+//     pid_t   right_pid;
+//     int     l_status;
+//     int     r_status;
 
-//     if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+//     fprintf(stderr, "DEBUG-PIPE: Executing '%s | %s'\n", 
+//             pipe_node->left && pipe_node->left->args ? pipe_node->left->args[0] : "NULL",
+//             pipe_node->right && pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+    
+//     // Initialize pipe
+//     if (pipe(pipe_fd) == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE: Pipe creation failed\n");
 //         return (1);
-        
-//     if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+//     }
+    
+//     // Create left child process
+//     left_pid = fork();
+//     if (left_pid == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE: Left fork failed\n");
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
 //         return (1);
-        
+//     }
+    
+//     if (left_pid == 0)
+//     {
+//         exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPE: Created left child with pid=%d\n", left_pid);
+    
+//     // Create right child process
 //     right_pid = fork();
 //     if (right_pid == -1)
 //     {
-//         ft_putendl_fd("fork: Creation failed (right)", 2);
+//         fprintf(stderr, "DEBUG-PIPE: Right fork failed\n");
+//         kill(left_pid, SIGTERM);
 //         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
 //         waitpid(left_pid, &l_status, 0);
 //         return (1);
 //     }
     
 //     if (right_pid == 0)
 //     {
+//         // Close write end of pipe in right child before calling exec_pipe_right
+//         close(pipe_fd[1]);
 //         exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
 //     }
-        
+    
+//     fprintf(stderr, "DEBUG-PIPE: Created right child with pid=%d\n", right_pid);
+    
+//     // Close unused pipe ends in parent
+//     fprintf(stderr, "DEBUG-PIPE: Parent closing pipe ends\n");
 //     close(pipe_fd[0]);
+//     close(pipe_fd[1]);
     
+//     // Wait for child processes
+//     fprintf(stderr, "DEBUG-PIPE: Waiting for left child (pid=%d)\n", left_pid);
 //     waitpid(left_pid, &l_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE: Left child exited with status %d\n", l_status);
+    
+//     fprintf(stderr, "DEBUG-PIPE: Waiting for right child (pid=%d)\n", right_pid);
 //     waitpid(right_pid, &r_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE: Right child exited with status %d\n", r_status);
     
-//     return (handle_cmd_status(r_status, vars));
+//     // Process status with handler
+//     l_status = handle_cmd_status(l_status, NULL);
+//     r_status = handle_cmd_status(r_status, vars);
+    
+//     // KEY FIX: Always return the right side's status for a pipe
+//     // This matches bash behavior where the pipeline exit code is the 
+//     // exit code of the last command in the pipeline
+//     fprintf(stderr, "DEBUG-PIPE: Pipe execution complete, returning right status %d\n", r_status);
+//     return (r_status);
 // }
-int	execute_pipes(t_node *pipe_node, t_vars *vars)
-{
-    int		pipe_fd[2];
-    pid_t	left_pid;
-    pid_t	right_pid;
-    int		r_status;
-    int		l_status;
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int     pipe_fd[2];
+//     pid_t   left_pid;
+//     pid_t   right_pid;
+//     int     l_status;
+//     int     r_status;
 
-    // Debug print: Entry with command info
-    fprintf(stderr, "DEBUG: execute_pipes for '%s | %s'\n", 
-            pipe_node->left->args[0], pipe_node->right->args[0]);
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: ===== PIPE EXECUTION DETAILS =====\n");
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Pipe node structure:\n");
+//     print_node_debug(pipe_node, "PIPE", "execute_pipes");
     
-    // Initialize pipe and status variables
-    if (init_pipe_exec(pipe_fd, &r_status, &l_status))
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Left command:\n");
+//     print_node_debug(pipe_node->left, "LEFT", "execute_pipes");
+    
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Right command:\n");
+//     print_node_debug(pipe_node->right, "RIGHT", "execute_pipes");
+    
+//     // Initialize pipe
+//     if (pipe(pipe_fd) == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE-DETAILED: Pipe creation failed\n");
+//         return (1);
+//     }
+    
+//     // Create left child process
+//     left_pid = fork();
+//     if (left_pid == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE-DETAILED: Left fork failed\n");
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         return (1);
+//     }
+    
+//     if (left_pid == 0)
+//     {
+//         exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Created left child with pid=%d\n", left_pid);
+    
+//     // Create right child process
+//     right_pid = fork();
+//     if (right_pid == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE-DETAILED: Right fork failed\n");
+//         kill(left_pid, SIGTERM);
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         waitpid(left_pid, &l_status, 0);
+//         return (1);
+//     }
+    
+//     if (right_pid == 0)
+//     {
+//         // Close write end of pipe in right child before calling exec_pipe_right
+//         close(pipe_fd[1]);
+//         exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Created right child with pid=%d\n", right_pid);
+    
+//     // Close unused pipe ends in parent
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Parent closing pipe ends\n");
+//     close(pipe_fd[0]);
+//     close(pipe_fd[1]);
+    
+//     // Wait for child processes
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Waiting for left child (pid=%d)\n", left_pid);
+//     waitpid(left_pid, &l_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Left child exited with status %d\n", l_status);
+    
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Waiting for right child (pid=%d)\n", right_pid);
+//     waitpid(right_pid, &r_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Right child exited with status %d\n", r_status);
+    
+//     // Process status with handler
+//     l_status = handle_cmd_status(l_status, NULL);
+//     r_status = handle_cmd_status(r_status, vars);
+    
+//     fprintf(stderr, "DEBUG-PIPE-DETAILED: Pipe execution complete, returning status %d\n", r_status);
+//     return (r_status);
+// }
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int     pipe_fd[2];
+//     pid_t   left_pid;
+//     pid_t   right_pid;
+//     int     l_status;
+//     int     r_status;
+
+//     fprintf(stderr, "DEBUG-PIPE: Executing pipe with commands: '%s | %s'\n",
+//             pipe_node->left && pipe_node->left->args ? pipe_node->left->args[0] : "NULL",
+//             pipe_node->right && pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+    
+//     if (pipe(pipe_fd) == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE: pipe creation failed\n");
+//         return (1);
+//     }
+    
+//     // Create left child process
+//     left_pid = fork();
+//     if (left_pid == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE: left fork failed\n");
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         return (1);
+//     }
+    
+//     if (left_pid == 0)
+//     {
+//         exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPE: Created left child with pid=%d\n", left_pid);
+    
+//     // Create right child process
+//     right_pid = fork();
+//     if (right_pid == -1)
+//     {
+//         fprintf(stderr, "DEBUG-PIPE: right fork failed\n");
+//         kill(left_pid, SIGTERM);
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         waitpid(left_pid, &l_status, 0);
+//         return (1);
+//     }
+    
+//     if (right_pid == 0)
+//     {
+//         // Close write end of pipe in right child before calling exec_pipe_right
+//         close(pipe_fd[1]);
+//         exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         // Should never reach here
+//         exit(1);
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPE: Created right child with pid=%d\n", right_pid);
+    
+//     // Close unused pipe ends in parent
+//     fprintf(stderr, "DEBUG-PIPE: Parent closing pipe ends\n");
+//     close(pipe_fd[0]);
+//     close(pipe_fd[1]);
+    
+//     // Wait for child processes and get their status
+//     fprintf(stderr, "DEBUG-PIPE: Waiting for left child (pid=%d)\n", left_pid);
+//     waitpid(left_pid, &l_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE: Left child exited with status %d\n", l_status);
+//     l_status = handle_cmd_status(l_status, NULL);
+    
+//     fprintf(stderr, "DEBUG-PIPE: Waiting for right child (pid=%d)\n", right_pid);
+//     waitpid(right_pid, &r_status, 0);
+//     fprintf(stderr, "DEBUG-PIPE: Right child exited with status %d\n", r_status);
+//     r_status = handle_cmd_status(r_status, vars);  // This updates vars->error_code
+    
+//     // IMPORTANT: According to POSIX, the exit status of a pipeline is 
+//     // the exit status of the last command in the pipeline
+//     fprintf(stderr, "DEBUG-PIPE: Pipe execution complete, returning right status %d\n", r_status);
+//     return (r_status);
+// }
+int execute_pipes(t_node *pipe_node, t_vars *vars)
+{
+    int     pipe_fd[2];
+    pid_t   left_pid;
+    pid_t   right_pid;
+    int     l_status;
+    int     r_status;
+
+    fprintf(stderr, "DEBUG-PIPE: Executing pipe with commands: '%s | %s'\n",
+            pipe_node->left && pipe_node->left->args ? pipe_node->left->args[0] : "NULL",
+            pipe_node->right && pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+    
+    if (pipe(pipe_fd) == -1)
     {
-        fprintf(stderr, "DEBUG: pipe creation failed\n");
+        fprintf(stderr, "DEBUG-PIPE: pipe creation failed\n");
         return (1);
     }
     
     // Create left child process
-    if (fork_left_child(pipe_node->left, pipe_fd, vars, &left_pid))
+    left_pid = fork();
+    if (left_pid == -1)
     {
-        fprintf(stderr, "DEBUG: left fork failed\n");
+        fprintf(stderr, "DEBUG-PIPE: left fork failed\n");
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
         return (1);
     }
     
-    // Debug print: Left child created
-    fprintf(stderr, "DEBUG: left child created with pid=%d\n", left_pid);
+    if (left_pid == 0)
+    {
+        exec_pipe_left(pipe_node->left, pipe_fd, vars);
+        // Should never reach here
+        exit(1);
+    }
+    
+    fprintf(stderr, "DEBUG-PIPE: Created left child with pid=%d\n", left_pid);
     
     // Create right child process
     right_pid = fork();
     if (right_pid == -1)
     {
-        fprintf(stderr, "DEBUG: right fork failed\n");
-        ft_putendl_fd("fork: Creation failed (right)", 2);
+        fprintf(stderr, "DEBUG-PIPE: right fork failed\n");
+        kill(left_pid, SIGTERM);
         close(pipe_fd[0]);
+        close(pipe_fd[1]);
         waitpid(left_pid, &l_status, 0);
         return (1);
     }
     
-    // Debug print: Right child created
-    fprintf(stderr, "DEBUG: right child created with pid=%d\n", right_pid);
-    
     if (right_pid == 0)
     {
+        close(pipe_fd[1]); // Close write end in right child
         exec_pipe_right(pipe_node->right, pipe_fd, vars);
         // Should never reach here
+        exit(1);
     }
     
-    // Close unused pipe end in parent
+    fprintf(stderr, "DEBUG-PIPE: Created right child with pid=%d\n", right_pid);
+    
+    // Close unused pipe ends in parent
+    fprintf(stderr, "DEBUG-PIPE: Parent closing pipe ends\n");
     close(pipe_fd[0]);
-    fprintf(stderr, "DEBUG: parent closed pipe read end\n");
+    close(pipe_fd[1]);
     
-    // Wait for child processes
-    fprintf(stderr, "DEBUG: waiting for left child (pid=%d)\n", left_pid);
+    // Wait for child processes and get their status
+    fprintf(stderr, "DEBUG-PIPE: Waiting for left child (pid=%d)\n", left_pid);
     waitpid(left_pid, &l_status, 0);
-    fprintf(stderr, "DEBUG: left child exited with raw status %d\n", l_status);
+    fprintf(stderr, "DEBUG-PIPE: Left child exited with status %d\n", l_status);
+    l_status = handle_cmd_status(l_status, NULL);
     
-    fprintf(stderr, "DEBUG: waiting for right child (pid=%d)\n", right_pid);
+    fprintf(stderr, "DEBUG-PIPE: Waiting for right child (pid=%d)\n", right_pid);
     waitpid(right_pid, &r_status, 0);
-    fprintf(stderr, "DEBUG: right child exited with raw status %d\n", r_status);
+    fprintf(stderr, "DEBUG-PIPE: Right child exited with status %d\n", r_status);
     
-    // Process status with original handler
-    int final_status = handle_cmd_status(r_status, vars);
-    fprintf(stderr, "DEBUG: returning final status: %d\n", final_status);
+    // CRITICAL FIX: According to POSIX, the exit status of a pipeline is 
+    // the exit status of the last command in the pipeline
+    r_status = handle_cmd_status(r_status, vars);
     
-    return (final_status);
+    fprintf(stderr, "DEBUG-PIPE: Pipe execution complete, returning right status %d\n", r_status);
+    return (r_status);
 }
