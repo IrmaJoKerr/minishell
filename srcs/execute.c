@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 17:50:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 18:36:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,36 +126,30 @@ int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
     int     result;
     t_node  *cmd_node;
 
-    fprintf(stderr, "DEBUG-REDIR-EXEC: Executing redirection command for node type=%s, filename='%s'\n", 
-            get_token_str(node->type), node->args ? node->args[0] : "NULL");
+    // Minimal debug output with essential info
+    if (node->args && node->args[0])
+        fprintf(stderr, "DEBUG: Exec redir: '%s'\n", node->args[0]);
     
     if (!node->left)
-    {
-        fprintf(stderr, "DEBUG-REDIR-EXEC: No command (left) node found\n");
         return (1);
-    }
     
     cmd_node = node->left;
-    fprintf(stderr, "DEBUG-REDIR-EXEC: Command node is '%s'\n",
-            cmd_node->args ? cmd_node->args[0] : "NULL");
     
     // Save original file descriptors
     vars->pipes->saved_stdin = dup(STDIN_FILENO);
     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
     
     // Process redirection chain - check the return value
-    fprintf(stderr, "DEBUG-REDIR-EXEC: Processing redirection chain\n");
     if (!proc_redir_chain(node, cmd_node, vars))
     {
-        fprintf(stderr, "DEBUG-REDIR-EXEC: Redirection chain processing failed, error_code=%d\n",
-                vars->error_code);
+        // Only log failure
+        fprintf(stderr, "DEBUG: Redir failed: err=%d\n", vars->error_code);
         reset_redirect_fds(vars);
         reset_terminal_after_heredoc();
         return (vars->error_code);
     }
     
     // Only execute command if proc_redir_chain succeeded
-    fprintf(stderr, "DEBUG-REDIR-EXEC: Executing command after successful redirection\n");
     result = execute_cmd(cmd_node, envp, vars);
     
     // Clean up

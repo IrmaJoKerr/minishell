@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 17:57:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 19:29:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,7 @@ t_node *proc_token_list(t_vars *vars)
     fprintf(stderr, "DEBUG-AST: Built AST with root type=%s\n", 
             root ? get_token_str(root->type) : "NULL");
     
-    // Print the entire AST structure for debugging
-    if (root) {
-        fprintf(stderr, "===== AST STRUCTURE =====\n");
-        print_ast_node(stderr, root, 0);
-        fprintf(stderr, "=========================\n");
-    }
+    // Removed AST structure debug printing to reduce log size
     
     return root;
 }

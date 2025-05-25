@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/25 17:43:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/25 18:36:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,14 +101,9 @@ Returns:
 // }
 int proc_redir_target(t_node *node, t_vars *vars)
 {
-    fprintf(stderr, "DEBUG-REDIR-TARGET: Processing redirection target for node type %s\n", 
-            get_token_str(node->type));
-    
     // Using node->args[0] directly instead of node->right->args[0]
     if (node && node->args && node->args[0])
     {
-        fprintf(stderr, "DEBUG-REDIR-TARGET: Found valid filename: '%s'\n", node->args[0]);
-        
         if (node->type != TYPE_HEREDOC)
             strip_outer_quotes(&node->args[0], vars);
         
@@ -116,7 +111,7 @@ int proc_redir_target(t_node *node, t_vars *vars)
     }
     else if (node && node->type != TYPE_HEREDOC)
     {
-        fprintf(stderr, "DEBUG-REDIR-TARGET: Missing filename for redirection\n");
+        fprintf(stderr, "DEBUG: Missing filename for redirection\n");
         tok_syntax_error_msg("newline", vars);
         return (0);
     }
