@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:03:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:53:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,32 +50,26 @@ Works with build_and_execute().
 // 		return (vars->cmd_nodes[0]);
 // 	return (NULL);
 // }
-t_node *proc_token_list(t_vars *vars)
+t_node	*proc_token_list(t_vars *vars)
 {
-    if (!vars || !vars->head || !vars->pipes)
-        return (NULL);
-    
-    find_cmd(NULL, NULL, FIND_ALL, vars);
-    
-    if (vars->cmd_count == 0 || !vars->cmd_nodes[0] || !vars->cmd_nodes[0]->args)
-        return (NULL);
-    
-    vars->pipes->pipe_root = NULL;
-    vars->pipes->redir_root = NULL;
-    
-    vars->pipes->pipe_root = proc_pipes(vars);
-    vars->pipes->redir_root = proc_redir(vars);
-    
-    verify_command_args(vars);
-    
-    if (vars->pipes->pipe_root)
-        return (vars->pipes->pipe_root);
-    else if (vars->pipes->redir_root)
-        return (vars->pipes->redir_root);
-    else if (vars->cmd_count > 0)
-        return (vars->cmd_nodes[0]);
-    
-    return (NULL);
+	if (!vars || !vars->head || !vars->pipes)
+		return (NULL);
+	find_cmd(NULL, NULL, FIND_ALL, vars);
+	if (vars->cmd_count == 0 || !vars->cmd_nodes[0]
+		|| !vars->cmd_nodes[0]->args)
+		return (NULL);
+	vars->pipes->pipe_root = NULL;
+	vars->pipes->redir_root = NULL;
+	vars->pipes->pipe_root = proc_pipes(vars);
+	vars->pipes->redir_root = proc_redir(vars);
+	verify_command_args(vars);
+	if (vars->pipes->pipe_root)
+		return (vars->pipes->pipe_root);
+	else if (vars->pipes->redir_root)
+		return (vars->pipes->redir_root);
+	else if (vars->cmd_count > 0)
+		return (vars->cmd_nodes[0]);
+	return (NULL);
 }
 
 /*
@@ -109,29 +103,28 @@ Works with proc_redir for redirection structure building.
 // 		current = current->next;
 // 	}
 // }
-void build_redir_ast(t_vars *vars)
+void	build_redir_ast(t_vars *vars)
 {
-    t_node *current;
+	t_node	*current;
 
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-        {
-            vars->pipes->last_cmd = current;
-        }
-        else if (is_redirection(current->type))
-        {
-            if (!current->args || !current->args[0])
-            {
-                tok_syntax_error_msg("newline", vars);
-                return;
-            }
-            
-            process_redir_node(current, vars);
-        }
-        current = current->next;
-    }
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+		{
+			vars->pipes->last_cmd = current;
+		}
+		else if (is_redirection(current->type))
+		{
+			if (!current->args || !current->args[0])
+			{
+				tok_syntax_error_msg("newline", vars);
+				return ;
+			}
+			process_redir_node(current, vars);
+		}
+		current = current->next;
+	}
 }
 
 /*
@@ -188,9 +181,11 @@ void	verify_command_args(t_vars *vars)
 			continue ;
 		}
 		current = current->next;
-		while (current && current->type != TYPE_CMD && current->type != TYPE_PIPE)
+		while (current && current->type != TYPE_CMD
+			&& current->type != TYPE_PIPE)
 		{
-			if (current->type == TYPE_ARGS && !is_redirection_target(current, vars))
+			if (current->type == TYPE_ARGS
+				&& !is_redirection_target(current, vars))
 			{
 				if (!is_arg_in_cmd(cmd, current->args[0]))
 					append_arg(cmd, current->args[0], 0);
@@ -206,17 +201,17 @@ void	verify_command_args(t_vars *vars)
 int	is_arg_in_cmd(t_node *cmd, char *arg)
 {
 	int	i;
-	
+
 	i = 0;
 	if (!cmd || !cmd->args || !arg)
-		return 0;
+		return (0);
 	while (cmd->args[i])
 	{
 		if (ft_strcmp(cmd->args[i], arg) == 0)
-			return 1;
+			return (1);
 		i++;
 	}
-	return 0;
+	return (0);
 }
 
 // Helper function to find a node in the linked list
@@ -280,32 +275,28 @@ t_node	*proc_redir(t_vars *vars)
 	return (vars->pipes->redir_root);
 }
 
-void collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
+void	collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
 {
-    t_node *arg_node;
-    
-    if (!redir_node || !cmd_node)
-        return;
-    
-    // Start from the node after the redirection
-    arg_node = redir_node->next;
-    
-    // Collect all consecutive ARGS tokens until we hit something else
-    while (arg_node && arg_node->type == TYPE_ARGS && arg_node->args)
-    {
-        // Skip this argument if it's already in the command's args
-        if (is_arg_in_cmd(cmd_node, arg_node->args[0]))
-        {
-            arg_node = arg_node->next;
-            continue;
-        }
-        
-        // Append this argument to the command
-        append_arg(cmd_node, arg_node->args[0], 0);
-        
-        // Move to the next node
-        arg_node = arg_node->next;
-    }
+	t_node	*arg_node;
+
+	if (!redir_node || !cmd_node)
+		return ;
+	// Start from the node after the redirection
+	arg_node = redir_node->next;
+	// Collect all consecutive ARGS tokens until we hit something else
+	while (arg_node && arg_node->type == TYPE_ARGS && arg_node->args)
+	{
+		// Skip this argument if it's already in the command's args
+		if (is_arg_in_cmd(cmd_node, arg_node->args[0]))
+		{
+			arg_node = arg_node->next;
+			continue ;
+		}
+		// Append this argument to the command
+		append_arg(cmd_node, arg_node->args[0], 0);
+		// Move to the next node
+		arg_node = arg_node->next;
+	}
 }
 
 /*
@@ -323,34 +314,26 @@ Works with build_redir_ast() during AST construction.
 
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Processing redirection type=%s, filename='%s'\n",
 //             get_token_str(redir_node->type), redir_node->args ? redir_node->args[0] : "NULL");
-    
 //     cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
 //     if (!cmd)
 //     {
 //         fprintf(stderr, "DEBUG-PROCESS-REDIR: No command target found\n");
 //         return;
 //     }
-    
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Target command is '%s'\n",
 //             cmd->args ? cmd->args[0] : "NULL");
-    
 //     // Directly set the left pointer to the command
 //     redir_node->left = cmd;
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Set left pointer to command '%s'\n",
 //             cmd->args ? cmd->args[0] : "NULL");
-    
 //     // Link with previous redirections targeting same command
 //     link_prev_redirs(redir_node, cmd, vars);
-    
 //     // Track redirection type (IN or OUT)
 //     track_redirs(redir_node, cmd, vars);
-    
 //     // Link input and output redirections if they target the same command
 //     link_in_out_redirs(vars);
-    
 //     // Collect any arguments that follow this redirection
 //     collect_args_after_redir(redir_node, cmd);
-    
 //     // Set the redirection root if this is the first one
 //     if (!vars->pipes->redir_root)
 //     {
@@ -362,26 +345,20 @@ Works with build_redir_ast() during AST construction.
 // void process_redir_node(t_node *redir_node, t_vars *vars)
 // {
 //     t_node *cmd;
-    
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Processing redirection type=%s, filename='%s'\n", 
 //             get_token_str(redir_node->type),
 //             redir_node->args ? redir_node->args[0] : "NULL");
-    
 //     cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Target command is '%s'\n", 
 //             cmd && cmd->args ? cmd->args[0] : "NULL");
-    
 //     // Set the redirection's left pointer to the command
 //     redir_node->left = cmd;
 //     fprintf(stderr, "DEBUG-PROCESS-REDIR: Set left pointer to command '%s'\n", 
 //             cmd && cmd->args ? cmd->args[0] : "NULL");
-    
 //     // Link with previous redirections targeting the same command
 //     link_prev_redirs(redir_node, cmd, vars);
-    
 //     // Check for arguments after the redirection
 //     collect_args_after_redir(redir_node, cmd);
-    
 //     // Set the first redirection as the root if not already set
 //     if (!vars->pipes->redir_root)
 //     {
@@ -389,31 +366,25 @@ Works with build_redir_ast() during AST construction.
 //         fprintf(stderr, "DEBUG-PROCESS-REDIR: Set redir_root to redirection with filename '%s'\n", 
 //                 redir_node->args ? redir_node->args[0] : "NULL");
 //     }
-    
 //     // Update redirection tracking based on type
 //     track_redirs(redir_node, cmd, vars);
 // }
-void process_redir_node(t_node *redir_node, t_vars *vars)
+void	process_redir_node(t_node *redir_node, t_vars *vars)
 {
-    t_node *cmd;
-    
-    cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
-    
-    // Set the redirection's left pointer to the command
-    redir_node->left = cmd;
-    
-    // Link with previous redirections targeting the same command
-    link_prev_redirs(redir_node, cmd, vars);
-    
-    // Check for arguments after the redirection and collect them
-    collect_args_after_redir(redir_node, cmd);
-    
-    // Set the first redirection as the root if not already set
-    if (!vars->pipes->redir_root)
-    {
-        vars->pipes->redir_root = redir_node;
-    }
-    
-    // Update redirection tracking based on type
-    track_redirs(redir_node, cmd, vars);
+	t_node	*cmd;
+
+	cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
+	// Set the redirection's left pointer to the command
+	redir_node->left = cmd;
+	// Link with previous redirections targeting the same command
+	link_prev_redirs(redir_node, cmd, vars);
+	// Check for arguments after the redirection and collect them
+	collect_args_after_redir(redir_node, cmd);
+	// Set the first redirection as the root if not already set
+	if (!vars->pipes->redir_root)
+	{
+		vars->pipes->redir_root = redir_node;
+	}
+	// Update redirection tracking based on type
+	track_redirs(redir_node, cmd, vars);
 }

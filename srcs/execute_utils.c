@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 01:52:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:40:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,32 +77,28 @@ int	setup_redirection(t_node *node, t_vars *vars)
 {
 	t_node	*cmd_node;
 	int		result;
-	
-    // Track the redirection node
-    vars->pipes->current_redirect = node;
-    // Find the command node
-    cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-    if (!cmd_node)
-    {
-        vars->error_code = ERR_DEFAULT;
-        return (0);
-    }
-    vars->pipes->cmd_redir = cmd_node;
-    // Update last redirection pointers
-    if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC) {
-        vars->pipes->last_in_redir = node;
-    }
-    else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
+
+	vars->pipes->current_redirect = node;
+	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+	if (!cmd_node)
 	{
-        vars->pipes->last_out_redir = node;
-    }
-    // Process the target
-    if (!proc_redir_target(node, vars)) {
-        return (0);
-    }
-    // Setup redirection mode
-    result = redir_mode_setup(node, vars);
-    return (result);
+		vars->error_code = ERR_DEFAULT;
+		return (0);
+	}
+	vars->pipes->cmd_redir = cmd_node;
+	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+	{
+		vars->pipes->last_in_redir = node;
+	}
+	else if (node->type == TYPE_OUT_REDIRECT
+		|| node->type == TYPE_APPEND_REDIRECT)
+	{
+		vars->pipes->last_out_redir = node;
+	}
+	if (!proc_redir_target(node, vars))
+		return (0);
+	result = redir_mode_setup(node, vars);
+	return (result);
 }
 
 /*
@@ -118,26 +114,26 @@ Returns:
 // {
 //     fprintf(stderr, "DEBUG-REDIR-TARGET: Processing redirection target for node type %s\n", 
 //             get_token_str(node->type));
-    
+	
 //     if (!node) {
 //         fprintf(stderr, "DEBUG-REDIR-TARGET: NULL node\n");
 //         return (0);
 //     }
-    
+	
 //     fprintf(stderr, "DEBUG-REDIR-TARGET: Node args pointer: %p\n", (void*)node->args);
-    
+	
 //     // Using node->args[0] directly instead of node->right->args[0]
 //     if (node && node->args && node->args[0])
 //     {
 //         fprintf(stderr, "DEBUG-REDIR-TARGET: Found valid filename: '%s'\n", node->args[0]);
-        
+		
 //         if (node->type != TYPE_HEREDOC)
 //         {
 //             fprintf(stderr, "DEBUG-REDIR-TARGET: Before stripping quotes: '%s'\n", node->args[0]);
 //             strip_outer_quotes(&node->args[0], vars);
 //             fprintf(stderr, "DEBUG-REDIR-TARGET: After stripping quotes: '%s'\n", node->args[0]);
 //         }
-        
+		
 //         return (1);
 //     }
 //     else if (node && node->type != TYPE_HEREDOC)
@@ -146,25 +142,25 @@ Returns:
 //         tok_syntax_error_msg("newline", vars);
 //         return (0);
 //     }
-    
+	
 //     return (1);
 // }
 int proc_redir_target(t_node *node, t_vars *vars)
 {
-    if (node && node->args && node->args[0])
-    {
-        if (node->type != TYPE_HEREDOC)
-            strip_outer_quotes(&node->args[0], vars);
-        
-        return (1);
-    }
-    else if (node && node->type != TYPE_HEREDOC)
-    {
-        tok_syntax_error_msg("newline", vars);
-        return (0);
-    }
-    
-    return (1);
+	if (node && node->args && node->args[0])
+	{
+		if (node->type != TYPE_HEREDOC)
+			strip_outer_quotes(&node->args[0], vars);
+		
+		return (1);
+	}
+	else if (node && node->type != TYPE_HEREDOC)
+	{
+		tok_syntax_error_msg("newline", vars);
+		return (0);
+	}
+	
+	return (1);
 }
 
 /*

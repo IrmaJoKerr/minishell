@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:52:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 01:09:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:38:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,36 +170,28 @@ Modifies the string pointed to by delimiter directly.
 // 		*delimiter = new_str;
 // 	}
 // }
-void strip_outer_quotes(char **delimiter, t_vars *vars)
+void	strip_outer_quotes(char **delimiter, t_vars *vars)
 {
-    char *str;
-    char *new_str;
-    size_t len;
+	char	*str;
+	char	*new_str;
+	size_t	len;
 
-    if (!delimiter || !*delimiter)
-    {
-        return;
-    }
-    
-    str = *delimiter;
-    len = ft_strlen(str);
-    
-    if (len < 2)
-    {
-        return;
-    }
-    
-    if ((str[0] == '"' && str[len - 1] == '"') || 
-        (str[0] == '\'' && str[len - 1] == '\''))
-    {
-        new_str = ft_substr(str, 1, len - 2);
-        if (!new_str)
-        {
-            vars->error_code = ERR_DEFAULT;
-            return;
-        }
-        
-        free(*delimiter);
-        *delimiter = new_str;
-    }
+	if (!delimiter || !*delimiter)
+		return ;
+	str = *delimiter;
+	len = ft_strlen(str);
+	if (len < 2)
+		return ;
+	if ((str[0] == '"' && str[len - 1] == '"') ||
+		(str[0] == '\'' && str[len - 1] == '\''))
+	{
+		new_str = ft_substr(str, 1, len - 2);
+		if (!new_str)
+		{
+			vars->error_code = ERR_DEFAULT;
+			return ;
+		}
+		free(*delimiter);
+		*delimiter = new_str;
+	}
 }

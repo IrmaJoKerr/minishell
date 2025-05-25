@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:16:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:37:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,27 +94,24 @@ Returns:
 */
 int	handle_heredoc(t_node *node, t_vars *vars)
 {
-    if (!process_heredoc(node, vars))
-    {
-        return (0);
-    }
-    
-    if (vars->pipes->heredoc_fd < 0)
-    {
-        return (0);
-    }
-    
-    if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1)
-    {
-        close(vars->pipes->heredoc_fd);
-        vars->pipes->heredoc_fd = -1;
-        vars->error_code = ERR_DEFAULT;
-        return (0);
-    }
-    
-    close(vars->pipes->heredoc_fd);
-    vars->pipes->heredoc_fd = -1;
-    return (1);
+	if (!process_heredoc(node, vars))
+	{
+		return (0);
+	}
+	if (vars->pipes->heredoc_fd < 0)
+	{
+		return (0);
+	}
+	if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1)
+	{
+		close(vars->pipes->heredoc_fd);
+		vars->pipes->heredoc_fd = -1;
+		vars->error_code = ERR_DEFAULT;
+		return (0);
+	}
+	close(vars->pipes->heredoc_fd);
+	vars->pipes->heredoc_fd = -1;
+	return (1);
 }
 
 /*
@@ -127,30 +124,26 @@ Returns:
 */
 int	process_heredoc(t_node *node, t_vars *vars)
 {
-    if (!node || !vars || !vars->pipes)
-    {
-        vars->error_code = ERR_DEFAULT;
-        return (0);
-    }
-    
-    if (vars->pipes->heredoc_fd >= 0)
-    {
-        close(vars->pipes->heredoc_fd);
-        vars->pipes->heredoc_fd = -1;
-    }
-    
-    if (!vars->hd_text_ready)
-    {
-        vars->error_code = ERR_DEFAULT;
-        return (0);
-    }
-    
-    if (!read_tmp_buf(vars))
-    {
-        return (0);
-    }
-    
-    return (1);
+	if (!node || !vars || !vars->pipes)
+	{
+		vars->error_code = ERR_DEFAULT;
+		return (0);
+	}
+	if (vars->pipes->heredoc_fd >= 0)
+	{
+		close(vars->pipes->heredoc_fd);
+		vars->pipes->heredoc_fd = -1;
+	}
+	if (!vars->hd_text_ready)
+	{
+		vars->error_code = ERR_DEFAULT;
+		return (0);
+	}
+	if (!read_tmp_buf(vars))
+	{
+		return (0);
+	}
+	return (1);
 }
 
 /*
@@ -163,17 +156,16 @@ Returns:
 */
 int	read_tmp_buf(t_vars *vars)
 {
-    int	fd;
-    
-    fd = open(TMP_BUF, O_RDONLY);
-    if (fd == -1)
-    {
-        perror("bleshell: failed to open TMP_BUF file for reading");
-        vars->error_code = ERR_DEFAULT;
-        unlink(TMP_BUF);
-        return (0);
-    }
-    
-    vars->pipes->heredoc_fd = fd;
-    return (1);
+	int	fd;
+
+	fd = open(TMP_BUF, O_RDONLY);
+	if (fd == -1)
+	{
+		perror("bleshell: failed to open TMP_BUF file for reading");
+		vars->error_code = ERR_DEFAULT;
+		unlink(TMP_BUF);
+		return (0);
+	}
+	vars->pipes->heredoc_fd = fd;
+	return (1);
 }

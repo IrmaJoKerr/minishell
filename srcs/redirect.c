@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:06:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:25:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
 	char	*redir_str;
 	t_node	*redir_node;
 	int		moves;
-	
+
 	// Create the redirection token string
 	moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
 	redir_str = ft_substr(input, *i, moves);

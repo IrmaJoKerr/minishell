@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:34:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
 	size_t	old_len;
 	size_t	expanded_len;
 	size_t	total_len;
+	size_t	i;
 
 	if (!vars || !vars->current || !vars->current->arg_quote_type
 		|| !vars->current->arg_quote_type[arg_idx] || !expanded_val)
@@ -146,7 +147,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
 		return (0);
 	}
 	ft_memcpy(new_types, old_types, sizeof(int) * old_len);
-	size_t i = 0;
+	i = 0;
 	while (i < expanded_len)
 	{
 		new_types[old_len + i] = 0;

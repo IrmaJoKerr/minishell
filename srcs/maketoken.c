@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 00:50:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:33:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,34 +48,31 @@ Example: When tokenizing "echo hello"
 // 		curr = curr->next;
 // 	}
 // }
-void maketoken(char *token, t_tokentype type, t_vars *vars)
+void	maketoken(char *token, t_tokentype type, t_vars *vars)
 {
-    t_node *node;
-    t_node *curr;
-    int node_freed;
+	t_node	*node;
+	t_node	*curr;
+	int		node_freed;
 
-    if (!token || !vars)
-    {
-        return;
-    }
-    
-    node = initnode(type, token);
-    if (!node)
-    {
-        return;
-    }
-    
-    node_freed = build_token_linklist(vars, node);
-    if (!node_freed)
-    {
-        free_if_orphan_node(node, vars);
-    }
-    
-    curr = vars->head;
-    while (curr)
-    {
-        curr = curr->next;
-    }
+	if (!token || !vars)
+	{
+		return ;
+	}
+	node = initnode(type, token);
+	if (!node)
+	{
+		return ;
+	}
+	node_freed = build_token_linklist(vars, node);
+	if (!node_freed)
+	{
+		free_if_orphan_node(node, vars);
+	}
+	curr = vars->head;
+	while (curr)
+	{
+		curr = curr->next;
+	}
 }
 
 /*

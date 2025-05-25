@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:14:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 00:50:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:32:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,6 @@ int	finish_tokenizing(char *input, t_vars *vars, int hd_is_delim)
 		return (0);
 	}
 	handle_text(input, vars);
-	
 	return (1);
 }
 

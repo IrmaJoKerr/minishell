@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 01:52:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:39:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,26 +38,24 @@ Works with exec_external_cmd() and execute_pipes().
 // 		vars->error_code = exit_code;
 // 	return (exit_code);
 // }
-int handle_cmd_status(int status, t_vars *vars)
+int	handle_cmd_status(int status, t_vars *vars)
 {
-    int exit_code;
+	int	exit_code;
 
-    exit_code = 0;
-    if (WIFEXITED(status))
-    {
-        exit_code = WEXITSTATUS(status);
-    }
-    else if (WIFSIGNALED(status))
-    {
-        exit_code = 128 + WTERMSIG(status);
-    }
-    
-    if (vars)
-    {
-        vars->error_code = exit_code;
-    }
-    
-    return (exit_code);
+	exit_code = 0;
+	if (WIFEXITED(status))
+	{
+		exit_code = WEXITSTATUS(status);
+	}
+	else if (WIFSIGNALED(status))
+	{
+		exit_code = 128 + WTERMSIG(status);
+	}
+	if (vars)
+	{
+		vars->error_code = exit_code;
+	}
+	return (exit_code);
 }
 
 /*
@@ -74,18 +72,14 @@ Works with execute_cmd().
 // {
 //     int     result;
 //     t_node  *cmd_node;
-
 //     if (!node->left || !node->right)
 //         return (1);
-    
 //     cmd_node = node->left;
 //     while (cmd_node && is_redirection(cmd_node->type))
 //         cmd_node = cmd_node->left;
-    
 //     // Save original file descriptors
 //     vars->pipes->saved_stdin = dup(STDIN_FILENO);
 //     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-    
 //     // Process redirection chain - check the return value
 //     if (!proc_redir_chain(node, cmd_node, vars))
 //     {
@@ -93,35 +87,27 @@ Works with execute_cmd().
 //         reset_terminal_after_heredoc();
 //         return (vars->error_code); // Return the error code, don't execute command
 //     }
-    
 //     // Only execute command if proc_redir_chain succeeded
 //     result = execute_cmd(cmd_node, envp, vars);
-    
 //     // Clean up
 //     reset_redirect_fds(vars);
 //     reset_terminal_after_heredoc();
-    
 //     return (result);
 // }
 // int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 // {
 //     int     result;
 //     t_node  *cmd_node;
-
 //     fprintf(stderr, "DEBUG: exec_redirect_cmd for node type: %s\n", 
 //             get_token_str(node->type));
-    
 //     if (!node->left || !node->right)
 //         return (1);
-    
 //     cmd_node = node->left;
 //     while (cmd_node && is_redirection(cmd_node->type))
 //         cmd_node = cmd_node->left;
-    
 //     // Save original file descriptors
 //     vars->pipes->saved_stdin = dup(STDIN_FILENO);
 //     vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-    
 //     // Process redirection chain - check the return value
 //     fprintf(stderr, "DEBUG: Processing redirection chain\n");
 //     if (!proc_redir_chain(node, cmd_node, vars))
@@ -131,47 +117,38 @@ Works with execute_cmd().
 //         reset_terminal_after_heredoc();
 //         return (vars->error_code); // Return the error code, don't execute command
 //     }
-    
 //     // Only execute command if proc_redir_chain succeeded
 //     fprintf(stderr, "DEBUG: Executing command after successful redirection\n");
 //     result = execute_cmd(cmd_node, envp, vars);
-    
 //     // Clean up
 //     reset_redirect_fds(vars);
 //     reset_terminal_after_heredoc();
-    
 //     return (result);
 // }
-int exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
+int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int     result;
-    t_node  *cmd_node;
+	int		result;
+	t_node	*cmd_node;
 
-    if (!node->left)
-        return (1);
-    
-    cmd_node = node->left;
-    
-    // Save original file descriptors
-    vars->pipes->saved_stdin = dup(STDIN_FILENO);
-    vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-    
-    // Process redirection chain - check the return value
-    if (!proc_redir_chain(node, cmd_node, vars))
-    {
-        reset_redirect_fds(vars);
-        reset_terminal_after_heredoc();
-        return (vars->error_code);
-    }
-    
-    // Only execute command if proc_redir_chain succeeded
-    result = execute_cmd(cmd_node, envp, vars);
-    
-    // Clean up
-    reset_redirect_fds(vars);
-    reset_terminal_after_heredoc();
-    
-    return (result);
+	if (!node->left)
+		return (1);
+	cmd_node = node->left;
+	// Save original file descriptors
+	vars->pipes->saved_stdin = dup(STDIN_FILENO);
+	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
+	// Process redirection chain - check the return value
+	if (!proc_redir_chain(node, cmd_node, vars))
+	{
+		reset_redirect_fds(vars);
+		reset_terminal_after_heredoc();
+		return (vars->error_code);
+	}
+	// Only execute command if proc_redir_chain succeeded
+	result = execute_cmd(cmd_node, envp, vars);
+	// Clean up
+	reset_redirect_fds(vars);
+	reset_terminal_after_heredoc();
+	return (result);
 }
 
 /*
@@ -209,38 +186,36 @@ Main command execution function.
 Returns:
 Exit code which is also stored in vars->error_code.
 */
-int execute_cmd(t_node *node, char **envp, t_vars *vars)
+int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
-    int	result;
+	int	result;
 	int	prev_error;
-    // Save current error code to detect redirection errors
-    prev_error = vars->error_code;
-    result = 0;
-    if (!node)
-        return (vars->error_code = 1);
-    if (node->type == TYPE_CMD)
-    {
-        result = exec_cmd_node(node, envp, vars);
-    }
-    else if (is_redirection(node->type))
-    {
-        result = exec_redirect_cmd(node, envp, vars);
-    }
-    else if (node->type == TYPE_PIPE)
-    {
-        if (!node->left || !node->right)
-            return (vars->error_code = 1);
-        result = execute_pipes(node, vars);
-    }
-    else
-    {
-        result = 1;
-    }
-    // Preserve redirection errors that occurred before command execution
-    if (prev_error == ERR_REDIRECTION)
-        vars->error_code = prev_error;
-    vars->error_code = result;
-    return (vars->error_code);
+	// Save current error code to detect redirection errors
+	prev_error = vars->error_code;
+	result = 0;
+	if (!node)
+		return (vars->error_code = 1);
+	if (node->type == TYPE_CMD)
+	{
+		result = exec_cmd_node(node, envp, vars);
+	}
+	else if (is_redirection(node->type))
+	{
+		result = exec_redirect_cmd(node, envp, vars);
+	}
+	else if (node->type == TYPE_PIPE)
+	{
+		if (!node->left || !node->right)
+			return (vars->error_code = 1);
+		result = execute_pipes(node, vars);
+	}
+	else
+		result = 1;
+	// Preserve redirection errors that occurred before command execution
+	if (prev_error == ERR_REDIRECTION)
+		vars->error_code = prev_error;
+	vars->error_code = result;
+	return (vars->error_code);
 }
 
 /*

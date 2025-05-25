@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 00:50:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:31:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@ Sets up pipe node connections by linking to command nodes.
 - Updates the pipes structure for tracking.
 Works with process_first_pipe and process_addon_pipes.
 */
-void setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
+void	setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
 {
-    if (!pipe_node || !left_cmd || !right_cmd) {
-        return;
+    if (!pipe_node || !left_cmd || !right_cmd)
+	{
+        return ;
     }
-    
     pipe_node->left = left_cmd;
     pipe_node->right = right_cmd;
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:16:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:03:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 02:54:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,31 +47,28 @@ Examples:
 - "'hello'world"  -> at 'hello', adjacency is [0,1]
 - "he'llo'wo"     -> at 'llo', adjacency is [1,1]
 */
-void check_token_adj(char *input, t_vars *vars)
+void	check_token_adj(char *input, t_vars *vars)
 {
-    int     has_left_adj;
-    int     has_right_adj;
-    char    left_char;
-    char    right_char;
+	int		has_left_adj;
+	int		has_right_adj;
+	char	left_char;
+	char	right_char;
 
-    has_left_adj = 0;
-    has_right_adj = 0;
-    
-    if (vars->pos > 0)
-    {
-        left_char = input[vars->pos - 1];
-        has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
-    }
-    
-    if (input[vars->pos + 1])
-    {
-        right_char = input[vars->pos + 1];
-        has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
-    }
-    
-    vars->adj_state[0] = has_left_adj;
-    vars->adj_state[1] = has_right_adj;
-    vars->adj_state[2] = -1;
+	has_left_adj = 0;
+	has_right_adj = 0;
+	if (vars->pos > 0)
+	{
+		left_char = input[vars->pos - 1];
+		has_left_adj = !ft_isspace(left_char) && !ft_is_operator(left_char);
+	}
+	if (input[vars->pos + 1])
+	{
+		right_char = input[vars->pos + 1];
+		has_right_adj = !ft_isspace(right_char) && !ft_is_operator(right_char);
+	}
+	vars->adj_state[0] = has_left_adj;
+	vars->adj_state[1] = has_right_adj;
+	vars->adj_state[2] = -1;
 }
 
 /*
