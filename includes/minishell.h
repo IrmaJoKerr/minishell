@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 01:56:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 05:16:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -397,8 +397,10 @@ void		handle_fd_error(int fd, t_vars *vars, const char *error_msg);
 Pipe execution functions.
 In execute_pipes.c
 */
-void		exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
-void		exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+// void		exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+int			exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+// void		exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+int			exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
 int			fork_left_child(t_node *left_cmd, int pipe_fd[2], t_vars *vars,
 				pid_t *left_pid_ptr);
 int			init_pipe_exec(int pipe_fd[2], int *r_status_ptr,
@@ -416,8 +418,7 @@ int			setup_output_redirection(char *file, t_vars *vars);
 int			setup_heredoc_redir(t_node *node, t_vars *vars);
 int			check_input_file_access(char *file, struct stat *file_stat, t_vars *vars);
 int			handle_missing_input(t_vars *vars);
-int			proc_redir_chain(t_node *start_node, t_node *cmd_node,
-				t_vars *vars);
+int			proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars);
 
 /*
 Execution utility functions.

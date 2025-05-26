@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:40:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 14:52:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,32 +73,73 @@ Works with exec_redirect_cmd().
 // 	result = redir_mode_setup(node, vars);
 // 	return (result);
 // }
+// int	setup_redirection(t_node *node, t_vars *vars)
+// {
+// 	t_node	*cmd_node;
+// 	int		result;
+
+// 	vars->pipes->current_redirect = node;
+// 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+// 	if (!cmd_node)
+// 	{
+// 		vars->error_code = ERR_DEFAULT;
+// 		return (0);
+// 	}
+// 	vars->pipes->cmd_redir = cmd_node;
+// 	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+// 	{
+// 		vars->pipes->last_in_redir = node;
+// 	}
+// 	else if (node->type == TYPE_OUT_REDIRECT
+// 		|| node->type == TYPE_APPEND_REDIRECT)
+// 	{
+// 		vars->pipes->last_out_redir = node;
+// 	}
+// 	if (!proc_redir_target(node, vars))
+// 		return (0);
+// 	result = redir_mode_setup(node, vars);
+// 	return (result);
+// }
 int	setup_redirection(t_node *node, t_vars *vars)
 {
-	t_node	*cmd_node;
-	int		result;
+    int		result;
+    t_node	*cmd_node;
 
-	vars->pipes->current_redirect = node;
-	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-	if (!cmd_node)
-	{
-		vars->error_code = ERR_DEFAULT;
-		return (0);
-	}
-	vars->pipes->cmd_redir = cmd_node;
-	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
-	{
-		vars->pipes->last_in_redir = node;
-	}
-	else if (node->type == TYPE_OUT_REDIRECT
-		|| node->type == TYPE_APPEND_REDIRECT)
-	{
-		vars->pipes->last_out_redir = node;
-	}
-	if (!proc_redir_target(node, vars))
-		return (0);
-	result = redir_mode_setup(node, vars);
-	return (result);
+    fprintf(stderr, "DEBUG-SETUP-REDIR: Setting up redirection type=%s, filename='%s'\n",
+            get_token_str(node->type), 
+            node->args ? node->args[0] : "NULL");
+
+    vars->pipes->current_redirect = node;
+    cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
+    if (!cmd_node)
+    {
+        fprintf(stderr, "DEBUG-SETUP-REDIR: No command found for redirection\n");
+        vars->error_code = ERR_DEFAULT;
+        return (0);
+    }
+    
+    fprintf(stderr, "DEBUG-SETUP-REDIR: Target command is '%s'\n",
+            cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+    vars->pipes->cmd_redir = cmd_node;
+    if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
+        vars->pipes->last_in_redir = node;
+    else if (node->type == TYPE_OUT_REDIRECT
+        || node->type == TYPE_APPEND_REDIRECT)
+    {
+        vars->pipes->last_out_redir = node;
+    }
+    if (!proc_redir_target(node, vars))
+    {
+        fprintf(stderr, "DEBUG-SETUP-REDIR: proc_redir_target failed\n");
+        return (0);
+    }
+    
+    result = redir_mode_setup(node, vars);
+    fprintf(stderr, "DEBUG-SETUP-REDIR: redir_mode_setup returned %d, error_code=%d\n",
+            result, vars->error_code);
+    
+    return (result);
 }
 
 /*

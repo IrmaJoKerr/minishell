@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:46:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 02:58:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,28 +431,552 @@ Works with exec_redirect_cmd().
 //         fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain completed successfully\n");
 //     return redir_status;
 // }
-int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
-{
-	t_node	*current_node;
-	t_node	*next_redir;
-	int		redir_status;
+// int	proc_redir_chain(t_node *start_node, t_vars *vars)
+// {
+// 	t_node	*current_node;
+// 	t_node	*next_redir;
+// 	int		redir_status;
 
-	redir_status = 1;
-	(void)cmd_node; // Suppress unused parameter warning
-	current_node = start_node;
-	while (current_node && is_redirection(current_node->type))
-	{
-		// Setup this redirection
-		if (!setup_redirection(current_node, vars))
-		{
-			redir_status = 0;
-			break ;
-		}
-		// Find next redirection in the chain
-		next_redir = current_node->redir;
-		if (!next_redir)
-			break ;
-		current_node = next_redir;
-	}
-	return (redir_status);
+// 	redir_status = 1;
+// 	(void)cmd_node; // Suppress unused parameter warning
+// 	current_node = start_node;
+// 	while (current_node && is_redirection(current_node->type))
+// 	{
+// 		// Setup this redirection
+// 		if (!setup_redirection(current_node, vars))
+// 		{
+// 			redir_status = 0;
+// 			break ;
+// 		}
+// 		// Find next redirection in the chain
+// 		next_redir = current_node->redir;
+// 		if (!next_redir)
+// 			break ;
+// 		current_node = next_redir;
+// 	}
+// 	return (redir_status);
+// }
+// int	proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+// {
+// 	t_node	*current_node;
+// 	t_node	*next_redir;
+// 	int		redir_status;
+// 	int		prev_in_redir_error;
+
+// 	redir_status = 1;
+// 	prev_in_redir_error = 0;
+// 	(void)cmd_node; // Suppress unused parameter warning
+	
+// 	current_node = start_node;
+// 	while (current_node && is_redirection(current_node->type))
+// 	{
+// 		fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+// 			get_token_str(current_node->type),
+// 			current_node->args ? current_node->args[0] : "NULL",
+// 			prev_in_redir_error);
+		
+// 		// Skip input redirections if we've already had an error
+// 		if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+// 		{
+// 			fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+// 				current_node->args ? current_node->args[0] : "NULL");
+// 			next_redir = current_node->redir;
+// 			if (!next_redir)
+// 				break;
+// 			current_node = next_redir;
+// 			continue;
+// 		}
+		
+// 		// Setup this redirection
+// 		if (!setup_redirection(current_node, vars))
+// 		{
+// 			// Record error for input redirections
+// 			if (current_node->type == TYPE_IN_REDIRECT)
+// 			{
+// 				prev_in_redir_error = 1;
+// 				fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+// 				// Don't break for input redirection errors, continue to next redirection
+// 				next_redir = current_node->redir;
+// 				if (!next_redir)
+// 					break;
+// 				current_node = next_redir;
+// 				continue;
+// 			}
+// 			else
+// 			{
+// 				// For output redirections, still break on error
+// 				redir_status = 0;
+// 				break;
+// 			}
+// 		}
+		
+// 		// Find next redirection in the chain
+// 		next_redir = current_node->redir;
+// 		if (!next_redir)
+// 			break;
+// 		current_node = next_redir;
+// 	}
+	
+// 	return (redir_status);
+// }
+// int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current_node;
+//     t_node *next_redir;
+//     int redir_status = 1;
+//     int prev_in_redir_error = 0;
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain for command: %s\n", 
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current_node = start_node;
+//     while (current_node && is_redirection(current_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL",
+//                 prev_in_redir_error);
+        
+//         // Skip input redirections if we've already had an error
+//         if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+//                    current_node->args ? current_node->args[0] : "NULL");
+//             next_redir = current_node->redir;
+//             if (!next_redir)
+//                 break;
+//             current_node = next_redir;
+//             continue;
+//         }
+        
+//         // Use your existing setup_redirection function
+//         if (!setup_redirection(current_node, vars))
+//         {
+//             // For input redirections, record error but continue
+//             if (current_node->type == TYPE_IN_REDIRECT)
+//             {
+//                 prev_in_redir_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+//                 next_redir = current_node->redir;
+//                 if (!next_redir)
+//                     break;
+//                 current_node = next_redir;
+//                 continue;
+//             }
+//             else
+//             {
+//                 // For output redirections, break on error
+//                 redir_status = 0;
+//                 break;
+//             }
+//         }
+        
+//         next_redir = current_node->redir;
+//         if (!next_redir)
+//             break;
+//         current_node = next_redir;
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Finished processing redirections, status=%d\n", redir_status);
+//     return (redir_status);
+// }
+// int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current_node;
+//     t_node *next_redir;
+//     int redir_status = 1;
+//     int prev_in_redir_error = 0;
+    
+//     // Enhanced debug print - function entry
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Starting chain processing for cmd '%s'\n",
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain for command: %s\n", 
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current_node = start_node;
+//     while (current_node && is_redirection(current_node->type))
+//     {
+//         // Enhanced debug print - processing each redirection
+//         fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection type=%s, filename='%s'\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL");
+//         fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL",
+//                 prev_in_redir_error);
+        
+//         // Skip input redirections if we've already had an error
+//         if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+//                    current_node->args ? current_node->args[0] : "NULL");
+//             next_redir = current_node->redir;
+//             if (!next_redir)
+//                 break;
+//             current_node = next_redir;
+//             continue;
+//         }
+        
+//         // Use your existing setup_redirection function
+//         if (!setup_redirection(current_node, vars))
+//         {
+//             // Enhanced debug print - redirection failure
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     0, "no");
+            
+//             // For input redirections, record error but continue
+//             if (current_node->type == TYPE_IN_REDIRECT)
+//             {
+//                 prev_in_redir_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+//                 next_redir = current_node->redir;
+//                 if (!next_redir)
+//                     break;
+//                 current_node = next_redir;
+//                 continue;
+//             }
+//             else
+//             {
+//                 // For output redirections, break on error
+//                 redir_status = 0;
+//                 break;
+//             }
+//         }
+//         else
+//         {
+//             // Enhanced debug print - redirection success
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     1, "yes");
+//         }
+        
+//         next_redir = current_node->redir;
+//         if (!next_redir)
+//             break;
+//         current_node = next_redir;
+//     }
+    
+//     // Enhanced debug print - function completion
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain processing completed, final_result=%d\n", redir_status);
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Finished processing redirections, status=%d\n", redir_status);
+//     return (redir_status);
+// }
+// int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current_node;
+//     t_node *next_redir;
+//     int redir_status = 1;
+//     int prev_in_redir_error = 0;
+//     int any_error_occurred = 0;  // NEW: Track if any error occurred
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Starting chain processing for cmd '%s'\n",
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain for command: %s\n", 
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current_node = start_node;
+//     while (current_node && is_redirection(current_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection type=%s, filename='%s'\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL");
+//         fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL",
+//                 prev_in_redir_error);
+        
+//         // Skip input redirections if we've already had an error
+//         if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+//                    current_node->args ? current_node->args[0] : "NULL");
+//             next_redir = current_node->redir;
+//             if (!next_redir)
+//                 break;
+//             current_node = next_redir;
+//             continue;
+//         }
+        
+//         // Use your existing setup_redirection function
+//         if (!setup_redirection(current_node, vars))
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     0, "no");
+            
+//             // NEW: Set any_error_occurred for all redirection types
+//             any_error_occurred = 1;
+//             fprintf(stderr, "DEBUG-REDIR-FIX: Setting any_error_occurred=1 for failed %s\n",
+//                     get_token_str(current_node->type));
+            
+//             // For input redirections, record error but continue
+//             if (current_node->type == TYPE_IN_REDIRECT)
+//             {
+//                 prev_in_redir_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+//                 next_redir = current_node->redir;
+//                 if (!next_redir)
+//                     break;
+//                 current_node = next_redir;
+//                 continue;
+//             }
+//             else
+//             {
+//                 // For output redirections, break on error
+//                 redir_status = 0;
+//                 fprintf(stderr, "DEBUG-REDIR-FIX: Breaking on output redirection error\n");
+//                 break;
+//             }
+//         }
+//         else
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     1, "yes");
+//         }
+        
+//         next_redir = current_node->redir;
+//         if (!next_redir)
+//             break;
+//         current_node = next_redir;
+//     }
+    
+//     // NEW: Fix the return logic - if any error occurred, return 0
+//     if (any_error_occurred)
+//     {
+//         redir_status = 0;
+//         fprintf(stderr, "DEBUG-REDIR-FIX: Returning 0 due to any_error_occurred=1\n");
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain processing completed, final_result=%d\n", redir_status);
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Finished processing redirections, status=%d\n", redir_status);
+//     return (redir_status);
+// }
+// int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current_node;
+//     t_node *next_redir;
+//     int redir_status = 1;
+//     int prev_in_redir_error = 0;
+//     int any_input_error = 0;      // NEW: Track input redirection errors
+//     int any_output_error = 0;     // NEW: Track output redirection errors
+//     int is_pipeline_context = 0;  // NEW: Detect if we're in a pipeline
+    
+//     // NEW: Detect pipeline context
+//     is_pipeline_context = (vars->pipes && vars->pipes->pipe_root != NULL);
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Starting chain processing for cmd '%s' (pipeline_context=%d)\n",
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL", is_pipeline_context);
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain for command: %s\n", 
+//             cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current_node = start_node;
+//     while (current_node && is_redirection(current_node->type))
+//     {
+//         fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection type=%s, filename='%s'\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL");
+//         fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+//                 get_token_str(current_node->type),
+//                 current_node->args ? current_node->args[0] : "NULL",
+//                 prev_in_redir_error);
+        
+//         // Skip input redirections if we've already had an error
+//         if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+//                    current_node->args ? current_node->args[0] : "NULL");
+//             next_redir = current_node->redir;
+//             if (!next_redir)
+//                 break;
+//             current_node = next_redir;
+//             continue;
+//         }
+        
+//         // Use your existing setup_redirection function
+//         if (!setup_redirection(current_node, vars))
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     0, "no");
+            
+//             // NEW: Categorize the error type
+//             if (current_node->type == TYPE_IN_REDIRECT || current_node->type == TYPE_HEREDOC)
+//             {
+//                 any_input_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-FIX: Setting any_input_error=1 for failed %s\n",
+//                         get_token_str(current_node->type));
+                
+//                 prev_in_redir_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+//                 next_redir = current_node->redir;
+//                 if (!next_redir)
+//                     break;
+//                 current_node = next_redir;
+//                 continue;
+//             }
+//             else if (current_node->type == TYPE_OUT_REDIRECT || current_node->type == TYPE_APPEND_REDIRECT)
+//             {
+//                 any_output_error = 1;
+//                 fprintf(stderr, "DEBUG-REDIR-FIX: Setting any_output_error=1 for failed %s\n",
+//                         get_token_str(current_node->type));
+                
+//                 // For output redirections, always break on error
+//                 redir_status = 0;
+//                 fprintf(stderr, "DEBUG-REDIR-FIX: Breaking on output redirection error\n");
+//                 break;
+//             }
+//         }
+//         else
+//         {
+//             fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+//                     1, "yes");
+//         }
+        
+//         next_redir = current_node->redir;
+//         if (!next_redir)
+//             break;
+//         current_node = next_redir;
+//     }
+    
+//     // NEW: Context-aware error handling
+//     if (any_output_error)
+//     {
+//         // Output errors always fail
+//         redir_status = 0;
+//         fprintf(stderr, "DEBUG-REDIR-FIX: Returning 0 due to output redirection error\n");
+//     }
+//     else if (any_input_error && !is_pipeline_context)
+//     {
+//         // Input errors fail only in non-pipeline context
+//         redir_status = 0;
+//         fprintf(stderr, "DEBUG-REDIR-FIX: Returning 0 due to input error in standalone command\n");
+//     }
+//     else if (any_input_error && is_pipeline_context)
+//     {
+//         // Input errors in pipeline context: let pipeline continue
+//         redir_status = 1;  // Don't fail the redirection chain
+//         fprintf(stderr, "DEBUG-REDIR-FIX: Allowing pipeline to continue despite input redirection error\n");
+//     }
+    
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain processing completed, final_result=%d\n", redir_status);
+//     fprintf(stderr, "DEBUG-REDIR-CHAIN: Finished processing redirections, status=%d\n", redir_status);
+//     return (redir_status);
+// }
+int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+{
+    t_node *current_node;
+    t_node *next_redir;
+    int redir_status = 1;
+    int prev_in_redir_error = 0;
+    int any_input_error = 0;      // NEW: Track input redirection errors
+    int any_output_error = 0;     // NEW: Track output redirection errors
+    int is_pipeline_context = 0;  // NEW: Detect if we're in a pipeline
+    
+    // NEW: Detect pipeline context
+    is_pipeline_context = (vars->pipes && vars->pipes->pipe_root != NULL);
+    
+    // NEW: Enhanced debug at start
+    fprintf(stderr, "DEBUG-REDIR-CHAIN-ENHANCED: === REDIRECTION CHAIN START ===\n");
+    fprintf(stderr, "DEBUG-REDIR-CHAIN-ENHANCED: start_node type: %s, filename: '%s'\n",
+            start_node ? get_token_str(start_node->type) : "NULL",
+            start_node && start_node->args ? start_node->args[0] : "NULL");
+    fprintf(stderr, "DEBUG-REDIR-CHAIN-ENHANCED: cmd_node type: %s, command: '%s'\n",
+            cmd_node ? get_token_str(cmd_node->type) : "NULL",
+            cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    fprintf(stderr, "DEBUG-REDIR-CHAIN-ENHANCED: Pipeline context: %s\n",
+            (vars->pipes && vars->pipes->pipe_root) ? "YES" : "NO");
+    
+    fprintf(stderr, "DEBUG-REDIR-CHAIN: Starting chain processing for cmd '%s' (pipeline_context=%d)\n",
+            cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL", is_pipeline_context);
+    fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection chain for command: %s\n", 
+            cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+    current_node = start_node;
+    while (current_node && is_redirection(current_node->type))
+    {
+        fprintf(stderr, "DEBUG-REDIR-CHAIN: Processing redirection type=%s, filename='%s'\n",
+                get_token_str(current_node->type),
+                current_node->args ? current_node->args[0] : "NULL");
+        fprintf(stderr, "DEBUG-REDIR-EXEC: Processing %s redirection '%s', prev_result=%d\n",
+                get_token_str(current_node->type),
+                current_node->args ? current_node->args[0] : "NULL",
+                prev_in_redir_error);
+        
+        // Skip input redirections if we've already had an error
+        if (prev_in_redir_error && current_node->type == TYPE_IN_REDIRECT)
+        {
+            fprintf(stderr, "DEBUG-REDIR-EXEC: Skipping '%s' due to previous error\n",
+                   current_node->args ? current_node->args[0] : "NULL");
+            next_redir = current_node->redir;
+            if (!next_redir)
+                break;
+            current_node = next_redir;
+            continue;
+        }
+        
+        // Use your existing setup_redirection function
+        if (!setup_redirection(current_node, vars))
+        {
+            fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+                    0, "no");
+            
+            // NEW: Categorize the error type
+            if (current_node->type == TYPE_IN_REDIRECT || current_node->type == TYPE_HEREDOC)
+            {
+                any_input_error = 1;
+                fprintf(stderr, "DEBUG-REDIR-FIX: Setting any_input_error=1 for failed %s\n",
+                        get_token_str(current_node->type));
+                
+                prev_in_redir_error = 1;
+                fprintf(stderr, "DEBUG-REDIR-EXEC: Input redirection error\n");
+                next_redir = current_node->redir;
+                if (!next_redir)
+                    break;
+                current_node = next_redir;
+                continue;
+            }
+            else if (current_node->type == TYPE_OUT_REDIRECT || current_node->type == TYPE_APPEND_REDIRECT)
+            {
+                any_output_error = 1;
+                fprintf(stderr, "DEBUG-REDIR-FIX: Setting any_output_error=1 for failed %s\n",
+                        get_token_str(current_node->type));
+                
+                // For output redirections, always break on error
+                redir_status = 0;
+                fprintf(stderr, "DEBUG-REDIR-FIX: Breaking on output redirection error\n");
+                break;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "DEBUG-REDIR-CHAIN: Redirection result: success=%d, continuing=%s\n",
+                    1, "yes");
+        }
+        
+        next_redir = current_node->redir;
+        if (!next_redir)
+            break;
+        current_node = next_redir;
+    }
+    
+    // NEW: Context-aware error handling
+    if (any_output_error)
+    {
+        // Output errors always fail
+        redir_status = 0;
+        fprintf(stderr, "DEBUG-REDIR-FIX: Returning 0 due to output redirection error\n");
+    }
+    else if (any_input_error && !is_pipeline_context)
+    {
+        // Input errors fail only in non-pipeline context
+        redir_status = 0;
+        fprintf(stderr, "DEBUG-REDIR-FIX: Returning 0 due to input error in standalone command\n");
+    }
+    else if (any_input_error && is_pipeline_context)
+    {
+        // Input errors in pipeline context: let pipeline continue
+        redir_status = 1;  // Don't fail the redirection chain
+        fprintf(stderr, "DEBUG-REDIR-FIX: Allowing pipeline to continue despite input redirection error\n");
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-CHAIN: Chain processing completed, final_result=%d\n", redir_status);
+    fprintf(stderr, "DEBUG-REDIR-CHAIN: Finished processing redirections, status=%d\n", redir_status);
+    return (redir_status);
 }

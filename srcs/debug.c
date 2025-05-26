@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 12:18:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:14:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 03:40:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,57 +36,132 @@ void	print_node_content(FILE *fp, t_node *node)
 	fprintf(fp, "]");
 }
 
-/*
-Recursively prints the AST starting from the given node.
-indent_level controls the indentation for tree visualization.
-*/
-void	print_ast_node(FILE *fp, t_node *node, int indent_level)
+// Internal helper function with cycle detection
+static void print_ast_node_helper(FILE *fp, t_node *node, int indent_level, 
+								 void **visited, int visited_count)
 {
-	int	i;
+	int i;
 
 	if (!node || !fp)
-		return ;
+		return;
+	
+	// Prevent infinite recursion with depth limit
+	if (visited_count >= 100) {
+		fprintf(fp, " [MAX DEPTH EXCEEDED]\n");
+		return;
+	}
+	
+	// Check for cycles in the AST
+	for (i = 0; i < visited_count; i++) {
+		if (visited[i] == node) {
+			fprintf(fp, " [CYCLE DETECTED]\n");
+			return;
+		}
+	}
+	
+	// Add this node to visited array
+	visited[visited_count++] = node;
+	
+	// Original function implementation
 	i = 0;
-	while (i < indent_level)
-	{
+	while (i < indent_level) {
 		fprintf(fp, "  ");
 		i++;
 	}
 	print_node_content(fp, node);
 	fprintf(fp, "\n");
-	if (node->redir)
-	{
+	
+	if (node->redir) {
 		i = 0;
-		while (i < indent_level)
-		{
+		while (i < indent_level) {
 			fprintf(fp, "  ");
 			i++;
 		}
 		fprintf(fp, "├─(redir)-> ");
-		print_ast_node(fp, node->redir, 0);
+		print_ast_node_helper(fp, node->redir, 0, visited, visited_count);
 	}
-	if (node->left)
-	{
+	
+	if (node->left) {
 		i = 0;
-		while (i < indent_level)
-		{
+		while (i < indent_level) {
 			fprintf(fp, "  ");
 			i++;
 		}
 		fprintf(fp, "├─(left)-> ");
-		print_ast_node(fp, node->left, indent_level + 1);
+		print_ast_node_helper(fp, node->left, indent_level + 1, visited, visited_count);
 	}
-	if (node->right)
-	{
+	
+	if (node->right) {
 		i = 0;
-		while (i < indent_level)
-		{
+		while (i < indent_level) {
 			fprintf(fp, "  ");
 			i++;
 		}
 		fprintf(fp, "└─(right)-> ");
-		print_ast_node(fp, node->right, indent_level + 1);
+		print_ast_node_helper(fp, node->right, indent_level + 1, visited, visited_count);
 	}
+}
+
+/*
+Recursively prints the AST starting from the given node.
+indent_level controls the indentation for tree visualization.
+*/
+// void	print_ast_node(FILE *fp, t_node *node, int indent_level)
+// {
+// 	int	i;
+
+// 	if (!node || !fp)
+// 		return ;
+// 	i = 0;
+// 	while (i < indent_level)
+// 	{
+// 		fprintf(fp, "  ");
+// 		i++;
+// 	}
+// 	print_node_content(fp, node);
+// 	fprintf(fp, "\n");
+// 	if (node->redir)
+// 	{
+// 		i = 0;
+// 		while (i < indent_level)
+// 		{
+// 			fprintf(fp, "  ");
+// 			i++;
+// 		}
+// 		fprintf(fp, "├─(redir)-> ");
+// 		print_ast_node(fp, node->redir, 0);
+// 	}
+// 	if (node->left)
+// 	{
+// 		i = 0;
+// 		while (i < indent_level)
+// 		{
+// 			fprintf(fp, "  ");
+// 			i++;
+// 		}
+// 		fprintf(fp, "├─(left)-> ");
+// 		print_ast_node(fp, node->left, indent_level + 1);
+// 	}
+// 	if (node->right)
+// 	{
+// 		i = 0;
+// 		while (i < indent_level)
+// 		{
+// 			fprintf(fp, "  ");
+// 			i++;
+// 		}
+// 		fprintf(fp, "└─(right)-> ");
+// 		print_ast_node(fp, node->right, indent_level + 1);
+// 	}
+// }
+void print_ast_node(FILE *fp, t_node *node, int indent_level)
+{
+	// Create an array to track visited nodes for cycle detection
+	void *visited[100] = {0};
+	int visited_count = 0;
+	
+	// Call internal helper with cycle detection
+	print_ast_node_helper(fp, node, indent_level, visited, visited_count);
 }
 
 /*
@@ -115,7 +190,7 @@ void	print_ast(t_node *root, const char *filename)
 		fp = stdout;
 	fprintf(fp, "=== ABSTRACT SYNTAX TREE ===\n");
 	print_ast_node(fp, root, 0);
-	fprintf(fp, "=END=\n");
+	// fprintf(fp, "=END=\n");
 	if (filename)
 		fclose(fp);
 }
@@ -156,7 +231,7 @@ void	print_token_list(t_node *head, const char *filename)
 		fprintf(fp, "\n");
 		current = current->next;
 	}
-	fprintf(fp, "=END=\n");
+	fprintf(fp, "\n");
 	if (filename)
 		fclose(fp);
 }
@@ -164,33 +239,35 @@ void	print_token_list(t_node *head, const char *filename)
 /*
 Prints complete details about a node's structure and contents
 */
-void print_node_debug(t_node *node, const char *prefix, const char *location)
+void	print_node_debug(t_node *node, const char *prefix, const char *location)
 {
 	fprintf(stderr, "DEBUG-NODE[%s@%s]: ", prefix, location);
-	
-	if (!node) {
+
+	if (!node)
+	{
 		fprintf(stderr, "NULL node\n");
-		return;
+		return ;
 	}
-	
 	// Print node type
 	fprintf(stderr, "Type=%s", get_token_str(node->type));
-	
 	// Print arguments
 	fprintf(stderr, ", Args=[");
-	if (node->args) {
+	if (node->args)
+	{
 		int i = 0;
-		while (node->args[i]) {
+		while (node->args[i])
+		{
 			fprintf(stderr, "'%s'", node->args[i]);
 			if (node->args[i+1])
 				fprintf(stderr, ", ");
 			i++;
 		}
-	} else {
+	}
+	else
+	{
 		fprintf(stderr, "NULL");
 	}
 	fprintf(stderr, "]");
-	
 	// Print connections
 	fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
 		(void*)node->left, (void*)node->right, (void*)node->redir, 
@@ -202,15 +279,15 @@ Prints detailed information about a node's arguments
 */
 void	print_node_args(t_node *node, const char *prefix)
 {
-	int i;
+	int	i;
 
 	if (!node)
 	{
 		fprintf(stderr, "DEBUG-%s: NULL node\n", prefix);
 		return ;
 	}
-	fprintf(stderr, "DEBUG-%s: Node type=%s, Args=[", 
-			prefix, get_token_str(node->type));
+	fprintf(stderr, "DEBUG-%s: Node type=%s, Args=[",
+		prefix, get_token_str(node->type));
 	if (node->args)
 	{
 		i = 0;
@@ -257,29 +334,118 @@ void	print_node_linked_list(t_node *head, const char *prefix)
 /*
 Prints a detailed tree visualization of the AST with pointer connections
 */
-void	print_ast_detailed(t_node *root, const char *prefix)
+// void	print_ast_detailed(t_node *root, const char *prefix)
+// {
+// 	if (!root)
+// 	{
+// 		fprintf(stderr, "DEBUG-%s: Empty AST (no root node)\n", prefix);
+// 		return ;
+// 	}
+// 	fprintf(stderr, "DEBUG-%s: = DETAILED AST =\n", prefix);
+// 	// Queue for breadth-first traversal
+// 	t_node **queue = malloc(sizeof(t_node *) * 1000);  // Assuming max 1000 nodes
+// 	if (!queue)
+// 	{
+// 		fprintf(stderr, "DEBUG-%s: Memory allocation failed for AST traversal\n", prefix);
+// 		return ;
+// 	}
+// 	int front = 0, rear = 0;
+// 	queue[rear++] = root;
+// 	while (front < rear)
+// 	{
+// 		t_node *node = queue[front++];
+// 		// Print current node details
+// 		fprintf(stderr, "DEBUG-%s: Node(%p):", prefix, (void*)node);
+// 		fprintf(stderr, " Type=%s", get_token_str(node->type));
+// 		// Print args
+// 		fprintf(stderr, ", Args=[");
+// 		if (node->args)
+// 		{
+// 			int i = 0;
+// 			while (node->args[i])
+// 			{
+// 				fprintf(stderr, "'%s'", node->args[i]);
+// 				if (node->args[i+1])
+// 					fprintf(stderr, ", ");
+// 				i++;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			fprintf(stderr, "NULL");
+// 		}
+// 		fprintf(stderr, "]");
+// 		// Print connections
+// 		fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
+// 			(void*)node->left, (void*)node->right, (void*)node->redir, 
+// 			(void*)node->prev, (void*)node->next);
+// 		// Add children to queue
+// 		if (node->left)
+// 			queue[rear++] = node->left;
+// 		if (node->right)
+// 			queue[rear++] = node->right;
+// 		if (node->redir)
+// 			queue[rear++] = node->redir;
+// 	}
+// 	free(queue);
+// 	fprintf(stderr, "DEBUG-%s: = END DETAILED AST =\n", prefix);
+// }
+void print_ast_detailed(t_node *root, const char *prefix)
 {
 	if (!root)
 	{
 		fprintf(stderr, "DEBUG-%s: Empty AST (no root node)\n", prefix);
-		return ;
+		return;
 	}
 	fprintf(stderr, "DEBUG-%s: = DETAILED AST =\n", prefix);
+	
 	// Queue for breadth-first traversal
 	t_node **queue = malloc(sizeof(t_node *) * 1000);  // Assuming max 1000 nodes
 	if (!queue)
 	{
 		fprintf(stderr, "DEBUG-%s: Memory allocation failed for AST traversal\n", prefix);
-		return ;
+		return;
 	}
+	
+	// Visited nodes tracking to prevent cycles
+	void **visited = malloc(sizeof(void *) * 1000);
+	if (!visited)
+	{
+		fprintf(stderr, "DEBUG-%s: Memory allocation failed for cycle detection\n", prefix);
+		free(queue);
+		return;
+	}
+	int visited_count = 0;
+	
 	int front = 0, rear = 0;
 	queue[rear++] = root;
+	
 	while (front < rear)
 	{
 		t_node *node = queue[front++];
+		
+		// Check for cycles
+		int is_cycle = 0;
+		for (int i = 0; i < visited_count; i++)
+		{
+			if (visited[i] == node)
+			{
+				fprintf(stderr, "DEBUG-%s: [CYCLE DETECTED] Node(%p)\n", prefix, (void*)node);
+				is_cycle = 1;
+				break;
+			}
+		}
+		
+		if (is_cycle)
+			continue;
+			
+		// Add to visited
+		visited[visited_count++] = node;
+		
 		// Print current node details
 		fprintf(stderr, "DEBUG-%s: Node(%p):", prefix, (void*)node);
 		fprintf(stderr, " Type=%s", get_token_str(node->type));
+		
 		// Print args
 		fprintf(stderr, ", Args=[");
 		if (node->args)
@@ -298,10 +464,21 @@ void	print_ast_detailed(t_node *root, const char *prefix)
 			fprintf(stderr, "NULL");
 		}
 		fprintf(stderr, "]");
+		
 		// Print connections
-		fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
-			(void*)node->left, (void*)node->right, (void*)node->redir, 
-			(void*)node->prev, (void*)node->next);
+		fprintf(stderr, ", Connections: {");
+		if (node->left)
+			fprintf(stderr, " left->%p", (void*)node->left);
+		if (node->right)
+			fprintf(stderr, " right->%p", (void*)node->right);
+		if (node->redir)
+			fprintf(stderr, " redir->%p", (void*)node->redir);
+		if (node->prev)
+			fprintf(stderr, " prev->%p", (void*)node->prev);
+		if (node->next)
+			fprintf(stderr, " next->%p", (void*)node->next);
+		fprintf(stderr, " }\n");
+		
 		// Add children to queue
 		if (node->left)
 			queue[rear++] = node->left;
@@ -310,8 +487,9 @@ void	print_ast_detailed(t_node *root, const char *prefix)
 		if (node->redir)
 			queue[rear++] = node->redir;
 	}
+	
+	free(visited);
 	free(queue);
-	fprintf(stderr, "DEBUG-%s: = END DETAILED AST =\n", prefix);
 }
 
 /*

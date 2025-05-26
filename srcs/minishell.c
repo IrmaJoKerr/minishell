@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:32:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/26 07:17:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,9 @@ void	build_and_execute(t_vars *vars)
 	 * Debug example: Uncomment any of these lines to see debug output
 	 * These functions can now be called directly without DEBUG flags
 	 */
-	debug_print_tokens(vars->head);          // Print token list to stdout
-	debug_analyze_list(vars->head);          // Detailed token analysis to stderr
+	// debug_print_tokens(vars->head);          // Print token list to stdout
+	// debug_analyze_list(vars->head);          // Detailed token analysis to stderr
 	// debug_save_tokens(vars->head, "tokens.txt"); // Save tokens to file
-	
 	vars->astroot = proc_token_list(vars);
 	if (vars->astroot)
 	{

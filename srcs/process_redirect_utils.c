@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:21:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 03:27:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,26 @@ Resets redirection tracking state in the pipes structure.
 - Prepares pipes structure for new redirection processing.
 Works with proc_redir to clean state before processing.
 */
+// void	reset_redir_tracking(t_pipe *pipes)
+// {
+// 	if (!pipes)
+// 		return ;
+// 	pipes->last_cmd = NULL;
+// 	pipes->redir_root = NULL;
+// 	pipes->last_in_redir = NULL;
+// 	pipes->last_out_redir = NULL;
+// 	pipes->cmd_redir = NULL;
+// }
 void	reset_redir_tracking(t_pipe *pipes)
 {
-	if (!pipes)
-		return ;
-	pipes->last_cmd = NULL;
-	pipes->redir_root = NULL;
-	pipes->last_in_redir = NULL;
-	pipes->last_out_redir = NULL;
-	pipes->cmd_redir = NULL;
+    if (!pipes)
+        return ;
+    fprintf(stderr, "REDIR-DBG: Resetting redirection tracking state\n");
+    pipes->last_cmd = NULL;
+    pipes->redir_root = NULL;
+    pipes->last_in_redir = NULL;
+    pipes->last_out_redir = NULL;
+    pipes->cmd_redir = NULL;
 }
 
 /*
@@ -36,16 +47,41 @@ Returns:
 - 1 if redirection has valid syntax.
 - 0 otherwise.
 */
+// int	is_valid_redir_node(t_node *current)
+// {
+// 	if (!current)
+// 		return (0);
+// 	if (!is_redirection(current->type))
+// 		return (0);
+// 	if (!current->next || (current->next->type != TYPE_CMD
+// 			&& current->next->type != TYPE_ARGS))
+// 		return (0);
+// 	return (1);
+// }
 int	is_valid_redir_node(t_node *current)
 {
-	if (!current)
-		return (0);
-	if (!is_redirection(current->type))
-		return (0);
-	if (!current->next || (current->next->type != TYPE_CMD
-			&& current->next->type != TYPE_ARGS))
-		return (0);
-	return (1);
+    if (!current)
+    {
+        fprintf(stderr, "REDIR-DBG: Invalid node: NULL\n");
+        return (0);
+    }
+    if (!is_redirection(current->type))
+    {
+        fprintf(stderr, "REDIR-DBG: Node type %s is not a redirection\n", 
+                get_token_str(current->type));
+        return (0);
+    }
+    if (!current->next || (current->next->type != TYPE_CMD
+            && current->next->type != TYPE_ARGS))
+    {
+        fprintf(stderr, "REDIR-DBG: Redirection missing target: %s\n", 
+                current->next ? get_token_str(current->next->type) : "NULL");
+        return (0);
+    }
+    fprintf(stderr, "REDIR-DBG: Valid redirection node %s with target %s\n", 
+            get_token_str(current->type), 
+            get_token_str(current->next->type));
+    return (1);
 }
 
 /*
@@ -55,12 +91,26 @@ Configures a redirection node with source and target commands.
 - Establishes the redirection relationship in the AST.
 Works with proc_redir().
 */
+// void	set_redir_node(t_node *redir, t_node *cmd, t_node *target)
+// {
+// 	if (!redir || !cmd || !target)
+// 		return ;
+// 	redir->left = cmd;
+// 	redir->right = target;
+// }
 void	set_redir_node(t_node *redir, t_node *cmd, t_node *target)
 {
-	if (!redir || !cmd || !target)
-		return ;
-	redir->left = cmd;
-	redir->right = target;
+    if (!redir || !cmd || !target)
+    {
+        fprintf(stderr, "REDIR-DBG: Invalid set_redir_node arguments\n");
+        return ;
+    }
+    fprintf(stderr, "REDIR-DBG: Setting redirection: %s -> %s -> %s\n",
+            cmd->args ? cmd->args[0] : "NULL",
+            get_token_str(redir->type),
+            target->args ? target->args[0] : "NULL");
+    redir->left = cmd;
+    redir->right = target;
 }
 
 /*
@@ -73,19 +123,48 @@ Returns:
 - NULL if no matching redirection found.
 Works with swap_cmd_redir() to connect commands and redirections in the AST.
 */
+// t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+// 	t_node	*current;
+
+// 	if (!redir_root || !cmd_node)
+// 		return (NULL);
+// 	current = redir_root;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type)
+// 			&& get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+// 			return (current);
+// 		current = current->next;
+// 	}
+// 	return (NULL);
+// }
 t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
 {
-	t_node	*current;
+    t_node	*current;
 
-	if (!redir_root || !cmd_node)
-		return (NULL);
-	current = redir_root;
-	while (current)
-	{
-		if (is_redirection(current->type)
-			&& get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
-			return (current);
-		current = current->next;
-	}
-	return (NULL);
+    if (!redir_root || !cmd_node)
+    {
+        fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+        return (NULL);
+    }
+    fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+            cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+    current = redir_root;
+    while (current)
+    {
+        if (is_redirection(current->type)
+            && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+        {
+            fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s'\n",
+                    get_token_str(current->type),
+                    cmd_node->args ? cmd_node->args[0] : "NULL");
+            return (current);
+        }
+        current = current->next;
+    }
+    fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+            cmd_node->args ? cmd_node->args[0] : "NULL");
+    return (NULL);
 }
