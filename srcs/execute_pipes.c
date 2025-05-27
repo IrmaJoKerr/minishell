@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 03:44:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 20:20:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -913,154 +913,451 @@ Example: For "ls -l | grep txt"
 //     vars->error_code = right_status;
 //     return (right_status);
 // }
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int pipe_fd[2];
+//     pid_t left_pid, right_pid;
+//     int left_status, right_status;
+//     int left_result, right_result;
+
+//     fprintf(stderr, "PIPE-DBG-MAIN: === PIPELINE EXECUTION START ===\n");
+//     fprintf(stderr, "PIPE-DBG-MAIN: %p\n", (void*)pipe_node);
+    
+//     if (!pipe_node || !pipe_node->left || !pipe_node->right) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Invalid pipe structure\n");
+//         return 1;
+//     }
+
+//     // Log pipe structure
+//     fprintf(stderr, "PIPE-DBG-MAIN: Left type=%s ", 
+//             get_token_str(pipe_node->left->type));
+//     fprintf(stderr, "Right type=%s\n", 
+//             get_token_str(pipe_node->right->type));
+
+//     // Determine the actual command nodes
+//     if (pipe_node->left->type == TYPE_CMD)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left is direct command '%s'\n",
+//                 pipe_node->left->args ? pipe_node->left->args[0] : "NULL");
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left is %s node\n",
+//                 get_token_str(pipe_node->left->type));
+
+//     if (pipe_node->right->type == TYPE_CMD)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is direct command '%s'\n",
+//                 pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+//     else if (pipe_node->right->type == TYPE_PIPE)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is another pipe node\n");
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is %s node\n",
+//                 get_token_str(pipe_node->right->type));
+
+//     // Create pipe
+//     if (pipe(pipe_fd) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Failed to create pipe: %s\n", strerror(errno));
+//         return 1;
+//     }
+//     fprintf(stderr, "PIPE-DBG-MAIN: Created pipe: read_fd=%d, write_fd=%d\n", 
+//             pipe_fd[0], pipe_fd[1]);
+
+//     // Fork for left command
+//     fprintf(stderr, "PIPE-DBG-MAIN: Setting up left pipe process for '%s'\n",
+//             pipe_node->left->args ? pipe_node->left->args[0] : 
+//             (pipe_node->left->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->left->type)));
+
+//     left_pid = fork();
+//     if (left_pid == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left fork failed: %s\n", strerror(errno));
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         return 1;
+//     }
+
+//     if (left_pid == 0) {
+//         // Child process for left command
+//         fprintf(stderr, "PIPE-DBG-MAIN: %d\n", getpid());
+//         left_result = exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         fprintf(stderr, "PIPE-DBG-LEFT: Exiting with status %d\n", left_result);
+//         exit(left_result);
+//     }
+
+//     // Parent continues here
+//     // Close write end of pipe for parent
+//     if (close(pipe_fd[1]) == -1)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error closing write end in parent: %s\n", strerror(errno));
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Parent closed write end fd=%d\n", pipe_fd[1]);
+
+//     // Fork for right command
+//     fprintf(stderr, "PIPE-DBG-MAIN: Setting up right pipe process for '%s'\n",
+//             pipe_node->right->args ? pipe_node->right->args[0] : 
+//             (pipe_node->right->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->right->type)));
+
+//     right_pid = fork();
+//     if (right_pid == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right fork failed: %s\n", strerror(errno));
+//         close(pipe_fd[0]);
+//         kill(left_pid, SIGTERM);
+//         waitpid(left_pid, NULL, 0);
+//         return 1;
+//     }
+
+//     if (right_pid == 0) {
+//         // Child process for right command
+//         right_result = exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         fprintf(stderr, "PIPE-DBG-RIGHT: Exiting with status %d\n", right_result);
+//         exit(right_result);
+//     }
+
+//     // Parent continues here
+//     // Close read end of pipe in parent
+//     if (close(pipe_fd[0]) == -1)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error closing read end in parent: %s\n", strerror(errno));
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Parent closed read end fd=%d\n", pipe_fd[0]);
+
+//     // Wait for left process
+//     fprintf(stderr, "PIPE-DBG-MAIN: Waiting for left process (pid=%d)\n", left_pid);
+//     if (waitpid(left_pid, &left_status, 0) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for left process: %s\n", strerror(errno));
+//     }
+    
+//     // Check left process status
+//     if (WIFEXITED(left_status)) {
+//         left_result = WEXITSTATUS(left_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process exited with status %d\n", left_result);
+//     } else if (WIFSIGNALED(left_status)) {
+//         left_result = 128 + WTERMSIG(left_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process terminated by signal %d\n", 
+//                 WTERMSIG(left_status));
+//     } else {
+//         left_result = 1;
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process exited abnormally\n");
+//     }
+
+//     // Wait for right process
+//     fprintf(stderr, "PIPE-DBG-MAIN: Waiting for right process (pid=%d)\n", right_pid);
+//     if (waitpid(right_pid, &right_status, 0) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for right process: %s\n", strerror(errno));
+//     }
+    
+//     // Check right process status
+//     if (WIFEXITED(right_status)) {
+//         right_result = WEXITSTATUS(right_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process exited with status %d\n", right_result);
+//     } else if (WIFSIGNALED(right_status)) {
+//         right_result = 128 + WTERMSIG(right_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process terminated by signal %d\n", 
+//                 WTERMSIG(right_status));
+//     } else {
+//         right_result = 1;
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process exited abnormally\n");
+//     }
+
+//     // Check for special case - if left failed with permission error but right succeeded
+//     if (left_result == ERR_PERMISSIONS && right_result == 0) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left had permission error but right succeeded\n");
+//         fprintf(stderr, "PIPE-DBG-MAIN: CORRECTING final status to right result (0)\n");
+//         return 0;
+//     }
+
+//     // Return the exit status of the last command in the pipeline
+//     fprintf(stderr, "PIPE-DBG-MAIN: Pipeline finished, returning right status: %d\n", right_result);
+//     return right_result;
+// }
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int pipe_fd[2];
+//     pid_t left_pid, right_pid;
+//     int left_status, right_status;
+//     int left_result, right_result;
+
+//     fprintf(stderr, "PIPE-DBG-MAIN: === PIPELINE EXECUTION START ===\n");
+//     fprintf(stderr, "PIPE-DBG-MAIN: %p\n", (void*)pipe_node);
+    
+//     if (!pipe_node || !pipe_node->left || !pipe_node->right) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Invalid pipe structure\n");
+//         return 1;
+//     }
+
+//     // Log pipe structure
+//     fprintf(stderr, "PIPE-DBG-MAIN: Left type=%s ", 
+//             get_token_str(pipe_node->left->type));
+//     fprintf(stderr, "Right type=%s\n", 
+//             get_token_str(pipe_node->right->type));
+
+//     // Determine the actual command nodes
+//     if (pipe_node->left->type == TYPE_CMD)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left is direct command '%s'\n",
+//                 pipe_node->left->args ? pipe_node->left->args[0] : "NULL");
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left is %s node\n",
+//                 get_token_str(pipe_node->left->type));
+
+//     if (pipe_node->right->type == TYPE_CMD)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is direct command '%s'\n",
+//                 pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
+//     else if (pipe_node->right->type == TYPE_PIPE)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is another pipe node\n");
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right is %s node\n",
+//                 get_token_str(pipe_node->right->type));
+
+//     // Create pipe
+//     if (pipe(pipe_fd) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Failed to create pipe: %s\n", strerror(errno));
+//         return 1;
+//     }
+//     fprintf(stderr, "PIPE-DBG-MAIN: Created pipe: read_fd=%d, write_fd=%d\n", 
+//             pipe_fd[0], pipe_fd[1]);
+
+//     // Fork for left command
+//     fprintf(stderr, "PIPE-DBG-MAIN: Setting up left pipe process for '%s'\n",
+//             pipe_node->left->args ? pipe_node->left->args[0] : 
+//             (pipe_node->left->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->left->type)));
+
+//     left_pid = fork();
+//     if (left_pid == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left fork failed: %s\n", strerror(errno));
+//         close(pipe_fd[0]);
+//         close(pipe_fd[1]);
+//         return 1;
+//     }
+
+//     if (left_pid == 0) {
+//         // Child process for left command
+//         fprintf(stderr, "PIPE-DBG-MAIN: %d\n", getpid());
+//         left_result = exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         fprintf(stderr, "PIPE-DBG-LEFT: Exiting with status %d\n", left_result);
+//         exit(left_result);
+//     }
+
+//     // Parent continues here
+//     // Close write end of pipe for parent
+//     if (close(pipe_fd[1]) == -1)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error closing write end in parent: %s\n", strerror(errno));
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Parent closed write end fd=%d\n", pipe_fd[1]);
+
+//     // Fork for right command
+//     fprintf(stderr, "PIPE-DBG-MAIN: Setting up right pipe process for '%s'\n",
+//             pipe_node->right->args ? pipe_node->right->args[0] : 
+//             (pipe_node->right->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->right->type)));
+
+//     right_pid = fork();
+//     if (right_pid == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right fork failed: %s\n", strerror(errno));
+//         close(pipe_fd[0]);
+//         kill(left_pid, SIGTERM);
+//         waitpid(left_pid, NULL, 0);
+//         return 1;
+//     }
+
+//     if (right_pid == 0) {
+//         // Child process for right command
+//         right_result = exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         fprintf(stderr, "PIPE-DBG-RIGHT: Exiting with status %d\n", right_result);
+//         exit(right_result);
+//     }
+
+//     // Parent continues here
+//     // Close read end of pipe in parent
+//     if (close(pipe_fd[0]) == -1)
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error closing read end in parent: %s\n", strerror(errno));
+//     else
+//         fprintf(stderr, "PIPE-DBG-MAIN: Parent closed read end fd=%d\n", pipe_fd[0]);
+
+//     // Wait for left process
+//     fprintf(stderr, "PIPE-DBG-MAIN: Waiting for left process (pid=%d)\n", left_pid);
+//     if (waitpid(left_pid, &left_status, 0) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for left process: %s\n", strerror(errno));
+//     }
+    
+//     // Check left process status
+//     if (WIFEXITED(left_status)) {
+//         left_result = WEXITSTATUS(left_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process exited with status %d\n", left_result);
+//     } else if (WIFSIGNALED(left_status)) {
+//         left_result = 128 + WTERMSIG(left_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process terminated by signal %d\n", 
+//                 WTERMSIG(left_status));
+//     } else {
+//         left_result = 1;
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left process exited abnormally\n");
+//     }
+
+//     // Wait for right process
+//     fprintf(stderr, "PIPE-DBG-MAIN: Waiting for right process (pid=%d)\n", right_pid);
+//     if (waitpid(right_pid, &right_status, 0) == -1) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for right process: %s\n", strerror(errno));
+//     }
+    
+//     // Check right process status
+//     if (WIFEXITED(right_status)) {
+//         right_result = WEXITSTATUS(right_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process exited with status %d\n", right_result);
+//     } else if (WIFSIGNALED(right_status)) {
+//         right_result = 128 + WTERMSIG(right_status);
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process terminated by signal %d\n", 
+//                 WTERMSIG(right_status));
+//     } else {
+//         right_result = 1;
+//         fprintf(stderr, "PIPE-DBG-MAIN: Right process exited abnormally\n");
+//     }
+
+//     // CRITICAL FIX: When the left process fails with a permission error but right succeeded
+//     if (left_result == ERR_PERMISSIONS && right_result == 0) {
+//         fprintf(stderr, "PIPE-DBG-MAIN: Left had permission error but right succeeded\n");
+//         fprintf(stderr, "PIPE-DBG-MAIN: CORRECTING final status to right result (0)\n");
+//         return 0;
+//     }
+
+//     // Return the exit status of the last command in the pipeline
+//     fprintf(stderr, "PIPE-DBG-MAIN: Pipeline finished, returning right status: %d\n", right_result);
+//     return right_result;
+// }
+// int execute_pipes(t_node *pipe_node, t_vars *vars)
+// {
+//     int     pipe_fd[2];
+//     pid_t   left_pid, right_pid;
+//     int     status, left_status, right_status;
+    
+//     fprintf(stderr, "DEBUG-PIPELINE: === PIPELINE EXECUTION START ===\n");
+//     fprintf(stderr, "DEBUG-PIPELINE: %p Left type=%s Right type=%s\n", 
+//             (void*)pipe_node,
+//             pipe_node->left ? get_token_str(pipe_node->left->type) : "NULL",
+//             pipe_node->right ? get_token_str(pipe_node->right->type) : "NULL");
+    
+//     // Setup pipe
+//     if (pipe(pipe_fd) == -1) {
+//         perror("pipe");
+//         vars->error_code = 1;
+//         return 1;
+//     }
+    
+//     fprintf(stderr, "DEBUG-PIPELINE: read_fd=%d, write_fd=%d\n", pipe_fd[0], pipe_fd[1]);
+    
+//     // Execute left command
+//     left_pid = fork();
+//     if (left_pid == 0) {
+//         // CRITICAL FIX: Always execute left command in child process, but allow it to fail
+//         int exit_code = exec_pipe_left(pipe_node->left, pipe_fd, vars);
+//         fprintf(stderr, "DEBUG-PIPELINE: Left process exiting with status %d\n", exit_code);
+//         exit(exit_code);
+//     }
+    
+//     // Parent: close write end after fork
+//     close(pipe_fd[1]);
+    
+//     // Execute right command
+//     right_pid = fork();
+//     if (right_pid == 0) {
+//         // CRITICAL FIX: Always execute right command, regardless of left command's status
+//         int exit_code = exec_pipe_right(pipe_node->right, pipe_fd, vars);
+//         fprintf(stderr, "DEBUG-PIPELINE: Right process exiting with status %d\n", exit_code);
+//         exit(exit_code);
+//     }
+    
+//     // Parent: close read end after fork
+//     close(pipe_fd[0]);
+    
+//     // Wait for processes
+//     fprintf(stderr, "DEBUG-PIPELINE: Waiting for left process (pid=%d)\n", left_pid);
+//     waitpid(left_pid, &left_status, 0);
+//     fprintf(stderr, "DEBUG-PIPELINE: Left process exited with status %d\n", 
+//             WIFEXITED(left_status) ? WEXITSTATUS(left_status) : 128 + WTERMSIG(left_status));
+    
+//     fprintf(stderr, "DEBUG-PIPELINE: Waiting for right process (pid=%d)\n", right_pid);
+//     waitpid(right_pid, &right_status, 0);
+//     fprintf(stderr, "DEBUG-PIPELINE: Right process exited with status %d\n", 
+//             WIFEXITED(right_status) ? WEXITSTATUS(right_status) : 128 + WTERMSIG(right_status));
+    
+//     // CRITICAL FIX: Use the exit status of the right (last) command in the pipeline
+//     status = right_status;
+//     handle_cmd_status(status, vars);
+// 	return right_status; 
+// }
 int execute_pipes(t_node *pipe_node, t_vars *vars)
 {
-    int pipe_fd[2];
-    pid_t left_pid, right_pid;
-    int left_status, right_status;
-    int left_result, right_result;
-
-    fprintf(stderr, "PIPE-DBG-MAIN: === PIPELINE EXECUTION START ===\n");
-    fprintf(stderr, "PIPE-DBG-MAIN: %p\n", (void*)pipe_node);
+    int     pipe_fd[2];
+    pid_t   left_pid, right_pid;
+    int     status, left_status, right_status;
     
-    if (!pipe_node || !pipe_node->left || !pipe_node->right) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Invalid pipe structure\n");
-        return 1;
-    }
-
-    // Log pipe structure
-    fprintf(stderr, "PIPE-DBG-MAIN: Left type=%s ", 
-            get_token_str(pipe_node->left->type));
-    fprintf(stderr, "Right type=%s\n", 
-            get_token_str(pipe_node->right->type));
-
-    // Determine the actual command nodes
-    if (pipe_node->left->type == TYPE_CMD)
-        fprintf(stderr, "PIPE-DBG-MAIN: Left is direct command '%s'\n",
-                pipe_node->left->args ? pipe_node->left->args[0] : "NULL");
-    else
-        fprintf(stderr, "PIPE-DBG-MAIN: Left is %s node\n",
-                get_token_str(pipe_node->left->type));
-
-    if (pipe_node->right->type == TYPE_CMD)
-        fprintf(stderr, "PIPE-DBG-MAIN: Right is direct command '%s'\n",
-                pipe_node->right->args ? pipe_node->right->args[0] : "NULL");
-    else if (pipe_node->right->type == TYPE_PIPE)
-        fprintf(stderr, "PIPE-DBG-MAIN: Right is another pipe node\n");
-    else
-        fprintf(stderr, "PIPE-DBG-MAIN: Right is %s node\n",
-                get_token_str(pipe_node->right->type));
-
-    // Create pipe
+    fprintf(stderr, "DEBUG-PIPELINE: === PIPELINE EXECUTION START ===\n");
+    fprintf(stderr, "DEBUG-PIPELINE: %p Left type=%s Right type=%s\n", 
+            (void*)pipe_node,
+            pipe_node->left ? get_token_str(pipe_node->left->type) : "NULL",
+            pipe_node->right ? get_token_str(pipe_node->right->type) : "NULL");
+    
+    // Setup pipe
     if (pipe(pipe_fd) == -1) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Failed to create pipe: %s\n", strerror(errno));
+        perror("pipe");
+        vars->error_code = 1;
         return 1;
     }
-    fprintf(stderr, "PIPE-DBG-MAIN: Created pipe: read_fd=%d, write_fd=%d\n", 
-            pipe_fd[0], pipe_fd[1]);
-
-    // Fork for left command
-    fprintf(stderr, "PIPE-DBG-MAIN: Setting up left pipe process for '%s'\n",
-            pipe_node->left->args ? pipe_node->left->args[0] : 
-            (pipe_node->left->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->left->type)));
-
+    
+    fprintf(stderr, "DEBUG-PIPELINE: read_fd=%d, write_fd=%d\n", pipe_fd[0], pipe_fd[1]);
+    
+    // Execute left command
     left_pid = fork();
     if (left_pid == -1) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Left fork failed: %s\n", strerror(errno));
+        perror("fork (left)");
         close(pipe_fd[0]);
         close(pipe_fd[1]);
         return 1;
     }
-
+    
     if (left_pid == 0) {
         // Child process for left command
-        fprintf(stderr, "PIPE-DBG-MAIN: %d\n", getpid());
-        left_result = exec_pipe_left(pipe_node->left, pipe_fd, vars);
-        fprintf(stderr, "PIPE-DBG-LEFT: Exiting with status %d\n", left_result);
-        exit(left_result);
+        int exit_code = exec_pipe_left(pipe_node->left, pipe_fd, vars);
+        fprintf(stderr, "DEBUG-PIPELINE: Left process exiting with status %d\n", exit_code);
+        exit(exit_code);
     }
-
-    // Parent continues here
-    // Close write end of pipe for parent
-    if (close(pipe_fd[1]) == -1)
-        fprintf(stderr, "PIPE-DBG-MAIN: Error closing write end in parent: %s\n", strerror(errno));
-    else
-        fprintf(stderr, "PIPE-DBG-MAIN: Parent closed write end fd=%d\n", pipe_fd[1]);
-
-    // Fork for right command
-    fprintf(stderr, "PIPE-DBG-MAIN: Setting up right pipe process for '%s'\n",
-            pipe_node->right->args ? pipe_node->right->args[0] : 
-            (pipe_node->right->type == TYPE_CMD ? "CMD" : get_token_str(pipe_node->right->type)));
-
+    
+    // Parent: close write end after fork
+    close(pipe_fd[1]);
+    
+    // Execute right command
     right_pid = fork();
     if (right_pid == -1) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Right fork failed: %s\n", strerror(errno));
+        perror("fork (right)");
         close(pipe_fd[0]);
         kill(left_pid, SIGTERM);
         waitpid(left_pid, NULL, 0);
         return 1;
     }
-
+    
     if (right_pid == 0) {
         // Child process for right command
-        right_result = exec_pipe_right(pipe_node->right, pipe_fd, vars);
-        fprintf(stderr, "PIPE-DBG-RIGHT: Exiting with status %d\n", right_result);
-        exit(right_result);
-    }
-
-    // Parent continues here
-    // Close read end of pipe in parent
-    if (close(pipe_fd[0]) == -1)
-        fprintf(stderr, "PIPE-DBG-MAIN: Error closing read end in parent: %s\n", strerror(errno));
-    else
-        fprintf(stderr, "PIPE-DBG-MAIN: Parent closed read end fd=%d\n", pipe_fd[0]);
-
-    // Wait for left process
-    fprintf(stderr, "PIPE-DBG-MAIN: Waiting for left process (pid=%d)\n", left_pid);
-    if (waitpid(left_pid, &left_status, 0) == -1) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for left process: %s\n", strerror(errno));
+        int exit_code = exec_pipe_right(pipe_node->right, pipe_fd, vars);
+        fprintf(stderr, "DEBUG-PIPELINE: Right process exiting with status %d\n", exit_code);
+        exit(exit_code);
     }
     
-    // Check left process status
-    if (WIFEXITED(left_status)) {
-        left_result = WEXITSTATUS(left_status);
-        fprintf(stderr, "PIPE-DBG-MAIN: Left process exited with status %d\n", left_result);
-    } else if (WIFSIGNALED(left_status)) {
-        left_result = 128 + WTERMSIG(left_status);
-        fprintf(stderr, "PIPE-DBG-MAIN: Left process terminated by signal %d\n", 
-                WTERMSIG(left_status));
-    } else {
-        left_result = 1;
-        fprintf(stderr, "PIPE-DBG-MAIN: Left process exited abnormally\n");
-    }
-
-    // Wait for right process
-    fprintf(stderr, "PIPE-DBG-MAIN: Waiting for right process (pid=%d)\n", right_pid);
-    if (waitpid(right_pid, &right_status, 0) == -1) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Error waiting for right process: %s\n", strerror(errno));
+    // Parent: close read end after fork
+    close(pipe_fd[0]);
+    
+    // Wait for processes
+    fprintf(stderr, "DEBUG-PIPELINE: Waiting for left process (pid=%d)\n", left_pid);
+    waitpid(left_pid, &left_status, 0);
+    fprintf(stderr, "DEBUG-PIPELINE: Left process exited with status %d\n", 
+            WIFEXITED(left_status) ? WEXITSTATUS(left_status) : 128 + WTERMSIG(left_status));
+    
+    fprintf(stderr, "DEBUG-PIPELINE: Waiting for right process (pid=%d)\n", right_pid);
+    waitpid(right_pid, &right_status, 0);
+    fprintf(stderr, "DEBUG-PIPELINE: Right process exited with status %d\n", 
+            WIFEXITED(right_status) ? WEXITSTATUS(right_status) : 128 + WTERMSIG(right_status));
+    
+    // CRITICAL FIX: ALWAYS use the right side's status, regardless of left side failures
+    status = right_status;
+    
+    // Extract and set the actual exit code
+    if (WIFEXITED(status)) {
+        vars->error_code = WEXITSTATUS(status);
+        fprintf(stderr, "DEBUG-PIPELINE: Setting pipeline exit code to %d (from right side)\n", vars->error_code);
+    } else if (WIFSIGNALED(status)) {
+        vars->error_code = 128 + WTERMSIG(status);
+        fprintf(stderr, "DEBUG-PIPELINE: Setting pipeline exit code to %d (signal+128)\n", vars->error_code);
     }
     
-    // Check right process status
-    if (WIFEXITED(right_status)) {
-        right_result = WEXITSTATUS(right_status);
-        fprintf(stderr, "PIPE-DBG-MAIN: Right process exited with status %d\n", right_result);
-    } else if (WIFSIGNALED(right_status)) {
-        right_result = 128 + WTERMSIG(right_status);
-        fprintf(stderr, "PIPE-DBG-MAIN: Right process terminated by signal %d\n", 
-                WTERMSIG(right_status));
-    } else {
-        right_result = 1;
-        fprintf(stderr, "PIPE-DBG-MAIN: Right process exited abnormally\n");
-    }
-
-    // Check for special case - if left failed with permission error but right succeeded
-    if (left_result == ERR_PERMISSIONS && right_result == 0) {
-        fprintf(stderr, "PIPE-DBG-MAIN: Left had permission error but right succeeded\n");
-        fprintf(stderr, "PIPE-DBG-MAIN: CORRECTING final status to right result (0)\n");
-        return 0;
-    }
-
-    // Return the exit status of the last command in the pipeline
-    fprintf(stderr, "PIPE-DBG-MAIN: Pipeline finished, returning right status: %d\n", right_result);
-    return right_result;
+    return vars->error_code;
 }

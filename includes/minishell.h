@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 05:16:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 22:09:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/stat.h>
+# include <stdbool.h>
 
 extern volatile sig_atomic_t	g_signal_received;
 
@@ -146,6 +147,7 @@ typedef struct s_node
 	struct s_node	*left;
 	struct s_node	*right;
 	struct s_node	*redir;
+	struct s_node	*next_redir;
 }	t_node;
 
 /*
@@ -183,6 +185,7 @@ typedef struct s_pipe
 	int			hd_expand;
 	int			redirection_fd;
 	int			out_mode;
+	bool		in_pipe;
 	t_node		*current_redirect;
 	t_node		*last_cmd;
 	t_node		*last_pipe;
@@ -580,6 +583,7 @@ Lexer core functions.
 */
 t_tokentype	get_token_at(char *input, int pos, int *moves);
 int			tokenizer(char *input, t_vars *vars);
+void		add_null_token_stop(t_vars *vars);
 int			handle_token(char *input, t_vars *vars, int *hd_is_delim);
 char		*get_quoted_str(char *input, t_vars *vars, int *quote_type);
 int			process_operator_char(char *input, int *i, t_vars *vars);
@@ -768,7 +772,8 @@ int			validate_redir_targets(t_vars *vars);
 Process redirection nodes functions.
 In process_redir_node.c
 */
-void		link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
+void		link_cmd_redirs(t_node *cmd_node, t_vars *vars);
+// void		link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
 void		track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
 void		link_in_out_redirs(t_vars *vars);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);

@@ -1,0 +1,4 @@
+= TOKEN LIST =
+[0] ARGS []
+[1] ARGS [echo]
+

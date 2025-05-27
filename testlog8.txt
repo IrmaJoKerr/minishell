@@ -1,244 +1,62 @@
-Test  68: ❌ echo <"./test_files/infile_big" | cat <"./test_files/infile" 
-mini output = ()
-bash output = (hi hello world 42)
-mini error = ( Processing redirection type=<, filename='./test_files/infile_big' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/infile_big' 'echo' Examining node type=|, content='|' Stopping at | 'echo' Set redir_root to this node Processing node type=<, filename='./test_files/infile_big' Checking prev_redir type=CMD, filename='echo' < './test_files/infile_big' → NULL Processing redirection type=<, filename='./test_files/infile' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile' 'cat' 'cat' Processing node type=<, filename='./test_files/infile' Checking prev_redir type=CMD, filename='cat' Checking prev_redir type=|, filename='|' Checking prev_redir type=<, filename='./test_files/infile_big' Checking prev_redir type=CMD, filename='echo' < './test_files/infile' → NULL 190861 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Setting up right pipe process for 'cat' Executing command Command execution completed with status 0 Right process exited with status 0)
+Test  59: ❌ echo hi < ./test_files/infile bye bye 
+mini output = (hi bye)
+bash output = (hi bye bye)
+mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=< Valid redirection node < with embedded filename './test_files/infile' Processing command 'echo' Starting to link redirections for command 'echo' Found redirection < './test_files/infile' for command 'echo' Set first redirection for command 'echo' < './test_files/infile' -> END Appending 'bye' to node type=CMD 2 'echo' 'hi' Successfully created new args array with 3 elements 3) Starting redirection execution for node type=< 'echo' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting redirection chain processing < './test_files/infile' 'echo' Processing redirection < './test_files/infile' './test_files/infile' './test_files/infile' END Chain processing completed successfully Redirection successful, executing command 'echo' Command execution completed with result=0)
 bash error = ()
 
-Test  71: ❌ echo hi | cat <"./test_files/infile" 
-mini output = (hi)
-bash output = (hi hello world 42)
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=<, filename='./test_files/infile' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile' 'cat' 'cat' Set redir_root to this node Processing node type=<, filename='./test_files/infile' Checking prev_redir type=CMD, filename='cat' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' < './test_files/infile' → NULL 191005 Setting up right pipe process for 'cat' Executing command Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Command execution completed with status 0 Right process exited with status 0)
-bash error = ()
-
-Test  73: ❌ cat <"./test_files/infile" | echo hi 
-mini exit code = hi
-bash exit code = 0
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=<, filename='./test_files/infile' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='./test_files/infile' Checking prev_redir type=CMD, filename='cat' < './test_files/infile' → NULL 191103 Setting up right pipe process for 'echo' Executing command Setting up left pipe process for 'cat' Command execution completed with status 0 Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Broken pipe)
-Test  74: ❌ cat <"./test_files/infile" | grep hello 
-mini output = ()
-bash output = (hello)
-mini exit code =
-bash exit code = 0
-mini error = ( Appending 'hello' to node type=CMD 1 'grep' Successfully created new args array with 2 elements 2) Processing redirection type=<, filename='./test_files/infile' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='./test_files/infile' Checking prev_redir type=CMD, filename='cat' < './test_files/infile' → NULL 191154 Setting up left pipe process for 'cat' Executing command Setting up right pipe process for 'grep' Executing command Command execution completed with status 0 Left process exited with status 0 Command execution completed with status 1 Right process exited with status 1)
-bash error = ()
-Test  75: ❌ cat <"./test_files/infile_big" | echo hi 
-mini exit code = hi
-bash exit code = 0
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=<, filename='./test_files/infile_big' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile_big' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='./test_files/infile_big' Checking prev_redir type=CMD, filename='cat' < './test_files/infile_big' → NULL 191204 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Setting up left pipe process for 'cat' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Broken pipe)
-
+mini error = ( Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=< Valid redirection node < with embedded filename 'missing' Processing command 'cat' Starting to link redirections for command 'cat' Found redirection < 'missing' for command 'cat' Set first redirection for command 'cat' < 'missing' -> END Starting redirection execution for node type=< 'cat' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting redirection chain processing < 'missing' 'cat' Processing redirection < 'missing' 'missing' 'missing' No such file or directory Redirection failed for 'missing' Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
+bash error = ( No such file or directory)
 Test  77: ❌ cat <missing | cat 
-mini exit code =
+mini exit code = 1
 bash exit code = 0
-mini error = ( Processing redirection type=<, filename='missing' Target command is 'cat' Starting collection for cmd 'cat' after redir 'missing' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='missing' Checking prev_redir type=CMD, filename='cat' < 'missing' → NULL 191293 Setting up left pipe process for 'cat' Executing command Setting up right pipe process for 'cat' Executing command Command execution completed with status 0 Left process exited with status 0 Command execution completed with status 0 Right process exited with status 0)
-bash error = ( No such file or directory)
-Test  78: ❌ cat <missing | echo oi 
-mini exit code = oi
-bash exit code = 0
-mini error = ( Appending 'oi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=<, filename='missing' Target command is 'cat' Starting collection for cmd 'cat' after redir 'missing' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='missing' Checking prev_redir type=CMD, filename='cat' < 'missing' → NULL 191343 Setting up left pipe process for 'cat' Executing command Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( No such file or directory)
-Test  79: ❌ cat <missing | cat <"./test_files/infile" 
-mini output = ()
-bash output = (hi hello world 42)
-mini exit code =
-bash exit code = 0
-mini error = ( Processing redirection type=<, filename='missing' Target command is 'cat' Starting collection for cmd 'cat' after redir 'missing' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='missing' Checking prev_redir type=CMD, filename='cat' < 'missing' → NULL Processing redirection type=<, filename='./test_files/infile' Target command is 'cat' Starting collection for cmd 'cat' after redir './test_files/infile' 'cat' 'cat' Processing node type=<, filename='./test_files/infile' Checking prev_redir type=CMD, filename='cat' Checking prev_redir type=|, filename='|' Checking prev_redir type=<, filename='missing' Checking prev_redir type=CMD, filename='cat' < './test_files/infile' → NULL 191394 Setting up right pipe process for 'cat' Executing command Setting up left pipe process for 'cat' Executing command Command execution completed with status 0 Left process exited with status 0 Command execution completed with status 0 Right process exited with status 0)
+mini error = ( Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=< Valid redirection node < with embedded filename 'missing' Processing command 'cat' Starting to link redirections for command 'cat' Found redirection < 'missing' for command 'cat' Set first redirection for command 'cat' < 'missing' -> END Starting redirection execution for node type=< 'cat' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting redirection chain processing < 'missing' 'cat' Processing redirection < 'missing' 'missing' 'missing' No such file or directory Redirection failed for 'missing' Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
 bash error = ( No such file or directory)
 
-Test  91: ❌ echo hi >./outfiles/outfile01 | echo bye 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL 191884 Setting up right pipe process for 'echo' Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test  92: ❌ echo hi >./outfiles/outfile01 >./outfiles/outfile02 | echo bye 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=>, content='./outfiles/outfile02' Stopping at > 'echo' 'hi' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL Processing redirection type=>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Processing node type=>, filename='./outfiles/outfile02' Checking prev_redir type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile02' → NULL 191932 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test  93: ❌ echo hi | echo >./outfiles/outfile01 bye 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' Examining node type=ARGS, content='bye' 'bye' Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) 'echo' 'bye' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL 191980 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test  94: ❌ echo hi | echo bye >./outfiles/outfile01 >./outfiles/outfile02 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'bye' Examining node type=>, content='./outfiles/outfile02' Stopping at > 'echo' 'bye' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL Processing redirection type=>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'bye' 'echo' 'bye' Processing node type=>, filename='./outfiles/outfile02' Checking prev_redir type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile02' → NULL 192028 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test  95: ❌ echo hi >./outfiles/outfile01 | echo bye >./outfiles/outfile02 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL Processing redirection type=>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'bye' 'echo' 'bye' Processing node type=>, filename='./outfiles/outfile02' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile02' → NULL Setting up left pipe process for 'echo' 192076 Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test  96: ❌ echo hi >./outfiles/outfile01 >./test_files/invalid_permission | echo bye 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=>, content='./test_files/invalid_permission' Stopping at > 'echo' 'hi' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL Processing redirection type=>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Processing node type=>, filename='./test_files/invalid_permission' Checking prev_redir type=>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' > './test_files/invalid_permission' → NULL 192124 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Permission denied)
-
-Test  99: ❌ echo hi | echo bye >./test_files/invalid_permission 
-mini output = (bye)
-bash output = ()
-mini exit code = 0
-bash exit code = 1
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'bye' 'echo' 'bye' Set redir_root to this node Processing node type=>, filename='./test_files/invalid_permission' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './test_files/invalid_permission' → NULL 192264 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Permission denied)
 Test 100: ❌ echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission 
 Only in ./bash_outfiles: outfile01
 mini outfiles:
 cat: './mini_outfiles/*': No such file or directory
 bash outfiles:
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=ARGS, content='echo' 'echo' Appending 'echo' to node type=CMD 2 'echo' 'hi' Successfully created new args array with 3 elements 3) Examining node type=ARGS, content='bye' 'bye' Appending 'bye' to node type=CMD 3 'echo' 'hi' 'echo' Successfully created new args array with 4 elements 4) Examining node type=>, content='./test_files/invalid_permission' Stopping at > 'echo' 'hi' 'echo' 'bye' Set redir_root to this node Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL Processing redirection type=>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'hi' 'echo' 'bye' 'echo' 'hi' 'echo' 'bye' Processing node type=>, filename='./test_files/invalid_permission' Checking prev_redir type=ARGS, filename='bye' Checking prev_redir type=ARGS, filename='echo' Checking prev_redir type=>, filename='./outfiles/outfile01' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './test_files/invalid_permission' → NULL Starting redirection execution for node type=> 'echo' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting chain processing for cmd 'echo' (pipeline_context=0) echo Processing redirection type=>, filename='./outfiles/outfile01' Processing > redirection './outfiles/outfile01', prev_result=0 Setting up redirection type=>, filename='./outfiles/outfile01' No command found for redirection success=0, continuing=no Setting any_output_error=1 for failed > Breaking on output redirection error Returning 0 due to output redirection error Chain processing completed, final_result=0 Finished processing redirections, status=0 Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
-bash error = ( Permission denied)
-Test 101: ❌ echo hi | echo bye >./test_files/invalid_permission >./outfiles/outfile01 
-mini output = (bye)
-bash output = ()
-mini exit code = 0
-bash exit code = 1
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'bye' Examining node type=>, content='./outfiles/outfile01' Stopping at > 'echo' 'bye' Set redir_root to this node Processing node type=>, filename='./test_files/invalid_permission' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './test_files/invalid_permission' → NULL Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'bye' 'echo' 'bye' Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=>, filename='./test_files/invalid_permission' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './outfiles/outfile01' → NULL 192352 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
+mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=> Valid redirection node > with embedded filename './outfiles/outfile01' Checking redirection node type=> Valid redirection node > with embedded filename './test_files/invalid_permission' Processing command 'echo' Starting to link redirections for command 'echo' No redirections found for cmd 'echo' Starting redirection execution for node type=> Missing left node, returning error)
 bash error = ( Permission denied)
 
-Test 104: ❌ cat <missing >./outfiles/outfile01 
-Only in ./mini_outfiles: outfile01
-mini outfiles:
-bash outfiles:
-cat: './bash_outfiles/*': No such file or directory
-mini error = ( Processing redirection type=<, filename='missing' Target command is 'cat' Starting collection for cmd 'cat' after redir 'missing' 'cat' Examining node type=>, content='./outfiles/outfile01' Stopping at > 'cat' Set redir_root to this node Processing node type=<, filename='missing' Checking prev_redir type=CMD, filename='cat' < 'missing' → NULL Processing redirection type=>, filename='./outfiles/outfile01' Target command is 'cat' Starting collection for cmd 'cat' after redir './outfiles/outfile01' 'cat' 'cat' Processing node type=>, filename='./outfiles/outfile01' Checking prev_redir type=<, filename='missing' Found compatible redirection Checking for cycles in .redir links... Safe to link, connecting 'missing' → './outfiles/outfile01' > './outfiles/outfile01' → NULL Starting redirection execution for node type=< 'cat' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting chain processing for cmd 'cat' (pipeline_context=0) cat Processing redirection type=<, filename='missing' Processing < redirection 'missing', prev_result=0 Setting up redirection type=<, filename='missing' Target command is 'cat' No such file or directory redir_mode_setup returned 0, error_code=1 success=0, continuing=no Setting any_input_error=1 for failed < Input redirection error Processing redirection type=>, filename='./outfiles/outfile01' Processing > redirection './outfiles/outfile01', prev_result=1 Setting up redirection type=>, filename='./outfiles/outfile01' Target command is 'cat' redir_mode_setup returned 1, error_code=1 success=1, continuing=yes Returning 0 due to input error in standalone command Chain processing completed, final_result=0 Finished processing redirections, status=0 Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
-bash error = ( No such file or directory)
-
-Test 121: ❌ echo hi >>./outfiles/outfile01 | echo bye 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL Setting up left pipe process for 'echo' 193140 Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test 122: ❌ echo hi >>./outfiles/outfile01 >>./outfiles/outfile02 | echo bye 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=>>, content='./outfiles/outfile02' Stopping at >> 'echo' 'hi' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL Processing redirection type=>>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Processing node type=>>, filename='./outfiles/outfile02' Checking prev_redir type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile02' → NULL Setting up left pipe process for 'echo' 193188 Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test 123: ❌ echo hi | echo >>./outfiles/outfile01 bye 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' Examining node type=ARGS, content='bye' 'bye' Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) 'echo' 'bye' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL 193236 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test 124: ❌ echo hi | echo bye >>./outfiles/outfile01 >>./outfiles/outfile02 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'bye' Examining node type=>>, content='./outfiles/outfile02' Stopping at >> 'echo' 'bye' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL Processing redirection type=>>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'bye' 'echo' 'bye' Processing node type=>>, filename='./outfiles/outfile02' Checking prev_redir type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile02' → NULL 193284 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-Test 125: ❌ echo hi >>./outfiles/outfile01 | echo bye >>./outfiles/outfile02 
-Only in ./bash_outfiles: outfile01
-Only in ./bash_outfiles: outfile02
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-hi
-bye
-mini output = (bye)
-bash output = ()
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' 'hi' Examining node type=|, content='|' Stopping at | 'echo' 'hi' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL Processing redirection type=>>, filename='./outfiles/outfile02' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile02' 'echo' 'bye' 'echo' 'bye' Processing node type=>>, filename='./outfiles/outfile02' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile02' → NULL Setting up left pipe process for 'echo' 193332 Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ()
-
-Test 128: ❌ echo hi | echo bye >>./test_files/invalid_permission 
-mini output = (bye)
-bash output = ()
-mini exit code = 0
-bash exit code = 1
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'bye' 'echo' 'bye' Set redir_root to this node Processing node type=>>, filename='./test_files/invalid_permission' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' >> './test_files/invalid_permission' → NULL 193472 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Permission denied)
-Test 129: ❌ echo hi | echo >>./outfiles/outfile01 bye >./test_files/invalid_permission 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-mini output = (bye)
-bash output = ()
-mini exit code = 0
-bash exit code = 1
-mini error = ( Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Processing redirection type=>>, filename='./outfiles/outfile01' Target command is 'echo' Starting collection for cmd 'echo' after redir './outfiles/outfile01' 'echo' Examining node type=ARGS, content='bye' 'bye' Appending 'bye' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Examining node type=>, content='./test_files/invalid_permission' Stopping at > 'echo' 'bye' Set redir_root to this node Processing node type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' >> './outfiles/outfile01' → NULL Processing redirection type=>, filename='./test_files/invalid_permission' Target command is 'echo' Starting collection for cmd 'echo' after redir './test_files/invalid_permission' 'echo' 'bye' 'echo' 'bye' Processing node type=>, filename='./test_files/invalid_permission' Checking prev_redir type=ARGS, filename='bye' Checking prev_redir type=>>, filename='./outfiles/outfile01' Checking prev_redir type=CMD, filename='echo' Checking prev_redir type=|, filename='|' Checking prev_redir type=CMD, filename='echo' > './test_files/invalid_permission' → NULL 193518 Setting up right pipe process for 'echo' Executing command Command execution completed with status 0 Setting up left pipe process for 'echo' Executing command Command execution completed with status 0 Left process exited with status 0 Right process exited with status 0)
-bash error = ( Permission denied)
-Test 130: ❌ cat <minishell.h>./outfiles/outfile 
-Only in ./mini_outfiles: outfile
-mini outfiles:
-bash outfiles:
-cat: './bash_outfiles/*': No such file or directory
-mini error = ( Processing redirection type=<, filename='minishell.h' Target command is 'cat' Starting collection for cmd 'cat' after redir 'minishell.h' 'cat' Examining node type=>, content='./outfiles/outfile' Stopping at > 'cat' Set redir_root to this node Processing node type=<, filename='minishell.h' Checking prev_redir type=CMD, filename='cat' < 'minishell.h' → NULL Processing redirection type=>, filename='./outfiles/outfile' Target command is 'cat' Starting collection for cmd 'cat' after redir './outfiles/outfile' 'cat' 'cat' Processing node type=>, filename='./outfiles/outfile' Checking prev_redir type=<, filename='minishell.h' Found compatible redirection Checking for cycles in .redir links... Safe to link, connecting 'minishell.h' → './outfiles/outfile' > './outfiles/outfile' → NULL Starting redirection execution for node type=< 'cat' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting chain processing for cmd 'cat' (pipeline_context=0) cat Processing redirection type=<, filename='minishell.h' Processing < redirection 'minishell.h', prev_result=0 Setting up redirection type=<, filename='minishell.h' Target command is 'cat' No such file or directory redir_mode_setup returned 0, error_code=1 success=0, continuing=no Setting any_input_error=1 for failed < Input redirection error Processing redirection type=>, filename='./outfiles/outfile' Processing > redirection './outfiles/outfile', prev_result=1 Setting up redirection type=>, filename='./outfiles/outfile' Target command is 'cat' redir_mode_setup returned 1, error_code=1 success=1, continuing=yes Returning 0 due to input error in standalone command Chain processing completed, final_result=0 Finished processing redirections, status=0 Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
-bash error = ( No such file or directory)
 Test 131: ❌ cat <minishell.h|ls 
-mini exit code = wildcards
+mini output = ()
+bash output = (ast.txt bash_outfiles bash.supp bonus bonus_bonus builtins extras local.supp loop.out manual_tests mini_outfiles minishell os_specific outfiles pipes README.md redirects syntax temp tester test_files tokens.txt wildcards)
+mini exit code = 1
 bash exit code = 0
-mini error = ( Processing redirection type=<, filename='minishell.h' Target command is 'cat' Starting collection for cmd 'cat' after redir 'minishell.h' 'cat' Examining node type=|, content='|' Stopping at | 'cat' Set redir_root to this node Processing node type=<, filename='minishell.h' Checking prev_redir type=CMD, filename='cat' < 'minishell.h' → NULL 193610 Setting up right pipe process for 'ls' Executing command Setting up left pipe process for 'cat' Executing command Command execution completed with status 0 Left process exited with status 0 Command execution completed with status 0 Right process exited with status 0)
+mini error = ( Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=< Valid redirection node < with embedded filename 'minishell.h' Processing command 'cat' Starting to link redirections for command 'cat' Found redirection < 'minishell.h' for command 'cat' Set first redirection for command 'cat' < 'minishell.h' -> END Starting redirection execution for node type=< 'cat' (pipeline_context=0) Saved stdin=3, stdout=4 About to process redirection chain Starting redirection chain processing < 'minishell.h' 'cat' Processing redirection < 'minishell.h' 'minishell.h' 'minishell.h' No such file or directory Redirection failed for 'minishell.h' Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure)
 bash error = ( No such file or directory)
 ———————————— extras
 
 Test 133: ❌ $PWD 
 mini exit code = 2
 bash exit code = 126
+mini error = ( Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '/home/bleow/Coding/Core/minishell/minishell_tester' Starting to link redirections for command '/home/bleow/Coding/Core/minishell/minishell_tester' No redirections found for cmd '/home/bleow/Coding/Core/minishell/minishell_tester' Is a directory)
+bash error = ( Is a directory)
 Test 134: ❌ $EMPTY 
 mini exit code = 127
 bash exit code = 0
-mini error = ( Permission denied)
+mini error = ( Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '' Starting to link redirections for command '' No redirections found for cmd '' Permission denied)
 bash error = ()
 Test 135: ❌ $EMPTY echo hi 
 mini output = ()
 bash output = (hi)
 mini exit code = 127
 bash exit code = 0
-mini error = ( Appending 'echo' to node type=CMD 1 '' Successfully created new args array with 2 elements 2) Appending 'hi' to node type=CMD 2 '' 'echo' Successfully created new args array with 3 elements 3) Permission denied)
+mini error = ( Appending 'echo' to node type=CMD 1 '' Successfully created new args array with 2 elements 2) Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '' Starting to link redirections for command '' No redirections found for cmd '' Appending 'hi' to node type=CMD 2 '' 'echo' Successfully created new args array with 3 elements 3) Permission denied)
 bash error = ()
 Test 136: ❌ ./test_files/invalid_permission 
 mini exit code = 127
 bash exit code = 126
+mini error = ( Adding null token safety stop Resetting redirection tracking state Building redirection AST (command-first approach) Processing command './test_files/invalid_permission' Starting to link redirections for command './test_files/invalid_permission' No redirections found for cmd './test_files/invalid_permission' Permission denied)
+bash error = ( Permission denied)
 
 Test 141: ❌ ./test_files 
 mini exit code = 2
 bash exit code = 126
+mini error = ( Adding null token safety stop Resetting redirection tracking state Building redirection AST (command-first approach) Processing command './test_files' Starting to link redirections for command './test_files' No redirections found for cmd './test_files' Is a directory)
+bash error = ( Is a directory)
 
-114/146
+137/146
 

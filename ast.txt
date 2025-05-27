@@ -1,0 +1,2 @@
+=== ABSTRACT SYNTAX TREE ===
+CMD [exit]

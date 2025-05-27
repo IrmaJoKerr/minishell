@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:21:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 03:27:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 19:33:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,14 +30,14 @@ Works with proc_redir to clean state before processing.
 // }
 void	reset_redir_tracking(t_pipe *pipes)
 {
-    if (!pipes)
-        return ;
-    fprintf(stderr, "REDIR-DBG: Resetting redirection tracking state\n");
-    pipes->last_cmd = NULL;
-    pipes->redir_root = NULL;
-    pipes->last_in_redir = NULL;
-    pipes->last_out_redir = NULL;
-    pipes->cmd_redir = NULL;
+	if (!pipes)
+		return ;
+	fprintf(stderr, "REDIR-DBG: Resetting redirection tracking state\n");
+	pipes->last_cmd = NULL;
+	pipes->redir_root = NULL;
+	pipes->last_in_redir = NULL;
+	pipes->last_out_redir = NULL;
+	pipes->cmd_redir = NULL;
 }
 
 /*
@@ -58,29 +58,67 @@ Returns:
 // 		return (0);
 // 	return (1);
 // }
-int	is_valid_redir_node(t_node *current)
+// int	is_valid_redir_node(t_node *current)
+// {
+// 	if (!current)
+// 	{
+// 		fprintf(stderr, "REDIR-DBG: Invalid node: NULL\n");
+// 		return (0);
+// 	}
+// 	if (!is_redirection(current->type))
+// 	{
+// 		fprintf(stderr, "REDIR-DBG: Node type %s is not a redirection\n", 
+// 				get_token_str(current->type));
+// 		return (0);
+// 	}
+// 	if (!current->next || (current->next->type != TYPE_CMD
+// 			&& current->next->type != TYPE_ARGS))
+// 	{
+// 		fprintf(stderr, "REDIR-DBG: Redirection missing target: %s\n", 
+// 				current->next ? get_token_str(current->next->type) : "NULL");
+// 		return (0);
+// 	}
+// 	fprintf(stderr, "REDIR-DBG: Valid redirection node %s with target %s\n", 
+// 			get_token_str(current->type), 
+// 			get_token_str(current->next->type));
+// 	return (1);
+// }
+int is_valid_redir_node(t_node *current)
 {
+    fprintf(stderr, "DEBUG-VALIDATE-REDIR: Checking redirection node type=%s\n", 
+            get_token_str(current->type));
+    
     if (!current)
     {
-        fprintf(stderr, "REDIR-DBG: Invalid node: NULL\n");
+        fprintf(stderr, "DEBUG-VALIDATE-REDIR: NULL node\n");
         return (0);
     }
+    
     if (!is_redirection(current->type))
     {
-        fprintf(stderr, "REDIR-DBG: Node type %s is not a redirection\n", 
-                get_token_str(current->type));
+        fprintf(stderr, "DEBUG-VALIDATE-REDIR: Not a redirection node\n");
         return (0);
     }
-    if (!current->next || (current->next->type != TYPE_CMD
+    
+    // CRITICAL FIX: Check for two valid cases:
+    // 1. Redirection has args already (quoted filename case)
+    if (current->args && current->args[0])
+    {
+        fprintf(stderr, "DEBUG-VALIDATE-REDIR: Valid redirection node %s with embedded filename '%s'\n",
+                get_token_str(current->type), current->args[0]);
+        return (1);
+    }
+    
+    // 2. Next node is a CMD or ARGS (traditional case)
+    if (!current->next || (current->next->type != TYPE_CMD 
             && current->next->type != TYPE_ARGS))
     {
-        fprintf(stderr, "REDIR-DBG: Redirection missing target: %s\n", 
-                current->next ? get_token_str(current->next->type) : "NULL");
+        fprintf(stderr, "DEBUG-VALIDATE-REDIR: Invalid: missing next node or not CMD/ARGS\n");
         return (0);
     }
-    fprintf(stderr, "REDIR-DBG: Valid redirection node %s with target %s\n", 
-            get_token_str(current->type), 
-            get_token_str(current->next->type));
+    
+    fprintf(stderr, "DEBUG-VALIDATE-REDIR: Valid redirection node %s with target ARGS\n",
+            get_token_str(current->type));
     return (1);
 }
 
@@ -100,17 +138,17 @@ Works with proc_redir().
 // }
 void	set_redir_node(t_node *redir, t_node *cmd, t_node *target)
 {
-    if (!redir || !cmd || !target)
-    {
-        fprintf(stderr, "REDIR-DBG: Invalid set_redir_node arguments\n");
-        return ;
-    }
-    fprintf(stderr, "REDIR-DBG: Setting redirection: %s -> %s -> %s\n",
-            cmd->args ? cmd->args[0] : "NULL",
-            get_token_str(redir->type),
-            target->args ? target->args[0] : "NULL");
-    redir->left = cmd;
-    redir->right = target;
+	if (!redir || !cmd || !target)
+	{
+		fprintf(stderr, "REDIR-DBG: Invalid set_redir_node arguments\n");
+		return ;
+	}
+	fprintf(stderr, "REDIR-DBG: Setting redirection: %s -> %s -> %s\n",
+			cmd->args ? cmd->args[0] : "NULL",
+			get_token_str(redir->type),
+			target->args ? target->args[0] : "NULL");
+	redir->left = cmd;
+	redir->right = target;
 }
 
 /*
@@ -139,10 +177,186 @@ Works with swap_cmd_redir() to connect commands and redirections in the AST.
 // 	}
 // 	return (NULL);
 // }
-t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
-{
-    t_node	*current;
+// t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node	*current;
 
+//     if (!redir_root || !cmd_node)
+//     {
+//         fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+//         return (NULL);
+//     }
+//     fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+	
+//     current = redir_root;
+//     while (current)
+//     {
+//         if (is_redirection(current->type)
+//             && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+//         {
+//             fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s'\n",
+//                     get_token_str(current->type),
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             return (current);
+//         }
+//         current = current->next;
+//     }
+//     fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     return (NULL);
+// }
+// t_node *find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+// 	t_node *current;
+
+// 	if (!redir_root || !cmd_node)
+// 	{
+// 		fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+// 		return (NULL);
+// 	}
+// 	fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+// 			cmd_node->args ? cmd_node->args[0] : "NULL");
+	
+// 	current = redir_root;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type)
+// 			&& get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+// 		{
+// 			// CRITICAL FIX: Only match redirections that are on the same side of the pipe
+// 			// Check if redirection is linked to this command via the redir field
+// 			if (current->redir == cmd_node)
+// 			{
+// 				fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s' (same side of pipe)\n",
+// 						get_token_str(current->type),
+// 						cmd_node->args ? cmd_node->args[0] : "NULL");
+// 				return (current);
+// 			}
+// 			else
+// 			{
+// 				fprintf(stderr, "REDIR-DBG: Skipping redirection %s (different side of pipe)\n",
+// 						get_token_str(current->type));
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// 	fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+// 			cmd_node->args ? cmd_node->args[0] : "NULL");
+// 	return (NULL);
+// }
+// t_node *find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current;
+
+//     if (!redir_root || !cmd_node)
+//     {
+//         fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+//         return (NULL);
+//     }
+//     fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current = redir_root;
+//     while (current && current->type != TYPE_PIPE)
+//     {
+//         if (is_redirection(current->type)
+//             && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+//         {
+//             // Check if redirection is linked to this command via the redir field
+//             if (current->redir == cmd_node)
+//             {
+//                 fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s' (same side of pipe)\n",
+//                         get_token_str(current->type),
+//                         cmd_node->args ? cmd_node->args[0] : "NULL");
+//                 return (current);
+//             }
+//             else
+//             {
+//                 fprintf(stderr, "REDIR-DBG: Skipping redirection %s (different side of pipe)\n",
+//                         get_token_str(current->type));
+//             }
+//         }
+//         current = current->next;
+//     }
+//     fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     return (NULL);
+// }
+// t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node	*current;
+
+//     if (!redir_root || !cmd_node)
+//     {
+//         fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+//         return (NULL);
+//     }
+//     fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+	
+//     current = redir_root;
+//     while (current)
+//     {
+//         if (is_redirection(current->type)
+//             && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+//         {
+//             // CRITICAL FIX: Only match redirections that are on the same side of the pipe
+//             // Check if redirection is linked to this command via the redir field
+//             if (current->redir == cmd_node)
+//             {
+//                 fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s' (same side of pipe)\n",
+//                         get_token_str(current->type),
+//                         cmd_node->args ? cmd_node->args[0] : "NULL");
+//                 return (current);
+//             }
+//             else
+//             {
+//                 fprintf(stderr, "REDIR-DBG: Skipping redirection %s (different side of pipe)\n",
+//                         get_token_str(current->type));
+//             }
+//         }
+//         current = current->next;
+//     }
+//     fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     return (NULL);
+// }
+// t_node *find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+// {
+//     t_node *current;
+
+//     if (!redir_root || !cmd_node)
+//     {
+//         fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
+//         return (NULL);
+//     }
+//     fprintf(stderr, "REDIR-DBG: Searching redirections for command '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+    
+//     current = redir_root;
+//     while (current)
+//     {
+//         if (is_redirection(current->type) && current->redir == cmd_node)
+//         {
+//             fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s'\n",
+//                     get_token_str(current->type),
+//                     cmd_node->args ? cmd_node->args[0] : "NULL");
+//             return (current);
+//         }
+//         current = current->next;
+//     }
+    
+//     fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
+//     return (NULL);
+// }
+t_node *find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
+{
+    t_node *current;
+
+	// Explicitly mark vars as used to avoid compiler warning
+    (void)vars;
     if (!redir_root || !cmd_node)
     {
         fprintf(stderr, "REDIR-DBG: find_cmd_redir called with NULL args\n");
@@ -154,8 +368,7 @@ t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
     current = redir_root;
     while (current)
     {
-        if (is_redirection(current->type)
-            && get_redir_target(current, vars->pipes->last_cmd) == cmd_node)
+        if (is_redirection(current->type) && current->redir == cmd_node)
         {
             fprintf(stderr, "REDIR-DBG: Found matching redirection %s for '%s'\n",
                     get_token_str(current->type),
@@ -164,6 +377,7 @@ t_node	*find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
         }
         current = current->next;
     }
+    
     fprintf(stderr, "REDIR-DBG: No matching redirection found for '%s'\n",
             cmd_node->args ? cmd_node->args[0] : "NULL");
     return (NULL);
