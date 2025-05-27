@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 20:18:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 02:04:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -645,46 +645,46 @@ t_node *proc_redir(t_vars *vars)
 //         current = current->next;
 //     }
 // }
-void collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
-{
-    t_node *current;
+// void collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
+// {
+//     t_node *current;
     
-    fprintf(stderr, "DEBUG-COLLECT-ARGS: Starting collection for cmd '%s'\n",
-            cmd_node->args ? cmd_node->args[0] : "NULL");
+//     fprintf(stderr, "DEBUG-COLLECT-ARGS: Starting collection for cmd '%s'\n",
+//             cmd_node->args ? cmd_node->args[0] : "NULL");
     
-    if (!redir_node || !redir_node->next || !cmd_node)
-        return;
+//     if (!redir_node || !redir_node->next || !cmd_node)
+//         return;
     
-    // Start from the node after the redirection's target
-    current = redir_node->next;
+//     // Start from the node after the redirection's target
+//     current = redir_node->next;
     
-    // If the next node is the filename for the redirection, skip it
-    if (current && (current->type == TYPE_ARGS || current->type == TYPE_CMD)) {
-        current = current->next;
-    }
+//     // If the next node is the filename for the redirection, skip it
+//     if (current && (current->type == TYPE_ARGS || current->type == TYPE_CMD)) {
+//         current = current->next;
+//     }
     
-    // CRITICAL FIX: Continue collecting ALL arguments until we hit a pipe or redirection
-    while (current) {
-        // Stop at pipe or redirection
-        if (current->type == TYPE_PIPE || is_redirection(current->type))
-            break;
+//     // CRITICAL FIX: Continue collecting ALL arguments until we hit a pipe or redirection
+//     while (current) {
+//         // Stop at pipe or redirection
+//         if (current->type == TYPE_PIPE || is_redirection(current->type))
+//             break;
             
-        // Only collect arguments
-        if (current->type == TYPE_ARGS && current->args && current->args[0]) {
-            fprintf(stderr, "DEBUG-COLLECT-ARGS: Found argument '%s' after redirection\n",
-                    current->args[0]);
+//         // Only collect arguments
+//         if (current->type == TYPE_ARGS && current->args && current->args[0]) {
+//             fprintf(stderr, "DEBUG-COLLECT-ARGS: Found argument '%s' after redirection\n",
+//                     current->args[0]);
             
-            append_arg(cmd_node, current->args[0], 0);
-            fprintf(stderr, "DEBUG-COLLECT-ARGS: Appended '%s' to command, now has %d args\n", 
-                    current->args[0], (int)ft_arrlen(cmd_node->args)-1);
-        }
+//             append_arg(cmd_node, current->args[0], 0);
+//             fprintf(stderr, "DEBUG-COLLECT-ARGS: Appended '%s' to command, now has %d args\n", 
+//                     current->args[0], (int)ft_arrlen(cmd_node->args)-1);
+//         }
         
-        current = current->next;
-    }
+//         current = current->next;
+//     }
     
-    fprintf(stderr, "DEBUG-COLLECT-ARGS: Finished collecting args, final count: %d\n", 
-            (int)ft_arrlen(cmd_node->args)-1);
-}
+//     fprintf(stderr, "DEBUG-COLLECT-ARGS: Finished collecting args, final count: %d\n", 
+//             (int)ft_arrlen(cmd_node->args)-1);
+// }
 
 /*
 Master control function for processing an individual redirection node.
@@ -979,7 +979,7 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
     }
     
     // Collect any arguments that follow this redirection
-    collect_args_after_redir(redir_node, cmd);
+    // collect_args_after_redir(redir_node, cmd);
     
     // Set the redirection root if this is the first one
     if (!vars->pipes->redir_root)

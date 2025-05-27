@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 20:20:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 02:01:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1358,6 +1358,10 @@ int execute_pipes(t_node *pipe_node, t_vars *vars)
         vars->error_code = 128 + WTERMSIG(status);
         fprintf(stderr, "DEBUG-PIPELINE: Setting pipeline exit code to %d (signal+128)\n", vars->error_code);
     }
+	else
+	{
+		vars->error_code = status;
+	}
     
     return vars->error_code;
 }
