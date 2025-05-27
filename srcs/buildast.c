@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 01:33:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/27 20:18:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -322,62 +322,6 @@ void	verify_command_args(t_vars *vars)
 		remaining_cmds--;
 	}
 }
-// void verify_command_args(t_vars *vars)
-// {
-//     t_node *current;
-//     t_node *cmd;
-//     t_node **cmd_ptr;
-//     int remaining_cmds;
-
-//     fprintf(stderr, "DEBUG-VERIFY-CMD: Starting command args verification\n");
-    
-//     cmd_ptr = vars->cmd_nodes;
-//     remaining_cmds = vars->cmd_count;
-//     while (remaining_cmds > 0)
-//     {
-//         cmd = *cmd_ptr;
-//         if (!cmd || !cmd->args)
-//         {
-//             cmd_ptr++;
-//             remaining_cmds--;
-//             continue;
-//         }
-        
-//         fprintf(stderr, "DEBUG-VERIFY-CMD: Checking args for command '%s'\n",
-//                 cmd->args ? cmd->args[0] : "NULL");
-        
-//         current = find_node_in_list(vars->head, cmd);
-//         if (!current)
-//         {
-//             cmd_ptr++;
-//             remaining_cmds--;
-//             continue;
-//         }
-        
-//         current = current->next;
-//         while (current && current->type != TYPE_CMD && current->type != TYPE_PIPE && current->type != TYPE_NULL)
-//         {
-//             if (current->type == TYPE_ARGS && !is_redirection_target(current, vars) && 
-//                 current->args && current->args[0])
-//             {
-//                 // CRITICAL FIX: Remove is_arg_in_cmd() check to allow duplicate arguments
-//                 // This mimics bash behavior for handling multiple instances of the same argument
-//                 fprintf(stderr, "DEBUG-APPEND-CALL: verify_command_args() appending arg='%s'\n",
-//                         current->args[0]);
-                
-//                 append_arg(cmd, current->args[0], 0);
-                
-//                 fprintf(stderr, "DEBUG-APPEND-DONE: verify_command_args() append complete\n");
-//             }
-//             current = current->next;
-//         }
-        
-//         cmd_ptr++;
-//         remaining_cmds--;
-//     }
-    
-//     fprintf(stderr, "DEBUG-VERIFY-CMD: Command args verification complete\n");
-// }
 
 // Helper function to check if an argument already exists in command's arguments
 int	is_arg_in_cmd(t_node *cmd, char *arg)
@@ -701,46 +645,46 @@ t_node *proc_redir(t_vars *vars)
 //         current = current->next;
 //     }
 // }
-// void collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
-// {
-//     t_node *current;
+void collect_args_after_redir(t_node *redir_node, t_node *cmd_node)
+{
+    t_node *current;
     
-//     fprintf(stderr, "DEBUG-COLLECT-ARGS: Starting collection for cmd '%s'\n",
-//             cmd_node->args ? cmd_node->args[0] : "NULL");
+    fprintf(stderr, "DEBUG-COLLECT-ARGS: Starting collection for cmd '%s'\n",
+            cmd_node->args ? cmd_node->args[0] : "NULL");
     
-//     if (!redir_node || !redir_node->next || !cmd_node)
-//         return;
+    if (!redir_node || !redir_node->next || !cmd_node)
+        return;
     
-//     // Start from the node after the redirection's target
-//     current = redir_node->next;
+    // Start from the node after the redirection's target
+    current = redir_node->next;
     
-//     // If the next node is the filename for the redirection, skip it
-//     if (current && (current->type == TYPE_ARGS || current->type == TYPE_CMD)) {
-//         current = current->next;
-//     }
+    // If the next node is the filename for the redirection, skip it
+    if (current && (current->type == TYPE_ARGS || current->type == TYPE_CMD)) {
+        current = current->next;
+    }
     
-//     // CRITICAL FIX: Continue collecting ALL arguments until we hit a pipe or redirection
-//     while (current) {
-//         // Stop at pipe or redirection
-//         if (current->type == TYPE_PIPE || is_redirection(current->type))
-//             break;
+    // CRITICAL FIX: Continue collecting ALL arguments until we hit a pipe or redirection
+    while (current) {
+        // Stop at pipe or redirection
+        if (current->type == TYPE_PIPE || is_redirection(current->type))
+            break;
             
-//         // Only collect arguments
-//         if (current->type == TYPE_ARGS && current->args && current->args[0]) {
-//             fprintf(stderr, "DEBUG-COLLECT-ARGS: Found argument '%s' after redirection\n",
-//                     current->args[0]);
+        // Only collect arguments
+        if (current->type == TYPE_ARGS && current->args && current->args[0]) {
+            fprintf(stderr, "DEBUG-COLLECT-ARGS: Found argument '%s' after redirection\n",
+                    current->args[0]);
             
-//             append_arg(cmd_node, current->args[0], 0);
-//             fprintf(stderr, "DEBUG-COLLECT-ARGS: Appended '%s' to command, now has %d args\n", 
-//                     current->args[0], (int)ft_arrlen(cmd_node->args)-1);
-//         }
+            append_arg(cmd_node, current->args[0], 0);
+            fprintf(stderr, "DEBUG-COLLECT-ARGS: Appended '%s' to command, now has %d args\n", 
+                    current->args[0], (int)ft_arrlen(cmd_node->args)-1);
+        }
         
-//         current = current->next;
-//     }
+        current = current->next;
+    }
     
-//     fprintf(stderr, "DEBUG-COLLECT-ARGS: Finished collecting args, final count: %d\n", 
-//             (int)ft_arrlen(cmd_node->args)-1);
-// }
+    fprintf(stderr, "DEBUG-COLLECT-ARGS: Finished collecting args, final count: %d\n", 
+            (int)ft_arrlen(cmd_node->args)-1);
+}
 
 /*
 Master control function for processing an individual redirection node.
@@ -1035,7 +979,7 @@ void process_redir_node(t_node *redir_node, t_vars *vars)
     }
     
     // Collect any arguments that follow this redirection
-    // collect_args_after_redir(redir_node, cmd);
+    collect_args_after_redir(redir_node, cmd);
     
     // Set the redirection root if this is the first one
     if (!vars->pipes->redir_root)
