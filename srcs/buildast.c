@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 17:13:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 18:01:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,39 +94,144 @@ Builds the redirection AST by connecting commands to redirection operators.
 - Sets pipes->redir_root to the first valid redirection.
 Works with proc_redir for redirection structure building.
 */
+// void build_redir_ast(t_vars *vars)
+// {
+// 	int i;
+	
+// 	fprintf(stderr, "DEBUG-REDIR-BUILD: Building redirection AST (command-first approach)\n");
+	
+// 	// First initialize any redirection nodes that have targets
+// 	t_node *current = vars->head;
+// 	while (current) {
+// 		if (is_redirection(current->type)) {
+// 			// CRITICAL FIX: Improved validation logic for both types of redirection targets
+// 			if (!is_valid_redir_node(current)) {
+// 				tok_syntax_error_msg("newline", vars);
+// 				return;
+// 			}
+			
+// 			// Initialize redirection target (command will be set later)
+// 			if (!vars->pipes->redir_root)
+// 				vars->pipes->redir_root = current;
+// 		}
+// 		current = current->next;
+// 	}
+	
+// 	// Process each command and find its redirections
+// 	for (i = 0; i < vars->cmd_count; i++) {
+// 		if (vars->cmd_nodes[i]) {
+// 			fprintf(stderr, "DEBUG-REDIR-BUILD: Processing command '%s'\n",
+// 					vars->cmd_nodes[i]->args ? vars->cmd_nodes[i]->args[0] : "NULL");
+			
+// 			// Link all redirections that belong to this command
+// 			link_cmd_redirs(vars->cmd_nodes[i], vars);
+// 		}
+// 	}
+// }
 void build_redir_ast(t_vars *vars)
 {
-	int i;
-	
-	fprintf(stderr, "DEBUG-REDIR-BUILD: Building redirection AST (command-first approach)\n");
-	
-	// First initialize any redirection nodes that have targets
-	t_node *current = vars->head;
-	while (current) {
-		if (is_redirection(current->type)) {
-			// CRITICAL FIX: Improved validation logic for both types of redirection targets
-			if (!is_valid_redir_node(current)) {
-				tok_syntax_error_msg("newline", vars);
-				return;
-			}
-			
-			// Initialize redirection target (command will be set later)
-			if (!vars->pipes->redir_root)
-				vars->pipes->redir_root = current;
-		}
-		current = current->next;
-	}
-	
-	// Process each command and find its redirections
-	for (i = 0; i < vars->cmd_count; i++) {
-		if (vars->cmd_nodes[i]) {
-			fprintf(stderr, "DEBUG-REDIR-BUILD: Processing command '%s'\n",
-					vars->cmd_nodes[i]->args ? vars->cmd_nodes[i]->args[0] : "NULL");
-			
-			// Link all redirections that belong to this command
-			link_cmd_redirs(vars->cmd_nodes[i], vars);
-		}
-	}
+    t_node *current;
+    
+    // NEW: Pre-process orphaned redirections first
+    if (!preprocess_orphaned_redirections(vars)) {
+        return; // Error in orphaned redirection execution
+    }
+    
+    // Continue with existing logic (unchanged)
+    fprintf(stderr, "DEBUG-REDIR-BUILD: Building redirection AST\n");
+    
+    current = vars->head;
+    while (current) {
+        if (is_redirection(current->type)) {
+            if (!is_valid_redir_node(current)) {
+                tok_syntax_error_msg("newline", vars);
+                return;
+            }
+            if (!vars->pipes->redir_root)
+                vars->pipes->redir_root = current;
+        }
+        current = current->next;
+    }
+    
+    // Process commands - no for loop needed
+    current = vars->head;
+    while (current) {
+        if (current->type == TYPE_CMD) {
+            fprintf(stderr, "DEBUG-REDIR-BUILD: Processing command '%s'\n",
+                    current->args ? current->args[0] : "NULL");
+            link_cmd_redirs(current, vars);
+        }
+        current = current->next;
+    }
+}
+
+// NEW: Pre-process orphaned redirections (SIMPLIFIED - NO NODE REMOVAL)
+int preprocess_orphaned_redirections(t_vars *vars)
+{
+    t_node *current;
+    
+    fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Scanning for orphaned redirections\n");
+    
+    current = vars->head;
+    while (current) {
+        if (is_redirection(current->type)) {
+            // Check if this redirection is orphaned (between pipe and command)
+            if (current->prev && current->prev->type == TYPE_PIPE &&
+                current->next && current->next->type == TYPE_CMD) {
+                
+                fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Found orphaned redirection %s '%s'\n",
+                        get_token_str(current->type), 
+                        current->args ? current->args[0] : "NULL");
+                
+                // Execute the orphaned redirection immediately
+                if (!execute_orphaned_redirection_immediate(current, vars)) {
+                    return 0; // Execution failed
+                }
+                
+                // SIMPLIFIED: Mark as executed, don't remove from list
+                current->type = TYPE_NULL; // Mark as processed
+                fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Marked orphaned redirection as processed\n");
+            }
+        }
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Orphaned redirection preprocessing completed\n");
+    return 1;
+}
+
+// Execute orphaned redirection immediately (unchanged)
+int execute_orphaned_redirection_immediate(t_node *redir_node, t_vars *vars)
+{
+    if (!redir_node->args || !redir_node->args[0]) {
+        fprintf(stderr, "DEBUG-ORPHAN-EXEC: No filename for redirection\n");
+        return 0;
+    }
+    
+    char *filename = redir_node->args[0];
+    int fd = -1;
+    
+    fprintf(stderr, "DEBUG-ORPHAN-EXEC: Executing orphaned %s to '%s'\n",
+            get_token_str(redir_node->type), filename);
+    
+    // Handle different redirection types
+    if (redir_node->type == TYPE_OUT_REDIRECT) {
+        fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    } else if (redir_node->type == TYPE_APPEND_REDIRECT) {
+        fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    } else {
+        fprintf(stderr, "DEBUG-ORPHAN-EXEC: Unsupported orphaned redirection type\n");
+        return 0;
+    }
+    
+    if (fd == -1) {
+        shell_error(filename, ERR_PERMISSIONS, vars);
+        return 0;
+    }
+    
+    close(fd);
+    fprintf(stderr, "DEBUG-ORPHAN-EXEC: Successfully processed orphaned redirection to '%s'\n", filename);
+    return 1;
 }
 
 /*
@@ -288,20 +393,20 @@ void verify_command_args(t_vars *vars)
 // 	return (0);
 // }
 
-// Helper function to find a node in the linked list
-t_node	*find_node_in_list(t_node *head, t_node *target)
-{
-	t_node	*current;
+// // Helper function to find a node in the linked list
+// t_node	*find_node_in_list(t_node *head, t_node *target)
+// {
+// 	t_node	*current;
 
-	current = head;
-	while (current)
-	{
-		if (current == target)
-			return (current);
-		current = current->next;
-	}
-	return (NULL);
-}
+// 	current = head;
+// 	while (current)
+// 	{
+// 		if (current == target)
+// 			return (current);
+// 		current = current->next;
+// 	}
+// 	return (NULL);
+// }
 
 // Helper function to check if a node is a redirection target
 // int	is_redirection_target(t_node *node, t_vars *vars)
@@ -339,43 +444,43 @@ t_node	*find_node_in_list(t_node *head, t_node *target)
 // }
 int is_redirection_target(t_node *node, t_vars *vars)
 {
-    t_node *current = vars->head;
-    
-    fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if node '%s' is redirection target\n",
-            node->args ? node->args[0] : "NULL");
-    
-    while (current)
-    {
-        if (is_redirection(current->type))
-        {
-            fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection type=%s with filename='%s'\n",
-                    get_token_str(current->type),
-                    current->args && current->args[0] ? current->args[0] : "NONE");
-            
-            // Check if this node immediately follows a redirection
-            if (current->next == node)
-            {
-                // CRITICAL FIX: Check if redirection already has embedded filename
-                if (current->args && current->args[0] && strlen(current->args[0]) > 0)
-                {
-                    fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already complete with '%s', node '%s' is NOT target\n",
-                            current->args[0], node->args ? node->args[0] : "NULL");
-                    return 0;
-                }
-                else
-                {
-                    fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection needs target, node '%s' IS target\n",
-                            node->args ? node->args[0] : "NULL");
-                    return 1;
-                }
-            }
-        }
-        current = current->next;
-    }
-    
-    fprintf(stderr, "DEBUG-REDIR-TARGET: Node '%s' is NOT a redirection target\n",
-            node->args ? node->args[0] : "NULL");
-    return 0;
+	t_node *current = vars->head;
+	
+	fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if node '%s' is redirection target\n",
+			node->args ? node->args[0] : "NULL");
+	
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection type=%s with filename='%s'\n",
+					get_token_str(current->type),
+					current->args && current->args[0] ? current->args[0] : "NONE");
+			
+			// Check if this node immediately follows a redirection
+			if (current->next == node)
+			{
+				// CRITICAL FIX: Check if redirection already has embedded filename
+				if (current->args && current->args[0] && strlen(current->args[0]) > 0)
+				{
+					fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already complete with '%s', node '%s' is NOT target\n",
+							current->args[0], node->args ? node->args[0] : "NULL");
+					return 0;
+				}
+				else
+				{
+					fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection needs target, node '%s' IS target\n",
+							node->args ? node->args[0] : "NULL");
+					return 1;
+				}
+			}
+		}
+		current = current->next;
+	}
+	
+	fprintf(stderr, "DEBUG-REDIR-TARGET: Node '%s' is NOT a redirection target\n",
+			node->args ? node->args[0] : "NULL");
+	return 0;
 }
 
 /*

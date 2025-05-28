@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:55:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 17:41:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ void link_cmd_redirs(t_node *cmd_node, t_vars *vars)
 				cmd_node->args ? cmd_node->args[0] : "NULL");
 	}
 }
+
 /*
 Updates redirection type trackers and chains with existing redirections.
 - Updates last_in_redir or last_out_redir based on type
@@ -173,16 +174,52 @@ Returns:
 - Pointer to the target command node.
 - NULL if no valid target found.
 */
+// t_node	*get_redir_target(t_node *current, t_node *last_cmd)
+// {
+// 	t_node	*target;
+
+// 	target = NULL;
+// 	if (current->prev && current->prev->type == TYPE_CMD)
+// 		target = current->prev;
+// 	else
+// 		target = last_cmd;
+// 	return (target);
+// }
 t_node	*get_redir_target(t_node *current, t_node *last_cmd)
 {
-	t_node	*target;
-
-	target = NULL;
+	t_node	*target = NULL;
+	
+	fprintf(stderr, "DEBUG-GET-REDIR-TARGET: Finding target for redirection %s '%s'\n",
+			get_token_str(current->type), 
+			current->args ? current->args[0] : "NULL");
+	
+	// Original logic: check if previous node is a command
 	if (current->prev && current->prev->type == TYPE_CMD)
+	{
 		target = current->prev;
-	else
+		fprintf(stderr, "DEBUG-GET-REDIR-TARGET: Found target via prev node: '%s'\n",
+				target->args ? target->args[0] : "NULL");
+	}
+	// NEW: Check if next node is a command (pipeline context: | >file cmd)
+	else if (current->next && current->next->type == TYPE_CMD)
+	{
+		target = current->next;
+		fprintf(stderr, "DEBUG-GET-REDIR-TARGET: Found target via next node (pipeline): '%s'\n",
+				target->args ? target->args[0] : "NULL");
+	}
+	// Fallback: use last command seen
+	else if (last_cmd)
+	{
 		target = last_cmd;
-	return (target);
+		fprintf(stderr, "DEBUG-GET-REDIR-TARGET: Using last command as target: '%s'\n",
+				target->args ? target->args[0] : "NULL");
+	}
+	else
+	{
+		fprintf(stderr, "DEBUG-GET-REDIR-TARGET: No target found for redirection\n");
+	}
+	
+	return target;
 }
 
 /*

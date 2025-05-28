@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 17:13:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 17:54:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,6 +340,8 @@ t_node		*find_node_in_list(t_node *head, t_node *target);
 int			is_redirection_target(t_node *node, t_vars *vars);
 t_node		*proc_redir(t_vars *vars);
 void		build_redir_ast(t_vars *vars);
+int			preprocess_orphaned_redirections(t_vars *vars);
+int			execute_orphaned_redirection_immediate(t_node *redir_node, t_vars *vars);
 void		collect_args_after_redir(t_node *redir_node, t_node *cmd_node);
 void		process_redir_node(t_node *redir_node, t_vars *vars);
 
