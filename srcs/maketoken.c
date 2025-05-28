@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 16:57:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 17:21:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,51 +24,51 @@ Example: When tokenizing "echo hello"
 */
 // void	maketoken(char *token, t_tokentype type, t_vars *vars)
 // {
-// 	t_node	*node;
-// 	t_node	*curr;
-// 	int		node_freed;
-
-// 	if (!token || !vars)
-// 	{
-// 		return ;
-// 	}
-// 	node = initnode(type, token);
-// 	if (!node)
-// 	{
-// 		return ;
-// 	}
-// 	node_freed = build_token_linklist(vars, node);
-// 	if (!node_freed)
-// 	{
-// 		free_if_orphan_node(node, vars);
-// 	}
-// 	curr = vars->head;
-// 	while (curr)
-// 	{
-// 		curr = curr->next;
-// 	}
-// }
-// void	maketoken(char *token, t_tokentype type, t_vars *vars)
-// {
-// 	t_node	*node;
-// 	t_node	*curr;
-// 	int		node_freed;
-// 	static int token_position = 0;
+// 	t_node		*node;
+// 	t_node		*curr;
+// 	int			node_freed;
+// 	static int	token_position = 0;
 
 // 	if (!token || !vars)
 // 		return ;
-// 	// DEBUG CALL #3: Token creation
-// 	debug_token_creation(token, type, token_position);
+	
+// 	// DEBUG: Enhanced token creation tracking
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: === TOKEN CREATION START ===\n");
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: Position %d, creating token '%s' as %s\n", 
+// 			token_position, token, get_token_str(type));
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: Before creation - prev_type=%s, curr_type=%s\n",
+// 			get_token_str(vars->prev_type), get_token_str(vars->curr_type));
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: Pipeline state - in_pipe=%d\n", 
+// 			vars->pipes ? vars->pipes->in_pipe : -1);
 	
 // 	node = initnode(type, token);
 // 	if (!node)
+// 	{
+// 		fprintf(stderr, "DEBUG-MAKETOKEN: Failed to create node\n");
 // 		return ;
+// 	}
+	
+// 	// CRITICAL: Update pipeline state when pipe token is created
+// 	if (type == TYPE_PIPE)
+// 	{
+// 		vars->pipes->in_pipe = 1;
+// 		fprintf(stderr, "DEBUG-MAKETOKEN: Set in_pipe=1 for pipe token\n");
+// 	}
+	
 // 	node_freed = build_token_linklist(vars, node);
 // 	if (!node_freed)
 // 		free_if_orphan_node(node, vars);
+	
+// 	// CRITICAL FIX: Update prev_type for next token classification
+// 	vars->prev_type = type;
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: Updated prev_type to %s for next classification\n", 
+// 			get_token_str(vars->prev_type));
+	
 // 	curr = vars->head;
 // 	while (curr)
 // 		curr = curr->next;
+	
+// 	fprintf(stderr, "DEBUG-MAKETOKEN: === TOKEN CREATION END ===\n\n");
 // 	token_position++;
 // }
 void	maketoken(char *token, t_tokentype type, t_vars *vars)
@@ -76,25 +76,50 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 	t_node		*node;
 	t_node		*curr;
 	int			node_freed;
-	static int	token_position;
+	static int	token_position = 0;
 
-	token_position = 0;
 	if (!token || !vars)
 		return ;
-	// DEBUG CALL #3: Token creation
-	debug_token_creation(token, type, token_position);
+	
+	// DEBUG: Enhanced token creation tracking
+	fprintf(stderr, "DEBUG-MAKETOKEN: === TOKEN CREATION START ===\n");
+	fprintf(stderr, "DEBUG-MAKETOKEN: Position %d, creating token '%s' as %s\n", 
+			token_position, token, get_token_str(type));
+	fprintf(stderr, "DEBUG-MAKETOKEN: Before creation - prev_type=%s, curr_type=%s\n",
+			get_token_str(vars->prev_type), get_token_str(vars->curr_type));
+	fprintf(stderr, "DEBUG-MAKETOKEN: Pipeline state - in_pipe=%d\n", 
+			vars->pipes ? vars->pipes->in_pipe : -1);
+	
 	node = initnode(type, token);
 	if (!node)
+	{
+		fprintf(stderr, "DEBUG-MAKETOKEN: Failed to create node\n");
 		return ;
+	}
+	
+	// CRITICAL: Update pipeline state when pipe token is created
 	if (type == TYPE_PIPE)
+	{
 		vars->pipes->in_pipe = 1;
+		fprintf(stderr, "DEBUG-MAKETOKEN: Set in_pipe=1 for pipe token\n");
+	}
+	
 	node_freed = build_token_linklist(vars, node);
 	if (!node_freed)
 		free_if_orphan_node(node, vars);
+	
+	// CRITICAL FIX: Update prev_type AFTER token creation, not before
+	fprintf(stderr, "DEBUG-MAKETOKEN: Updating prev_type from %s to %s\n", 
+			get_token_str(vars->prev_type), get_token_str(type));
 	vars->prev_type = type;
+	fprintf(stderr, "DEBUG-MAKETOKEN: prev_type now set to %s for next classification\n", 
+			get_token_str(vars->prev_type));
+	
 	curr = vars->head;
 	while (curr)
 		curr = curr->next;
+	
+	fprintf(stderr, "DEBUG-MAKETOKEN: === TOKEN CREATION END ===\n\n");
 	token_position++;
 }
 

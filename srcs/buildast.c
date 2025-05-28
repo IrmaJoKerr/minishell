@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 16:44:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 17:13:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,22 +271,22 @@ void verify_command_args(t_vars *vars)
 	fprintf(stderr, "DEBUG-VERIFY-ARGS: Argument verification completed\n");
 }
 
-// Helper function to check if an argument already exists in command's arguments
-int	is_arg_in_cmd(t_node *cmd, char *arg)
-{
-	int	i;
+// // Helper function to check if an argument already exists in command's arguments
+// int	is_arg_in_cmd(t_node *cmd, char *arg)
+// {
+// 	int	i;
 
-	i = 0;
-	if (!cmd || !cmd->args || !arg)
-		return (0);
-	while (cmd->args[i])
-	{
-		if (ft_strcmp(cmd->args[i], arg) == 0)
-			return (1);
-		i++;
-	}
-	return (0);
-}
+// 	i = 0;
+// 	if (!cmd || !cmd->args || !arg)
+// 		return (0);
+// 	while (cmd->args[i])
+// 	{
+// 		if (ft_strcmp(cmd->args[i], arg) == 0)
+// 			return (1);
+// 		i++;
+// 	}
+// 	return (0);
+// }
 
 // Helper function to find a node in the linked list
 t_node	*find_node_in_list(t_node *head, t_node *target)

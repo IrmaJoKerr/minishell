@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 10:16:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 17:13:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,7 +332,7 @@ void		append_arg(t_node *node, char *new_arg, int quote_type);
 AST token processing and AST tree building.
 In buildast.c
 */
-int			is_arg_in_cmd(t_node *cmd, char *arg);
+// int			is_arg_in_cmd(t_node *cmd, char *arg);
 t_node		*proc_token_list(t_vars *vars);
 t_node		*proc_pipes(t_vars *vars);
 void		verify_command_args(t_vars *vars);
