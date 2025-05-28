@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 10:38:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 16:44:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,25 +317,65 @@ t_node	*find_node_in_list(t_node *head, t_node *target)
 // 	}
 // 	return (0);
 // }
+// int is_redirection_target(t_node *node, t_vars *vars)
+// {
+// 	t_node *current = vars->head;
+	
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type))
+// 		{
+// 			// Check if this node immediately follows a redirection
+// 			if (current->next == node)
+// 			{
+// 				fprintf(stderr, "DEBUG-VERIFY-ARGS: Node '%s' is redirection target\n",
+// 						node->args ? node->args[0] : "NULL");
+// 				return 1;
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// 	return 0;
+// }
 int is_redirection_target(t_node *node, t_vars *vars)
 {
-	t_node *current = vars->head;
-	
-	while (current)
-	{
-		if (is_redirection(current->type))
-		{
-			// Check if this node immediately follows a redirection
-			if (current->next == node)
-			{
-				fprintf(stderr, "DEBUG-VERIFY-ARGS: Node '%s' is redirection target\n",
-						node->args ? node->args[0] : "NULL");
-				return 1;
-			}
-		}
-		current = current->next;
-	}
-	return 0;
+    t_node *current = vars->head;
+    
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if node '%s' is redirection target\n",
+            node->args ? node->args[0] : "NULL");
+    
+    while (current)
+    {
+        if (is_redirection(current->type))
+        {
+            fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection type=%s with filename='%s'\n",
+                    get_token_str(current->type),
+                    current->args && current->args[0] ? current->args[0] : "NONE");
+            
+            // Check if this node immediately follows a redirection
+            if (current->next == node)
+            {
+                // CRITICAL FIX: Check if redirection already has embedded filename
+                if (current->args && current->args[0] && strlen(current->args[0]) > 0)
+                {
+                    fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already complete with '%s', node '%s' is NOT target\n",
+                            current->args[0], node->args ? node->args[0] : "NULL");
+                    return 0;
+                }
+                else
+                {
+                    fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection needs target, node '%s' IS target\n",
+                            node->args ? node->args[0] : "NULL");
+                    return 1;
+                }
+            }
+        }
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-REDIR-TARGET: Node '%s' is NOT a redirection target\n",
+            node->args ? node->args[0] : "NULL");
+    return 0;
 }
 
 /*
