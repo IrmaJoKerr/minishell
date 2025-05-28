@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 10:43:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 16:57:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,11 +73,12 @@ Example: When tokenizing "echo hello"
 // }
 void	maketoken(char *token, t_tokentype type, t_vars *vars)
 {
-	t_node	*node;
-	t_node	*curr;
-	int		node_freed;
-	static int token_position = 0;
+	t_node		*node;
+	t_node		*curr;
+	int			node_freed;
+	static int	token_position;
 
+	token_position = 0;
 	if (!token || !vars)
 		return ;
 	// DEBUG CALL #3: Token creation
@@ -90,6 +91,7 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 	node_freed = build_token_linklist(vars, node);
 	if (!node_freed)
 		free_if_orphan_node(node, vars);
+	vars->prev_type = type;
 	curr = vars->head;
 	while (curr)
 		curr = curr->next;
