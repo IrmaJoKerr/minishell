@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:21:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:56:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 22:00:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 Resets redirection tracking state in the pipes structure.
 - Clears command and redirection node pointers.
 - Prepares pipes structure for new redirection processing.
-Works with proc_redir to clean state before processing.
+Works with proc_ast_redir to clean state before processing.
 */
 void	reset_redir_tracking(t_pipe *pipes)
 {
@@ -81,7 +81,7 @@ Configures a redirection node with source and target commands.
 - Sets left child to source command node.
 - Sets right child to target command/filename node.
 - Establishes the redirection relationship in the AST.
-Works with proc_redir().
+Works with proc_ast_redir().
 */
 // void	set_redir_node(t_node *redir, t_node *cmd, t_node *target)
 // {
@@ -113,7 +113,7 @@ Finds redirection nodes associated with a specific command node.
 Returns:
 - The first redirection node that targets the command.
 - NULL if no matching redirection found.
-Works with swap_cmd_redir() to connect commands and redirections in the AST.
+Works with link_redir_to_cmd_node() to connect commands and redirections in the AST.
 */
 t_node *find_cmd_redir(t_node *redir_root, t_node *cmd_node, t_vars *vars)
 {

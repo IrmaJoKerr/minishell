@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 17:54:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 21:59:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,18 +332,15 @@ void		append_arg(t_node *node, char *new_arg, int quote_type);
 AST token processing and AST tree building.
 In buildast.c
 */
-// int			is_arg_in_cmd(t_node *cmd, char *arg);
-t_node		*proc_token_list(t_vars *vars);
-t_node		*proc_pipes(t_vars *vars);
-void		verify_command_args(t_vars *vars);
-t_node		*find_node_in_list(t_node *head, t_node *target);
+t_node		*ast_builder(t_vars *vars);
+t_node		*proc_ast_pipes(t_vars *vars);
+void		chk_args_match_cmd(t_vars *vars);
+// t_node		*find_node_in_list(t_node *head, t_node *target);
 int			is_redirection_target(t_node *node, t_vars *vars);
-t_node		*proc_redir(t_vars *vars);
-void		build_redir_ast(t_vars *vars);
-int			preprocess_orphaned_redirections(t_vars *vars);
-int			execute_orphaned_redirection_immediate(t_node *redir_node, t_vars *vars);
-void		collect_args_after_redir(t_node *redir_node, t_node *cmd_node);
-void		process_redir_node(t_node *redir_node, t_vars *vars);
+t_node		*proc_ast_redir(t_vars *vars);
+void		pre_ast_redir_proc(t_vars *vars);
+int			proc_solo_redirs(t_vars *vars);
+int			exec_solo_redir(t_node *redir_node, t_vars *vars);
 
 /*
 Builtin control handling.
@@ -774,7 +771,7 @@ int			validate_redir_targets(t_vars *vars);
 Process redirection nodes functions.
 In process_redir_node.c
 */
-void		link_cmd_redirs(t_node *cmd_node, t_vars *vars);
+void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
 // void		link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
 void		track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
 void		link_in_out_redirs(t_vars *vars);
@@ -796,11 +793,8 @@ int			process_redir_filename(char *input, int *i, t_node *redir_node);
 Redirection processing functions.
 In process_redirect.c
 */
-int			chk_redir_nodes(t_vars *vars, t_node *current);
-t_node		*find_redir_chain_head(t_node *current, t_node *last_cmd);
-void		swap_cmd_redir(t_node **node_ptr, t_vars *vars);
+void		link_redir_to_cmd_node(t_node **node_ptr, t_vars *vars);
 void		proc_pipe_chain(t_node *start_pipe, t_vars *vars);
-void		link_redirs_pipes(t_vars *vars);
 
 /*
 Handles expansion in quotes.
@@ -881,7 +875,6 @@ Tokenizing functions.
 In tokenize.c
 */
 int			process_input_tokens(char *command, t_vars *vars);
-
 void		tokenize_quote(char *input, t_vars *vars);
 void		tokenize_expan(char *input, t_vars *vars);
 void		tokenize_white(char *input, t_vars *vars);

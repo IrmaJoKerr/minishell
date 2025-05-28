@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 10:24:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 21:58:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ Finds and processes the first pipe node in token stream.
 Returns:
 The pipe node if found and valid.
 NULL if no valid pipe configuration exists.
-Works with proc_pipes.
+Works with proc_ast_pipes.
 */
 t_node	*process_first_pipe(t_vars *vars)
 {
@@ -75,7 +75,7 @@ Processes remaining pipe nodes after the first pipe.
 - Links them into the pipe chain.
 Returns:
 Nothing (void function).
-Works with proc_pipes.
+Works with proc_ast_pipes.
 */
 void	process_addon_pipes(t_vars *vars)
 {

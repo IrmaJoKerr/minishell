@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 18:01:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 21:59:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,15 @@
 Processes the entire token list to build the AST structure.
 - Identifies command nodes in the token list.
 - Builds pipe structures for commands separated by pipes.
-- Processes redirections and integrates with pipe structure.
-- Selects the appropriate root node for the final AST.
-Example: For input "ls -l | grep a > output.txt":
-- Finds "ls" and "grep" commands.
-- Creates pipe structure connecting them.
-- Attaches ">" redirection to "grep".
-- Returns pipe node as root with redirection integrated.
+- Processes redirections and integrates with command/pipe structure.
+- Sets the appropriate root node for the final AST.
 
 Returns:
 - Root node of the constructed AST.
 - NULL if invalid syntax or no commands found.
 Works with build_and_execute().
 */
-t_node	*proc_token_list(t_vars *vars)
+t_node	*ast_builder(t_vars *vars)
 {
 	if (!vars || !vars->head || !vars->pipes)
 		return (NULL);
@@ -37,47 +32,9 @@ t_node	*proc_token_list(t_vars *vars)
 	if (vars->cmd_count == 0 || !vars->cmd_nodes[0]
 		|| !vars->cmd_nodes[0]->args)
 		return (NULL);
-	vars->pipes->pipe_root = NULL;
-	vars->pipes->redir_root = NULL;
-	vars->pipes->pipe_root = proc_pipes(vars);
-	vars->pipes->redir_root = proc_redir(vars);
-	verify_command_args(vars);
-	
-	// NEW: Add AST structure validation debug
-	if (vars->pipes->pipe_root)
-	{
-		fprintf(stderr, "DEBUG-AST-FINAL: === FINAL AST STRUCTURE ===\n");
-		fprintf(stderr, "DEBUG-AST-FINAL: Root is PIPE\n");
-		fprintf(stderr, "DEBUG-AST-FINAL: Left: %s (%s)\n",
-				get_token_str(vars->pipes->pipe_root->left->type),
-				vars->pipes->pipe_root->left && vars->pipes->pipe_root->left->args ? 
-				vars->pipes->pipe_root->left->args[0] : "NULL");
-		fprintf(stderr, "DEBUG-AST-FINAL: Right: %s (%s)\n",
-				get_token_str(vars->pipes->pipe_root->right->type),
-				vars->pipes->pipe_root->right && vars->pipes->pipe_root->right->args ? 
-				vars->pipes->pipe_root->right->args[0] : "NULL");
-				
-		// Check if left side has redirection structure
-		if (is_redirection(vars->pipes->pipe_root->left->type))
-		{
-			fprintf(stderr, "DEBUG-AST-FINAL: Left redirection->left: %s (%s)\n",
-					vars->pipes->pipe_root->left->left ? 
-					get_token_str(vars->pipes->pipe_root->left->left->type) : "NULL",
-					vars->pipes->pipe_root->left->left && vars->pipes->pipe_root->left->left->args ? 
-					vars->pipes->pipe_root->left->left->args[0] : "NULL");
-		}
-		
-		// Check if right side has redirection structure  
-		if (is_redirection(vars->pipes->pipe_root->right->type))
-		{
-			fprintf(stderr, "DEBUG-AST-FINAL: Right redirection->left: %s (%s)\n",
-					vars->pipes->pipe_root->right->left ? 
-					get_token_str(vars->pipes->pipe_root->right->left->type) : "NULL",
-					vars->pipes->pipe_root->right->left && vars->pipes->pipe_root->right->left->args ? 
-					vars->pipes->pipe_root->right->left->args[0] : "NULL");
-		}
-	}
-	
+	vars->pipes->pipe_root = proc_ast_pipes(vars);
+	vars->pipes->redir_root = proc_ast_redir(vars);
+	chk_args_match_cmd(vars);
 	if (vars->pipes->pipe_root)
 		return (vars->pipes->pipe_root);
 	else if (vars->pipes->redir_root)
@@ -88,150 +45,122 @@ t_node	*proc_token_list(t_vars *vars)
 }
 
 /*
-Builds the redirection AST by connecting commands to redirection operators.
-- Traverses token list once, tracking commands and redirections.
-- Links redirection nodes to their target commands and targets.
-- Sets pipes->redir_root to the first valid redirection.
-Works with proc_redir for redirection structure building.
+Master redirection node preprocessor for AST.
+- Handles solo redirections by immediate execution and marking as TYPE_NULL.
+- Validates remaining redirection syntax and reports syntax errors.
+- Sets the first valid redirection as the redirection root.
+- Links commands to their associated redirections for AST construction.
+
+Example: For "echo hi | >./outfile echo bye > output.txt":
+- Processes ">./outfile" as solo redirection (executes immediately).
+- Validates "> output.txt" redirection syntax.
+- Sets "> output.txt" as redirection root.
+- Links "echo bye" command with "> output.txt" redirection.
+
+Works with proc_ast_redir() as part of the redirection preprocessing pipeline.
+Called before main AST construction to prepare redirection structures.
 */
-// void build_redir_ast(t_vars *vars)
-// {
-// 	int i;
-	
-// 	fprintf(stderr, "DEBUG-REDIR-BUILD: Building redirection AST (command-first approach)\n");
-	
-// 	// First initialize any redirection nodes that have targets
-// 	t_node *current = vars->head;
-// 	while (current) {
-// 		if (is_redirection(current->type)) {
-// 			// CRITICAL FIX: Improved validation logic for both types of redirection targets
-// 			if (!is_valid_redir_node(current)) {
-// 				tok_syntax_error_msg("newline", vars);
-// 				return;
-// 			}
-			
-// 			// Initialize redirection target (command will be set later)
-// 			if (!vars->pipes->redir_root)
-// 				vars->pipes->redir_root = current;
-// 		}
-// 		current = current->next;
-// 	}
-	
-// 	// Process each command and find its redirections
-// 	for (i = 0; i < vars->cmd_count; i++) {
-// 		if (vars->cmd_nodes[i]) {
-// 			fprintf(stderr, "DEBUG-REDIR-BUILD: Processing command '%s'\n",
-// 					vars->cmd_nodes[i]->args ? vars->cmd_nodes[i]->args[0] : "NULL");
-			
-// 			// Link all redirections that belong to this command
-// 			link_cmd_redirs(vars->cmd_nodes[i], vars);
-// 		}
-// 	}
-// }
-void build_redir_ast(t_vars *vars)
+void	pre_ast_redir_proc(t_vars *vars)
 {
-    t_node *current;
-    
-    // NEW: Pre-process orphaned redirections first
-    if (!preprocess_orphaned_redirections(vars)) {
-        return; // Error in orphaned redirection execution
-    }
-    
-    // Continue with existing logic (unchanged)
-    fprintf(stderr, "DEBUG-REDIR-BUILD: Building redirection AST\n");
-    
-    current = vars->head;
-    while (current) {
-        if (is_redirection(current->type)) {
-            if (!is_valid_redir_node(current)) {
-                tok_syntax_error_msg("newline", vars);
-                return;
-            }
-            if (!vars->pipes->redir_root)
-                vars->pipes->redir_root = current;
-        }
-        current = current->next;
-    }
-    
-    // Process commands - no for loop needed
-    current = vars->head;
-    while (current) {
-        if (current->type == TYPE_CMD) {
-            fprintf(stderr, "DEBUG-REDIR-BUILD: Processing command '%s'\n",
-                    current->args ? current->args[0] : "NULL");
-            link_cmd_redirs(current, vars);
-        }
-        current = current->next;
-    }
+	t_node	*current;
+
+	if (!proc_solo_redirs(vars))
+		return ;
+	current = vars->head;
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			if (!is_valid_redir_node(current))
+			{
+				tok_syntax_error_msg("newline", vars);
+				return ;
+			}
+			if (!vars->pipes->redir_root)
+				vars->pipes->redir_root = current;
+		}
+		else if (current->type == TYPE_CMD)
+			make_cmd_redir_chain(current, vars);
+		current = current->next;
+	}
 }
 
-// NEW: Pre-process orphaned redirections (SIMPLIFIED - NO NODE REMOVAL)
-int preprocess_orphaned_redirections(t_vars *vars)
+/*
+Processes solo redirections in pipeline contexts.
+- Looks for redirections between pipes and commands (e.g., "| >file cmd").
+- Executes solo redirections to create/truncate target files.
+- Marks processed redirection nodes as TYPE_NULL so not in AST.
+- Handles both output (>) and append (>>) redirections.
+- Continues processing the pipeline normally after redirection.
+
+Example: For "echo hi | >./outfile echo bye":
+- Detects ">./outfile" as solo (between | and echo).
+- Executes redirection to create/truncate "./outfile".
+- Marks redirection node as TYPE_NULL.
+- Continues with normal pipeline: "echo hi | echo bye".
+
+Returns:
+- 1 on success.
+- 0 on failure.
+Works with pre_ast_redir_proc() and exec_solo_redir().
+*/
+int	proc_solo_redirs(t_vars *vars)
 {
-    t_node *current;
-    
-    fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Scanning for orphaned redirections\n");
-    
-    current = vars->head;
-    while (current) {
-        if (is_redirection(current->type)) {
-            // Check if this redirection is orphaned (between pipe and command)
-            if (current->prev && current->prev->type == TYPE_PIPE &&
-                current->next && current->next->type == TYPE_CMD) {
-                
-                fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Found orphaned redirection %s '%s'\n",
-                        get_token_str(current->type), 
-                        current->args ? current->args[0] : "NULL");
-                
-                // Execute the orphaned redirection immediately
-                if (!execute_orphaned_redirection_immediate(current, vars)) {
-                    return 0; // Execution failed
-                }
-                
-                // SIMPLIFIED: Mark as executed, don't remove from list
-                current->type = TYPE_NULL; // Mark as processed
-                fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Marked orphaned redirection as processed\n");
-            }
-        }
-        current = current->next;
-    }
-    
-    fprintf(stderr, "DEBUG-ORPHAN-PREPROCESS: Orphaned redirection preprocessing completed\n");
-    return 1;
+	t_node	*current;
+
+	current = vars->head;
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			if (current->prev && current->prev->type == TYPE_PIPE
+				&& current->next && current->next->type == TYPE_CMD)
+			{
+				if (!exec_solo_redir(current, vars))
+					return (0);
+				current->type = TYPE_NULL;
+			}
+		}
+		current = current->next;
+	}
+	return (1);
 }
 
-// Execute orphaned redirection immediately (unchanged)
-int execute_orphaned_redirection_immediate(t_node *redir_node, t_vars *vars)
+/*
+Executes a solo redirection by creating or modifying the target file.
+- Validates that the redirection node has a valid filename argument.
+- Creates files with standard permissions (0644) if they don't exist.
+Used by proc_solo_redirs() to immediately execute orphaned redirections
+that appear between pipes and commands (e.g., "cmd1 | >file cmd2").
+
+Returns:
+- 1 on success (file created/modified successfully).
+- 0 on failure (invalid arguments, unsupported redirection type, or file error).
+*/
+int	exec_solo_redir(t_node *redir_node, t_vars *vars)
 {
-    if (!redir_node->args || !redir_node->args[0]) {
-        fprintf(stderr, "DEBUG-ORPHAN-EXEC: No filename for redirection\n");
-        return 0;
-    }
-    
-    char *filename = redir_node->args[0];
-    int fd = -1;
-    
-    fprintf(stderr, "DEBUG-ORPHAN-EXEC: Executing orphaned %s to '%s'\n",
-            get_token_str(redir_node->type), filename);
-    
-    // Handle different redirection types
-    if (redir_node->type == TYPE_OUT_REDIRECT) {
-        fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    } else if (redir_node->type == TYPE_APPEND_REDIRECT) {
-        fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-    } else {
-        fprintf(stderr, "DEBUG-ORPHAN-EXEC: Unsupported orphaned redirection type\n");
-        return 0;
-    }
-    
-    if (fd == -1) {
-        shell_error(filename, ERR_PERMISSIONS, vars);
-        return 0;
-    }
-    
-    close(fd);
-    fprintf(stderr, "DEBUG-ORPHAN-EXEC: Successfully processed orphaned redirection to '%s'\n", filename);
-    return 1;
+	char	*filename;
+	int		fd;
+
+	if (!redir_node->args || !redir_node->args[0])
+		return (0);
+	filename = redir_node->args[0];
+	fd = -1;
+	if (!chk_permissions(filename, O_WRONLY, vars))
+		return (0);
+	if (redir_node->type == TYPE_OUT_REDIRECT)
+		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if (redir_node->type == TYPE_APPEND_REDIRECT)
+		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		return (0);
+	if (fd == -1)
+	{
+		shell_error(filename, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	close(fd);
+	return (1);
 }
 
 /*
@@ -243,25 +172,9 @@ Master function for pipe node processing in token list.
 Returns:
 Root pipe node for AST if pipes found.
 NULL if no valid pipes in token stream.
-Works with proc_token_list.
+Works with ast_builder.
 */
-// t_node	*proc_pipes(t_vars *vars)
-// {
-// 	t_node	*pipe_root;
-
-// 	if (!vars || !vars->head || !vars->pipes)
-// 		return (NULL);
-// 	vars->pipes->pipe_root = NULL;
-// 	vars->pipes->last_pipe = NULL;
-// 	vars->pipes->last_cmd = NULL;
-// 	pipe_root = process_first_pipe(vars);
-// 	if (!pipe_root)
-// 		return (NULL);
-// 	vars->pipes->pipe_root = pipe_root;
-// 	process_addon_pipes(vars);
-// 	return (pipe_root);
-// }
-t_node	*proc_pipes(t_vars *vars)
+t_node	*proc_ast_pipes(t_vars *vars)
 {
 	t_node	*pipe_root;
 
@@ -276,304 +189,128 @@ t_node	*proc_pipes(t_vars *vars)
 	vars->pipes->pipe_root = pipe_root;
 	if (vars->pipes->pipe_root)
 	{
-		// CRITICAL ADD: Ensure flag is set when pipe_root exists
 		vars->pipes->in_pipe = 1;
 		process_addon_pipes(vars);
 	}
 	return (pipe_root);
 }
 
-// void	verify_command_args(t_vars *vars)
-// {
-// 	t_node	*current;
-// 	t_node	*cmd;
-// 	t_node	**cmd_ptr;
-// 	int		remaining_cmds;
+/*
+Associates argument tokens with their corresponding command tokens.
+- Scans token linklist to identify commands and their args.
+- Appends ARGS tokens to CMD tokens not redirection targets (filenames).
 
-// 	cmd_ptr = vars->cmd_nodes;
-// 	remaining_cmds = vars->cmd_count;
-// 	while (remaining_cmds > 0)
-// 	{
-// 		cmd = *cmd_ptr;
-// 		if (!cmd || !cmd->args)
-// 		{
-// 			cmd_ptr++;
-// 			remaining_cmds--;
-// 			continue ;
-// 		}
-// 		current = find_node_in_list(vars->head, cmd);
-// 		if (!current)
-// 		{
-// 			cmd_ptr++;
-// 			remaining_cmds--;
-// 			continue ;
-// 		}
-// 		current = current->next;
-// 		while (current && current->type != TYPE_CMD
-// 			&& current->type != TYPE_PIPE)
-// 		{
-// 			if (current->type == TYPE_ARGS
-// 				&& !is_redirection_target(current, vars))
-// 			{
-// 				if (!is_arg_in_cmd(cmd, current->args[0]))
-// 					append_arg(cmd, current->args[0], 0);
-// 			}
-// 			current = current->next;
-// 		}
-// 		cmd_ptr++;
-// 		remaining_cmds--;
-// 	}
-// }
-void verify_command_args(t_vars *vars)
+Process flow:
+- Tracks current active command as it encounters CMD tokens.
+- For each ARGS token, checks if it's a redirection target before appending.
+- Resets command context when encountering pipe operators.
+
+Example: For "cat file.txt > output.txt | grep pattern":
+- Links "file.txt" with "cat" command.
+- Skips "output.txt" (redirection target).
+- Links "pattern" to "grep" command node.
+*/
+void	chk_args_match_cmd(t_vars *vars)
 {
-	t_node *current;
-	t_node *cmd_node = NULL;
-	
-	fprintf(stderr, "DEBUG-VERIFY-ARGS: Starting argument verification\n");
-	
+	t_node	*current;
+	t_node	*node;
+
+	node = NULL;
 	if (!vars || !vars->head)
-		return;
-		
+		return ;
 	current = vars->head;
 	while (current)
 	{
-		fprintf(stderr, "DEBUG-VERIFY-ARGS: Processing node type=%s, args[0]='%s'\n",
-				get_token_str(current->type),
-				current->args ? current->args[0] : "NULL");
-				
 		if (current->type == TYPE_CMD)
 		{
-			cmd_node = current;
-			fprintf(stderr, "DEBUG-VERIFY-ARGS: Found command '%s'\n", 
-					cmd_node->args[0]);
+			node = current;
 		}
-		else if (current->type == TYPE_ARGS && cmd_node && 
-				 !is_redirection_target(current, vars))
-		{
-			fprintf(stderr, "DEBUG-VERIFY-ARGS: Found orphaned argument '%s' for command '%s'\n",
-					current->args[0], cmd_node->args[0]);
-			
-			// Append this argument to the command
-			append_arg(cmd_node, current->args[0], 0);
-			
-			fprintf(stderr, "DEBUG-VERIFY-ARGS: Appended argument '%s' to command '%s'\n",
-					current->args[0], cmd_node->args[0]);
-		}
-		else if (is_redirection(current->type))
-		{
-			fprintf(stderr, "DEBUG-VERIFY-ARGS: Found redirection, continuing with same command context\n");
-			// Don't reset cmd_node - keep it for subsequent arguments
-		}
+		else if (current->type == TYPE_ARGS && node
+			&& !is_redirection_target(current, vars))
+			append_arg(node, current->args[0], 0);
 		else if (current->type == TYPE_PIPE)
-		{
-			fprintf(stderr, "DEBUG-VERIFY-ARGS: Found pipe, resetting command context\n");
-			cmd_node = NULL; // Reset for next command in pipeline
-		}
-		
+			node = NULL;
 		current = current->next;
 	}
-	
-	fprintf(stderr, "DEBUG-VERIFY-ARGS: Argument verification completed\n");
 }
 
-// // Helper function to check if an argument already exists in command's arguments
-// int	is_arg_in_cmd(t_node *cmd, char *arg)
-// {
-// 	int	i;
+/*
+Analyses if a token is the filename target of a redirection operator.
+Prevents redirection filenames from being incorrectly added as command args.
+- Scans the token list to find redirections before the current node.
 
-// 	i = 0;
-// 	if (!cmd || !cmd->args || !arg)
-// 		return (0);
-// 	while (cmd->args[i])
-// 	{
-// 		if (ft_strcmp(cmd->args[i], arg) == 0)
-// 			return (1);
-// 		i++;
-// 	}
-// 	return (0);
-// }
+Detection logic:
+- If node follows a redirection with filename in arg[0]: NOT a target.
+- If node follows a redirection without filename: IS a target.
+- If node doesn't follow any redirection: NOT a target.
 
-// // Helper function to find a node in the linked list
-// t_node	*find_node_in_list(t_node *head, t_node *target)
-// {
-// 	t_node	*current;
+Example:
+- [CMD: "cat"] [>: "output.txt"] [ARGS: "extra"] → "extra" == 0 (not a target)
+- [CMD: "cat"] [>: ""] [ARGS: "output.txt"] → "output.txt" == 1 (is a target)
 
-// 	current = head;
-// 	while (current)
-// 	{
-// 		if (current == target)
-// 			return (current);
-// 		current = current->next;
-// 	}
-// 	return (NULL);
-// }
-
-// Helper function to check if a node is a redirection target
-// int	is_redirection_target(t_node *node, t_vars *vars)
-// {
-// 	t_node	*current;
-
-// 	current = vars->head;
-// 	while (current)
-// 	{
-// 		if (is_redirection(current->type) && current->right == node)
-// 			return (1);
-// 		current = current->next;
-// 	}
-// 	return (0);
-// }
-// int is_redirection_target(t_node *node, t_vars *vars)
-// {
-// 	t_node *current = vars->head;
-	
-// 	while (current)
-// 	{
-// 		if (is_redirection(current->type))
-// 		{
-// 			// Check if this node immediately follows a redirection
-// 			if (current->next == node)
-// 			{
-// 				fprintf(stderr, "DEBUG-VERIFY-ARGS: Node '%s' is redirection target\n",
-// 						node->args ? node->args[0] : "NULL");
-// 				return 1;
-// 			}
-// 		}
-// 		current = current->next;
-// 	}
-// 	return 0;
-// }
-int is_redirection_target(t_node *node, t_vars *vars)
+Returns:
+- 0 if node is NOT a redirection target (Ok to append to command).
+- 1 if node IS a redirection target (Don't append to command).
+*/
+int	is_redirection_target(t_node *node, t_vars *vars)
 {
-	t_node *current = vars->head;
-	
-	fprintf(stderr, "DEBUG-REDIR-TARGET: Checking if node '%s' is redirection target\n",
-			node->args ? node->args[0] : "NULL");
-	
+	t_node	*current;
+
+	current = vars->head;
 	while (current)
 	{
 		if (is_redirection(current->type))
 		{
-			fprintf(stderr, "DEBUG-REDIR-TARGET: Found redirection type=%s with filename='%s'\n",
-					get_token_str(current->type),
-					current->args && current->args[0] ? current->args[0] : "NONE");
-			
-			// Check if this node immediately follows a redirection
 			if (current->next == node)
 			{
-				// CRITICAL FIX: Check if redirection already has embedded filename
-				if (current->args && current->args[0] && strlen(current->args[0]) > 0)
-				{
-					fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection already complete with '%s', node '%s' is NOT target\n",
-							current->args[0], node->args ? node->args[0] : "NULL");
-					return 0;
-				}
+				if (current->args && current->args[0])
+					return (0);
 				else
-				{
-					fprintf(stderr, "DEBUG-REDIR-TARGET: Redirection needs target, node '%s' IS target\n",
-							node->args ? node->args[0] : "NULL");
-					return 1;
-				}
+					return (1);
 			}
 		}
 		current = current->next;
 	}
-	
-	fprintf(stderr, "DEBUG-REDIR-TARGET: Node '%s' is NOT a redirection target\n",
-			node->args ? node->args[0] : "NULL");
-	return 0;
+	return (0);
 }
 
 /*
-Master redirection processing function.
+Master redirection processing function with pipe linking.
 - Controls the overall redirection handling workflow.
 - Identifies commands and redirection operators.
 - Builds redirection nodes and links them properly.
 - Integrates redirections with pipe structures if present.
+- Performs command-redirection swapping in pipe nodes directly.
+
+Process flow:
+- Resets redirection tracking structures.
+- Identifies all commands in the token stream.
+- Preprocesses redirections (handles orphaned, validates, links).
+- If pipes exist, integrates redirections with pipe structure.
+
 Returns:
 - Root redirection node for the AST if found.
 - NULL if no valid redirections exist in the token stream.
-Works with proc_token_list.
+
+Works with ast_builder() for complete AST construction.
 */
-t_node *proc_redir(t_vars *vars)
+t_node *proc_ast_redir(t_vars *vars)
 {
 	if (!vars || !vars->head)
 		return (NULL);
-	
 	reset_redir_tracking(vars->pipes);
-	
-	// Find all commands first
 	find_cmd(NULL, NULL, FIND_ALL, vars);
-	
-	// Build the redirection AST with new forward command-based approach
-	build_redir_ast(vars);
-	
-	// If we also have pipe structure, integrate redirections with it
-	if (vars->pipes->pipe_root)
-		link_redirs_pipes(vars);
-	
+	pre_ast_redir_proc(vars);
+	if (vars->pipes && vars->pipes->pipe_root && vars->pipes->redir_root)
+	{
+		link_redir_to_cmd_node(&(vars->pipes->pipe_root->left), vars);
+		if (vars->pipes->pipe_root->right)
+		{
+			if (vars->pipes->pipe_root->right->type == TYPE_CMD)
+				link_redir_to_cmd_node(&(vars->pipes->pipe_root->right), vars);
+			else if (vars->pipes->pipe_root->right->type == TYPE_PIPE)
+				proc_pipe_chain(vars->pipes->pipe_root->right, vars);
+		}
+	}
 	return (vars->pipes->redir_root);
-}
-
-
-/*
-Processes a redirection node during AST construction.
-- Sets up connections between command, redirection, and target nodes.
-- Updates pipeline tracking structures for later processing.
-Works with build_redir_ast().
-*/
-void process_redir_node(t_node *redir_node, t_vars *vars)
-{
-	t_node *cmd;
-	
-	fprintf(stderr, "DEBUG-PROCESS-REDIR: Processing redirection type=%s\n", 
-			get_token_str(redir_node->type));
-	
-	// Debug print the filename based on whether it's embedded or in next node
-	if (redir_node->args && redir_node->args[0])
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: Filename (embedded): '%s'\n", redir_node->args[0]);
-	else if (redir_node->next && redir_node->next->args && redir_node->next->args[0])
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: Filename (next node): '%s'\n", redir_node->next->args[0]);
-	else
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: No filename found\n");
-	
-	cmd = get_redir_target(redir_node, vars->pipes->last_cmd);
-	if (!cmd)
-	{
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: No command target found\n");
-		return;
-	}
-	
-	fprintf(stderr, "DEBUG-PROCESS-REDIR: Target command is '%s'\n",
-			cmd->args ? cmd->args[0] : "NULL");
-	
-	// Directly set the left pointer to the command
-	redir_node->left = cmd;
-	
-	// Mark this redirection as belonging to this specific command
-	redir_node->redir = cmd;
-	fprintf(stderr, "DEBUG-PROCESS-REDIR: Marked redirection as belonging to command '%s'\n",
-			cmd->args ? cmd->args[0] : "NULL");
-	
-	// CRITICAL FIX: Process the filename for quoted redirections
-	if (redir_node->args && redir_node->args[0])
-	{
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: Processing embedded filename '%s'\n", 
-				redir_node->args[0]);
-		strip_outer_quotes(&redir_node->args[0], vars);
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: After stripping quotes: '%s'\n", 
-				redir_node->args[0]);
-	}
-	
-	// Collect any arguments that follow this redirection
-	// collect_args_after_redir(redir_node, cmd);
-	
-	// Set the redirection root if this is the first one
-	if (!vars->pipes->redir_root)
-	{
-		vars->pipes->redir_root = redir_node;
-		fprintf(stderr, "DEBUG-PROCESS-REDIR: Set redir_root to this node\n");
-	}
-	
-	// Track redirection type
-	track_redirs(redir_node, cmd, vars);
 }

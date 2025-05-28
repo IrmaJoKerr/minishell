@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:40:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:42:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 20:00:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,18 +51,12 @@ t_node	*mode_action(t_node *current, t_node **last_cmd, t_vars *vars)
 		}
 		*last_cmd = current;
 		if (vars->find_mode == FIND_NEXT && vars->find_start != current)
-		{
 			return (current);
-		}
 	}
 	if (vars->find_mode == FIND_PREV && current == vars->find_tgt)
-	{
 		return (*last_cmd);
-	}
 	if (vars->find_mode == FIND_PREV && current->type == TYPE_PIPE)
-	{
 		*last_cmd = NULL;
-	}
 	return (NULL);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 17:54:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 21:43:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	build_and_execute(t_vars *vars)
 	// debug_print_tokens(vars->head);          // Print token list to stdout
 	// debug_analyze_list(vars->head);          // Detailed token analysis to stderr
 	// debug_save_tokens(vars->head, "tokens.txt"); // Save tokens to file
-	vars->astroot = proc_token_list(vars);
+	vars->astroot = ast_builder(vars);
 	if (vars->astroot)
 	{
 		// debug_print_ast(vars->astroot);       // Print AST to stdout  

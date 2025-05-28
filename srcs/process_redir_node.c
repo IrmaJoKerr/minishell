@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 17:41:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 21:34:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Finds and links previous redirections targeting the same command.
 - Links earlier redirections to this one if they target the same command
 Works with process_redir_node().
 */
-void link_cmd_redirs(t_node *cmd_node, t_vars *vars)
+void make_cmd_redir_chain(t_node *cmd_node, t_vars *vars)
 {
 	t_node *current;
 	t_node *first_redir = NULL;

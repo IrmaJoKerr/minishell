@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 20:12:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,71 +152,31 @@ String: "Hello"'world'!
 Args: ["Hello", "world"]
 Quote types: [[5, 5, 5, 5, 5], [4, 4, 4, 4]]
 */
-void append_arg(t_node *node, char *new_arg, int quote_type)
+void	append_arg(t_node *node, char *new_arg, int quote_type)
 {
-	char    **new_args;
-	int     **new_quote_types;
-	size_t  len;
-
-	fprintf(stderr, "DEBUG-APPEND-ARG: Appending '%s' to node type=%s\n",
-			new_arg, get_token_str(node->type));
+	char	**new_args;
+	int		**new_quote_types;
+	size_t	len;
 
 	if (!node || !new_arg || !node->args)
-	{
-		fprintf(stderr, "DEBUG-APPEND-ARG: Invalid parameters: node=%p, new_arg=%p, node->args=%p\n",
-				(void*)node, (void*)new_arg, node ? (void*)node->args : NULL);
-		return;
-	}
-
+		return ;
 	len = ft_arrlen(node->args);
-	fprintf(stderr, "DEBUG-APPEND-ARG: Current arg count: %zu\n", len);
-	
-	// Print current arguments
-	fprintf(stderr, "DEBUG-APPEND-ARG: Current args: ");
-	for (size_t i = 0; i < len; i++) {
-		fprintf(stderr, "'%s' ", node->args[i]);
-	}
-	fprintf(stderr, "\n");
-
 	new_args = dup_node_args(node, len);
 	if (!new_args)
-	{
-		fprintf(stderr, "DEBUG-APPEND-ARG: Failed to duplicate node args\n");
-		return;
-	}
-
+		return ;
 	new_args[len] = ft_strdup(new_arg);
 	if (!new_args[len])
 	{
-		fprintf(stderr, "DEBUG-APPEND-ARG: Failed to duplicate new arg\n");
 		ft_free_2d(new_args, len);
-		return;
+		return ;
 	}
 	new_args[len + 1] = NULL;
-
-	fprintf(stderr, "DEBUG-APPEND-ARG: Successfully created new args array with %zu elements\n", len + 1);
-
 	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
 	if (!new_quote_types)
-	{
-		fprintf(stderr, "DEBUG-APPEND-ARG: Failed to resize quote types array\n");
-		return;
-	}
-
-	// Clean up old arrays
+		return ;
 	ft_free_2d(node->args, len);
 	if (node->arg_quote_type)
 		ft_free_int_2d(node->arg_quote_type, len);
-
-	// Assign new arrays
 	node->args = new_args;
 	node->arg_quote_type = new_quote_types;
-
-	// Print final arguments
-	fprintf(stderr, "DEBUG-APPEND-ARG: Final args after append: ");
-	size_t final_len = ft_arrlen(node->args);
-	for (size_t i = 0; i < final_len; i++) {
-		fprintf(stderr, "'%s' ", node->args[i]);
-	}
-	fprintf(stderr, " (total: %zu)\n", final_len);
 }
