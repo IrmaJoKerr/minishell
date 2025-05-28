@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:37:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 06:59:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,29 +22,250 @@ Returns:
 - 1 on success.
 - 0 on failure.
 */
-int	interactive_hd_mode(t_vars *vars)
-{
-	int	write_fd;
+// int	interactive_hd_mode(t_vars *vars)
+// {
+// 	int	write_fd;
 
-	if (!vars || !vars->pipes || !vars->pipes->heredoc_delim)
-	{
-		return (0);
-	}
-	write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-	if (write_fd == -1)
-	{
-		vars->error_code = ERR_DEFAULT;
-		return (0);
-	}
-	if (get_interactive_hd(write_fd, vars) == -1)
-	{
-		close(write_fd);
-		unlink(TMP_BUF);
-		return (0);
-	}
-	close(write_fd);
-	vars->hd_text_ready = 1;
-	return (1);
+// 	if (!vars || !vars->pipes || !vars->pipes->heredoc_delim)
+// 		return (0);
+// 	write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+// 	if (write_fd == -1)
+// 	{
+// 		vars->error_code = ERR_DEFAULT;
+// 		return (0);
+// 	}
+// 	if (get_interactive_hd(write_fd, vars) == -1)
+// 	{
+// 		close(write_fd);
+// 		unlink(TMP_BUF);
+// 		return (0);
+// 	}
+// 	close(write_fd);
+// 	vars->hd_text_ready = 1;
+// 	return (1);
+// }
+// int interactive_hd_mode(t_vars *vars)
+// {
+//     int write_fd;
+//     pid_t pid;
+//     int status;
+    
+//     if (!vars || !vars->pipes || !vars->pipes->heredoc_delim)
+//         return (0);
+    
+//     write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+//     if (write_fd == -1)
+//     {
+//         vars->error_code = ERR_DEFAULT;
+//         return (0);
+//     }
+    
+//     // Fork a child process to handle heredoc
+//     pid = fork();
+    
+//     if (pid == -1) {
+//         // Fork failed
+//         close(write_fd);
+//         vars->error_code = ERR_DEFAULT;
+//         return (0);
+//     }
+    
+//     if (pid == 0)
+// 	{
+//         // Child process - handle heredoc input
+//         int result = get_interactive_hd(write_fd, vars);
+//         close(write_fd);
+//         exit(result == -1 ? 130 : 0); // Exit with appropriate code
+//     }
+    
+//     // Parent process - wait for child
+//     waitpid(pid, &status, 0);
+//     close(write_fd);
+    
+//     // Check if child was interrupted by signal
+//     if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) == 130)) {
+//         unlink(TMP_BUF);
+//         vars->error_code = 130;
+//         return (0);
+//     }
+    
+//     vars->hd_text_ready = 1;
+//     return (1);
+// }
+// int interactive_hd_mode(t_vars *vars)
+// {
+//     int write_fd;
+//     pid_t pid;
+//     int status;
+//     int saved_signal_state;
+    
+//     if (!vars || !vars->pipes || !vars->pipes->heredoc_delim)
+//         return (0);
+    
+//     // Save original signal state
+//     saved_signal_state = g_signal_received;
+    
+//     write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+//     if (write_fd == -1) {
+//         vars->error_code = ERR_DEFAULT;
+//         return (0);
+//     }
+    
+//     // Fork a child process to handle heredoc
+//     pid = fork();
+    
+//     if (pid == -1) {
+//         close(write_fd);
+//         vars->error_code = ERR_DEFAULT;
+//         g_signal_received = saved_signal_state;  // Restore signal state
+//         return (0);
+//     }
+    
+//     if (pid == 0) {
+//         // Child process - handle heredoc input
+//         int result = get_interactive_hd(write_fd, vars);
+//         close(write_fd);
+//         exit(result == -1 ? 130 : 0);
+//     }
+    
+//     // Parent process - wait for child
+//     waitpid(pid, &status, 0);
+//     close(write_fd);
+    
+//     // Always restore terminal state
+//     manage_terminal_state(vars, TERM_RESTORE);
+    
+//     // CRITICAL FIX: Always restore signal state in parent
+//     g_signal_received = saved_signal_state;
+    
+//     // Check if child was interrupted by signal
+//     if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) == 130)) {
+//         unlink(TMP_BUF);
+//         vars->error_code = 130;
+//         return (0);
+//     }
+    
+//     vars->hd_text_ready = 1;
+//     return (1);
+// }
+// int interactive_hd_mode(t_vars *vars)
+// {
+//     int write_fd;
+//     pid_t pid;
+//     int status;
+//     int saved_signal_state;
+    
+//     saved_signal_state = g_signal_received;
+    
+//     write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+//     if (write_fd == -1) {
+//         vars->error_code = ERR_DEFAULT;
+//         return (0);
+//     }
+    
+//     pid = fork();
+    
+//     if (pid == -1) {
+//         close(write_fd);
+//         vars->error_code = ERR_DEFAULT;
+//         g_signal_received = saved_signal_state;
+//         return (0);
+//     }
+    
+//     if (pid == 0) {
+//         // Child process
+//         int result = get_interactive_hd(write_fd, vars);
+//         close(write_fd);
+        
+//         // Reset terminal settings before exit
+//         manage_terminal_state(vars, TERM_RESTORE);
+        
+//         // Exit with status based on result
+//         exit(result == -1 ? 130 : 0);
+//     }
+    
+//     // Parent process
+//     waitpid(pid, &status, 0);
+// 	kill(pid, SIGTERM); 
+//     close(write_fd);
+    
+//     // Reset terminal state
+//     manage_terminal_state(vars, TERM_RESTORE);
+//     reset_terminal_after_heredoc();
+    
+//     // Reset readline state
+//     rl_on_new_line();
+    
+//     // Restore signal state
+//     g_signal_received = saved_signal_state;
+    
+//     if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) == 130)) {
+//         unlink(TMP_BUF);
+//         vars->error_code = 130;
+//         return (0);
+//     }
+    
+//     vars->hd_text_ready = 1;
+//     return (1);
+// }
+int interactive_hd_mode(t_vars *vars)
+{
+    int write_fd;
+    pid_t pid;
+    int status;
+    int saved_signal_state;
+    
+    saved_signal_state = g_signal_received;
+    
+    write_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (write_fd == -1) {
+        vars->error_code = ERR_DEFAULT;
+        return (0);
+    }
+    
+    pid = fork();
+    
+    if (pid == -1) {
+        close(write_fd);
+        vars->error_code = ERR_DEFAULT;
+        g_signal_received = saved_signal_state;
+        return (0);
+    }
+    
+    if (pid == 0) {
+        // Child process
+        int result = get_interactive_hd(write_fd, vars);
+        close(write_fd);
+        
+        // Reset terminal settings before exit
+        manage_terminal_state(vars, TERM_RESTORE);
+        
+        exit(result == -1 ? 130 : 0);
+    }
+    
+    // Parent process
+    waitpid(pid, &status, 0);
+	kill(pid, SIGTERM); 
+    close(write_fd);
+    
+    // Reset terminal state
+    manage_terminal_state(vars, TERM_RESTORE);
+    reset_terminal_after_heredoc();
+    
+    // Reset readline state
+    rl_on_new_line();
+    
+    // Restore signal state
+    g_signal_received = saved_signal_state;
+    
+    if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) == 130)) {
+        unlink(TMP_BUF);
+        vars->error_code = 130;
+        return (0);
+    }
+    
+    vars->hd_text_ready = 1;
+    return (1);
 }
 
 /*
@@ -56,32 +277,220 @@ Returns:
 - 0 on success (delimiter found or EOF reached after warning).
 - -1 on failure (write error or malloc error).
 */
-int	get_interactive_hd(int write_fd, t_vars *vars)
-{
-	char	*line;
-	int		status;
+// int	get_interactive_hd(int write_fd, t_vars *vars)
+// {
+// 	char	*line;
+// 	int		status;
 
-	status = 0;
-	while (1)
-	{
-		line = readline("heredoc> ");
-		if (!line)
-			break ;
-		if (ft_strcmp(line, vars->pipes->heredoc_delim) == 0)
-		{
-			free(line);
-			break ;
-		}
-		if (!write_to_hd(write_fd, line, vars))
-		{
-			free(line);
-			status = -1;
-			break ;
-		}
-		free(line);
-		line = NULL;
-	}
-	return (status);
+// 	status = 0;
+// 	while (1)
+// 	{
+// 		line = readline("heredoc> ");
+// 		if (!line)
+// 			break ;
+// 		if (ft_strcmp(line, vars->pipes->heredoc_delim) == 0)
+// 		{
+// 			free(line);
+// 			break ;
+// 		}
+// 		if (!write_to_hd(write_fd, line, vars))
+// 		{
+// 			free(line);
+// 			status = -1;
+// 			break ;
+// 		}
+// 		free(line);
+// 		line = NULL;
+// 	}
+// 	return (status);
+// }
+// int get_interactive_hd(int write_fd, t_vars *vars)
+// {
+//     char    *line;
+//     int     status;
+//     int     saved_signal_state;
+//     struct termios term_before, term_after;
+
+//     status = 0;
+//     saved_signal_state = g_signal_received;
+//     write(2, "DEBUG-HD: Entering heredoc mode, setting g_signal_received = -1\n", 63);
+//     g_signal_received = -1;
+    
+//     // Get terminal settings before and after TERM_HEREDOC for diagnosis
+//     tcgetattr(STDIN_FILENO, &term_before);
+//     manage_terminal_state(vars, TERM_HEREDOC);
+//     tcgetattr(STDIN_FILENO, &term_after);
+    
+//     write(2, "DEBUG-HD: Terminal settings before/after heredoc mode:\n", 55);
+//     write(2, "  - ICANON flag before: ", 24);
+//     write(2, (term_before.c_lflag & ICANON) ? "ON\n" : "OFF\n", 4);
+//     write(2, "  - ICANON flag after: ", 23);
+//     write(2, (term_after.c_lflag & ICANON) ? "ON\n" : "OFF\n", 4);
+//     write(2, "  - ECHO flag after: ", 21);
+//     write(2, (term_after.c_lflag & ECHO) ? "ON\n" : "OFF\n", 4);
+    
+//     while (1)
+//     {
+//         write(2, "DEBUG-HD: Top of loop, checking g_signal_received: ", 51);
+//         char sig_val[20];
+//         sprintf(sig_val, "%d\n", g_signal_received);
+//         write(2, sig_val, strlen(sig_val));
+        
+//         if (g_signal_received == -2)  // SIGINT in heredoc
+//         {
+//             write(2, "DEBUG-HD: Signal -2 detected before readline!\n", 46);
+//             manage_terminal_state(vars, TERM_RESTORE);
+//             g_signal_received = saved_signal_state;
+//             return (-1);
+//         }
+        
+//         write(2, "DEBUG-HD: About to call readline()\n", 35);
+//         line = readline("heredoc> ");
+//         write(2, "DEBUG-HD: readline() returned\n", 30);
+        
+//         // Check signal state right after readline
+//         write(2, "DEBUG-HD: After readline, g_signal_received = ", 46);
+//         sprintf(sig_val, "%d\n", g_signal_received);
+//         write(2, sig_val, strlen(sig_val));
+        
+//         // Print info about the line returned
+//         if (line)
+//         {
+//             write(2, "DEBUG-HD: readline returned line: '", 35);
+//             write(2, line, strlen(line));
+//             write(2, "'\n", 2);
+//         }
+//         else
+//         {
+//             write(2, "DEBUG-HD: readline returned NULL\n", 33);
+//         }
+        
+//         // Check for signal interruption
+//         if (g_signal_received == -2)
+//         {
+//             write(2, "DEBUG-HD: Signal -2 detected after readline!\n", 45);
+//             manage_terminal_state(vars, TERM_RESTORE);
+//             if (line)
+//                 free(line);
+//             g_signal_received = saved_signal_state;
+//             return (-1);
+//         }
+        
+//         // More efficient empty line check (using *line == '\0' directly)
+//         if (line && *line == '\0')
+//         {
+//             write(2, "DEBUG-HD: Empty line detected, g_signal_received = ", 52);
+//             sprintf(sig_val, "%d\n", g_signal_received);
+//             write(2, sig_val, strlen(sig_val));
+            
+//             if (g_signal_received == -2)
+//             {
+//                 write(2, "DEBUG-HD: Empty line with signal -2, exiting\n", 45);
+//                 free(line);
+//                 manage_terminal_state(vars, TERM_RESTORE);
+//                 g_signal_received = saved_signal_state;
+//                 return (-1);
+//             }
+//         }
+        
+//         if (!line)  // EOF (Ctrl+D)
+//         {
+//             write(2, "DEBUG-HD: NULL line (EOF) detected\n", 35);
+//             manage_terminal_state(vars, TERM_RESTORE);
+//             g_signal_received = saved_signal_state;
+//             break;
+//         }
+        
+//         if (ft_strcmp(line, vars->pipes->heredoc_delim) == 0)
+//         {
+//             write(2, "DEBUG-HD: Delimiter matched, exiting normally\n", 47);
+//             free(line);
+//             manage_terminal_state(vars, TERM_RESTORE);
+//             g_signal_received = saved_signal_state;
+//             return (0);
+//         }
+        
+//         if (!write_to_hd(write_fd, line, vars))
+//         {
+//             write(2, "DEBUG-HD: write_to_hd failed\n", 30);
+//             free(line);
+//             manage_terminal_state(vars, TERM_RESTORE);
+//             g_signal_received = saved_signal_state;
+//             return (-1);
+//         }
+        
+//         free(line);
+//     }
+    
+//     write(2, "DEBUG-HD: Exited loop normally\n", 32);
+//     manage_terminal_state(vars, TERM_RESTORE);
+//     g_signal_received = saved_signal_state;
+//     return (status);
+// }
+int get_interactive_hd(int write_fd, t_vars *vars)
+{
+    char    *line;
+    int     status;
+    int     saved_signal_state;
+
+    status = 0;
+    saved_signal_state = g_signal_received;
+    g_signal_received = -1;
+    
+    manage_terminal_state(vars, TERM_HEREDOC);
+    
+    while (1)
+    {
+        if (g_signal_received == -2)  // SIGINT in heredoc
+        {
+            manage_terminal_state(vars, TERM_RESTORE);
+            g_signal_received = saved_signal_state;
+            return (-1);
+        }
+        
+        line = readline("heredoc> ");
+        
+        if (g_signal_received == -2)
+        {
+            manage_terminal_state(vars, TERM_RESTORE);
+            if (line)
+                free(line);
+            g_signal_received = saved_signal_state;
+            return (-1);
+        }
+        
+        if (!line)  // EOF (Ctrl+D)
+        {
+            manage_terminal_state(vars, TERM_RESTORE);
+            g_signal_received = saved_signal_state;
+            break;
+        }
+        
+        if (ft_strcmp(line, vars->pipes->heredoc_delim) == 0)
+        {
+            free(line);
+            manage_terminal_state(vars, TERM_RESTORE);
+            g_signal_received = saved_signal_state;
+            return (0);
+        }
+        
+        // Add debug print here
+        debug_heredoc_content(line, ft_strlen(line));
+        
+        if (!write_to_hd(write_fd, line, vars))
+        {
+            free(line);
+            manage_terminal_state(vars, TERM_RESTORE);
+            g_signal_received = saved_signal_state;
+            return (-1);
+        }
+        
+        free(line);
+    }
+    
+    manage_terminal_state(vars, TERM_RESTORE);
+    g_signal_received = saved_signal_state;
+    return (status);
 }
 
 /*

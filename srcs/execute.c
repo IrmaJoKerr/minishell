@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 10:42:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 23:27:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,19 +152,15 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 {
 	int	result;
 	int	prev_error;
-	// Save current error code to detect redirection errors
+
 	prev_error = vars->error_code;
 	result = 0;
 	if (!node)
 		return (vars->error_code = 1);
 	if (node->type == TYPE_CMD)
-	{
 		result = exec_cmd_node(node, envp, vars);
-	}
 	else if (is_redirection(node->type))
-	{
 		result = exec_redirect_cmd(node, envp, vars);
-	}
 	else if (node->type == TYPE_PIPE)
 	{
 		if (!node->left || !node->right)
@@ -173,7 +169,6 @@ int	execute_cmd(t_node *node, char **envp, t_vars *vars)
 	}
 	else
 		result = 1;
-	// Preserve redirection errors that occurred before command execution
 	if (prev_error == ERR_REDIRECTION)
 		vars->error_code = prev_error;
 	vars->error_code = result;

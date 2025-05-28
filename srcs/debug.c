@@ -6,11 +6,42 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 12:18:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 03:53:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 05:54:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+// In your append_args.c or similar function
+void debug_args_before_after(t_node *cmd_node, char *new_arg, int is_delim) {
+    char **args = cmd_node->args;
+    int i = 0;
+    
+    write(2, "DEBUG-ARGS: Before append - [", 29);
+    while (args && args[i]) {
+        write(2, args[i], strlen(args[i]));
+        write(2, " ", 1);
+        i++;
+    }
+    write(2, "]\n", 2);
+    
+    write(2, "DEBUG-ARGS: Appending: '", 24);
+    write(2, new_arg, strlen(new_arg));
+    write(2, is_delim ? "' (DELIM)\n" : "'\n", is_delim ? 10 : 2);
+}
+
+// In your process_heredoc or similar function
+void debug_heredoc_content(const char *content, size_t length) {
+    write(2, "DEBUG-HEREDOC: Content (", 24);
+    char len_str[20];
+    sprintf(len_str, "%zu", length);
+    write(2, len_str, strlen(len_str));
+    write(2, " bytes):\n", 10);
+    write(2, content, length > 100 ? 100 : length);
+    if (length > 100)
+        write(2, "...(truncated)", 14);
+    write(2, "\n", 1);
+}
 
 // Helper function to check if token is a redirection operator
 int is_redirection_operator(char *token)

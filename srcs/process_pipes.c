@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 21:58:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 23:52:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ Works with process_first_pipe and process_addon_pipes.
 */
 void	setup_pipe_node(t_node *pipe_node, t_node *left_cmd, t_node *right_cmd)
 {
-    if (!pipe_node || !left_cmd || !right_cmd)
+	if (!pipe_node || !left_cmd || !right_cmd)
 	{
-        return ;
-    }
-    pipe_node->left = left_cmd;
-    pipe_node->right = right_cmd;
+		return ;
+	}
+	pipe_node->left = left_cmd;
+	pipe_node->right = right_cmd;
 }
 
 /*

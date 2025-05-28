@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:50:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 23:13:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,7 @@ int setup_redirection(t_node *node, t_vars *vars)
 	int result;
 
 	vars->pipes->current_redirect = node;
-	
-	// Get the command associated with this redirection
 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-	
-	// CRITICAL FIX: For output redirections without commands, just create the file
 	if (!cmd_node && (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT))
 	{
 		fprintf(stderr, "DEBUG-SETUP-REDIR: Processing orphaned output redirection: %s\n", 
@@ -95,20 +91,18 @@ int setup_redirection(t_node *node, t_vars *vars)
 		vars->error_code = ERR_DEFAULT;
 		return (0);
 	}
-	
 	vars->pipes->cmd_redir = cmd_node;
 	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
 	{
 		vars->pipes->last_in_redir = node;
 	}
-	else if (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT)
+	else if (node->type == TYPE_OUT_REDIRECT 
+		|| node->type == TYPE_APPEND_REDIRECT)
 	{
 		vars->pipes->last_out_redir = node;
 	}
-	
 	if (!proc_redir_target(node, vars))
 		return (0);
-	
 	result = redir_mode_setup(node, vars);
 	return (result);
 }
@@ -122,13 +116,12 @@ Returns:
 - 1 if target is valid
 - 0 if target is invalid (with error_code set)
 */
-int proc_redir_target(t_node *node, t_vars *vars)
+int	proc_redir_target(t_node *node, t_vars *vars)
 {
 	if (node && node->args && node->args[0])
 	{
 		if (node->type != TYPE_HEREDOC)
 			strip_outer_quotes(&node->args[0], vars);
-		
 		return (1);
 	}
 	else if (node && node->type != TYPE_HEREDOC)
@@ -136,7 +129,6 @@ int proc_redir_target(t_node *node, t_vars *vars)
 		tok_syntax_error_msg("newline", vars);
 		return (0);
 	}
-	
 	return (1);
 }
 

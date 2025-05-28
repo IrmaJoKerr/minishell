@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 20:11:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 22:12:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,54 +25,36 @@ int	exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 {
 	int		cmd_result;
 	int		redir_success;
-	// t_node	*cmd_node;
+	t_node	*actual_cmd;
 
-	if (close(pipe_fd[0]) == -1)
-		close(pipe_fd[0]);
-	// Setup pipe redirection for stdout
-	if (dup2(pipe_fd[1], STDOUT_FILENO) == -1) {
+	close(pipe_fd[0]);
+	if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+	{
 		close(pipe_fd[1]);
 		return (1);
 	}
-	if (close(pipe_fd[1]) == -1)
-		close(pipe_fd[1]);
-	// Process redirections based on node type
-	if (is_redirection(cmd_node->type)) {
-		// Find actual command in redirection->left
-		if (cmd_node->left && cmd_node->left->type == TYPE_CMD)
-		{
-			cmd_node = cmd_node->left;
-		}
-		else
-		{
-			return 1;
-		}
-		redir_success = proc_redir_chain(cmd_node, cmd_node, vars);
+	close(pipe_fd[1]);
+	if (is_redirection(cmd_node->type))
+	{
+		redir_success = proc_redir_chain(cmd_node, cmd_node->left, vars);
 		if (!redir_success)
+			return (vars->error_code);
+		actual_cmd = cmd_node->left;
+	}
+	else if (cmd_node->type == TYPE_CMD)
+	{
+		actual_cmd = cmd_node;
+		if (actual_cmd->redir)
 		{
-			// Special case: Test if a file exists but has invalid permissions
-			if (vars->error_code == ERR_PERMISSIONS) {
-				return vars->error_code; // Return actual error
-			}
-			return 0; // Other redirection errors should still allow pipeline to continue
-		}
-	} else if (cmd_node->type == TYPE_CMD) {
-		cmd_node = cmd_node;
-	} else {
-		return 1;
-	}
-
-	// Check if redirections are attached to this command
-	if (cmd_node->redir) {
-		redir_success = proc_redir_chain(cmd_node->redir, cmd_node, vars);
-		if (!redir_success) {
-			return vars->error_code;
+			redir_success = proc_redir_chain(actual_cmd->redir, actual_cmd, vars);
+			if (!redir_success)
+				return (vars->error_code);
 		}
 	}
-	
-	cmd_result = execute_cmd(cmd_node, vars->env, vars);
-	
-	return cmd_result;
+	else
+		return (1);
+	cmd_result = execute_cmd(actual_cmd, vars->env, vars);
+	return (cmd_result);
 }
 
 /*

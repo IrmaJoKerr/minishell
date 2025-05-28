@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 21:59:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 05:54:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -890,6 +890,8 @@ char		*get_token_str(t_tokentype type);
 Debug utility functions.
 In debug.c
 */
+void		debug_args_before_after(t_node *cmd_node, char *new_arg, int is_delim);
+void		debug_heredoc_content(const char *content, size_t length);
 int			is_redirection_operator(char *token);
 int			get_redirection_type(char *token);
 int			is_pipe_operator(char *token);

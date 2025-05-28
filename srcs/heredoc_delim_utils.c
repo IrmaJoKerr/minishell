@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:06:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:18:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 06:41:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,10 @@ Frees any previously stored delimiter.
  */
 void	store_cln_delim(t_vars *vars, char *clean_delim, int quoted)
 {
+	t_node *cmd = vars->pipes->cmd_redir; // DEBUG
+
+	if (cmd && cmd->args) // DEBUG
+        debug_args_before_after(cmd, clean_delim, 1); //DEBUG
 	if (vars->pipes->heredoc_delim)
 		free(vars->pipes->heredoc_delim);
 	vars->pipes->heredoc_delim = clean_delim;

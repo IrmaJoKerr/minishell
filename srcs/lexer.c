@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 03:32:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 22:38:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,8 +95,6 @@ int tokenizer(char *input, t_vars *vars)
     while (input && input[vars->pos])
     {
         start_pos = vars->pos;
-        
-        // Process the token
         vars->next_flag = 0;
         
         if (hd_is_delim)
