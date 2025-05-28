@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 22:09:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 10:16:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,7 @@ typedef struct s_pipe
 	int			hd_expand;
 	int			redirection_fd;
 	int			out_mode;
-	bool		in_pipe;
+	int			in_pipe;
 	t_node		*current_redirect;
 	t_node		*last_cmd;
 	t_node		*last_pipe;
@@ -895,6 +895,10 @@ char		*get_token_str(t_tokentype type);
 Debug utility functions.
 In debug.c
 */
+int			is_redirection_operator(char *token);
+int			get_redirection_type(char *token);
+int			is_pipe_operator(char *token);
+int			current_comes_after_node(t_node *node1, t_node *node2, t_node *head);
 void		print_node_content(FILE *fp, t_node *node);
 void		print_ast_node(FILE *fp, t_node *node, int indent_level);
 void		print_ast(t_node *root, const char *filename);
@@ -903,6 +907,11 @@ void		print_node_debug(t_node *node, const char *prefix, const char *location);
 void		print_node_args(t_node *node, const char *prefix);
 void		print_node_linked_list(t_node *head, const char *prefix);
 void		print_ast_detailed(t_node *root, const char *prefix);
+void		debug_tokenize_state(const char *input, int pos, int token_type, const char *context);
+int			determine_token_type_with_debug(char *token, t_vars *vars, int position);
+void		debug_token_creation(char *token_str, int token_type, int position);
+void		debug_tokenization_loop(char *input, int start, int end, int token_count);
+void		debug_pipeline_awareness(t_vars *vars, int token_position);
 
 /*
 Debug convenience functions.

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 19:14:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 02:56:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,52 +79,22 @@ This function integrates redirections with pipe structures.
 - Replaces the command node reference with the redirection node.
 - Uses double pointer to modify the original node reference.
 */
-// void	swap_cmd_redir(t_node **node_ptr, t_vars *vars)
-// {
-// 	t_node	*redir_node;
-
-// 	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-// 	{
-// 		redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
-// 		if (redir_node)
-// 		{
-// 			(*node_ptr)->redir = redir_node;
-// 		}
-// 	}
-// }
-// void swap_cmd_redir(t_node **node_ptr, t_vars *vars)
-// {
-//     t_node *redir_node;
-
-//     if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-//     {
-//         // With the new approach, redir_node should already be linked
-//         // to the command through the redir field
-//         redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
-//         if (redir_node)
-//         {
-//             // Redirection is already assigned in link_cmd_redirs
-//             // This is just for compatibility with existing code
-//             (*node_ptr)->redir = redir_node;
-//         }
-//     }
-// }
 void swap_cmd_redir(t_node **node_ptr, t_vars *vars)
 {
-    t_node *redir_node;
+	t_node *redir_node;
 
-    if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
-    {
-        // With the new approach, redir_node should already be linked
-        // to the command through the redir field
-        redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
-        if (redir_node)
-        {
-            // Redirection is already assigned in link_cmd_redirs
-            // This is just for compatibility with existing code
-            (*node_ptr)->redir = redir_node;
-        }
-    }
+	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
+	{
+		// With the new approach, redir_node should already be linked
+		// to the command through the redir field
+		redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
+		if (redir_node)
+		{
+			// Redirection is already assigned in link_cmd_redirs
+			// This is just for compatibility with existing code
+			(*node_ptr)->redir = redir_node;
+		}
+	}
 }
 
 /*

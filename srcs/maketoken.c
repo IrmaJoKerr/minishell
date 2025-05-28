@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:33:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 10:43:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,31 +48,52 @@ Example: When tokenizing "echo hello"
 // 		curr = curr->next;
 // 	}
 // }
+// void	maketoken(char *token, t_tokentype type, t_vars *vars)
+// {
+// 	t_node	*node;
+// 	t_node	*curr;
+// 	int		node_freed;
+// 	static int token_position = 0;
+
+// 	if (!token || !vars)
+// 		return ;
+// 	// DEBUG CALL #3: Token creation
+// 	debug_token_creation(token, type, token_position);
+	
+// 	node = initnode(type, token);
+// 	if (!node)
+// 		return ;
+// 	node_freed = build_token_linklist(vars, node);
+// 	if (!node_freed)
+// 		free_if_orphan_node(node, vars);
+// 	curr = vars->head;
+// 	while (curr)
+// 		curr = curr->next;
+// 	token_position++;
+// }
 void	maketoken(char *token, t_tokentype type, t_vars *vars)
 {
 	t_node	*node;
 	t_node	*curr;
 	int		node_freed;
+	static int token_position = 0;
 
 	if (!token || !vars)
-	{
 		return ;
-	}
+	// DEBUG CALL #3: Token creation
+	debug_token_creation(token, type, token_position);
 	node = initnode(type, token);
 	if (!node)
-	{
 		return ;
-	}
+	if (type == TYPE_PIPE)
+		vars->pipes->in_pipe = 1;
 	node_freed = build_token_linklist(vars, node);
 	if (!node_freed)
-	{
 		free_if_orphan_node(node, vars);
-	}
 	curr = vars->head;
 	while (curr)
-	{
 		curr = curr->next;
-	}
+	token_position++;
 }
 
 /*

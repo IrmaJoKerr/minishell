@@ -6,12 +6,194 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 12:18:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 03:40:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 03:53:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
+// Helper function to check if token is a redirection operator
+int is_redirection_operator(char *token)
+{
+	if (!token)
+		return 0;
+	if (ft_strcmp(token, "<") == 0 || ft_strcmp(token, ">") == 0 || 
+		ft_strcmp(token, ">>") == 0 || ft_strcmp(token, "<<") == 0)
+		return 1;
+	return 0;
+}
+
+// Helper function to get redirection type
+int get_redirection_type(char *token)
+{
+	if (!token)
+		return 0;
+	if (ft_strcmp(token, "<") == 0)
+		return TYPE_IN_REDIRECT;
+	if (ft_strcmp(token, ">") == 0)
+		return TYPE_OUT_REDIRECT;
+	if (ft_strcmp(token, ">>") == 0)
+		return TYPE_APPEND_REDIRECT;
+	if (ft_strcmp(token, "<<") == 0)
+		return TYPE_HEREDOC;
+	return 0;
+}
+
+// Helper function to check if token is a pipe operator
+int is_pipe_operator(char *token)
+{
+	if (!token)
+		return 0;
+	return (ft_strcmp(token, "|") == 0);
+}
+
+// Add this debug function to track tokenization state
+void debug_tokenize_state(const char *input, int pos, int token_type, const char *context)
+{
+	fprintf(stderr, "DEBUG-TOKENIZE-STATE: pos=%d, char='%c', context='%s', determined_type=%s\n",
+			pos, 
+			input[pos] ? input[pos] : '\0',  // Fixed: single character constant
+			context,
+			get_token_str(token_type));
+	
+	// Show surrounding context
+	int start = (pos >= 5) ? pos - 5 : 0;
+	int end = pos + 5;
+	fprintf(stderr, "DEBUG-TOKENIZE-STATE: context='");
+	for (int i = start; i < end && input[i]; i++) {
+		if (i == pos) fprintf(stderr, "[%c]", input[i]);
+		else fprintf(stderr, "%c", input[i]);
+	}
+	fprintf(stderr, "'\n");
+}
+
+// Add this to track what triggers CMD vs ARGS classification
+int determine_token_type_with_debug(char *token, t_vars *vars, int position)
+{
+	int result_type;
+	static int last_token_type = -1;
+	static int expecting_command = 1;  // Start expecting a command
+	static int after_redirection = 0;
+	
+	(void)vars;  // Mark as intentionally unused
+	
+	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: Analyzing token '%s' at position %d\n", token, position);
+	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: State: expecting_command=%d, after_redirection=%d, last_token=%s\n",
+			expecting_command, after_redirection, 
+			last_token_type >= 0 ? get_token_str(last_token_type) : "NONE");
+	
+	// Check if this is a redirection operator
+	if (is_redirection_operator(token)) {
+		fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: '%s' is redirection operator\n", token);
+		result_type = get_redirection_type(token);
+		after_redirection = 1;  // Next token will be filename
+		expecting_command = 0;  // Not expecting command next
+	}
+	// Check if this is a pipe
+	else if (is_pipe_operator(token)) {
+		fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: '%s' is pipe operator\n", token);
+		result_type = TYPE_PIPE;
+		after_redirection = 0;
+		expecting_command = 1;  // After pipe, expect command
+	}
+	// Check if we're expecting a filename after redirection
+	else if (after_redirection) {
+		fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: '%s' is redirection filename (after_redirection=1)\n", token);
+		result_type = TYPE_ARGS;  // Redirection filename
+		after_redirection = 0;
+		expecting_command = 1;    // CRITICAL: After filename, expect command again
+	}
+	// Check if we should treat this as a command
+	else if (expecting_command) {
+		fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: '%s' classified as CMD (expecting_command=1)\n", token);
+		result_type = TYPE_CMD;
+		expecting_command = 0;    // After command, expect args
+	}
+	// Otherwise it's an argument
+	else {
+		fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: '%s' classified as ARGS (default)\n", token);
+		result_type = TYPE_ARGS;
+	}
+	
+	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: Final classification: '%s' -> %s\n", 
+			token, get_token_str(result_type));
+	
+	last_token_type = result_type;
+	return result_type;
+}
+
+// Add this to track the tokenization process step by step
+void debug_token_creation(char *token_str, int token_type, int position)
+{
+	fprintf(stderr, "DEBUG-TOKEN-CREATE: Creating token[%d]: '%s' as %s\n",
+			position, token_str, get_token_str(token_type));
+}
+
+// Add this to the main tokenization loop
+void debug_tokenization_loop(char *input, int start, int end, int token_count)
+{
+	char temp_char = input[end];
+	input[end] = '\0';  // Temporarily null-terminate
+	
+	fprintf(stderr, "DEBUG-TOKENIZE-LOOP: Token %d: extracting '%s' from position %d-%d\n",
+			token_count, &input[start], start, end-1);
+	
+	input[end] = temp_char;  // Restore original character
+}
+
+// Add this function to track pipeline context during tokenization
+void debug_pipeline_awareness(t_vars *vars, int token_position)
+{
+    int has_pipe_before = 0;
+    int has_redirection_before = 0;
+    int redirection_after_pipe = 0;
+    t_node *current = vars->head;
+    t_node *last_pipe = NULL;
+    
+    fprintf(stderr, "DEBUG-PIPELINE-AWARE: Checking context for token position %d\n", token_position);
+    
+    // Count previous tokens and track pipeline structure
+    int count = 0;
+    while (current && count < token_position) {
+        if (current->type == TYPE_PIPE) {
+            has_pipe_before = 1;
+            last_pipe = current;
+            fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found pipe at position %d\n", count);
+        }
+        if (is_redirection(current->type)) {
+            has_redirection_before = 1;
+            // Check if this redirection comes after the last pipe
+            if (last_pipe && current_comes_after_node(current, last_pipe, vars->head)) {
+                redirection_after_pipe = 1;
+            }
+            fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found redirection %s at position %d (after_pipe=%d)\n",
+                    get_token_str(current->type), count, redirection_after_pipe);
+        }
+        current = current->next;
+        count++;
+    }
+    
+    fprintf(stderr, "DEBUG-PIPELINE-AWARE: Context summary: has_pipe_before=%d, has_redirection_before=%d, redirection_after_pipe=%d\n",
+            has_pipe_before, has_redirection_before, redirection_after_pipe);
+}
+
+// Helper function to check if node1 comes after node2 in the list
+int current_comes_after_node(t_node *node1, t_node *node2, t_node *head)
+{
+    t_node *current = head;
+    int found_node2 = 0;
+    
+    while (current) {
+        if (current == node2) {
+            found_node2 = 1;
+        }
+        if (found_node2 && current == node1) {
+            return 1;
+        }
+        current = current->next;
+    }
+    return 0;
+}
 /*
 Prints a node's content to the specified file.
 */
@@ -102,58 +284,6 @@ static void print_ast_node_helper(FILE *fp, t_node *node, int indent_level,
 	}
 }
 
-/*
-Recursively prints the AST starting from the given node.
-indent_level controls the indentation for tree visualization.
-*/
-// void	print_ast_node(FILE *fp, t_node *node, int indent_level)
-// {
-// 	int	i;
-
-// 	if (!node || !fp)
-// 		return ;
-// 	i = 0;
-// 	while (i < indent_level)
-// 	{
-// 		fprintf(fp, "  ");
-// 		i++;
-// 	}
-// 	print_node_content(fp, node);
-// 	fprintf(fp, "\n");
-// 	if (node->redir)
-// 	{
-// 		i = 0;
-// 		while (i < indent_level)
-// 		{
-// 			fprintf(fp, "  ");
-// 			i++;
-// 		}
-// 		fprintf(fp, "├─(redir)-> ");
-// 		print_ast_node(fp, node->redir, 0);
-// 	}
-// 	if (node->left)
-// 	{
-// 		i = 0;
-// 		while (i < indent_level)
-// 		{
-// 			fprintf(fp, "  ");
-// 			i++;
-// 		}
-// 		fprintf(fp, "├─(left)-> ");
-// 		print_ast_node(fp, node->left, indent_level + 1);
-// 	}
-// 	if (node->right)
-// 	{
-// 		i = 0;
-// 		while (i < indent_level)
-// 		{
-// 			fprintf(fp, "  ");
-// 			i++;
-// 		}
-// 		fprintf(fp, "└─(right)-> ");
-// 		print_ast_node(fp, node->right, indent_level + 1);
-// 	}
-// }
 void print_ast_node(FILE *fp, t_node *node, int indent_level)
 {
 	// Create an array to track visited nodes for cycle detection
@@ -334,62 +464,6 @@ void	print_node_linked_list(t_node *head, const char *prefix)
 /*
 Prints a detailed tree visualization of the AST with pointer connections
 */
-// void	print_ast_detailed(t_node *root, const char *prefix)
-// {
-// 	if (!root)
-// 	{
-// 		fprintf(stderr, "DEBUG-%s: Empty AST (no root node)\n", prefix);
-// 		return ;
-// 	}
-// 	fprintf(stderr, "DEBUG-%s: = DETAILED AST =\n", prefix);
-// 	// Queue for breadth-first traversal
-// 	t_node **queue = malloc(sizeof(t_node *) * 1000);  // Assuming max 1000 nodes
-// 	if (!queue)
-// 	{
-// 		fprintf(stderr, "DEBUG-%s: Memory allocation failed for AST traversal\n", prefix);
-// 		return ;
-// 	}
-// 	int front = 0, rear = 0;
-// 	queue[rear++] = root;
-// 	while (front < rear)
-// 	{
-// 		t_node *node = queue[front++];
-// 		// Print current node details
-// 		fprintf(stderr, "DEBUG-%s: Node(%p):", prefix, (void*)node);
-// 		fprintf(stderr, " Type=%s", get_token_str(node->type));
-// 		// Print args
-// 		fprintf(stderr, ", Args=[");
-// 		if (node->args)
-// 		{
-// 			int i = 0;
-// 			while (node->args[i])
-// 			{
-// 				fprintf(stderr, "'%s'", node->args[i]);
-// 				if (node->args[i+1])
-// 					fprintf(stderr, ", ");
-// 				i++;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			fprintf(stderr, "NULL");
-// 		}
-// 		fprintf(stderr, "]");
-// 		// Print connections
-// 		fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
-// 			(void*)node->left, (void*)node->right, (void*)node->redir, 
-// 			(void*)node->prev, (void*)node->next);
-// 		// Add children to queue
-// 		if (node->left)
-// 			queue[rear++] = node->left;
-// 		if (node->right)
-// 			queue[rear++] = node->right;
-// 		if (node->redir)
-// 			queue[rear++] = node->redir;
-// 	}
-// 	free(queue);
-// 	fprintf(stderr, "DEBUG-%s: = END DETAILED AST =\n", prefix);
-// }
 void print_ast_detailed(t_node *root, const char *prefix)
 {
 	if (!root)

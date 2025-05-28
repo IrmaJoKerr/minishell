@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/27 22:09:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 03:32:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,48 +47,10 @@ Returns:
 - 1 on success.
 - 0 on error.
 */
-// int	tokenizer(char *input, t_vars *vars)
+// int tokenizer(char *input, t_vars *vars)
 // {
-// 	int	hd_is_delim;
-// 	int	result;
-
-// 	if (!input || !*input)
-// 		return (0);
-// 	init_tokenizer(vars);
-// 	hd_is_delim = 0;
-// 	while (input && input[vars->pos])
-// 	{
-// 		vars->next_flag = 0;
-// 		if (hd_is_delim)
-// 		{
-// 			result = proc_hd_delim(input, vars, &hd_is_delim);
-// 			if (result == 0)
-// 			{
-// 				return (0);
-// 			}
-// 			if (result == 1)
-// 			{
-// 				continue;
-// 			}
-// 		}
-// 		if (!vars->next_flag && !hd_is_delim)
-// 		{
-// 			if (!handle_token(input, vars, &hd_is_delim))
-// 			{
-// 				return (0);
-// 			}
-// 		}
-// 		if (chk_move_pos(vars, hd_is_delim))
-// 		{
-// 			continue;
-// 		}
-// 	}
-// 	return (finish_tokenizing(input, vars, hd_is_delim));
-// }
-// int	tokenizer(char *input, t_vars *vars)
-// {
-// 	int	hd_is_delim;
-// 	int	result;
+// 	int hd_is_delim;
+// 	int result;
 
 // 	if (!input || !*input)
 // 		return (0);
@@ -113,76 +75,96 @@ Returns:
 // 		if (chk_move_pos(vars, hd_is_delim))
 // 			continue ;
 // 	}
+// 	// Add a null token as a safety stop
+// 	add_null_token_stop(vars);
 // 	result = finish_tokenizing(input, vars, hd_is_delim);
 // 	return (result);
 // }
 int tokenizer(char *input, t_vars *vars)
 {
-	int hd_is_delim;
-	int result;
+    int hd_is_delim;
+    int result;
+    int token_count = 0;
+    int start_pos, end_pos;
 
-	if (!input || !*input)
-		return (0);
-	init_tokenizer(vars);
-	hd_is_delim = 0;
-	while (input && input[vars->pos])
-	{
-		vars->next_flag = 0;
-		if (hd_is_delim)
-		{
-			result = proc_hd_delim(input, vars, &hd_is_delim);
-			if (result == 0)
-				return (0);
-			if (result == 1)
-				continue ;
-		}
-		if (!vars->next_flag && !hd_is_delim)
-		{
-			if (!handle_token(input, vars, &hd_is_delim))
-				return (0);
-		}
-		if (chk_move_pos(vars, hd_is_delim))
-			continue ;
-	}
-	// Add a null token as a safety stop
-	add_null_token_stop(vars);
-	result = finish_tokenizing(input, vars, hd_is_delim);
-	return (result);
+    if (!input || !*input)
+        return (0);
+    init_tokenizer(vars);
+    hd_is_delim = 0;
+    
+    while (input && input[vars->pos])
+    {
+        start_pos = vars->pos;
+        
+        // Process the token
+        vars->next_flag = 0;
+        
+        if (hd_is_delim)
+        {
+            result = proc_hd_delim(input, vars, &hd_is_delim);
+            if (result == 0)
+                return (0);
+            if (result == 2)
+                continue;
+        }
+        else
+        {
+            if (!handle_token(input, vars, &hd_is_delim))
+                return (0);
+        }
+        
+        end_pos = vars->pos;
+        
+        // DEBUG CALL #4: Tokenization loop tracking
+        if (end_pos > start_pos || vars->next_flag)
+        {
+            debug_tokenization_loop(input, start_pos, end_pos, token_count);
+            token_count++;
+        }
+        
+        if (chk_move_pos(vars, hd_is_delim))
+            continue;
+    }
+    
+    // Add a null token as a safety stop
+    add_null_token_stop(vars);
+    result = finish_tokenizing(input, vars, hd_is_delim);
+    return (result);
 }
 
 void add_null_token_stop(t_vars *vars)
 {
-    t_node *null_node;
-    
-    fprintf(stderr, "DEBUG-TOKEN: Adding null token safety stop\n");
-    
-    if (!vars || !vars->head)
-        return;
-        
-    null_node = initnode(TYPE_NULL, "");
-    if (!null_node)
-        return;
-        
-    // Always add at the end of the list
-    if (vars->current)
-    {
-        vars->current->next = null_node;
-        null_node->prev = vars->current;
-        vars->current = null_node;
-        fprintf(stderr, "DEBUG-TOKEN: Null token added at the end of list\n");
-    }
-    else if (vars->head)
-    {
-        // This is a safety case - current should never be NULL if head isn't NULL
-        t_node *last = vars->head;
-        while (last->next)
-            last = last->next;
-            
-        last->next = null_node;
-        null_node->prev = last;
-        vars->current = null_node;
-        fprintf(stderr, "DEBUG-TOKEN: Null token added after finding last node\n");
-    }
+	t_node *null_node;
+	
+	fprintf(stderr, "DEBUG-TOKEN: Adding null token safety stop\n");
+	
+	if (!vars || !vars->head)
+		return;
+		
+	null_node = initnode(TYPE_NULL, "");
+	if (!null_node)
+		return;
+		
+	// Always add at the end of the list
+	if (vars->current)
+	{
+		vars->current->next = null_node;
+		null_node->prev = vars->current;
+		vars->current = null_node;
+		fprintf(stderr, "DEBUG-TOKEN: Null token added at the end of list\n");
+	}
+	else if (vars->head)
+	{
+		// This is a safety case - current should never be NULL if head isn't NULL
+		t_node *last = vars->head;
+		while (last->next)
+			last = last->next;
+			
+		last->next = null_node;
+		null_node->prev = last;
+		vars->current = null_node;
+		fprintf(stderr, "DEBUG-TOKEN: Null token added after finding last node\n");
+	}
 }
 
 /*
@@ -265,47 +247,6 @@ Example: For input "cmd > file"
 - Creates redirect token.
 - Returns 1 to indicate operator was handled.
 */
-// int	process_operator_char(char *input, int *i, t_vars *vars)
-// {
-// 	int			moves;
-// 	t_tokentype	token_type;
-
-// 	token_type = get_token_at(input, *i, &moves);
-// 	if (token_type == 0)
-// 	{
-// 		return (0);
-// 	}
-// 	vars->curr_type = token_type;
-// 	if (moves == 2)
-// 	{
-// 		handle_double_operator(input, vars);
-// 	}
-// 	else
-// 	{
-// 		handle_single_operator(input, vars);
-// 	}
-// 	return (1);
-// }
-// int process_operator_char(char *input, int *i, t_vars *vars)
-// {
-//     int moves;
-//     t_tokentype token_type;
-//     token_type = get_token_at(input, *i, &moves);
-//     if (token_type == 0)
-//         return (0);
-//     vars->curr_type = token_type;
-//     // If it's a redirection, create node and grab the filename
-//     if (is_redirection(token_type)) {
-//         return handle_redirection_token(input, i, vars, token_type);
-//     }
-//     else if (moves == 2) {
-//         handle_double_operator(input, vars);
-//     }
-//     else {
-//         handle_single_operator(input, vars);
-//     }
-//     return (1);
-// }
 int	process_operator_char(char *input, int *i, t_vars *vars)
 {
 	int			moves;

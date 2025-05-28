@@ -1,4 +1,3 @@
 = TOKEN LIST =
-[0] ARGS []
-[1] ARGS [echo]
+[0] CMD [exit]
 

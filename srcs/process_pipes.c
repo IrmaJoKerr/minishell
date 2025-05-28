@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:31:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 10:24:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ t_node	*process_first_pipe(t_vars *vars)
 			{
 				setup_pipe_node(current, vars->pipes->last_cmd, next_cmd);
 				vars->pipes->last_pipe = current;
+				vars->pipes->in_pipe = 1;
 				return (current);
 			}
 		}

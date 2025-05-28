@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:14:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:32:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 10:53:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ Updates vars->curr_type accordingly.
 void	set_token_type(t_vars *vars, char *input)
 {
 	int			moves;
-	t_tokentype	special_type;
+	t_tokentype	type;
 
-	special_type = 0;
+	type = 0;
 	vars->prev_type = vars->curr_type;
 	if (input && input[0] == '$')
 	{
@@ -31,18 +31,75 @@ void	set_token_type(t_vars *vars, char *input)
 	}
 	if (input && *input)
 	{
-		special_type = get_token_at(input, 0, &moves);
-		if (special_type != 0)
+		type = get_token_at(input, 0, &moves);
+		if (type != 0)
 		{
-			vars->curr_type = special_type;
+			vars->curr_type = type;
 			return ;
 		}
 	}
 	if (!vars->head || vars->prev_type == TYPE_PIPE)
+	// if (!vars->head || vars->prev_type == TYPE_PIPE || (vars->pipes->in_pipe == 1 && is_redirection(vars->prev_type)))
 		vars->curr_type = TYPE_CMD;
 	else
 		vars->curr_type = TYPE_ARGS;
 }
+// void	set_token_type(t_vars *vars, char *input)
+// {
+// 	int			moves;
+// 	t_tokentype	special_type;
+// 	t_tokentype	determined_type;
+// 	static int	token_position = 0;
+
+// 	special_type = 0;
+// 	vars->prev_type = vars->curr_type;
+	
+// 	if (input && input[0] == '$')
+// 	{
+// 		vars->curr_type = TYPE_EXPANSION;
+// 		determined_type = TYPE_EXPANSION;
+// 	}
+// 	else if (input && *input)
+// 	{
+// 		special_type = get_token_at(input, 0, &moves);
+// 		if (special_type != 0)
+// 		{
+// 			vars->curr_type = special_type;
+// 			determined_type = special_type;
+// 		}
+// 		else if (!vars->head || vars->prev_type == TYPE_PIPE)
+// 		{
+// 			vars->curr_type = TYPE_CMD;
+// 			determined_type = TYPE_CMD;
+// 		}
+// 		else
+// 		{
+// 			vars->curr_type = TYPE_ARGS;
+// 			determined_type = TYPE_ARGS;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		if (!vars->head || vars->prev_type == TYPE_PIPE)
+// 			vars->curr_type = TYPE_CMD;
+// 		else
+// 			vars->curr_type = TYPE_ARGS;
+// 		determined_type = vars->curr_type;
+// 	}
+	
+// 	// DEBUG CALL #1: Token type determination with debug
+// 	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: Analyzing token '%s' at position %d\n", 
+// 			input ? input : "NULL", token_position);
+// 	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: State: prev_type=%s, head=%s\n",
+// 			get_token_str(vars->prev_type), vars->head ? "exists" : "NULL");
+// 	fprintf(stderr, "DEBUG-TOKEN-CLASSIFY: Final classification: '%s' -> %s\n", 
+// 			input ? input : "NULL", get_token_str(determined_type));
+	
+// 	// DEBUG CALL #2: Pipeline awareness
+// 	debug_pipeline_awareness(vars, token_position);
+	
+// 	token_position++;
+// }
 
 /*
 Process heredoc delimiter when expected

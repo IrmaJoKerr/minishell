@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/28 10:43:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ t_pipe	*init_pipes(void)
 	pipes->heredoc_delim = NULL;
 	pipes->hd_expand = 0;
 	pipes->redirection_fd = -1;
+	pipes->in_pipe = 0;
 	pipes->last_cmd = NULL;
 	pipes->last_pipe = NULL;
 	pipes->pipe_root = NULL;
@@ -118,6 +119,7 @@ void	reset_pipe_vars(t_vars *vars)
 	vars->pipes->last_in_redir = NULL;
 	vars->pipes->last_out_redir = NULL;
 	vars->pipes->cmd_redir = NULL;
+	vars->pipes->in_pipe = 0;
 }
 
 /*
