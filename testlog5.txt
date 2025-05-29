@@ -1,45 +1,1029 @@
-Test 100: ❌ echo hi | >./outfiles/outfile01 echo bye >./test_files/invalid_permission 
-Only in ./bash_outfiles: outfile01
-mini outfiles:
-cat: './mini_outfiles/*': No such file or directory
-bash outfiles:
-mini error = ( === TOKEN CLASSIFICATION START === Position 0, analyzing token 'echo' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) 'echo' -> CMD === TOKEN CLASSIFICATION END === extracting 'echo' from position 0-3 === TOKEN CLASSIFICATION START === Position 1, analyzing token 'echo' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) 'echo' -> CMD === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 0, creating token 'echo' as CMD Before creation - prev_type=CMD, curr_type=CMD Pipeline state - in_pipe=0 Updated prev_type to CMD for next classification === TOKEN CREATION END === extracting ' ' from position 4-4 === TOKEN CLASSIFICATION START === Position 2, analyzing token 'hi' Current state - prev_type=CMD, head=exists, in_pipe=0 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'hi' -> ARGS === TOKEN CLASSIFICATION END === extracting 'hi' from position 5-6 === TOKEN CLASSIFICATION START === Position 3, analyzing token 'hi' Current state - prev_type=CMD, head=exists, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'hi' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 1, creating token 'hi' as ARGS Before creation - prev_type=ARGS, curr_type=ARGS Pipeline state - in_pipe=0 Appending 'hi' to node type=CMD 1 'echo' Successfully created new args array with 2 elements 2) Updated prev_type to ARGS for next classification === TOKEN CREATION END === extracting ' ' from position 7-7 === TOKEN CREATION START === Position 2, creating token '|' as | Before creation - prev_type=ARGS, curr_type=| Pipeline state - in_pipe=0 Set in_pipe=1 for pipe token Updated prev_type to | for next classification === TOKEN CREATION END === extracting '|' from position 8-8 extracting ' ' from position 9-9 extracting '>./outfiles/outfile01' from position 10-30 extracting ' ' from position 31-31 === TOKEN CLASSIFICATION START === Position 4, analyzing token 'echo' Current state - prev_type=|, head=exists, in_pipe=1 Updated prev_type to > Analyzing regular token for CMD vs ARGS false false 1 true Classified as CMD (pipeline + after redirection) 'echo' -> CMD === TOKEN CLASSIFICATION END === extracting 'echo' from position 32-35 === TOKEN CLASSIFICATION START === Position 5, analyzing token 'echo' Current state - prev_type=>, head=exists, in_pipe=1 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS false false 1 false Classified as ARGS (default) 'echo' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 3, creating token 'echo' as ARGS Before creation - prev_type=CMD, curr_type=ARGS Pipeline state - in_pipe=1 Updated prev_type to ARGS for next classification === TOKEN CREATION END === extracting ' ' from position 36-36 === TOKEN CLASSIFICATION START === Position 6, analyzing token 'bye' Current state - prev_type=ARGS, head=exists, in_pipe=1 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 1 false Classified as ARGS (default) 'bye' -> ARGS === TOKEN CLASSIFICATION END === extracting 'bye' from position 37-39 === TOKEN CLASSIFICATION START === Position 7, analyzing token 'bye' Current state - prev_type=ARGS, head=exists, in_pipe=1 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 1 false Classified as ARGS (default) 'bye' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 4, creating token 'bye' as ARGS Before creation - prev_type=ARGS, curr_type=ARGS Pipeline state - in_pipe=1 Updated prev_type to ARGS for next classification === TOKEN CREATION END === extracting ' ' from position 40-40 extracting '>./test_files/invalid_permission' from position 41-72 Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=> Valid redirection node > with embedded filename './outfiles/outfile01' Checking redirection node type=> Valid redirection node > with embedded filename './test_files/invalid_permission' Processing command 'echo' Starting to link redirections for command 'echo' No redirections found for cmd 'echo' Starting argument verification Processing node type=CMD, args[0]='echo' Found command 'echo' Processing node type=|, args[0]='|' Found pipe, resetting command context Processing node type=>, args[0]='./outfiles/outfile01' Found redirection, continuing with same command context Processing node type=ARGS, args[0]='echo' Processing node type=ARGS, args[0]='bye' Processing node type=>, args[0]='./test_files/invalid_permission' Found redirection, continuing with same command context Processing node type=ARGS, args[0]='' Argument verification completed Starting redirection execution for node type=> Missing left node, returning error)
-bash error = ( Permission denied)
+bleshell$> cat << END  
+This is a test: $HOME
+END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 2, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
 
-Test 131: ❌ cat <minishell.h|ls 
-mini output = ()
-bash output = (ast.txt bash_outfiles bash.supp bonus bonus_bonus builtins extras local.supp loop.out manual_tests mini_outfiles minishell os_specific outfiles pipes README.md redirects syntax temp tester test_files tokens.txt wildcards)
-mini error = ( === TOKEN CLASSIFICATION START === Position 0, analyzing token 'cat' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) 'cat' -> CMD === TOKEN CLASSIFICATION END === extracting 'cat' from position 0-2 === TOKEN CLASSIFICATION START === Position 1, analyzing token 'cat' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) 'cat' -> CMD === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 0, creating token 'cat' as CMD Before creation - prev_type=CMD, curr_type=CMD Pipeline state - in_pipe=0 Updated prev_type to CMD for next classification === TOKEN CREATION END === extracting ' ' from position 3-3 extracting '<minishell.h' from position 4-15 === TOKEN CREATION START === Position 1, creating token '|' as | Before creation - prev_type=CMD, curr_type=| Pipeline state - in_pipe=0 Set in_pipe=1 for pipe token Updated prev_type to | for next classification === TOKEN CREATION END === extracting '|' from position 16-16 Adding null token safety stop Null token added at the end of list === TOKEN CLASSIFICATION START === Position 2, analyzing token 'ls' Current state - prev_type=|, head=exists, in_pipe=1 Updated prev_type to | Analyzing regular token for CMD vs ARGS false true 1 false Classified as CMD (head or after pipe) 'ls' -> CMD === TOKEN CLASSIFICATION END === extracting 'ls' from position 17-18 === TOKEN CLASSIFICATION START === Position 3, analyzing token 'ls' Current state - prev_type=|, head=exists, in_pipe=1 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS false false 1 false Classified as ARGS (default) 'ls' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 2, creating token 'ls' as ARGS Before creation - prev_type=CMD, curr_type=ARGS Pipeline state - in_pipe=1 Updated prev_type to ARGS for next classification === TOKEN CREATION END === Resetting redirection tracking state Building redirection AST (command-first approach) Checking redirection node type=< Valid redirection node < with embedded filename 'minishell.h' Processing command 'cat' Starting to link redirections for command 'cat' Found redirection < 'minishell.h' for command 'cat' Set first redirection for command 'cat' < 'minishell.h' -> END Starting argument verification Processing node type=CMD, args[0]='cat' Found command 'cat' Processing node type=<, args[0]='minishell.h' Found redirection, continuing with same command context Processing node type=|, args[0]='|' Found pipe, resetting command context Processing node type=ARGS, args[0]='' Processing node type=ARGS, args[0]='ls' Argument verification completed Starting redirection execution for node type=< 'cat' (pipeline_context=1) Saved stdin=3, stdout=4 About to process redirection chain Starting redirection chain processing < 'minishell.h' 'cat' Processing redirection < 'minishell.h' 'minishell.h' 'minishell.h' Checking access to file 'minishell.h' File 'minishell.h' does not exist No such file or directory Handling missing input file (pipeline_context=0) Non-pipeline context - failing execution Redirection failed for 'minishell.h' Redirection failed, cleaning up and returning error_code=1 NOT executing command due to redirection failure Pipeline context - exiting with 0 for input redirection error)
-bash error = ( No such file or directory)
- 
-Test 133: ❌ $PWD 
-mini exit code = 2
-bash exit code = 126
-mini error = ( extracting '$PWD' from position 0-3 Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '/home/bleow/Coding/Core/minishell/minishell_tester' Starting to link redirections for command '/home/bleow/Coding/Core/minishell/minishell_tester' No redirections found for cmd '/home/bleow/Coding/Core/minishell/minishell_tester' Starting argument verification Processing node type=CMD, args[0]='/home/bleow/Coding/Core/minishell/minishell_tester' Found command '/home/bleow/Coding/Core/minishell/minishell_tester' Processing node type=ARGS, args[0]='' Argument verification completed Is a directory)
-bash error = ( Is a directory)
-Test 134: ❌ $EMPTY 
-mini exit code = 127
-bash exit code = 0
-mini error = ( extracting '$EMPTY' from position 0-5 Adding null token safety stop Null token added at the end of list Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '' Starting to link redirections for command '' No redirections found for cmd '' Starting argument verification Processing node type=CMD, args[0]='' Found command '' Processing node type=ARGS, args[0]='' Argument verification completed Permission denied)
-bash error = ()
-Test 135: ❌ $EMPTY echo hi 
-mini output = ()
-bash output = (hi)
-mini exit code = 127
-bash exit code = 0
-mini error = ( extracting '$EMPTY' from position 0-5 extracting ' ' from position 6-6 === TOKEN CLASSIFICATION START === Position 0, analyzing token 'echo' Current state - prev_type=ARGS, head=exists, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'echo' -> ARGS === TOKEN CLASSIFICATION END === extracting 'echo' from position 7-10 === TOKEN CLASSIFICATION START === Position 1, analyzing token 'echo' Current state - prev_type=ARGS, head=exists, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'echo' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 0, creating token 'echo' as ARGS Before creation - prev_type=ARGS, curr_type=ARGS Pipeline state - in_pipe=0 Appending 'echo' to node type=CMD 1 '' Successfully created new args array with 2 elements 2) Updated prev_type to ARGS for next classification === TOKEN CREATION END === extracting ' ' from position 11-11 Adding null token safety stop Null token added at the end of list === TOKEN CLASSIFICATION START === Position 2, analyzing token 'hi' Current state - prev_type=ARGS, head=exists, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'hi' -> ARGS === TOKEN CLASSIFICATION END === extracting 'hi' from position 12-13 === TOKEN CLASSIFICATION START === Position 3, analyzing token 'hi' Current state - prev_type=ARGS, head=exists, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS false false 0 false Classified as ARGS (default) 'hi' -> ARGS === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 1, creating token 'hi' as ARGS Before creation - prev_type=ARGS, curr_type=ARGS Pipeline state - in_pipe=0 Updated prev_type to ARGS for next classification === TOKEN CREATION END === Resetting redirection tracking state Building redirection AST (command-first approach) Processing command '' Starting to link redirections for command '' No redirections found for cmd '' Starting argument verification Processing node type=CMD, args[0]='' Found command '' Processing node type=ARGS, args[0]='' Processing node type=ARGS, args[0]='hi' Checking if node 'hi' is redirection target Node 'hi' is NOT a redirection target Found orphaned argument 'hi' for command '' Appending 'hi' to node type=CMD 2 '' 'echo' Successfully created new args array with 3 elements 3) Appended argument 'hi' to command '' Argument verification completed Permission denied)
-bash error = ()
-Test 136: ❌ ./test_files/invalid_permission 
-mini exit code = 127
-bash exit code = 126
-mini error = ( Adding null token safety stop === TOKEN CLASSIFICATION START === Position 0, analyzing token './test_files/invalid_permission' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) './test_files/invalid_permission' -> CMD === TOKEN CLASSIFICATION END === extracting './test_files/invalid_permission' from position 0-30 === TOKEN CLASSIFICATION START === Position 1, analyzing token './test_files/invalid_permission' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) './test_files/invalid_permission' -> CMD === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 0, creating token './test_files/invalid_permission' as CMD Before creation - prev_type=CMD, curr_type=CMD Pipeline state - in_pipe=0 Updated prev_type to CMD for next classification === TOKEN CREATION END === Resetting redirection tracking state Building redirection AST (command-first approach) Processing command './test_files/invalid_permission' Starting to link redirections for command './test_files/invalid_permission' No redirections found for cmd './test_files/invalid_permission' Starting argument verification Processing node type=CMD, args[0]='./test_files/invalid_permission' Found command './test_files/invalid_permission' Argument verification completed Permission denied)
-bash error = ( Permission denied)
+DEBUG-TOKENIZE-LOOP: Token 1: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 3, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
 
-Test 141: ❌ ./test_files 
-mini exit code = 2
-bash exit code = 126
-mini error = ( Adding null token safety stop === TOKEN CLASSIFICATION START === Position 0, analyzing token './test_files' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to ARGS Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) './test_files' -> CMD === TOKEN CLASSIFICATION END === extracting './test_files' from position 0-11 === TOKEN CLASSIFICATION START === Position 1, analyzing token './test_files' Current state - prev_type=ARGS, head=NULL, in_pipe=0 Updated prev_type to CMD Analyzing regular token for CMD vs ARGS true false 0 false Classified as CMD (head or after pipe) './test_files' -> CMD === TOKEN CLASSIFICATION END === === TOKEN CREATION START === Position 0, creating token './test_files' as CMD Before creation - prev_type=CMD, curr_type=CMD Pipeline state - in_pipe=0 Updated prev_type to CMD for next classification === TOKEN CREATION END === Resetting redirection tracking state Building redirection AST (command-first approach) Processing command './test_files' Starting to link redirections for command './test_files' No redirections found for cmd './test_files' Starting argument verification Processing node type=CMD, args[0]='./test_files' Found command './test_files' Argument verification completed Is a directory)
-bash error = ( Is a directory)
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 1, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
 
-139/146
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 2, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
 
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 0)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: ON
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 3, creating token 'END' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting 'END' from position 7-9
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+DEBUG-HD-COMPARE: Comparing line 'This is a test: $HOME' with delimiter 'END'
+DEBUG-HEREDOC: Content (27 bytes):
+This is a test: /home/bleow
+DEBUG-HD-COMPARE: Comparing line 'END' with delimiter 'END'
+DEBUG-HD-COMPARE: Match found, ending heredoc
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 4, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 5, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 4, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 5, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 0)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: ON
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 6, creating token 'END' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting 'END' from position 7-9
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS [END]
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d90
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3de0, next=0x5acccd9e3d40
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=['END'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=0x5acccd9c7940
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if 'END' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node 'END', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d40, node=0x5acccd9e3d40
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping 'END' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d90): Type=<<, Args=['<<'], Connections: { left->0x5acccd9e3de0 redir->0x5acccd9e3de0 prev->0x5acccd9e3de0 next->0x5acccd9e3d40 }
+DEBUG-AST: Node(0x5acccd9e3de0): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d90 next->0x5acccd9e3d90 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3de0)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d90)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+This is a test: /home/bleow
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> cat << 'END'
+This is a test: $HOME
+END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 6, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 3: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 7, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 7, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 8, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 9, creating token ''END'' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting ''END'' from position 7-11
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+DEBUG-HD-COMPARE: Comparing line 'This is a test: $HOME' with delimiter 'END'
+DEBUG-HEREDOC: Content (21 bytes):
+This is a test: $HOME
+DEBUG-HD-COMPARE: Comparing line 'END' with delimiter 'END'
+DEBUG-HD-COMPARE: Match found, ending heredoc
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 8, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 4: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 9, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 10, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 11, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 12, creating token ''END'' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting ''END'' from position 7-11
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS ['END']
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d90
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3de0, next=0x5acccd9e3d40
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''END''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=0x5acccd9c7940
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if ''END'' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node ''END'', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d40, node=0x5acccd9e3d40
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping ''END'' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d90): Type=<<, Args=['<<'], Connections: { left->0x5acccd9e3de0 redir->0x5acccd9e3de0 prev->0x5acccd9e3de0 next->0x5acccd9e3d40 }
+DEBUG-AST: Node(0x5acccd9e3de0): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d90 next->0x5acccd9e3d90 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3de0)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d90)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+This is a test: $HOME
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> cat << "END"
+This is a test: $HOME
+END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 10, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 5: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 11, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 13, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 14, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 15, creating token '"END"' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting '"END"' from position 7-11
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+DEBUG-HD-COMPARE: Comparing line 'This is a test: $HOME' with delimiter 'END'
+DEBUG-HEREDOC: Content (21 bytes):
+This is a test: $HOME
+DEBUG-HD-COMPARE: Comparing line 'END' with delimiter 'END'
+DEBUG-HD-COMPARE: Match found, ending heredoc
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 12, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 6: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 13, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 16, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 17, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 18, creating token '"END"' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting '"END"' from position 7-11
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS ["END"]
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d90
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3de0, next=0x5acccd9e3d40
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=['"END"'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=0x5acccd9c7940
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if '"END"' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node '"END"', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d40, node=0x5acccd9e3d40
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping '"END"' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d90): Type=<<, Args=['<<'], Connections: { left->0x5acccd9e3de0 redir->0x5acccd9e3de0 prev->0x5acccd9e3de0 next->0x5acccd9e3d40 }
+DEBUG-AST: Node(0x5acccd9e3de0): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d90 next->0x5acccd9e3d90 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3de0)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d90)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+This is a test: $HOME
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> cat << '"END"'
+This is a test: $HOME
+END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 14, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 7: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 15, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 19, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 20, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter '"END"' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to '"END"', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 22 45 4e 44 22 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 21, creating token ''"END"'' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting ''"END"'' from position 7-13
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+DEBUG-HD-COMPARE: Comparing line 'This is a test: $HOME' with delimiter '"END"'
+DEBUG-HEREDOC: Content (21 bytes):
+This is a test: $HOME
+DEBUG-HD-COMPARE: Comparing line 'END' with delimiter '"END"'
+DEBUG-HEREDOC: Content (3 bytes):
+END
+heredoc> 'END'
+DEBUG-HEREDOC: Content (5 bytes):
+'END'
+DEBUG-HEREDOC: Content (5 bytes):
+'END'
+heredoc> "END"
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 16, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 8: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 17, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 22, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 23, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter '"END"' (quoted: 1)
+DEBUG-HEREDOC-DELIM: New delimiter set to '"END"', expansion: OFF
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 22 45 4e 44 22 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 24, creating token ''"END"'' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting ''"END"'' from position 7-13
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS ['"END"']
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d90
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3de0, next=0x5acccd9e3d40
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''"END"''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=0x5acccd9c7940
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if ''"END"'' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node ''"END"'', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d40, node=0x5acccd9e3d40
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping ''"END"'' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d90): Type=<<, Args=['<<'], Connections: { left->0x5acccd9e3de0 redir->0x5acccd9e3de0 prev->0x5acccd9e3de0 next->0x5acccd9e3d40 }
+DEBUG-AST: Node(0x5acccd9e3de0): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d90 next->0x5acccd9e3d90 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3de0)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d90)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+This is a test: $HOME
+END
+'END'
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> cat << END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 18, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 9: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 19, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 25, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 26, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 0)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: ON
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 27, creating token 'END' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting 'END' from position 7-9
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS [END]
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d40
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9c7940, next=0x5acccd9e3d90
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=['END'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=0x5acccd9e3de0
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if 'END' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node 'END', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d90, node=0x5acccd9e3d90
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping 'END' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d40): Type=<<, Args=['<<'], Connections: { left->0x5acccd9c7940 redir->0x5acccd9c7940 prev->0x5acccd9c7940 next->0x5acccd9e3d90 }
+DEBUG-AST: Node(0x5acccd9c7940): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d40 next->0x5acccd9e3d40 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9c7940)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d40)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+heredoc> test
+DEBUG-HEREDOC: Content (4 bytes):
+test
+DEBUG-HEREDOC: Content (4 bytes):
+test
+heredoc> $HOME
+DEBUG-HEREDOC: Content (5 bytes):
+$HOME
+DEBUG-HEREDOC: Content (11 bytes):
+/home/bleow
+heredoc> END
+DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+test
+/home/bleow
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> cat << END
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 20, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 10: extracting 'cat' from position 0-2
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION START ===
+DEBUG-SET-TOKEN-TYPE: Position 21, analyzing token 'cat'
+DEBUG-SET-TOKEN-TYPE: Current state - prev_type=ARGS, head=NULL, in_pipe=0
+DEBUG-SET-TOKEN-TYPE: Keeping prev_type as ARGS (not updating yet)
+DEBUG-SET-TOKEN-TYPE: Analyzing regular token for CMD vs ARGS
+DEBUG-SET-TOKEN-TYPE: Conditions check:
+  - !vars->head: true
+  - prev_type == TYPE_PIPE: false
+  - in_pipe: 0
+  - is_redirection(prev_type): false
+DEBUG-SET-TOKEN-TYPE: Classified as CMD (head or after pipe)
+DEBUG-SET-TOKEN-TYPE: Final classification: 'cat' -> CMD
+DEBUG-SET-TOKEN-TYPE: prev_type remains: ARGS (will be updated in maketoken)
+DEBUG-SET-TOKEN-TYPE: === TOKEN CLASSIFICATION END ===
+
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 28, creating token 'cat' as CMD
+DEBUG-MAKETOKEN: Before creation - prev_type=ARGS, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from ARGS to CMD
+DEBUG-MAKETOKEN: prev_type now set to CMD for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 0: extracting ' ' from position 3-3
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 29, creating token '<<' as <<
+DEBUG-MAKETOKEN: Before creation - prev_type=CMD, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from CMD to <<
+DEBUG-MAKETOKEN: prev_type now set to << for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 1: extracting '<<' from position 4-5
+DEBUG-HEREDOC-DELIM: Storing delimiter 'END' (quoted: 0)
+DEBUG-HEREDOC-DELIM: New delimiter set to 'END', expansion: ON
+DEBUG-HEREDOC-DELIM: Hex dump of delimiter: 45 4e 44 
+DEBUG-MAKETOKEN: === TOKEN CREATION START ===
+DEBUG-MAKETOKEN: Position 30, creating token 'END' as ARGS
+DEBUG-MAKETOKEN: Before creation - prev_type=<<, curr_type=CMD
+DEBUG-MAKETOKEN: Pipeline state - in_pipe=0
+DEBUG-MAKETOKEN: Updating prev_type from << to ARGS
+DEBUG-MAKETOKEN: prev_type now set to ARGS for next classification
+DEBUG-MAKETOKEN: === TOKEN CREATION END ===
+
+DEBUG-TOKENIZE-LOOP: Token 2: extracting 'END' from position 7-9
+DEBUG-TOKEN: Adding null token safety stop
+DEBUG-TOKEN: Null token added at the end of list
+= TOKEN LIST =
+[0] CMD [cat]
+[1] << [<<]
+[2] ARGS [END]
+[3] ARGS []
+
+DEBUG-LIST: = LINKED LIST =
+DEBUG-LIST: [0] DEBUG-NODE[LIST@linked_list]: Type=CMD, Args=['cat'], Connections: left=(nil), right=(nil), redir=(nil), prev=(nil), next=0x5acccd9e3d90
+DEBUG-LIST: [1] DEBUG-NODE[LIST@linked_list]: Type=<<, Args=['<<'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3de0, next=0x5acccd9e3d40
+DEBUG-LIST: [2] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=['END'], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d90, next=0x5acccd9c7940
+DEBUG-LIST: [3] DEBUG-NODE[LIST@linked_list]: Type=ARGS, Args=[''], Connections: left=(nil), right=(nil), redir=(nil), prev=0x5acccd9e3d40, next=(nil)
+DEBUG-LIST: = END LINKED LIST (4 nodes) =
+REDIR-DBG: Resetting redirection tracking state
+DEBUG-FIX-REDIR: Starting to link redirections for command 'cat'
+DEBUG-FIX-REDIR: Found redirection << '<<' for command 'cat'
+DEBUG-FIX-REDIR: Set first redirection for command 'cat'
+DEBUG-FIX-REDIR: Final redirection chain for cmd 'cat':
+  0: << '<<' -> END
+DEBUG-VALIDATE-REDIR: Checking redirection node type=<<
+DEBUG-VALIDATE-REDIR: Valid redirection node << with embedded filename '<<'
+DEBUG-MATCH-CMD: Starting command-argument matching
+DEBUG-MATCH-CMD: Found command node 'cat'
+DEBUG-MATCH-CMD: Checking if 'END' should be appended to 'cat'
+DEBUG-IS-REDIR-TARGET: Checking node 'END', prev=<<
+DEBUG-IS-REDIR-TARGET: Found redirection '<<' type=<<
+DEBUG-HEREDOC-TARGET: Found heredoc, next=0x5acccd9e3d40, node=0x5acccd9e3d40
+DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator
+DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target
+DEBUG-MATCH-CMD: Decision: SKIP
+DEBUG-MATCH-CMD: Skipping 'END' (redirection target)
+DEBUG-MATCH-CMD: Finished command-argument matching
+=== ABSTRACT SYNTAX TREE ===
+<< [<<]
+├─(redir)-> CMD [cat]
+├─(redir)->  [CYCLE DETECTED]
+├─(left)->   CMD [cat]
+  ├─(redir)->  [CYCLE DETECTED]
+DEBUG-AST: = DETAILED AST =
+DEBUG-AST: Node(0x5acccd9e3d90): Type=<<, Args=['<<'], Connections: { left->0x5acccd9e3de0 redir->0x5acccd9e3de0 prev->0x5acccd9e3de0 next->0x5acccd9e3d40 }
+DEBUG-AST: Node(0x5acccd9e3de0): Type=CMD, Args=['cat'], Connections: { redir->0x5acccd9e3d90 next->0x5acccd9e3d90 }
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3de0)
+DEBUG-AST: [CYCLE DETECTED] Node(0x5acccd9e3d90)
+DEBUG-EXEC-REDIR: Starting redirection execution for node type=<<
+DEBUG-EXEC-REDIR: Found command node: 'cat' (pipeline_context=0)
+DEBUG-EXEC-REDIR: Saved stdin=3, stdout=4
+DEBUG-EXEC-REDIR: About to process redirection chain
+DEBUG-FIX-CHAIN: Starting redirection chain processing
+DEBUG-FIX-CHAIN: Start node: << '<<'
+DEBUG-FIX-CHAIN: Command: 'cat'
+DEBUG-FIX-CHAIN: Processing redirection << '<<'
+DEBUG-FIX-CHAIN: Before stripping quotes: '<<'
+DEBUG-FIX-CHAIN: After stripping quotes: '<<'
+DEBUG: SIGINT received
+
+bleshell$> DEBUG-FIX-CHAIN: Moving to next redirection: END
+DEBUG-FIX-CHAIN: Chain processing completed successfully
+DEBUG-EXEC-REDIR: Redirection successful, executing command 'cat'
+DEBUG-EXEC-REDIR: Command execution completed with result=0
+bleshell$> 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 21:59:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 07:54:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,28 +210,82 @@ Example: For "cat file.txt > output.txt | grep pattern":
 - Skips "output.txt" (redirection target).
 - Links "pattern" to "grep" command node.
 */
-void	chk_args_match_cmd(t_vars *vars)
-{
-	t_node	*current;
-	t_node	*node;
+// void	chk_args_match_cmd(t_vars *vars)
+// {
+// 	t_node	*current;
+// 	t_node	*node;
 
-	node = NULL;
-	if (!vars || !vars->head)
-		return ;
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_CMD)
-		{
-			node = current;
-		}
-		else if (current->type == TYPE_ARGS && node
-			&& !is_redirection_target(current, vars))
-			append_arg(node, current->args[0], 0);
-		else if (current->type == TYPE_PIPE)
-			node = NULL;
-		current = current->next;
-	}
+// 	node = NULL;
+// 	if (!vars || !vars->head)
+// 		return ;
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (current->type == TYPE_CMD)
+// 		{
+// 			node = current;
+// 		}
+// 		else if (current->type == TYPE_ARGS && node
+// 			&& !is_redirection_target(current, vars))
+// 			append_arg(node, current->args[0], 0);
+// 		else if (current->type == TYPE_PIPE)
+// 			node = NULL;
+// 		current = current->next;
+// 	}
+// }
+void chk_args_match_cmd(t_vars *vars)
+{
+    t_node *current;
+    t_node *node;
+    int is_target;
+
+    node = NULL;
+    if (!vars || !vars->head)
+        return;
+        
+    fprintf(stderr, "DEBUG-MATCH-CMD: Starting command-argument matching\n");
+    
+    current = vars->head;
+    while (current)
+    {
+        if (current->type == TYPE_CMD)
+        {
+            node = current;
+            fprintf(stderr, "DEBUG-MATCH-CMD: Found command node '%s'\n",
+                    current->args ? current->args[0] : "NULL");
+        }
+        else if (current->type == TYPE_ARGS && node)
+        {
+            fprintf(stderr, "DEBUG-MATCH-CMD: Checking if '%s' should be appended to '%s'\n",
+                    current->args ? current->args[0] : "NULL",
+                    node->args ? node->args[0] : "NULL");
+                    
+            is_target = is_redirection_target(current, vars);
+            
+            fprintf(stderr, "DEBUG-MATCH-CMD: Decision: %s\n",
+                    !is_target ? "APPEND" : "SKIP");
+                    
+            if (!is_target)
+            {
+                // Debug the state before appending
+                debug_args_before_after(node, current->args[0], 0);
+                append_arg(node, current->args[0], 0);
+            }
+            else
+            {
+                fprintf(stderr, "DEBUG-MATCH-CMD: Skipping '%s' (redirection target)\n", 
+                        current->args ? current->args[0] : "NULL");
+            }
+        }
+        else if (current->type == TYPE_PIPE)
+        {
+            fprintf(stderr, "DEBUG-MATCH-CMD: Found pipe, resetting command context\n");
+            node = NULL;
+        }
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-MATCH-CMD: Finished command-argument matching\n");
 }
 
 /*
@@ -252,26 +306,110 @@ Returns:
 - 0 if node is NOT a redirection target (Ok to append to command).
 - 1 if node IS a redirection target (Don't append to command).
 */
-int	is_redirection_target(t_node *node, t_vars *vars)
-{
-	t_node	*current;
+// int	is_redirection_target(t_node *node, t_vars *vars)
+// {
+// 	t_node	*current;
 
-	current = vars->head;
-	while (current)
-	{
-		if (is_redirection(current->type))
-		{
-			if (current->next == node)
-			{
-				if (current->args && current->args[0])
-					return (0);
-				else
-					return (1);
-			}
-		}
-		current = current->next;
-	}
-	return (0);
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type))
+// 		{
+// 			if (current->next == node)
+// 			{
+// 				if (current->args && current->args[0])
+// 					return (0);
+// 				else
+// 					return (1);
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// 	return (0);
+// }
+int is_redirection_target(t_node *node, t_vars *vars)
+{
+    t_node *current;
+    int result = 0;
+
+    fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Checking node '%s', prev=%s\n", 
+            node->args ? node->args[0] : "NULL",
+            node->prev ? get_token_str(node->prev->type) : "NULL");
+
+    current = vars->head;
+    while (current)
+    {
+        if (is_redirection(current->type))
+        {
+            fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Found redirection '%s' type=%s\n",
+                    current->args ? current->args[0] : "NULL",
+                    get_token_str(current->type));
+            
+            // Special handling for heredoc
+            if (current->type == TYPE_HEREDOC)
+            {
+                fprintf(stderr, "DEBUG-HEREDOC-TARGET: Found heredoc, next=%p, node=%p\n", 
+                        (void*)current->next, (void*)node);
+                
+                // Check if node is directly after heredoc operator
+                if (current->next == node)
+                {
+                    fprintf(stderr, "DEBUG-HEREDOC-TARGET: Node directly follows heredoc operator\n");
+                    fprintf(stderr, "DEBUG-HEREDOC-TARGET: Node IS a heredoc delimiter target\n");
+                    return 1; // This is a heredoc delimiter
+                }
+                
+                // Check stored delimiter
+                if (vars->pipes && vars->pipes->heredoc_delim)
+                {
+                    fprintf(stderr, "DEBUG-HEREDOC-TARGET: Current delimiter='%s'\n", 
+                            vars->pipes->heredoc_delim);
+                    
+                    // Check if this node contains the delimiter
+                    if (node->args && node->args[0] && 
+                        ft_strcmp(node->args[0], vars->pipes->heredoc_delim) == 0)
+                    {
+                        fprintf(stderr, "DEBUG-HEREDOC-TARGET: Node matches current delimiter!\n");
+                        result = 1;
+                        break;
+                    }
+                }
+            }
+
+            if (current->next == node)
+            {
+                fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Node directly follows redirection\n");
+                
+                // FIXED: Special handling for heredoc - it always has "<<" in args[0] but this
+                // is the operator, not an embedded filename
+                if (current->type == TYPE_HEREDOC) 
+                {
+                    fprintf(stderr, "DEBUG-IS-REDIR-TARGET: This is a heredoc delimiter\n");
+                    result = 1;
+                }
+                else if (current->args && current->args[0] && 
+                        ft_strcmp(current->args[0], get_token_str(current->type)) != 0)
+                {
+                    fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Redirection has embedded arg: '%s'\n", 
+                            current->args[0]);
+                    result = 0;
+                }
+                else
+                {
+                    fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Redirection needs this node as target\n");
+                    result = 1;
+                }
+                break;
+            }
+        }
+        current = current->next;
+    }
+    
+    fprintf(stderr, "DEBUG-IS-REDIR-TARGET: Final decision for '%s': %s target\n",
+            node->args ? node->args[0] : "NULL",
+            result ? "IS" : "NOT");
+    
+    return (result);
 }
 
 /*
