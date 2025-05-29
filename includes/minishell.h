@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:00:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:22:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -422,7 +422,7 @@ int			setup_input_redirection(char *file, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
 int			setup_output_redirection(char *file, t_vars *vars);
 int			setup_heredoc_redir(t_node *node, t_vars *vars);
-int			check_input_file_access(char *file, struct stat *file_stat,
+int			chk_in_file_access(char *file, struct stat *file_stat,
 						t_vars *vars);
 int			handle_bad_infile(t_vars *vars);
 int			proc_redir_chain(t_node *start_node, t_vars *vars);
@@ -600,6 +600,7 @@ int			proc_join_args(t_vars *vars, char *expanded_val);
 int			handle_tok_join(char *input, t_vars *vars, char *expanded_val,
 				char *token);
 void		process_right_adj(char *input, t_vars *vars);
+int			realloc_quo_arr(int **quo_arr_ptr, size_t new_char_len);
 int			update_quote_types(t_vars *vars, int arg_idx, char *expanded_val);
 
 /*
@@ -610,7 +611,7 @@ int			get_expn_name(char *input, t_vars *vars, char **token,
 				char **var_name);
 int			get_var_token(char *input, t_vars *vars, char **token,
 				char **var_name);
-int			addon_quo_type_arr(int *dest, int *src, int new_len);
+// int			addon_quo_type_arr(int *dest, int *src, int new_len);
 int			sub_make_exp_token(char *input, t_vars *vars, char *expanded_val,
 				char *token);
 int			make_exp_token(char *input, t_vars *vars);
@@ -682,8 +683,7 @@ In operators.c
 */
 int			is_operator_token(t_tokentype type);
 void		handle_string(char *input, t_vars *vars);
-int			handle_single_operator(char *input, t_vars *vars);
-int			handle_double_operator(char *input, t_vars *vars);
+int			handle_pipe_operator(char *input, t_vars *vars);
 
 /*
 Parsing functions.
@@ -785,7 +785,7 @@ void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
 t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node);
 int			handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type);
-int			process_redir_filename(char *input, int *i, t_node *redir_node);
+int			proc_redir_filename(char *input, int *i, t_node *redir_node);
 /*
 Redirection processing functions.
 In process_redirect.c
@@ -863,6 +863,9 @@ Tokenizing utility functions.
 In tokenize_utils.c
 */
 int			chk_move_pos(t_vars *vars, int hd_is_delim);
+int			join_arg_strings(t_node *tgt_append_tok, int arg_idx,
+				char *append_str, t_vars *vars);
+t_node		*get_valid_target_token(t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
 char		*get_delim_str(char *input, t_vars *vars, int *error_code);
 void		handle_text(char *input, t_vars *vars);

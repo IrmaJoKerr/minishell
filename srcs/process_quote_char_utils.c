@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:15:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:12:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,6 @@ int	validate_single_redir(t_node *redir_node, t_vars *vars)
 		tok_syntax_error_msg("newline", vars);
 		return (0);
 	}
-	// Check if next token is a pipe (invalid syntax)
-	// Note: We allow another redirection to follow this one
 	next = redir_node->next;
 	if (next && next->type == TYPE_PIPE)
 	{

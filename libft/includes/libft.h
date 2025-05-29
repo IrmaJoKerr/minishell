@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 18:10:58 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/14 08:20:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 20:50:23 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void		*ft_calloc(size_t num, size_t size);
 void		ft_free_2d(char **splits, size_t i);
 void		ft_free_int_2d(int **array, size_t len);
 void		ft_free_void_2d(void **array, size_t length);
+size_t		ft_intarrlen(int *arr);
 int			ft_is_operator(char c);
 int			ft_isalnum(int c);
 int			ft_isalpha(int c);

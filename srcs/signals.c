@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:34:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:17:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,58 +58,6 @@ Handles Ctrl+C (SIGINT) signal in interactive shell.
 This on-screen cancels the current input and shows a fresh
 prompt when Ctrl+C is pressed.
 */
-// void	sigint_handler(int sig)
-// {
-// 	(void)sig;
-// 	g_signal_received = 2;
-// 	write(1, "\n", 1);
-// 	rl_on_new_line();
-// 	rl_replace_line("", 0);
-// 	rl_redisplay();
-// }
-// void sigint_handler(int sig)
-// {
-//     (void)sig;
-//     write(1, "\n", 1);
-	
-//     if (g_signal_received == -1)  // Currently in heredoc
-//     {
-//         g_signal_received = -2;   // Mark as interrupted in heredoc
-//         // Force readline to acknowledge the interruption
-//         rl_on_new_line();
-//         rl_replace_line("", 0);   // Clear input to empty string
-//         rl_redisplay();           // This should cause readline to return
-//         return;
-//     }
-	
-//     g_signal_received = 2;  // Standard SIGINT
-//     rl_on_new_line();
-//     rl_replace_line("", 0);
-//     rl_redisplay();
-// }
-// void sigint_handler(int sig)
-// {
-// 	(void)sig;
-//     write(2, "DEBUG: SIGINT received\n", 23);
-//     write(1, "\n", 1);
-	
-//     if (g_signal_received == -1)
-//     {
-//         write(2, "DEBUG: In heredoc mode\n", 23);
-//         g_signal_received = -2;
-//         // Force readline to acknowledge the interruption
-//         rl_on_new_line();
-//         rl_replace_line("", 0);
-//         rl_redisplay();
-//         return;
-//     }
-	
-//     write(2, "DEBUG: In normal mode\n", 22);
-//     g_signal_received = 2;
-//       rl_on_new_line();
-//     rl_replace_line("", 0);
-//     rl_redisplay();
-// }
 void	sigint_handler(int sig)
 {
 	(void)sig;

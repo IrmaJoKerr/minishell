@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:47:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:36:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:17:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ Return :
  - NULL on error.
 Works with expand_quoted_str().
 */
-char	*expand_quoted_var(char *expanded, char *content, int *pos, t_vars *vars)
+char	*expand_quoted_var(char *expanded, char *content, int *pos,
+			t_vars *vars)
 {
 	char	*var_value;
 	char	*temp;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 16:46:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:11:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,11 @@ int	handle_cmd_status(int status, t_vars *vars)
 
 	exit_code = 0;
 	if (WIFEXITED(status))
-	{
 		exit_code = WEXITSTATUS(status);
-	}
 	else if (WIFSIGNALED(status))
-	{
 		exit_code = 128 + WTERMSIG(status);
-	}
 	if (vars)
-	{
 		vars->error_code = exit_code;
-	}
 	return (exit_code);
 }
 
@@ -55,33 +49,25 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 {
 	int		result;
 	t_node	*cmd_node;
-	int		is_pipeline_context;
-
-	if (!node->left)
-		return (1);
 
 	cmd_node = node->left;
-	is_pipeline_context = vars->pipes->in_pipe;
-
-	// Save original file descriptors
 	vars->pipes->saved_stdin = dup(STDIN_FILENO);
 	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-
-	// Process redirection chain - check the return value
 	if (!proc_redir_chain(node, vars))
 	{
 		reset_redirect_fds(vars);
 		reset_terminal_after_heredoc();
-		// NEW: In pipeline context with input errors, exit with 0 to let pipeline continue
-		if (is_pipeline_context && vars->error_code == 1)  // Likely input redirection error
+		if (vars->pipes->in_pipe && vars->error_code == 1)
+			return (0);
+		else
 		{
-			return (0);  // Let pipeline continue
+			if (vars->error_code != 0)
+				return (vars->error_code);
+			else
+				return (1);
 		}
-		return (vars->error_code != 0 ? vars->error_code : 1);
 	}
-	// Only execute command if proc_redir_chain succeeded
 	result = execute_cmd(cmd_node, envp, vars);
-	// Clean up
 	reset_redirect_fds(vars);
 	reset_terminal_after_heredoc();
 	return (result);

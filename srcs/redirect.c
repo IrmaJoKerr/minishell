@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:51:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:19:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,13 +135,17 @@ t_node	*get_next_redir(t_node *current, t_node *cmd)
 Handles creation of a redirection token and its filename.
 Creates the redirection node and extracts the filename.
 */
-int	handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+int	handle_redirection_token(char *input, int *i, t_vars *vars,
+	t_tokentype type)
 {
 	char	*redir_str;
 	t_node	*redir_node;
 	int		moves;
 
-	moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
+	if (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT)
+		moves = 2;
+	else
+		moves = 1;
 	redir_str = ft_substr(input, *i, moves);
 	if (!redir_str)
 		return (0);
@@ -150,7 +154,7 @@ int	handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
 	if (!redir_node)
 		return (0);
 	*i += moves;
-	if (!process_redir_filename(input, i, redir_node))
+	if (!proc_redir_filename(input, i, redir_node))
 	{
 		free_token_node(redir_node);
 		return (0);
@@ -160,58 +164,52 @@ int	handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type
 	return (1);
 }
 
-/*
-Processes and extracts the filename for a redirection token.
-Skips whitespace and extracts the filename.
-*/
-int	process_redir_filename(char *input, int *i, t_node *redir_node)
+char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
+			char *quo_char)
 {
-	int		start;
-	char	*filename;
-	int		in_quotes;
-	char	quote_type;
+	char	*file_str;
 
-	in_quotes = 0;
-	quote_type = 0;
-	while (input[*i] && ft_isspace(input[*i]))
+	if (input[*i_ptr] == '\'' || input[*i_ptr] == '"')
 	{
-		(*i)++;
+		quo_char = &input[*i_ptr];
+		(*i_ptr)++;
+		tgt_start = *i_ptr;
+		while (input[*i_ptr] && input[*i_ptr] != *quo_char)
+			(*i_ptr)++;
+		if (!input[*i_ptr])
+			return (NULL);
+		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
+		(*i_ptr)++;
 	}
-	if (!input[*i])
-		return (1);
-	start = *i;
-	if (input[*i] == '"' || input[*i] == '\'')
-	{
-		quote_type = input[*i];
-		in_quotes = 1;
-		(*i)++;
-	}
-	while (input[*i])
-	{
-		if (in_quotes)
-		{
-			if (input[*i] == quote_type)
-			{
-				(*i)++;
-				break ;
-			}
-		}
-		else
-		{
-			if (ft_isspace(input[*i])
-				|| is_operator_token(get_token_at(input, *i, &(int){0})))
-				break ;
-		}
-		(*i)++;
-	}
-	if (in_quotes)
-		filename = ft_substr(input, start + 1, *i - start - 2);
 	else
-		filename = ft_substr(input, start, *i - start);
-	if (!filename)
+	{
+		while (input[*i_ptr] && !ft_isspace(input[*i_ptr])
+			&& !is_operator_token(get_token_at(input, *i_ptr, &(int){0})))
+			(*i_ptr)++;
+		if (*i_ptr == tgt_start)
+			return (NULL);
+		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
+	}
+	return (file_str);
+}
+
+int	proc_redir_filename(char *input, int *i, t_node *redir_node)
+{
+	char	*filename_str;
+	int		tgt_start;
+	char	quo_char;
+
+	quo_char = 0;
+	while (input[*i] && ft_isspace(input[*i]))
+		(*i)++;
+	if (!input[*i])
+		return (0);
+	tgt_start = *i;
+	filename_str = parse_and_get_filename(input, i, tgt_start, &quo_char);
+	if (!filename_str)
 		return (0);
 	if (redir_node->args[0])
 		free(redir_node->args[0]);
-	redir_node->args[0] = filename;
+	redir_node->args[0] = filename_str;
 	return (1);
 }

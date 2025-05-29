@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 16:46:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:33:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ Handles redirection setup for input files.
 Returns:
 - 1 on success.
 - 0 on failure.
-Works with setup_redirection().
 */
 int	setup_in_redir(t_node *node, t_vars *vars)
 {
@@ -31,16 +30,13 @@ int	setup_in_redir(t_node *node, t_vars *vars)
 	if (!node || !node->args || !node->args[0])
 		return (0);
 	file = node->args[0];
-	// Close any previously opened redirection file descriptor
 	if (vars->pipes->redirection_fd >= 0)
 	{
 		close(vars->pipes->redirection_fd);
 		vars->pipes->redirection_fd = -1;
 	}
-	// Check file accessibility
-	if (!check_input_file_access(file, &file_stat, vars))
+	if (!chk_in_file_access(file, &file_stat, vars))
 		return (0);
-	// Set up the redirection
 	result = setup_input_redirection(file, vars);
 	return (result);
 }
@@ -50,20 +46,17 @@ Opens input file and sets up stdin redirection.
 */
 int	setup_input_redirection(char *file, t_vars *vars)
 {
-	// Close any previous file descriptor
 	if (vars->pipes->redirection_fd >= 0)
 	{
 		close(vars->pipes->redirection_fd);
 		vars->pipes->redirection_fd = -1;
 	}
-	// Open the file
 	vars->pipes->redirection_fd = open(file, O_RDONLY);
 	if (vars->pipes->redirection_fd == -1)
 	{
 		vars->error_code = ERR_REDIRECTION;
 		return (0);
 	}
-	// Redirect stdin to the file
 	if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
 	{
 		close(vars->pipes->redirection_fd);
@@ -82,7 +75,6 @@ Handles redirection setup for output files.
 Returns:
 - 1 on success.
 - 0 on failure.
-Works with setup_redirection().
 */
 int	setup_out_redir(t_node *node, t_vars *vars)
 {
@@ -176,7 +168,7 @@ int	setup_heredoc_redir(t_node *node, t_vars *vars)
 /*
 Checks if input file exists and has correct permissions.
 */
-int	check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
+int	chk_in_file_access(char *file, struct stat *file_stat, t_vars *vars)
 {
 	if (access(file, F_OK) == -1)
 	{
@@ -208,10 +200,8 @@ For pipe contexts, redirects stdin from /dev/null.
 int	handle_bad_infile(t_vars *vars)
 {
 	int	null_fd;
-	int	is_pipeline_context;
 
-	is_pipeline_context = (vars->pipes && vars->pipes->pipe_root != NULL);
-	if (is_pipeline_context)
+	if (vars->pipes && vars->pipes->pipe_root != NULL)
 	{
 		null_fd = open("/dev/null", O_RDONLY);
 		if (null_fd == -1)
@@ -229,10 +219,7 @@ int	handle_bad_infile(t_vars *vars)
 		return (1);
 	}
 	else
-	{
-		vars->error_code = ERR_DEFAULT;
 		return (0);
-	}
 }
 
 /*

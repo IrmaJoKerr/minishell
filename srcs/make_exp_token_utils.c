@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:38:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 21:19:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,42 +107,58 @@ void	process_right_adj(char *input, t_vars *vars)
 }
 
 /*
-Updates quote types for joined arguments.
-Extends the quote type int array to accommodate new characters.
+Reallocates and extends a single quote type array (int *).
+Modifies *quo_arr_ptr directly.
 Returns:
-- 1 on success.
-- 0 on failure.
+- 0 on success.
+- 1 on error.
 */
-int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
+int	realloc_quo_arr(int **quo_arr_ptr, size_t new_char_len)
 {
-	int		*old_types;
-	int		*new_types;
+	int		*old_int_arr;
+	int		*new_int_arr;
 	size_t	old_len;
-	size_t	expanded_len;
 	size_t	total_len;
 	size_t	i;
 
-	if (!vars || !vars->current || !vars->current->arg_quote_type
-		|| !vars->current->arg_quote_type[arg_idx] || !expanded_val)
+	old_int_arr = *quo_arr_ptr;
+	old_len = ft_intarrlen(old_int_arr);
+	total_len = old_len + new_char_len;
+	new_int_arr = malloc(sizeof(int) * (total_len + 1));
+	if (!new_int_arr)
 		return (0);
-	old_types = vars->current->arg_quote_type[arg_idx];
-	old_len = 0;
-	while (old_types[old_len] != -1)
-		old_len++;
-	expanded_len = ft_strlen(expanded_val);
-	total_len = old_len + expanded_len;
-	new_types = malloc(sizeof(int) * (total_len + 1));
-	if (!new_types)
-		return (0);
-	ft_memcpy(new_types, old_types, sizeof(int) * old_len);
+	if (old_len > 0)
+		ft_memcpy(new_int_arr, old_int_arr, sizeof(int) * old_len);
 	i = 0;
-	while (i < expanded_len)
+	while (i < new_char_len)
 	{
-		new_types[old_len + i] = 0;
+		new_int_arr[old_len + i] = 0;
 		i++;
 	}
-	new_types[total_len] = -1;
-	free(vars->current->arg_quote_type[arg_idx]);
-	vars->current->arg_quote_type[arg_idx] = new_types;
+	new_int_arr[total_len] = -1;
+	free(old_int_arr);
+	*quo_arr_ptr = new_int_arr;
 	return (1);
+}
+
+/*
+Updates quote types for joined arguments.
+Extends the quote type int array for a specific argument to add on new chars.
+The new characters from 'appended_text' are marked as unquoted (type 0).
+Returns:
+- 0 on success.
+- 1 on failure.
+*/
+int	update_quote_types(t_vars *vars, int arg_idx, char *appended_text)
+{
+	size_t	appended_len;
+
+	if (!vars || !vars->current || !vars->current->arg_quote_type
+		|| !vars->current->arg_quote_type[arg_idx] || !appended_text)
+		return (0);
+	appended_len = ft_strlen(appended_text);
+	if (appended_len == 0)
+		return (1);
+	return (realloc_quo_arr(&(vars->current->arg_quote_type[arg_idx]),
+			appended_len));
 }

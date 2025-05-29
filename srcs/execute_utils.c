@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 16:15:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:07:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,26 +60,22 @@ int setup_redirection(t_node *node, t_vars *vars)
 	{
 		vars->pipes->out_mode = (node->type == TYPE_APPEND_REDIRECT) ? 
 					   OUT_MODE_APPEND : OUT_MODE_TRUNCATE;
-		// Just create the file
 		if (node->args && node->args[0])
 		{
 			char *filename = node->args[0];
 			int flags = (vars->pipes->out_mode == OUT_MODE_APPEND) ? 
 				   (O_WRONLY | O_CREAT | O_APPEND) : 
 				   (O_WRONLY | O_CREAT | O_TRUNC);
-			// Open the file, just to create it
 			int fd = open(filename, flags, 0644);
 			if (fd >= 0)
 			{
 				close(fd);
-				return 1; // Success
+				return (1);
 			}
-			// If open fails, still return 1 to continue processing
-			return 1;
+			return (1);
 		}
-		return 1; // Continue processing
+		return (1);
 	}
-	// Standard redirection handling for redirections with commands
 	if (!cmd_node)
 	{
 		vars->error_code = ERR_DEFAULT;
@@ -87,14 +83,10 @@ int setup_redirection(t_node *node, t_vars *vars)
 	}
 	vars->pipes->cmd_redir = cmd_node;
 	if (node->type == TYPE_IN_REDIRECT || node->type == TYPE_HEREDOC)
-	{
 		vars->pipes->last_in_redir = node;
-	}
 	else if (node->type == TYPE_OUT_REDIRECT
 		|| node->type == TYPE_APPEND_REDIRECT)
-	{
 		vars->pipes->last_out_redir = node;
-	}
 	if (!proc_redir_target(node, vars))
 		return (0);
 	result = redir_mode_setup(node, vars);

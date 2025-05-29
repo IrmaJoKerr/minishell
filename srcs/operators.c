@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:14:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:35:18 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ Returns:
 - Position after operator (i+1).
 - Unchanged position if token creation fails.
 */
-int	handle_single_operator(char *input, t_vars *vars)
+int	handle_pipe_operator(char *input, t_vars *vars)
 {
 	char	*token;
 
@@ -109,31 +109,6 @@ int	handle_single_operator(char *input, t_vars *vars)
 	maketoken(token, vars->curr_type, vars);
 	free(token);
 	vars->pos++;
-	vars->start = vars->pos;
-	vars->prev_type = vars->curr_type;
-	return (vars->pos);
-}
-
-/*
-Processes double-character operators (>>, <<).
-Creates token with the provided token type.
-Updates position tracking.
-Returns:
- - Position after operator (i+moves).
- - Unchanged position if token creation fails.
-*/
-int	handle_double_operator(char *input, t_vars *vars)
-{
-	char	*token;
-	int		moves;
-
-	moves = 2;
-	token = ft_substr(input, vars->pos, moves);
-	if (!token)
-		return (vars->pos);
-	maketoken(token, vars->curr_type, vars);
-	free(token);
-	vars->pos += moves;
 	vars->start = vars->pos;
 	vars->prev_type = vars->curr_type;
 	return (vars->pos);

@@ -6,18 +6,21 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:46:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:35:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:16:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 /*
-Sets up terminal settings specifically for heredoc input.
-- Modifies termios structure to disable ECHO and ICANON flags.
-- Uses the original terminal settings as a base.
-- Makes user input invisible when entering heredoc content.
-- Disables canonical mode for raw character input.
+Sets up terminal settings for interactive heredoc input.
+- Modifies termios structure based on original settings.
+- Disables canonical mode (ICANON) for character-by-character input.
+- Enables echoing of typed characters (ECHO).
+- Disables echoing of control characters (ECHOCTL) (e.g., ^C won't show as ^C).
+- Configures read to return after 1 character with no timeout (VMIN=1, VTIME=0).
+This mode allows the shell to process heredoc input interactively while
+displaying typed characters.
 Works with manage_terminal_state() to provide special input handling
 for heredocs.
 */
@@ -26,10 +29,10 @@ void	term_heredoc(t_vars *vars)
 	struct termios	heredoc_term;
 
 	heredoc_term = vars->ori_term_settings;
-	heredoc_term.c_lflag &= ~(ICANON | ECHOCTL); // Disable canonical mode & control char echo
-	heredoc_term.c_lflag |= ECHO;                // Ensure normal echo is enabled
-	heredoc_term.c_cc[VMIN] = 1;                 // Return after 1 character
-	heredoc_term.c_cc[VTIME] = 0;                // No timeout
+	heredoc_term.c_lflag &= ~(ICANON | ECHOCTL);
+	heredoc_term.c_lflag |= ECHO;
+	heredoc_term.c_cc[VMIN] = 1;
+	heredoc_term.c_cc[VTIME] = 0;
 	tcsetattr(STDIN_FILENO, TCSANOW, &heredoc_term);
 }
 

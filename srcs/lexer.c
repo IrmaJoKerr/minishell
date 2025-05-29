@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:41:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 01:22:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,9 +188,7 @@ int	process_operator_char(char *input, int *i, t_vars *vars)
 		result = handle_redirection_token(input, i, vars, token_type);
 		return (result);
 	}
-	else if (moves == 2)
-		handle_double_operator(input, vars);
 	else
-		handle_single_operator(input, vars);
+		handle_pipe_operator(input, vars);
 	return (1);
 }
