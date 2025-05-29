@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 01:33:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 	file = node->args[0];
 	mode = O_WRONLY | O_CREAT | O_TRUNC;
 	vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-	if (node->type == TYPE_APPEND_REDIRECT)
+	if (node->type == TYPE_APPD_REDIR)
 	{
 		mode = O_WRONLY | O_CREAT | O_APPEND;
 		vars->pipes->out_mode = OUT_MODE_APPEND;

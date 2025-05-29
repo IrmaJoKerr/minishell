@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 01:35:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@ int	is_operator_token(t_tokentype type)
 {
 	if (type == TYPE_PIPE)
 		return (1);
-	if (type == TYPE_IN_REDIRECT)
+	if (type == TYPE_IN_REDIR)
 		return (1);
-	if (type == TYPE_OUT_REDIRECT)
+	if (type == TYPE_OUT_REDIR)
 		return (1);
-	if (type == TYPE_APPEND_REDIRECT)
+	if (type == TYPE_APPD_REDIR)
 		return (1);
 	if (type == TYPE_HEREDOC)
 		return (1);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 14:45:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 04:46:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ Master redirection node preprocessor for AST.
 - Validates remaining redirection syntax and reports syntax errors.
 - Sets the first valid redirection as the redirection root.
 - Links commands to their associated redirections for AST construction.
-
 Example: For "echo hi | >./outfile echo bye > output.txt":
 - Processes ">./outfile" as solo redirection (executes immediately).
 - Validates "> output.txt" redirection syntax.
@@ -63,6 +62,8 @@ Called before main AST construction to prepare redirection structures.
 void	pre_ast_redir_proc(t_vars *vars)
 {
 	t_node	*current;
+	t_node	*first_redir;
+	t_node	*prev_redir;
 
 	if (!proc_solo_redirs(vars))
 		return ;
@@ -80,7 +81,7 @@ void	pre_ast_redir_proc(t_vars *vars)
 				vars->pipes->redir_root = current;
 		}
 		else if (current->type == TYPE_CMD)
-			make_cmd_redir_chain(current, vars);
+			make_cmd_redir_chain(current, vars, &first_redir, &prev_redir);
 		current = current->next;
 	}
 }
@@ -148,9 +149,9 @@ int	exec_solo_redir(t_node *redir_node, t_vars *vars)
 	fd = -1;
 	if (!chk_permissions(filename, O_WRONLY, vars))
 		return (0);
-	if (redir_node->type == TYPE_OUT_REDIRECT)
+	if (redir_node->type == TYPE_OUT_REDIR)
 		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if (redir_node->type == TYPE_APPEND_REDIRECT)
+	else if (redir_node->type == TYPE_APPD_REDIR)
 		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
 		return (0);

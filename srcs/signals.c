@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:17:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 05:22:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,4 +82,10 @@ void	sigquit_handler(int sig)
 {
 	(void)sig;
 	rl_redisplay();
+}
+
+void	hd_child_sigint_handler(int signo)
+{
+	(void)signo;
+	g_signal_received = -2;
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:45:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,9 @@ void	tokenize_quote(char *input, t_vars *vars)
 	int	saved_pos;
 
 	is_redir_target = 0;
-	if (vars->prev_type == TYPE_IN_REDIRECT
-		|| vars->prev_type == TYPE_OUT_REDIRECT
-		|| vars->prev_type == TYPE_APPEND_REDIRECT
+	if (vars->prev_type == TYPE_IN_REDIR
+		|| vars->prev_type == TYPE_OUT_REDIR
+		|| vars->prev_type == TYPE_APPD_REDIR
 		|| vars->prev_type == TYPE_HEREDOC)
 	{
 		is_redir_target = 1;

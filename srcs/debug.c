@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 12:18:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 05:54:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 04:36:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,33 +14,33 @@
 
 // In your append_args.c or similar function
 void debug_args_before_after(t_node *cmd_node, char *new_arg, int is_delim) {
-    char **args = cmd_node->args;
-    int i = 0;
-    
-    write(2, "DEBUG-ARGS: Before append - [", 29);
-    while (args && args[i]) {
-        write(2, args[i], strlen(args[i]));
-        write(2, " ", 1);
-        i++;
-    }
-    write(2, "]\n", 2);
-    
-    write(2, "DEBUG-ARGS: Appending: '", 24);
-    write(2, new_arg, strlen(new_arg));
-    write(2, is_delim ? "' (DELIM)\n" : "'\n", is_delim ? 10 : 2);
+	char **args = cmd_node->args;
+	int i = 0;
+	
+	write(2, "DEBUG-ARGS: Before append - [", 29);
+	while (args && args[i]) {
+		write(2, args[i], strlen(args[i]));
+		write(2, " ", 1);
+		i++;
+	}
+	write(2, "]\n", 2);
+	
+	write(2, "DEBUG-ARGS: Appending: '", 24);
+	write(2, new_arg, strlen(new_arg));
+	write(2, is_delim ? "' (DELIM)\n" : "'\n", is_delim ? 10 : 2);
 }
 
-// In your process_heredoc or similar function
+
 void debug_heredoc_content(const char *content, size_t length) {
-    write(2, "DEBUG-HEREDOC: Content (", 24);
-    char len_str[20];
-    sprintf(len_str, "%zu", length);
-    write(2, len_str, strlen(len_str));
-    write(2, " bytes):\n", 10);
-    write(2, content, length > 100 ? 100 : length);
-    if (length > 100)
-        write(2, "...(truncated)", 14);
-    write(2, "\n", 1);
+	write(2, "DEBUG-HEREDOC: Content (", 24);
+	char len_str[20];
+	sprintf(len_str, "%zu", length);
+	write(2, len_str, strlen(len_str));
+	write(2, " bytes):\n", 10);
+	write(2, content, length > 100 ? 100 : length);
+	if (length > 100)
+		write(2, "...(truncated)", 14);
+	write(2, "\n", 1);
 }
 
 // Helper function to check if token is a redirection operator
@@ -60,11 +60,11 @@ int get_redirection_type(char *token)
 	if (!token)
 		return 0;
 	if (ft_strcmp(token, "<") == 0)
-		return TYPE_IN_REDIRECT;
+		return TYPE_IN_REDIR;
 	if (ft_strcmp(token, ">") == 0)
-		return TYPE_OUT_REDIRECT;
+		return TYPE_OUT_REDIR;
 	if (ft_strcmp(token, ">>") == 0)
-		return TYPE_APPEND_REDIRECT;
+		return TYPE_APPD_REDIR;
 	if (ft_strcmp(token, "<<") == 0)
 		return TYPE_HEREDOC;
 	return 0;
@@ -175,55 +175,55 @@ void debug_tokenization_loop(char *input, int start, int end, int token_count)
 // Add this function to track pipeline context during tokenization
 void debug_pipeline_awareness(t_vars *vars, int token_position)
 {
-    int has_pipe_before = 0;
-    int has_redirection_before = 0;
-    int redirection_after_pipe = 0;
-    t_node *current = vars->head;
-    t_node *last_pipe = NULL;
-    
-    fprintf(stderr, "DEBUG-PIPELINE-AWARE: Checking context for token position %d\n", token_position);
-    
-    // Count previous tokens and track pipeline structure
-    int count = 0;
-    while (current && count < token_position) {
-        if (current->type == TYPE_PIPE) {
-            has_pipe_before = 1;
-            last_pipe = current;
-            fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found pipe at position %d\n", count);
-        }
-        if (is_redirection(current->type)) {
-            has_redirection_before = 1;
-            // Check if this redirection comes after the last pipe
-            if (last_pipe && current_comes_after_node(current, last_pipe, vars->head)) {
-                redirection_after_pipe = 1;
-            }
-            fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found redirection %s at position %d (after_pipe=%d)\n",
-                    get_token_str(current->type), count, redirection_after_pipe);
-        }
-        current = current->next;
-        count++;
-    }
-    
-    fprintf(stderr, "DEBUG-PIPELINE-AWARE: Context summary: has_pipe_before=%d, has_redirection_before=%d, redirection_after_pipe=%d\n",
-            has_pipe_before, has_redirection_before, redirection_after_pipe);
+	int has_pipe_before = 0;
+	int has_redirection_before = 0;
+	int redirection_after_pipe = 0;
+	t_node *current = vars->head;
+	t_node *last_pipe = NULL;
+	
+	fprintf(stderr, "DEBUG-PIPELINE-AWARE: Checking context for token position %d\n", token_position);
+	
+	// Count previous tokens and track pipeline structure
+	int count = 0;
+	while (current && count < token_position) {
+		if (current->type == TYPE_PIPE) {
+			has_pipe_before = 1;
+			last_pipe = current;
+			fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found pipe at position %d\n", count);
+		}
+		if (is_redirection(current->type)) {
+			has_redirection_before = 1;
+			// Check if this redirection comes after the last pipe
+			if (last_pipe && current_comes_after_node(current, last_pipe, vars->head)) {
+				redirection_after_pipe = 1;
+			}
+			fprintf(stderr, "DEBUG-PIPELINE-AWARE: Found redirection %s at position %d (after_pipe=%d)\n",
+					get_token_str(current->type), count, redirection_after_pipe);
+		}
+		current = current->next;
+		count++;
+	}
+	
+	fprintf(stderr, "DEBUG-PIPELINE-AWARE: Context summary: has_pipe_before=%d, has_redirection_before=%d, redirection_after_pipe=%d\n",
+			has_pipe_before, has_redirection_before, redirection_after_pipe);
 }
 
 // Helper function to check if node1 comes after node2 in the list
 int current_comes_after_node(t_node *node1, t_node *node2, t_node *head)
 {
-    t_node *current = head;
-    int found_node2 = 0;
-    
-    while (current) {
-        if (current == node2) {
-            found_node2 = 1;
-        }
-        if (found_node2 && current == node1) {
-            return 1;
-        }
-        current = current->next;
-    }
-    return 0;
+	t_node *current = head;
+	int found_node2 = 0;
+	
+	while (current) {
+		if (current == node2) {
+			found_node2 = 1;
+		}
+		if (found_node2 && current == node1) {
+			return 1;
+		}
+		current = current->next;
+	}
+	return 0;
 }
 /*
 Prints a node's content to the specified file.
@@ -250,63 +250,58 @@ void	print_node_content(FILE *fp, t_node *node)
 }
 
 // Internal helper function with cycle detection
-static void print_ast_node_helper(FILE *fp, t_node *node, int indent_level, 
-								 void **visited, int visited_count)
+static void	print_ast_node_helper(FILE *fp, t_node *node, int indent_level,
+				void **visited, int visited_count)
 {
-	int i;
-
+	int	i;
 	if (!node || !fp)
-		return;
-	
-	// Prevent infinite recursion with depth limit
+		return ;
 	if (visited_count >= 100) {
 		fprintf(fp, " [MAX DEPTH EXCEEDED]\n");
-		return;
+		return ;
 	}
-	
-	// Check for cycles in the AST
 	for (i = 0; i < visited_count; i++) {
 		if (visited[i] == node) {
 			fprintf(fp, " [CYCLE DETECTED]\n");
-			return;
+			return ;
 		}
 	}
-	
-	// Add this node to visited array
 	visited[visited_count++] = node;
-	
-	// Original function implementation
 	i = 0;
-	while (i < indent_level) {
+	while (i < indent_level)
+	{
 		fprintf(fp, "  ");
 		i++;
 	}
 	print_node_content(fp, node);
 	fprintf(fp, "\n");
-	
-	if (node->redir) {
+	if (node->redir)
+	{
 		i = 0;
-		while (i < indent_level) {
+		while (i < indent_level)
+		{
 			fprintf(fp, "  ");
 			i++;
 		}
 		fprintf(fp, "├─(redir)-> ");
 		print_ast_node_helper(fp, node->redir, 0, visited, visited_count);
 	}
-	
-	if (node->left) {
+	if (node->left)
+	{
 		i = 0;
-		while (i < indent_level) {
+		while (i < indent_level)
+		{
 			fprintf(fp, "  ");
 			i++;
 		}
 		fprintf(fp, "├─(left)-> ");
 		print_ast_node_helper(fp, node->left, indent_level + 1, visited, visited_count);
 	}
-	
-	if (node->right) {
+	if (node->right)
+	{
 		i = 0;
-		while (i < indent_level) {
+		while (i < indent_level)
+		{
 			fprintf(fp, "  ");
 			i++;
 		}
@@ -315,13 +310,10 @@ static void print_ast_node_helper(FILE *fp, t_node *node, int indent_level,
 	}
 }
 
-void print_ast_node(FILE *fp, t_node *node, int indent_level)
+void	print_ast_node(FILE *fp, t_node *node, int indent_level)
 {
-	// Create an array to track visited nodes for cycle detection
 	void *visited[100] = {0};
-	int visited_count = 0;
-	
-	// Call internal helper with cycle detection
+	int	visited_count = 0;
 	print_ast_node_helper(fp, node, indent_level, visited, visited_count);
 }
 
@@ -351,7 +343,6 @@ void	print_ast(t_node *root, const char *filename)
 		fp = stdout;
 	fprintf(fp, "=== ABSTRACT SYNTAX TREE ===\n");
 	print_ast_node(fp, root, 0);
-	// fprintf(fp, "=END=\n");
 	if (filename)
 		fclose(fp);
 }
@@ -409,9 +400,7 @@ void	print_node_debug(t_node *node, const char *prefix, const char *location)
 		fprintf(stderr, "NULL node\n");
 		return ;
 	}
-	// Print node type
 	fprintf(stderr, "Type=%s", get_token_str(node->type));
-	// Print arguments
 	fprintf(stderr, ", Args=[");
 	if (node->args)
 	{
@@ -419,7 +408,7 @@ void	print_node_debug(t_node *node, const char *prefix, const char *location)
 		while (node->args[i])
 		{
 			fprintf(stderr, "'%s'", node->args[i]);
-			if (node->args[i+1])
+			if (node->args[i + 1])
 				fprintf(stderr, ", ");
 			i++;
 		}
@@ -429,7 +418,6 @@ void	print_node_debug(t_node *node, const char *prefix, const char *location)
 		fprintf(stderr, "NULL");
 	}
 	fprintf(stderr, "]");
-	// Print connections
 	fprintf(stderr, ", Connections: left=%p, right=%p, redir=%p, prev=%p, next=%p\n",
 		(void*)node->left, (void*)node->right, (void*)node->redir, 
 		(void*)node->prev, (void*)node->next);
@@ -500,36 +488,28 @@ void print_ast_detailed(t_node *root, const char *prefix)
 	if (!root)
 	{
 		fprintf(stderr, "DEBUG-%s: Empty AST (no root node)\n", prefix);
-		return;
+		return ;
 	}
 	fprintf(stderr, "DEBUG-%s: = DETAILED AST =\n", prefix);
-	
-	// Queue for breadth-first traversal
 	t_node **queue = malloc(sizeof(t_node *) * 1000);  // Assuming max 1000 nodes
 	if (!queue)
 	{
 		fprintf(stderr, "DEBUG-%s: Memory allocation failed for AST traversal\n", prefix);
-		return;
+		return ;
 	}
-	
-	// Visited nodes tracking to prevent cycles
 	void **visited = malloc(sizeof(void *) * 1000);
 	if (!visited)
 	{
 		fprintf(stderr, "DEBUG-%s: Memory allocation failed for cycle detection\n", prefix);
 		free(queue);
-		return;
+		return ;
 	}
 	int visited_count = 0;
-	
 	int front = 0, rear = 0;
 	queue[rear++] = root;
-	
 	while (front < rear)
 	{
 		t_node *node = queue[front++];
-		
-		// Check for cycles
 		int is_cycle = 0;
 		for (int i = 0; i < visited_count; i++)
 		{
@@ -537,21 +517,13 @@ void print_ast_detailed(t_node *root, const char *prefix)
 			{
 				fprintf(stderr, "DEBUG-%s: [CYCLE DETECTED] Node(%p)\n", prefix, (void*)node);
 				is_cycle = 1;
-				break;
+				break ;
 			}
 		}
-		
 		if (is_cycle)
-			continue;
-			
-		// Add to visited
-		visited[visited_count++] = node;
-		
-		// Print current node details
-		fprintf(stderr, "DEBUG-%s: Node(%p):", prefix, (void*)node);
+			continue ;
+		visited[visited_count++] = node;fprintf(stderr, "DEBUG-%s: Node(%p):", prefix, (void*)node);
 		fprintf(stderr, " Type=%s", get_token_str(node->type));
-		
-		// Print args
 		fprintf(stderr, ", Args=[");
 		if (node->args)
 		{
@@ -569,8 +541,6 @@ void print_ast_detailed(t_node *root, const char *prefix)
 			fprintf(stderr, "NULL");
 		}
 		fprintf(stderr, "]");
-		
-		// Print connections
 		fprintf(stderr, ", Connections: {");
 		if (node->left)
 			fprintf(stderr, " left->%p", (void*)node->left);
@@ -583,8 +553,6 @@ void print_ast_detailed(t_node *root, const char *prefix)
 		if (node->next)
 			fprintf(stderr, " next->%p", (void*)node->next);
 		fprintf(stderr, " }\n");
-		
-		// Add children to queue
 		if (node->left)
 			queue[rear++] = node->left;
 		if (node->right)
@@ -592,7 +560,6 @@ void print_ast_detailed(t_node *root, const char *prefix)
 		if (node->redir)
 			queue[rear++] = node->redir;
 	}
-	
 	free(visited);
 	free(queue);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 16:51:38 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:34:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,12 @@ char	*get_token_str(t_tokentype type)
 		return (TOKEN_TYPE_PIPE);
 	else if (type == TYPE_EXPANSION)
 		return (TOKEN_TYPE_EXPANSION);
-	else if (type == TYPE_IN_REDIRECT)
-		return (TOKEN_TYPE_IN_REDIRECT);
-	else if (type == TYPE_OUT_REDIRECT)
-		return (TOKEN_TYPE_OUT_REDIRECT);
-	else if (type == TYPE_APPEND_REDIRECT)
-		return (TOKEN_TYPE_APPEND_REDIRECT);
+	else if (type == TYPE_IN_REDIR)
+		return (TOKEN_TYPE_IN_REDIR);
+	else if (type == TYPE_OUT_REDIR)
+		return (TOKEN_TYPE_OUT_REDIR);
+	else if (type == TYPE_APPD_REDIR)
+		return (TOKEN_TYPE_APPD_REDIR);
 	else if (type == TYPE_EXIT_STATUS)
 		return (TOKEN_TYPE_EXIT_STATUS);
 	else

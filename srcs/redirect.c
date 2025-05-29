@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 01:19:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ Example: When processing token list
 */
 int	is_redirection(t_tokentype type)
 {
-	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIRECT
-		|| type == TYPE_OUT_REDIRECT || type == TYPE_APPEND_REDIRECT)
+	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIR
+		|| type == TYPE_OUT_REDIR || type == TYPE_APPD_REDIR)
 		return (1);
 	else
 		return (0);
@@ -142,7 +142,7 @@ int	handle_redirection_token(char *input, int *i, t_vars *vars,
 	t_node	*redir_node;
 	int		moves;
 
-	if (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT)
+	if (type == TYPE_HEREDOC || type == TYPE_APPD_REDIR)
 		moves = 2;
 	else
 		moves = 1;

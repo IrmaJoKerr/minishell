@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 01:22:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 05:22:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,9 @@ This enables easy conversion between enum and string.
 # define TOKEN_TYPE_DOUBLE_QUOTE     "\""
 # define TOKEN_TYPE_SINGLE_QUOTE     "'"
 # define TOKEN_TYPE_HEREDOC          "<<"
-# define TOKEN_TYPE_IN_REDIRECT      "<"
-# define TOKEN_TYPE_OUT_REDIRECT     ">"
-# define TOKEN_TYPE_APPEND_REDIRECT  ">>"
+# define TOKEN_TYPE_IN_REDIR      "<"
+# define TOKEN_TYPE_OUT_REDIR     ">"
+# define TOKEN_TYPE_APPD_REDIR  ">>"
 # define TOKEN_TYPE_EXPANSION        "$"
 # define TOKEN_TYPE_PIPE             "|"
 # define TOKEN_TYPE_EXIT_STATUS      "$?"
@@ -115,9 +115,9 @@ typedef enum e_tokentype
 	TYPE_SINGLE_QUOTE = 4,
 	TYPE_DOUBLE_QUOTE = 5,
 	TYPE_HEREDOC = 6,
-	TYPE_IN_REDIRECT = 7,
-	TYPE_OUT_REDIRECT = 8,
-	TYPE_APPEND_REDIRECT = 9,
+	TYPE_IN_REDIR = 7,
+	TYPE_OUT_REDIR = 8,
+	TYPE_APPD_REDIR = 9,
 	TYPE_EXPANSION = 10,
 	TYPE_PIPE = 11,
 	TYPE_EXIT_STATUS = 12,
@@ -432,6 +432,7 @@ Execution utility functions.
 In execute_utils.c
 */
 void		exec_child(char *cmd_path, char **args, char **envp);
+int			handle_solo_out_redir(t_node *node, t_vars *vars);
 int			setup_redirection(t_node *node, t_vars *vars);
 int			proc_redir_target(t_node *node, t_vars *vars);
 int			redir_mode_setup(t_node *node, t_vars *vars);
@@ -503,6 +504,9 @@ void		cleanup_heredoc_fd(int write_fd);
 Heredoc main handling.
 In heredoc.c
 */
+void		exec_hd_child(t_vars *vars);
+int			process_hd_parent(pid_t child_pid, int child_status,
+				int saved_signal_state, t_vars *vars);
 int			interactive_hd_mode(t_vars *vars);
 int			get_interactive_hd(int write_fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
@@ -774,8 +778,13 @@ int			validate_redir_targets(t_vars *vars);
 Process redirection nodes functions.
 In process_redir_node.c
 */
-void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
+void		store_single_redir_node(t_node *redir_node, t_node *cmd_node,
+				t_vars *vars);
+void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars,
+				t_node **first_redir, t_node **prev_redir);
+// void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
+// void		store_single_redir_node(t_node *redir_node, t_node *cmd_node, t_vars *vars);
 
 /*
 Redirection processing utility functions.
@@ -837,6 +846,7 @@ In signals.c
 void		load_signals(void);
 void		sigint_handler(int sig);
 void		sigquit_handler(int sig);
+void		hd_child_sigint_handler(int signo);
 
 /*
 Terminal state modification functions.

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:18:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:13:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ int	is_single_token(char *input, int pos, int *moves)
 	else if (input[pos] == '\"')
 		token_type = TYPE_DOUBLE_QUOTE;
 	else if (input[pos] == '<')
-		token_type = TYPE_IN_REDIRECT;
+		token_type = TYPE_IN_REDIR;
 	else if (input[pos] == '>')
-		token_type = TYPE_OUT_REDIRECT;
+		token_type = TYPE_OUT_REDIR;
 	else if (input[pos] == '$')
 		token_type = TYPE_EXPANSION;
 	else if (input[pos] == '|')
@@ -56,7 +56,7 @@ int	is_double_token(char *input, int pos, int *moves)
 	if (!input || !input[pos] || !input[pos + 1])
 		return (token_type);
 	if (input[pos] == '>' && input[pos + 1] == '>')
-		token_type = TYPE_APPEND_REDIRECT;
+		token_type = TYPE_APPD_REDIR;
 	else if (input[pos] == '<' && input[pos + 1] == '<')
 		token_type = TYPE_HEREDOC;
 	else if (input[pos] == '$' && input[pos + 1] == '?')
