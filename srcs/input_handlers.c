@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:28:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,7 @@ Main entry point for all command input processing in the shell.
 void	handle_input(char *input, t_vars *vars)
 {
 	if (ft_strchr(input, '\n'))
-	{
 		process_multiline_input(input, vars);
-	}
 	else
 	{
 		reset_shell(vars);

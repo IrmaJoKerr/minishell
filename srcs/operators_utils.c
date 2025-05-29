@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:18:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:29:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:13:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,7 @@ int	is_single_token(char *input, int pos, int *moves)
 	else if (input[pos] == '|')
 		token_type = TYPE_PIPE;
 	if (token_type != 0)
-	{
 		*moves = 1;
-	}
 	return (token_type);
 }
 

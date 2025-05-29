@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:00:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:00:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,9 +130,7 @@ void	process_command(char *command, t_vars *vars)
 		return ;
 	}
 	if (!handle_pipe_syntax(vars))
-	{
 		return ;
-	}
 	build_and_execute(vars);
 	if (vars->partial_input)
 	{
@@ -155,8 +153,6 @@ int	main(int argc, char **argv, char **envp)
 	char	*input;
 	char	*exit_args[2];
 
-	// exit_args[0] = NULL;
-	// exit_args[1] = NULL;
 	(void)argc;
 	(void)argv;
 	ft_memset(&vars, 0, sizeof(t_vars));

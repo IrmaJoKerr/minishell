@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:46:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 05:11:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:35:12 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,10 @@ Sets up terminal settings specifically for heredoc input.
 Works with manage_terminal_state() to provide special input handling
 for heredocs.
 */
-// void	term_heredoc(t_vars *vars)
-// {
-// 	struct termios	heredoc_term;
-
-// 	heredoc_term = vars->ori_term_settings;
-// 	heredoc_term.c_lflag &= ~(ECHO | ICANON);
-// 	tcsetattr(STDIN_FILENO, TCSANOW, &heredoc_term);
-// }
-void term_heredoc(t_vars *vars)
+void	term_heredoc(t_vars *vars)
 {
-	struct termios heredoc_term;
-	
+	struct termios	heredoc_term;
+
 	heredoc_term = vars->ori_term_settings;
 	heredoc_term.c_lflag &= ~(ICANON | ECHOCTL); // Disable canonical mode & control char echo
 	heredoc_term.c_lflag |= ECHO;                // Ensure normal echo is enabled

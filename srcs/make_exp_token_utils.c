@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:34:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:38:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,28 +71,20 @@ int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 	int	arg_idx;
 
 	if (!vars->current || !vars->current->args || !vars->current->args[0])
-	{
 		return (0);
-	}
 	arg_idx = proc_join_args(vars, expanded_val);
 	if (arg_idx == -1)
-	{
 		return (0);
-	}
 	if (vars->current->arg_quote_type
 		&& vars->current->arg_quote_type[arg_idx])
 	{
 		if (!update_quote_types(vars, arg_idx, expanded_val))
-		{
 			return (0);
-		}
 	}
 	free(expanded_val);
 	free(token);
 	if (vars->adj_state[1])
-	{
 		process_right_adj(input, vars);
-	}
 	return (1);
 }
 
@@ -132,9 +124,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
 
 	if (!vars || !vars->current || !vars->current->arg_quote_type
 		|| !vars->current->arg_quote_type[arg_idx] || !expanded_val)
-	{
 		return (0);
-	}
 	old_types = vars->current->arg_quote_type[arg_idx];
 	old_len = 0;
 	while (old_types[old_len] != -1)
@@ -143,9 +133,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *expanded_val)
 	total_len = old_len + expanded_len;
 	new_types = malloc(sizeof(int) * (total_len + 1));
 	if (!new_types)
-	{
 		return (0);
-	}
 	ft_memcpy(new_types, old_types, sizeof(int) * old_len);
 	i = 0;
 	while (i < expanded_len)

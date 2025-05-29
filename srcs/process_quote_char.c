@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:54:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:06:32 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,8 @@ int	process_quote_char(char *input, t_vars *vars, int is_redir_target)
 	if (vars->adj_state[0])
 	{
 		redir_node = find_last_redir(vars);
-		if (redir_node && redir_node->right && redir_node->right->args && redir_node->right->args[0])
+		if (redir_node && redir_node->right && redir_node->right->args
+			&& redir_node->right->args[0])
 		{
 			existing = redir_node->right->args[0];
 			merged = ft_strjoin(existing, content);
@@ -206,28 +207,20 @@ int	process_quote_char(char *input, t_vars *vars, int is_redir_target)
 	}
 	cmd_node = process_quoted_str(&content, quote_type, vars);
 	if (!cmd_node && vars->adj_state[0] == 0)
-	{
 		return (make_quoted_cmd(content, input, vars));
-	}
 	else if (!cmd_node)
 	{
 		if (!merge_quoted_token(input, content, vars))
-		{
 			return (token_cleanup_error(content, vars));
-		}
 		return (1);
 	}
 	if (!merge_quoted_token(input, content, vars))
 	{
 		append_arg(cmd_node, content, quote_type);
 		if (vars->adj_state[1] && content && *content != '\0')
-		{
 			cleanup_and_process_adj(content, input, vars);
-		}
 		else
-		{
 			free(content);
-		}
 	}
 	return (1);
 }
@@ -250,7 +243,6 @@ int	validate_redir_targets(t_vars *vars)
 	{
 		if (is_redirection(current->type))
 		{
-			// Check if redirection has a filename
 			if (!current->args || !current->args[0])
 			{
 				tok_syntax_error_msg("newline", vars);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:56:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:33:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,37 +135,27 @@ t_node	*get_next_redir(t_node *current, t_node *cmd)
 Handles creation of a redirection token and its filename.
 Creates the redirection node and extracts the filename.
 */
-int handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
+int	handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type)
 {
 	char	*redir_str;
 	t_node	*redir_node;
 	int		moves;
 
-	// Create the redirection token string
 	moves = (type == TYPE_HEREDOC || type == TYPE_APPEND_REDIRECT) ? 2 : 1;
 	redir_str = ft_substr(input, *i, moves);
 	if (!redir_str)
-	{
 		return (0);
-	}
-	// Initialize the redirection node
 	redir_node = initnode(type, redir_str);
-	free(redir_str); // Safe to free after initnode copies it
+	free(redir_str);
 	if (!redir_node)
-	{
 		return (0);
-	}
-	// Move past the redirection operator
 	*i += moves;
-	// Process the filename
 	if (!process_redir_filename(input, i, redir_node))
 	{
 		free_token_node(redir_node);
 		return (0);
 	}
-	// Add the node to the token list
 	build_token_linklist(vars, redir_node);
-	// Update vars for next token
 	vars->start = *i;
 	return (1);
 }
@@ -183,65 +173,45 @@ int	process_redir_filename(char *input, int *i, t_node *redir_node)
 
 	in_quotes = 0;
 	quote_type = 0;
-	// Skip whitespace
 	while (input[*i] && ft_isspace(input[*i]))
 	{
 		(*i)++;
 	}
-	// Check if we have a filename
 	if (!input[*i])
-		return (1); // This will be caught later as a syntax error
+		return (1);
 	start = *i;
-	// Check if filename starts with a quote
 	if (input[*i] == '"' || input[*i] == '\'')
 	{
 		quote_type = input[*i];
 		in_quotes = 1;
-		(*i)++; // Skip the opening quote
+		(*i)++;
 	}
-	// Extract until end of filename
 	while (input[*i])
 	{
 		if (in_quotes)
 		{
-			// If in quotes, extract until closing quote
 			if (input[*i] == quote_type)
 			{
-				(*i)++; // Skip the closing quote
+				(*i)++;
 				break ;
 			}
 		}
-		else 
+		else
 		{
-			// If not in quotes, extract until whitespace or operator
-			if (ft_isspace(input[*i]) || 
-				is_operator_token(get_token_at(input, *i, &(int){0})))
-			{
+			if (ft_isspace(input[*i])
+				|| is_operator_token(get_token_at(input, *i, &(int){0})))
 				break ;
-			}
 		}
 		(*i)++;
 	}
-	// Extract the complete filename
 	if (in_quotes)
-	{
-		// For quoted filenames, extract without the quotes
 		filename = ft_substr(input, start + 1, *i - start - 2);
-	}
 	else
-	{
-		// For non-quoted filenames, extract normally
 		filename = ft_substr(input, start, *i - start);
-	}
 	if (!filename)
-	{
 		return (0);
-	}
-	// Store filename directly in args[0]
 	if (redir_node->args[0])
-	{
 		free(redir_node->args[0]);
-	}
 	redir_node->args[0] = filename;
 	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/26 02:07:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:41:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,11 +47,9 @@ void	handle_right_adj(char *input, t_vars *vars)
 
 	if (vars->pos <= vars->start)
 		return ;
-
 	adjacent_text = ft_substr(input, vars->start, vars->pos - vars->start);
 	if (!adjacent_text)
 		return ;
-
 	if (!vars->current || !vars->current->args || !vars->current->args[0])
 	{
 		last = vars->head;
@@ -61,7 +59,6 @@ void	handle_right_adj(char *input, t_vars *vars)
 				last = last->next;
 			vars->current = last;
 		}
-
 		if (!vars->current || !vars->current->args || !vars->current->args[0])
 		{
 			free(adjacent_text);
@@ -76,12 +73,10 @@ void	handle_right_adj(char *input, t_vars *vars)
 	{
 		free(vars->current->args[arg_idx]);
 		vars->current->args[arg_idx] = joined;
-		if (vars->current->arg_quote_type && vars->current->arg_quote_type[arg_idx])
-		{
+		if (vars->current->arg_quote_type
+			&& vars->current->arg_quote_type[arg_idx])
 			update_quote_types(vars, arg_idx, adjacent_text);
-		}
 	}
-
 	free(adjacent_text);
 }
 

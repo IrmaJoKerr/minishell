@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:57:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:45:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,9 @@ void	tokenize_quote(char *input, t_vars *vars)
 	handle_text(input, vars);
 	saved_pos = vars->pos;
 	if (process_quote_char(input, vars, is_redir_target))
-	{
 		vars->next_flag = 1;
-	}
 	else
-	{
 		vars->pos = saved_pos;
-	}
 }
 
 /*

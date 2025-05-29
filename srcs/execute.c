@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 23:27:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,56 +57,30 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	t_node	*cmd_node;
 	int		is_pipeline_context;
 
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Starting redirection execution for node type=%s\n", 
-			get_token_str(node->type));
-
 	if (!node->left)
-	{
-		fprintf(stderr, "DEBUG-EXEC-REDIR: Missing left node, returning error\n");
 		return (1);
-	}
 
 	cmd_node = node->left;
 	is_pipeline_context = vars->pipes->in_pipe;
-	
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Found command node: '%s' (pipeline_context=%d)\n",
-			cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL", is_pipeline_context);
 
 	// Save original file descriptors
 	vars->pipes->saved_stdin = dup(STDIN_FILENO);
 	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
-	
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Saved stdin=%d, stdout=%d\n",
-			vars->pipes->saved_stdin, vars->pipes->saved_stdout);
 
 	// Process redirection chain - check the return value
-	fprintf(stderr, "DEBUG-EXEC-REDIR: About to process redirection chain\n");
-	
 	if (!proc_redir_chain(node, cmd_node, vars))
 	{
-		fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection failed, cleaning up and returning error_code=%d\n",
-				vars->error_code);
-		fprintf(stderr, "DEBUG-EXEC-REDIR-FIX: NOT executing command due to redirection failure\n");
 		reset_redirect_fds(vars);
 		reset_terminal_after_heredoc();
-		
 		// NEW: In pipeline context with input errors, exit with 0 to let pipeline continue
 		if (is_pipeline_context && vars->error_code == 1)  // Likely input redirection error
 		{
-			fprintf(stderr, "DEBUG-EXEC-REDIR-FIX: Pipeline context - exiting with 0 for input redirection error\n");
 			return (0);  // Let pipeline continue
 		}
-		
 		return (vars->error_code != 0 ? vars->error_code : 1);
 	}
-	
 	// Only execute command if proc_redir_chain succeeded
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Redirection successful, executing command '%s'\n",
-			cmd_node && cmd_node->args ? cmd_node->args[0] : "NULL");
 	result = execute_cmd(cmd_node, envp, vars);
-	
-	fprintf(stderr, "DEBUG-EXEC-REDIR: Command execution completed with result=%d\n", result);
-
 	// Clean up
 	reset_redirect_fds(vars);
 	reset_terminal_after_heredoc();

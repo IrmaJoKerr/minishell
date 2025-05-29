@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 04:55:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:34:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ prompt when Ctrl+C is pressed.
 // {
 //     (void)sig;
 //     write(1, "\n", 1);
-    
+	
 //     if (g_signal_received == -1)  // Currently in heredoc
 //     {
 //         g_signal_received = -2;   // Mark as interrupted in heredoc
@@ -81,7 +81,7 @@ prompt when Ctrl+C is pressed.
 //         rl_redisplay();           // This should cause readline to return
 //         return;
 //     }
-    
+	
 //     g_signal_received = 2;  // Standard SIGINT
 //     rl_on_new_line();
 //     rl_replace_line("", 0);
@@ -92,7 +92,7 @@ prompt when Ctrl+C is pressed.
 // 	(void)sig;
 //     write(2, "DEBUG: SIGINT received\n", 23);
 //     write(1, "\n", 1);
-    
+	
 //     if (g_signal_received == -1)
 //     {
 //         write(2, "DEBUG: In heredoc mode\n", 23);
@@ -103,34 +103,25 @@ prompt when Ctrl+C is pressed.
 //         rl_redisplay();
 //         return;
 //     }
-    
+	
 //     write(2, "DEBUG: In normal mode\n", 22);
 //     g_signal_received = 2;
 //       rl_on_new_line();
 //     rl_replace_line("", 0);
 //     rl_redisplay();
 // }
-void sigint_handler(int sig)
+void	sigint_handler(int sig)
 {
-    (void)sig;
-	write(2, "DEBUG: SIGINT received\n", 23);
-    write(1, "\n", 1);
-    
-    // Set appropriate flag based on context without ternary
-    if (g_signal_received == -1)
-    {
-        g_signal_received = -2;  // In heredoc mode
-    }
-    else
-    {
-        g_signal_received = 2;   // In normal mode
-    }
-    
-    // Always perform these operations to help readline respond
-    rl_on_new_line();
-    rl_replace_line("", 0);
-    rl_redisplay();
+	(void)sig;
+	if (g_signal_received == -1)
+		g_signal_received = -2;
+	else
+		g_signal_received = 2;
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
+
 /*
 Handles Ctrl+\ (SIGQUIT) signal in interactive shell.
 - Uses readline utilities to:

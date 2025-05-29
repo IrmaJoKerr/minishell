@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:32:03 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:08:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,3 +30,5 @@ char	*empty_var(char *var_name)
 	else
 		return (NULL);
 }
+
+// No debug print statements or debug-related variables found in this file. No changes needed.

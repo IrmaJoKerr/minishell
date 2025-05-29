@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:06:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 07:42:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,28 +146,10 @@ Frees any previously stored delimiter.
 // }
 void store_cln_delim(t_vars *vars, char *clean_delim, int quoted)
 {
-    fprintf(stderr, "DEBUG-HEREDOC-DELIM: Storing delimiter '%s' (quoted: %d)\n", 
-            clean_delim, quoted);
-            
     if (vars->pipes->heredoc_delim)
-    {
-        fprintf(stderr, "DEBUG-HEREDOC-DELIM: Replacing old delimiter '%s'\n", 
-                vars->pipes->heredoc_delim);
         free(vars->pipes->heredoc_delim);
-    }
-    
     vars->pipes->heredoc_delim = clean_delim;
     vars->pipes->hd_expand = !quoted;
-    
-    fprintf(stderr, "DEBUG-HEREDOC-DELIM: New delimiter set to '%s', expansion: %s\n", 
-            clean_delim, !quoted ? "ON" : "OFF");
-    
-    // Print special characters in delimiter for debugging
-    fprintf(stderr, "DEBUG-HEREDOC-DELIM: Hex dump of delimiter: ");
-    for (int i = 0; clean_delim[i]; i++) {
-        fprintf(stderr, "%02x ", (unsigned char)clean_delim[i]);
-    }
-    fprintf(stderr, "\n");
 }
 
 /*

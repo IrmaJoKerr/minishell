@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:30:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 06:42:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:23:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,6 @@ int	write_to_hd(int fd, char *line, t_vars *vars)
 	expanded_line = prepare_hd_line(line, vars);
 	if (!expanded_line)
 		return (0);
-	debug_heredoc_content(expanded_line, ft_strlen(expanded_line)); //DEBUG
 	write_result = write(fd, expanded_line, ft_strlen(expanded_line));
 	if (write_result != -1)
 		write(fd, "\n", 1);

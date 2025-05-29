@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:54:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:15:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,7 @@ t_node	*find_last_redir(t_vars *vars)
 
 	last_redir = NULL;
 	if (vars->current && is_redirection(vars->current->type))
-	{
 		return (vars->current);
-	}
 	current = vars->current;
 	i = 0;
 	while (current && current->prev && i < 3)
@@ -70,9 +68,7 @@ t_node	*find_last_redir(t_vars *vars)
 		current = current->prev;
 		i++;
 		if (is_redirection(current->type))
-		{
 			return (current);
-		}
 	}
 	current = vars->head;
 	while (current)
@@ -95,7 +91,8 @@ Returns:
 */
 int	validate_single_redir(t_node *redir_node, t_vars *vars)
 {
-	// Check if redirection has a filename
+	t_node	*next;
+
 	if (!redir_node->args || !redir_node->args[0])
 	{
 		tok_syntax_error_msg("newline", vars);
@@ -103,7 +100,7 @@ int	validate_single_redir(t_node *redir_node, t_vars *vars)
 	}
 	// Check if next token is a pipe (invalid syntax)
 	// Note: We allow another redirection to follow this one
-	t_node *next = redir_node->next;
+	next = redir_node->next;
 	if (next && next->type == TYPE_PIPE)
 	{
 		if (next->args && next->args[0])

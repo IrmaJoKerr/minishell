@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 05:54:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:23:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -632,7 +632,6 @@ In maketoken.c
 */
 void		maketoken(char *token, t_tokentype type, t_vars *vars);
 int			build_token_linklist(t_vars *vars, t_node *node);
-void		token_link(t_node *node, t_vars *vars);
 int			merge_arg_with_cmd(t_vars *vars, t_node *arg_node);
 void		free_if_orphan_node(t_node *node, t_vars *vars);
 
@@ -660,7 +659,7 @@ int			handle_interactive_hd(int fd, int found_in_buf, t_vars *vars);
 Multiline validation functions.
 In multiline_validation.c
 */
-int			tokenize_first_line(char *input, char *nl_ptr, t_vars *vars);
+int			tok_first_line(char *input, char *nl_ptr, t_vars *vars);
 int			chk_hd_tail(char *line_start, char *raw_delim_ptr, char *delim,
 				t_vars *vars);
 char		*chk_raw_delim(char *line_start, int len, char *delim_arg,
@@ -776,7 +775,7 @@ void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
 void		track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
 void		link_in_out_redirs(t_vars *vars);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
+// void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 
 /*
 Redirection processing utility functions.
@@ -784,7 +783,7 @@ In process_redirect_utils.c
 */
 void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
-void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
+// void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
 t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node,
 				t_vars *vars);
 int			handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type);

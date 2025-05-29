@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 23:13:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,21 +57,16 @@ int setup_redirection(t_node *node, t_vars *vars)
 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
 	if (!cmd_node && (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT))
 	{
-		fprintf(stderr, "DEBUG-SETUP-REDIR: Processing orphaned output redirection: %s\n", 
-				node->args ? node->args[0] : "NULL");
-				
 		// Set mode based on redirection type
 		vars->pipes->out_mode = (node->type == TYPE_APPEND_REDIRECT) ? 
-							   OUT_MODE_APPEND : OUT_MODE_TRUNCATE;
-		
+					   OUT_MODE_APPEND : OUT_MODE_TRUNCATE;
 		// Just create the file
 		if (node->args && node->args[0])
 		{
 			char *filename = node->args[0];
 			int flags = (vars->pipes->out_mode == OUT_MODE_APPEND) ? 
-					   (O_WRONLY | O_CREAT | O_APPEND) : 
-					   (O_WRONLY | O_CREAT | O_TRUNC);
-			
+				   (O_WRONLY | O_CREAT | O_APPEND) : 
+				   (O_WRONLY | O_CREAT | O_TRUNC);
 			// Open the file, just to create it
 			int fd = open(filename, flags, 0644);
 			if (fd >= 0)
@@ -84,7 +79,6 @@ int setup_redirection(t_node *node, t_vars *vars)
 		}
 		return 1; // Continue processing
 	}
-	
 	// Standard redirection handling for redirections with commands
 	if (!cmd_node)
 	{

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 22:09:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:23:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,37 +178,26 @@ Checks if input file exists and has correct permissions.
 */
 int check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
 {
-	fprintf(stderr, "DEBUG-INPUT-ACCESS: Checking access to file '%s'\n", file);
-	
 	if (access(file, F_OK) == -1)
 	{
-		fprintf(stderr, "DEBUG-INPUT-ACCESS: File '%s' does not exist\n", file);
 		not_found_error(file, vars);
 		return handle_missing_input(vars); // Let handle_missing_input decide what to do
 	}
-	
 	if (stat(file, file_stat) == -1)
 	{
-		fprintf(stderr, "DEBUG-INPUT-ACCESS: stat() failed for file '%s'\n", file);
 		shell_error(file, ERR_DEFAULT, vars);
 		return 0;
 	}
-	
 	if (S_ISDIR(file_stat->st_mode))
 	{
-		fprintf(stderr, "DEBUG-INPUT-ACCESS: File '%s' is a directory\n", file);
 		shell_error(file, ERR_ISDIRECTORY, vars);
 		return 0;
 	}
-	
 	if (access(file, R_OK) == -1)
 	{
-		fprintf(stderr, "DEBUG-INPUT-ACCESS: No read permission for file '%s'\n", file);
 		shell_error(file, ERR_PERMISSIONS, vars);
 		return 0;
 	}
-	
-	fprintf(stderr, "DEBUG-INPUT-ACCESS: File '%s' is accessible\n", file);
 	return 1;
 }
 
@@ -220,45 +209,30 @@ int handle_missing_input(t_vars *vars)
 {
 	int null_fd;
 	int is_pipeline_context;
-	
 	is_pipeline_context = (vars->pipes && vars->pipes->pipe_root != NULL);
-	
-	fprintf(stderr, "DEBUG-MISSING-INPUT: Handling missing input file (pipeline_context=%d)\n", 
-			is_pipeline_context);
-	
 	if (is_pipeline_context)
 	{
-		// In pipeline context, redirect stdin from /dev/null instead of failing
-		fprintf(stderr, "DEBUG-MISSING-INPUT: Pipeline context - redirecting from /dev/null\n");
 		null_fd = open("/dev/null", O_RDONLY);
 		if (null_fd == -1)
 		{
-			fprintf(stderr, "DEBUG-MISSING-INPUT: Failed to open /dev/null\n");
 			vars->error_code = ERR_DEFAULT;
 			return 0;
 		}
-		
 		if (dup2(null_fd, STDIN_FILENO) == -1)
 		{
-			fprintf(stderr, "DEBUG-MISSING-INPUT: Failed to dup2 /dev/null to stdin\n");
 			close(null_fd);
 			vars->error_code = ERR_DEFAULT;
 			return 0;
 		}
-		
 		close(null_fd);
-		fprintf(stderr, "DEBUG-MISSING-INPUT: Successfully redirected stdin from /dev/null\n");
 		return 1; // Continue execution
 	}
 	else
 	{
-		// Non-pipeline context - fail as before
-		fprintf(stderr, "DEBUG-MISSING-INPUT: Non-pipeline context - failing execution\n");
 		vars->error_code = ERR_DEFAULT;
 		return 0;
 	}
 }
-
 
 /*
 Processes a chain of redirections for a command node.
@@ -277,62 +251,32 @@ int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
 	int prev_result = 0;
 	int result;
 	int chain_length = 0;
-	
-	fprintf(stderr, "DEBUG-FIX-CHAIN: Starting redirection chain processing\n");
-	fprintf(stderr, "DEBUG-FIX-CHAIN: Start node: %s '%s'\n", 
-			get_token_str(start_node->type),
-			start_node->args ? start_node->args[0] : "NULL");
-	fprintf(stderr, "DEBUG-FIX-CHAIN: Command: '%s'\n",
-			cmd_node->args ? cmd_node->args[0] : "NULL");
-	
+	(void)cmd_node; // Mark as unused to silence -Wunused-parameter
+
 	current = start_node;
-	
+
 	while (current) {
 		// CRITICAL FIX #4: Better cycle detection with previous pointer tracking
 		if (current == prev_node) {
-			fprintf(stderr, "DEBUG-FIX-CHAIN: Self-reference cycle detected!\n");
 			return 0;
 		}
-		
-		// Process the redirection
-		fprintf(stderr, "DEBUG-FIX-CHAIN: Processing redirection %s '%s'\n",
-				get_token_str(current->type),
-				current->args ? current->args[0] : "NULL");
-		
 		// CRITICAL FIX #5: Process quoted filenames correctly
 		if (current->args && current->args[0]) {
-			fprintf(stderr, "DEBUG-FIX-CHAIN: Before stripping quotes: '%s'\n", 
-					current->args[0]);
 			strip_outer_quotes(&current->args[0], vars);
-			fprintf(stderr, "DEBUG-FIX-CHAIN: After stripping quotes: '%s'\n", 
-					current->args[0]);
 		}
-		
 		result = setup_redirection(current, vars);
-		
 		if (!result) {
-			fprintf(stderr, "DEBUG-FIX-CHAIN: Redirection failed for '%s'\n",
-					current->args ? current->args[0] : "NULL");
 			return 0;
 		}
-		
 		prev_result = result;
-		
 		// Save current before advancing
 		prev_node = current;
-		
 		// CRITICAL FIX #6: Use next_redir field for chain traversal
 		current = current->next_redir;
-		fprintf(stderr, "DEBUG-FIX-CHAIN: Moving to next redirection: %s\n",
-				current ? (current->args ? current->args[0] : "NULL") : "END");
-		
 		// Hard limit on chain length as a fallback
 		if (++chain_length > 20) {
-			fprintf(stderr, "DEBUG-FIX-CHAIN: Chain too long, possible cycle\n");
 			return 0;
 		}
 	}
-	
-	fprintf(stderr, "DEBUG-FIX-CHAIN: Chain processing completed successfully\n");
 	return prev_result;
 }

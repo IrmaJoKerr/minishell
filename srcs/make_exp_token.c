@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:39:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,9 +170,7 @@ int	make_exp_token(char *input, t_vars *vars)
 	vars->start = vars->pos;
 	check_token_adj(input, vars);
 	if (!get_var_token(input, vars, &token, &var_name))
-	{
 		return (0);
-	}
 	expanded_val = expand_variable(NULL, NULL, var_name, vars);
 	free(var_name);
 	if (!expanded_val)

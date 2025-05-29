@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:32:42 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:26:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:12:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Returns:
 - 1 on successful tokenization (syntax check separate).
 - 0 on failure.
 */
-int	tokenize_first_line(char *input, char *nl_ptr, t_vars *vars)
+int	tok_first_line(char *input, char *nl_ptr, t_vars *vars)
 {
 	int		result;
 	char	original_char;

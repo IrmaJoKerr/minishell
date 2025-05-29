@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:12:20 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:34:14 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:12:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int	proc_first_line(char *input, char *first_line_end, t_vars *vars)
 	int	status;
 
 	reset_shell(vars);
-	status = tokenize_first_line(input, first_line_end, vars);
+	status = tok_first_line(input, first_line_end, vars);
 	if (!status || vars->error_code == ERR_SYNTAX)
 		return (0);
 	return (1);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 06:41:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 08:11:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,6 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 
 	if (!node || !new_arg || !node->args)
 		return ;
-	debug_args_before_after(node, new_arg, 0); //DEBUG
 	len = ft_arrlen(node->args);
 	new_args = dup_node_args(node, len);
 	if (!new_args)

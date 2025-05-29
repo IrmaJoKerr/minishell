@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 09:38:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,9 +122,7 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 
 	tmp = ft_strjoin("OLDPWD=", oldpwd);
 	if (!tmp)
-	{
 		return (1);
-	}
 	modify_env(&vars->env, 1, tmp);
 	free(tmp);
 	result = getcwd(cwd, sizeof(cwd));
@@ -135,9 +133,7 @@ int	update_env_pwd(t_vars *vars, char *oldpwd)
 	}
 	tmp = ft_strjoin("PWD=", cwd);
 	if (!tmp)
-	{
 		return (1);
-	}
 	modify_env(&vars->env, 1, tmp);
 	free(tmp);
 	return (0);
