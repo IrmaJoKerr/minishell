@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:59:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ char	*complete_pipe_cmd(char *command, t_vars *vars)
 
 /*
 Check for unfinished pipes in input and handle them.
+Runs recursively to handle multiple unfinished pipes.
 Prompts for additional input as needed.
 Returns:
 - 1 if pipes were handled and modifications were made

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:50:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:41:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,6 @@ int	tokenizer(char *input, t_vars *vars)
 	int	hd_is_delim;
 	int	result;
 
-	if (!input || !*input)
-		return (0);
 	init_tokenizer(vars);
 	hd_is_delim = 0;
 	while (input && input[vars->pos])
@@ -64,10 +62,8 @@ int	tokenizer(char *input, t_vars *vars)
 				continue ;
 		}
 		else
-		{
 			if (!handle_token(input, vars, &hd_is_delim))
 				return (0);
-		}
 		if (chk_move_pos(vars, hd_is_delim))
 			continue ;
 	}
@@ -76,6 +72,10 @@ int	tokenizer(char *input, t_vars *vars)
 	return (result);
 }
 
+/*
+Appends a TYPE_NULL sentinel token to the end of the token linked list.
+The function updates the list's 'current' pointer to this new null token.
+*/
 void	add_null_token_stop(t_vars *vars)
 {
 	t_node	*null_node;

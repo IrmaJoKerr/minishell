@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 22:00:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:49:17 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,15 @@ This function integrates redirections with pipe structures.
 - Replaces the command node reference with the redirection node.
 - Uses double pointer to modify the original node reference.
 */
-void link_redir_to_cmd_node(t_node **node_ptr, t_vars *vars)
+void	link_redir_to_cmd_node(t_node **node_ptr, t_vars *vars)
 {
-	t_node *redir_node;
+	t_node	*redir_node;
 
 	if (*node_ptr && (*node_ptr)->type == TYPE_CMD)
 	{
-		// With the new approach, redir_node should already be linked
-		// to the command through the redir field
-		redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr, vars);
+		redir_node = find_cmd_redir(vars->pipes->redir_root, *node_ptr);
 		if (redir_node)
 		{
-			// Redirection is already assigned in make_cmd_redir_chain
-			// This is just for compatibility with existing code
 			(*node_ptr)->redir = redir_node;
 		}
 	}

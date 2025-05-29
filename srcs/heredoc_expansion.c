@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:30:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:23:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:00:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ char	*hd_expander(char *line, t_vars *vars)
 		if (line[pos] == '$')
 		{
 			segment = expand_hd_var(line, &pos, vars);
-			result = merge_and_free(result, segment);
+			result = hd_merge_and_free(result, segment);
 		}
 		else
 		{
 			segment = read_hd_str(line, &pos);
-			result = merge_and_free(result, segment);
+			result = hd_merge_and_free(result, segment);
 		}
 		free(segment);
 	}

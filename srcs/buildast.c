@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:11:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 14:45:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,59 +210,65 @@ Example: For "cat file.txt > output.txt | grep pattern":
 - Skips "output.txt" (redirection target).
 - Links "pattern" to "grep" command node.
 */
-// void	chk_args_match_cmd(t_vars *vars)
-// {
-// 	t_node	*current;
-// 	t_node	*node;
-
-// 	node = NULL;
-// 	if (!vars || !vars->head)
-// 		return ;
-// 	current = vars->head;
-// 	while (current)
-// 	{
-// 		if (current->type == TYPE_CMD)
-// 		{
-// 			node = current;
-// 		}
-// 		else if (current->type == TYPE_ARGS && node
-// 			&& !is_redirection_target(current, vars))
-// 			append_arg(node, current->args[0], 0);
-// 		else if (current->type == TYPE_PIPE)
-// 			node = NULL;
-// 		current = current->next;
-// 	}
-// }
-void chk_args_match_cmd(t_vars *vars)
+void	chk_args_match_cmd(t_vars *vars)
 {
-    t_node *current;
-    t_node *node;
-    int is_target;
+	t_node	*current;
+	t_node	*node;
+	int		is_target;
+	int		is_heredoc;
 
-    node = NULL;
-    if (!vars || !vars->head)
-        return;
-    current = vars->head;
-    while (current)
-    {
-        if (current->type == TYPE_CMD)
-        {
-            node = current;
-        }
-        else if (current->type == TYPE_ARGS && node)
-        {
-            is_target = is_redirection_target(current, vars);
-            if (!is_target)
-            {
-                append_arg(node, current->args[0], 0);
-            }
-        }
-        else if (current->type == TYPE_PIPE)
-        {
-            node = NULL;
-        }
-        current = current->next;
-    }
+	node = NULL;
+	if (!vars || !vars->head)
+		return ;
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_CMD)
+			node = current;
+		else if (current->type == TYPE_ARGS && node)
+		{
+			is_target = is_redirection_target(current, vars);
+			is_heredoc = is_heredoc_target(current, vars);
+			if (!is_target && !is_heredoc)
+				append_arg(node, current->args[0], 0);
+		}
+		else if (current->type == TYPE_PIPE)
+			node = NULL;
+		current = current->next;
+	}
+}
+
+/*
+Checks if a node is the target of a heredoc redirection.
+- Identifies both direct targets (node follows heredoc)
+- Identifies delimiter nodes matching heredoc_delim
+
+Returns:
+- 1 if node is a heredoc target (don't append to command)
+- 0 if not a heredoc target (can append to command)
+*/
+int	is_heredoc_target(t_node *node, t_vars *vars)
+{
+	t_node	*current;
+
+	current = vars->head;
+	while (current)
+	{
+		if (current->type == TYPE_HEREDOC)
+		{
+			if (current->next == node)
+				return (1);
+			if (vars->pipes && vars->pipes->heredoc_delim)
+			{
+				if (node->args && node->args[0]
+					&& ft_strcmp(node->args[0]
+						, vars->pipes->heredoc_delim) == 0)
+					return (1);
+			}
+		}
+		current = current->next;
+	}
+	return (0);
 }
 
 /*
@@ -283,79 +289,31 @@ Returns:
 - 0 if node is NOT a redirection target (Ok to append to command).
 - 1 if node IS a redirection target (Don't append to command).
 */
-// int	is_redirection_target(t_node *node, t_vars *vars)
-// {
-// 	t_node	*current;
-
-// 	current = vars->head;
-// 	while (current)
-// 	{
-// 		if (is_redirection(current->type))
-// 		{
-// 			if (current->next == node)
-// 			{
-// 				if (current->args && current->args[0])
-// 					return (0);
-// 				else
-// 					return (1);
-// 			}
-// 		}
-// 		current = current->next;
-// 	}
-// 	return (0);
-// }
-int is_redirection_target(t_node *node, t_vars *vars)
+int	is_redirection_target(t_node *node, t_vars *vars)
 {
-    t_node *current;
-    int result = 0;
+	t_node	*current;
+	int		result;
 
-    current = vars->head;
-    while (current)
-    {
-        if (is_redirection(current->type))
-        {
-            // Special handling for heredoc
-            if (current->type == TYPE_HEREDOC)
-            {
-                // Check if node is directly after heredoc operator
-                if (current->next == node)
-                {
-                    return 1; // This is a heredoc delimiter
-                }
-                // Check stored delimiter
-                if (vars->pipes && vars->pipes->heredoc_delim)
-                {
-                    if (node->args && node->args[0] && 
-                        ft_strcmp(node->args[0], vars->pipes->heredoc_delim) == 0)
-                    {
-                        result = 1;
-                        break;
-                    }
-                }
-            }
-            if (current->next == node)
-            {
-                // FIXED: Special handling for heredoc - it always has "<<" in args[0] but this
-                // is the operator, not an embedded filename
-                if (current->type == TYPE_HEREDOC) 
-                {
-                    result = 1;
-                }
-                else if (current->args && current->args[0] && 
-                        ft_strcmp(current->args[0], get_token_str(current->type)) != 0)
-                {
-                    result = 0;
-                }
-                else
-                {
-                    result = 1;
-                }
-                break;
-            }
-        }
-        current = current->next;
-    }
-    return (result);
+	result = 0;
+	current = vars->head;
+	while (current)
+	{
+		if (is_redirection(current->type) && current->type != TYPE_HEREDOC)
+		{
+			if (current->next == node)
+			{
+				if (current->args && current->args[0]
+					&& ft_strcmp(current->args[0]
+						, get_token_str(current->type)) != 0)
+					result = 0;
+				else
+					result = 1;
+				break ;
+			}
+		}
+		current = current->next;
+	}
+	return (result);
 }
 
 /*
@@ -378,12 +336,11 @@ Returns:
 
 Works with ast_builder() for complete AST construction.
 */
-t_node *proc_ast_redir(t_vars *vars)
+t_node	*proc_ast_redir(t_vars *vars)
 {
 	if (!vars || !vars->head)
 		return (NULL);
 	reset_redir_tracking(vars->pipes);
-	find_cmd(NULL, NULL, FIND_ALL, vars);
 	pre_ast_redir_proc(vars);
 	if (vars->pipes && vars->pipes->pipe_root && vars->pipes->redir_root)
 	{

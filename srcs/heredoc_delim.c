@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:52:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:19:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:32:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,7 @@ int	is_valid_delim(char *orig_delim, t_vars *vars)
 	if (!processed)
 	{
 		if (!clean_delim && vars->error_code != ERR_SYNTAX)
-		{
 			vars->error_code = ERR_DEFAULT;
-		}
 		return (0);
 	}
 	store_cln_delim(vars, clean_delim, quoted);
@@ -122,24 +120,6 @@ Returns:
 - 0 if processed normally.
 - -1 on error.
 */
-// int	proc_hd_line(int write_fd, char *line, t_vars *vars)
-// {
-// 	size_t	delim_len;
-// 	int		result;
-
-// 	delim_len = ft_strlen(vars->pipes->heredoc_delim);
-// 	if (ft_strncmp(line, vars->pipes->heredoc_delim, delim_len) == 0
-// 		&& line[delim_len] == '\0')
-// 	{
-// 		free(line);
-// 		return (1);
-// 	}
-// 	result = write_to_hd(write_fd, line, vars);
-// 	free(line);
-// 	if (!result)
-// 		return (-1);
-// 	return (0);
-// }
 int	proc_hd_line(int write_fd, char *line, t_vars *vars)
 {
 	size_t	delim_len;

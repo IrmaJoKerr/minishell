@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:39:34 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:23:42 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 16:46:16 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,39 +176,40 @@ int	setup_heredoc_redir(t_node *node, t_vars *vars)
 /*
 Checks if input file exists and has correct permissions.
 */
-int check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
+int	check_input_file_access(char *file, struct stat *file_stat, t_vars *vars)
 {
 	if (access(file, F_OK) == -1)
 	{
 		not_found_error(file, vars);
-		return handle_missing_input(vars); // Let handle_missing_input decide what to do
+		return (handle_bad_infile(vars));
 	}
 	if (stat(file, file_stat) == -1)
 	{
 		shell_error(file, ERR_DEFAULT, vars);
-		return 0;
+		return (0);
 	}
 	if (S_ISDIR(file_stat->st_mode))
 	{
 		shell_error(file, ERR_ISDIRECTORY, vars);
-		return 0;
+		return (0);
 	}
 	if (access(file, R_OK) == -1)
 	{
 		shell_error(file, ERR_PERMISSIONS, vars);
-		return 0;
+		return (0);
 	}
-	return 1;
+	return (1);
 }
 
 /*
 Handles case when input file is missing or inaccessible.
 For pipe contexts, redirects stdin from /dev/null.
 */
-int handle_missing_input(t_vars *vars)
+int	handle_bad_infile(t_vars *vars)
 {
-	int null_fd;
-	int is_pipeline_context;
+	int	null_fd;
+	int	is_pipeline_context;
+
 	is_pipeline_context = (vars->pipes && vars->pipes->pipe_root != NULL);
 	if (is_pipeline_context)
 	{
@@ -216,21 +217,21 @@ int handle_missing_input(t_vars *vars)
 		if (null_fd == -1)
 		{
 			vars->error_code = ERR_DEFAULT;
-			return 0;
+			return (0);
 		}
 		if (dup2(null_fd, STDIN_FILENO) == -1)
 		{
 			close(null_fd);
 			vars->error_code = ERR_DEFAULT;
-			return 0;
+			return (0);
 		}
 		close(null_fd);
-		return 1; // Continue execution
+		return (1);
 	}
 	else
 	{
 		vars->error_code = ERR_DEFAULT;
-		return 0;
+		return (0);
 	}
 }
 
@@ -244,39 +245,25 @@ Returns:
 - 0 on failure (at least one redirection failed)
 Works with exec_redirect_cmd().
 */
-int proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars)
+int	proc_redir_chain(t_node *start_node, t_vars *vars)
 {
-	t_node *current;
-	t_node *prev_node = NULL;
-	int prev_result = 0;
-	int result;
-	int chain_length = 0;
-	(void)cmd_node; // Mark as unused to silence -Wunused-parameter
+	t_node	*current;
+	t_node	*prev_node;
+	int		prev_result;
+	int		result;
 
+	prev_node = NULL;
 	current = start_node;
-
-	while (current) {
-		// CRITICAL FIX #4: Better cycle detection with previous pointer tracking
-		if (current == prev_node) {
-			return 0;
-		}
-		// CRITICAL FIX #5: Process quoted filenames correctly
-		if (current->args && current->args[0]) {
-			strip_outer_quotes(&current->args[0], vars);
-		}
+	while (current)
+	{
+		if (current == prev_node)
+			return (0);
 		result = setup_redirection(current, vars);
-		if (!result) {
-			return 0;
-		}
+		if (!result)
+			return (0);
 		prev_result = result;
-		// Save current before advancing
 		prev_node = current;
-		// CRITICAL FIX #6: Use next_redir field for chain traversal
 		current = current->next_redir;
-		// Hard limit on chain length as a fallback
-		if (++chain_length > 20) {
-			return 0;
-		}
 	}
-	return prev_result;
+	return (prev_result);
 }

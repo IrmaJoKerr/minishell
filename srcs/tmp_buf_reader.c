@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 21:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:39:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:53:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	init_read_buf(t_read_buf *rb)
 	rb->pos = 0;
 	rb->in_quotes = 0;
 	rb->quote_type = 0;
-	rb->file_content = read_entire_file(TMP_BUF);
+	rb->file_content = read_tmp_buf_file(TMP_BUF);
 	if (!rb->file_content)
 		return (0);
 	rb->buffer = malloc(ft_strlen(rb->file_content) + 1);

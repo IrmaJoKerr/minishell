@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 16:46:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	vars->pipes->saved_stdout = dup(STDOUT_FILENO);
 
 	// Process redirection chain - check the return value
-	if (!proc_redir_chain(node, cmd_node, vars))
+	if (!proc_redir_chain(node, vars))
 	{
 		reset_redirect_fds(vars);
 		reset_terminal_after_heredoc();

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:08:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 13:07:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,9 @@ void	shell_error(char *element, int error_code, t_vars *vars)
 		ft_putendl_fd(": Is a directory", 2);
 	}
 	else if (error_code == ERR_SYNTAX)
-	{
 		ft_putendl_fd(element, 2);
-	}
 	if (vars)
-	{
 		vars->error_code = error_code;
-	}
 }
 
 /*
@@ -69,9 +65,7 @@ void	tok_syntax_error_msg(char *token_str, t_vars *vars)
 	ft_putstr_fd(token_str, 2);
 	ft_putendl_fd("'", 2);
 	if (vars)
-	{
 		vars->error_code = ERR_SYNTAX;
-	}
 }
 
 /*
@@ -102,9 +96,7 @@ void	crit_error(t_vars *vars)
 {
 	ft_putstr_fd("bleshell: critical error: initialization failed\n", 2);
 	if (vars && isatty(STDIN_FILENO) && vars->ori_term_saved)
-	{
 		tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
-	}
 	if (!vars)
 	{
 		exit(1);

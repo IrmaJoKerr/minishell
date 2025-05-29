@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:18:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 16:15:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,14 +50,14 @@ Works with exec_redirect_cmd().
 */
 int setup_redirection(t_node *node, t_vars *vars)
 {
-	t_node *cmd_node;
-	int result;
+	t_node	*cmd_node;
+	int		result;
 
 	vars->pipes->current_redirect = node;
 	cmd_node = find_cmd(vars->head, node, FIND_PREV, vars);
-	if (!cmd_node && (node->type == TYPE_OUT_REDIRECT || node->type == TYPE_APPEND_REDIRECT))
+	if (!cmd_node && (node->type == TYPE_OUT_REDIRECT
+		|| node->type == TYPE_APPEND_REDIRECT))
 	{
-		// Set mode based on redirection type
 		vars->pipes->out_mode = (node->type == TYPE_APPEND_REDIRECT) ? 
 					   OUT_MODE_APPEND : OUT_MODE_TRUNCATE;
 		// Just create the file
@@ -90,7 +90,7 @@ int setup_redirection(t_node *node, t_vars *vars)
 	{
 		vars->pipes->last_in_redir = node;
 	}
-	else if (node->type == TYPE_OUT_REDIRECT 
+	else if (node->type == TYPE_OUT_REDIRECT
 		|| node->type == TYPE_APPEND_REDIRECT)
 	{
 		vars->pipes->last_out_redir = node;
@@ -159,27 +159,4 @@ int	redir_mode_setup(t_node *node, t_vars *vars)
 	if (!result)
 		vars->error_code = ERR_DEFAULT;
 	return (result);
-}
-
-/*
-Terminates all active child processes in a pipeline.
-- Safely iterates through the PID array.
-- Sends SIGTERM to each valid child process.
-- Prevents orphaned processes during error conditions.
-Works with setup_in_redir() and other error handling paths.
-*/
-void	end_pipe_processes(t_vars *vars)
-{
-	int	i;
-
-	if (vars->pipes->pids)
-	{
-		i = 0;
-		while (i < vars->pipes->pipe_count)
-		{
-			if (vars->pipes->pids[i] > 0)
-				kill(vars->pipes->pids[i], SIGTERM);
-			i++;
-		}
-	}
 }

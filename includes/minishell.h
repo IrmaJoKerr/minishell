@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:23:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:00:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ HIST_LINE_SZ - Buffer size for reading each history line in bytes.
 # define HIST_MEM_MAX 50
 # define HIST_BUFFER_SZ 4096
 # define HIST_LINE_SZ 1024
+# define LPIPE 0
+# define RPIPE 1
 
 /*
 String representations of token types.
@@ -175,8 +177,7 @@ Has variables tracking:
 */
 typedef struct s_pipe
 {
-	int			pipe_count;
-	int			redir_count;
+	// int			pipe_count;
 	pid_t		*pids;
 	int			saved_stdin;
 	int			saved_stdout;
@@ -212,7 +213,7 @@ typedef struct s_vars
 	int				next_flag;
 	t_node			*cmd_nodes[100];
 	int				cmd_count;
-	t_quote_context	quote_ctx[32];
+	t_quote_context	quote_ctx[3];
 	int				quote_depth;
 	int				adj_state[3];
 	t_node			*find_start;
@@ -336,6 +337,7 @@ t_node		*ast_builder(t_vars *vars);
 t_node		*proc_ast_pipes(t_vars *vars);
 void		chk_args_match_cmd(t_vars *vars);
 // t_node		*find_node_in_list(t_node *head, t_node *target);
+int			is_heredoc_target(t_node *node, t_vars *vars);
 int			is_redirection_target(t_node *node, t_vars *vars);
 t_node		*proc_ast_redir(t_vars *vars);
 void		pre_ast_redir_proc(t_vars *vars);
@@ -399,14 +401,16 @@ void		handle_fd_error(int fd, t_vars *vars, const char *error_msg);
 Pipe execution functions.
 In execute_pipes.c
 */
-// void		exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
+int			scan_cmd_redirs(t_node *cmd_node, t_vars *vars);
+int			proc_first_redir(t_node *redir_node, t_vars *vars,
+				t_node **cmd_out);
+int			setup_pipe_cmd(t_node *node_in_pipe, t_vars *vars,
+				t_node **cmd_to_exec_out, int pipe_context);
 int			exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
-// void		exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
 int			exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
-int			fork_left_child(t_node *left_cmd, int pipe_fd[2], t_vars *vars,
-				pid_t *left_pid_ptr);
-int			init_pipe_exec(int pipe_fd[2], int *r_status_ptr,
-				int *l_status_ptr);
+pid_t		fork_left_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars);
+pid_t		fork_right_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars,
+				pid_t left_child_pid);
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
 
 /*
@@ -418,9 +422,10 @@ int			setup_input_redirection(char *file, t_vars *vars);
 int			setup_out_redir(t_node *node, t_vars *vars);
 int			setup_output_redirection(char *file, t_vars *vars);
 int			setup_heredoc_redir(t_node *node, t_vars *vars);
-int			check_input_file_access(char *file, struct stat *file_stat, t_vars *vars);
-int			handle_missing_input(t_vars *vars);
-int			proc_redir_chain(t_node *start_node, t_node *cmd_node, t_vars *vars);
+int			check_input_file_access(char *file, struct stat *file_stat,
+						t_vars *vars);
+int			handle_bad_infile(t_vars *vars);
+int			proc_redir_chain(t_node *start_node, t_vars *vars);
 
 /*
 Execution utility functions.
@@ -430,7 +435,6 @@ void		exec_child(char *cmd_path, char **args, char **envp);
 int			setup_redirection(t_node *node, t_vars *vars);
 int			proc_redir_target(t_node *node, t_vars *vars);
 int			redir_mode_setup(t_node *node, t_vars *vars);
-void		end_pipe_processes(t_vars *vars);
 
 /*
 Execution functions.
@@ -492,7 +496,7 @@ int			write_to_hd(int fd, char *line, t_vars *vars);
 Heredoc main handling utility functions.
 In heredoc_utils.c
 */
-char		*merge_and_free(char *str, char *chunk);
+char		*hd_merge_and_free(char *str, char *chunk);
 void		cleanup_heredoc_fd(int write_fd);
 
 /*
@@ -573,9 +577,9 @@ Input processing functions.
 In input_handlers.c
 */
 char		*allocate_and_read(int fd, size_t size);
-char		*read_entire_file(const char *filename);
+char		*read_tmp_buf_file(const char *filename);
 void		handle_input(char *input, t_vars *vars);
-int			check_trailing_chars(const char *line, int start_pos);
+// int			check_trailing_chars(const char *line, int start_pos);
 
 /*
 Lexer core functions.
@@ -771,11 +775,7 @@ Process redirection nodes functions.
 In process_redir_node.c
 */
 void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
-// void		link_prev_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
-void		track_redirs(t_node *redir_node, t_node *cmd, t_vars *vars);
-void		link_in_out_redirs(t_vars *vars);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-// void		upd_pipe_redir(t_node *pipe_root, t_node *cmd, t_node *redir);
 
 /*
 Redirection processing utility functions.
@@ -783,9 +783,7 @@ In process_redirect_utils.c
 */
 void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
-// void		set_redir_node(t_node *redir, t_node *cmd, t_node *target);
-t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node,
-				t_vars *vars);
+t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node);
 int			handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type);
 int			process_redir_filename(char *input, int *i, t_node *redir_node);
 /*

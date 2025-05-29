@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:17:51 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 18:00:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Example: str = "Hello", chunk = " World"
 - Returns: "Hello World"
 - Original "Hello" string is freed
 */
-char	*merge_and_free(char *str, char *chunk)
+char	*hd_merge_and_free(char *str, char *chunk)
 {
 	char	*new_str;
 

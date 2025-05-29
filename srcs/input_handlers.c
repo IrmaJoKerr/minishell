@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:28:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/29 17:58:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ Returns:
 - A newly allocated string containing the file contents,
 - NULL if an error occurred.
 */
-char	*read_entire_file(const char *filename)
+char	*read_tmp_buf_file(const char *filename)
 {
 	int			fd;
 	char		*content;
@@ -87,26 +87,4 @@ void	handle_input(char *input, t_vars *vars)
 		vars->pipes->heredoc_delim = NULL;
 	}
 	reset_redirect_fds(vars);
-}
-
-/*
-Checks for non-whitespace characters after a certain position on a line.
-Returns:
-- 1 if only whitespace/end-of-string found.
-- 0 if found something that's not whitespace and not the end. It's an error.
-*/
-int	check_trailing_chars(const char *line, int start_pos)
-{
-	int	i;
-
-	i = start_pos;
-	while (line[i] && ft_isspace(line[i]))
-	{
-		i++;
-	}
-	if (line[i] != '\0')
-	{
-		return (0);
-	}
-	return (1);
 }
