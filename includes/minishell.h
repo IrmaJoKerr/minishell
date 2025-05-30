@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 13:23:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 16:20:36 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,7 +331,6 @@ int			**resize_quotype_arr(t_node *node, char *new_arg, int quote_type,
 				char **new_args);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 
-
 /*
 AST Building utility functions.
 In buildast_utils.c
@@ -339,7 +338,6 @@ In buildast_utils.c
 void		chk_args_match_cmd(t_vars *vars);
 int			is_heredoc_target(t_node *node, t_vars *vars);
 int			is_redirection_target(t_node *node, t_vars *vars);
-int			proc_solo_redirs(t_vars *vars);
 
 /*
 AST token processing and AST tree building.
@@ -349,6 +347,7 @@ t_node		*ast_builder(t_vars *vars);
 t_node		*proc_ast_pipes(t_vars *vars);
 t_node		*proc_ast_redir(t_vars *vars);
 void		pre_ast_redir_proc(t_vars *vars);
+int			proc_solo_redirs(t_vars *vars);
 
 /*
 Builtin control handling.
@@ -523,7 +522,6 @@ int			process_hd_parent(pid_t child_pid, int child_status,
 int			get_interactive_hd(int write_fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
-
 
 /*
 History loading functions.
@@ -735,7 +733,6 @@ char		*search_in_env(char *cmd, char **envp, t_vars *vars);
 char		*handle_direct_path(char *cmd, t_vars *vars);
 char		*get_cmd_path(t_node *node, char **envp, t_vars *vars);
 
-
 /*
 Pipe analysis functions.
 In pipe_analysis.c
@@ -827,9 +824,6 @@ In process_redirect_utils.c
 void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
 t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node);
-int			handle_redirection_token(char *input, int *i, t_vars *vars,
-				t_tokentype type);
-int			proc_redir_filename(char *input, int *i, t_node *redir_node);
 
 /*
 Redirection processing functions.
@@ -871,14 +865,24 @@ int			setup_output_redirection(char *file, t_vars *vars);
 int			setup_heredoc_redir(t_node *node, t_vars *vars);
 
 /*
-Redirection handling.
-In redirect.c
+Redirection handling utility functions.
+In redirection_utils.c
 */
 int			is_redirection(t_tokentype type);
 void		restore_fd(int *saved_fd_ptr, int target_fd);
 void		reset_pipe_redir_state(t_pipe *pipes);
 void		reset_redirect_fds(t_vars *vars);
+
+/*
+Redirection handling.
+In redirect.c
+*/
 t_node		*get_next_redir(t_node *current, t_node *cmd);
+int			handle_redirection_token(char *input, int *i, t_vars *vars,
+				t_tokentype type);
+char		*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
+				char *quo_char);
+int			proc_redir_filename(char *input, int *i, t_node *redir_node);
 
 /*
 Shell level handling.

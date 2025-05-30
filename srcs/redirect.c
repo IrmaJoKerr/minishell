@@ -6,100 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 16:23:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Determines if token is a redirection operator.
-- Checks if token type matches any redirection types.
-- Includes all input and output redirection variants.
-Returns:
-- 1 if token is a redirection.
-- 0 if not.
-Works with process_redirections() and other redirection handlers.
-
-Example: When processing token list
-- Returns 1 for tokens of type <, >, >>, or <<
-- Returns 0 for command, pipe, or other token types
-*/
-int	is_redirection(t_tokentype type)
-{
-	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIR
-		|| type == TYPE_OUT_REDIR || type == TYPE_APPD_REDIR)
-		return (1);
-	else
-		return (0);
-}
-
-/*
-Restores a standard file descriptor (like stdin/stdout) from a saved fd.
-- Checks if the saved_fd is valid (> 2).
-- Duplicates saved_fd onto target_fd (e.g., STDIN_FILENO).
-- Closes the saved_fd.
-- Logs debug/error messages.
-- Resets the saved_fd value to -1 via the pointer.
-Works with reset_redirect_fds() to restore original file descriptors.
-*/
-void	restore_fd(int *saved_fd_ptr, int target_fd)
-{
-	int	result;
-
-	if (*saved_fd_ptr > 2)
-	{
-		result = dup2(*saved_fd_ptr, target_fd);
-		if (result == -1)
-		{
-			perror("dup2");
-		}
-		close(*saved_fd_ptr);
-		*saved_fd_ptr = -1;
-	}
-}
-
-/*
-Resets specific redirection tracking variables within the t_pipe structure.
-Works with reset_redirect_fds() to clean up redirection state after
-command execution or FD restoration.
-*/
-void	reset_pipe_redir_state(t_pipe *pipes)
-{
-	if (!pipes)
-		return ;
-	pipes->out_mode = OUT_MODE_NONE;
-	pipes->current_redirect = NULL;
-	pipes->last_in_redir = NULL;
-	pipes->last_out_redir = NULL;
-	pipes->cmd_redir = NULL;
-}
-
-/*
-Resets saved standard file descriptors and redirection state.
-- Restores original stdin and stdout if they were changed.
-- Closes any open heredoc or general redirection file descriptors.
-- Resets internal redirection tracking variables.
-Works with execute_cmd() to clean up after command execution.
-*/
-void	reset_redirect_fds(t_vars *vars)
-{
-	if (!vars || !vars->pipes)
-		return ;
-	restore_fd(&vars->pipes->saved_stdin, STDIN_FILENO);
-	restore_fd(&vars->pipes->saved_stdout, STDOUT_FILENO);
-	if (vars->pipes->heredoc_fd >= 0)
-	{
-		close(vars->pipes->heredoc_fd);
-		vars->pipes->heredoc_fd = -1;
-	}
-	if (vars->pipes->redirection_fd > 2)
-	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
-	}
-	reset_pipe_redir_state(vars->pipes);
-}
 
 /*
 Finds the next redirection node associated with a specific command.
@@ -164,6 +75,16 @@ int	handle_redirection_token(char *input, int *i, t_vars *vars,
 	return (1);
 }
 
+/*
+Extracts a filename string from input based on quoting rules.
+- Handles both quoted filenames ('file.txt' or "file.txt")
+- Handles unquoted filenames (stops at whitespace or operators)
+- Advances position pointer past the extracted filename
+- Properly handles quote matching and extraction
+Returns:
+- Extracted filename string on success
+- NULL on errors (missing closing quote, empty filename)
+*/
 char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
 			char *quo_char)
 {
@@ -193,6 +114,16 @@ char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
 	return (file_str);
 }
 
+/*
+Processes and sets a redirection target filename.
+- Skips leading whitespace to find filename start
+- Calls parse_and_get_filename to extract the actual string
+- Handles memory management of existing filenames
+- Stores extracted filename in redirection node's args array
+Returns:
+- 1 on successful filename extraction and storage
+- 0 on any error (empty input, extraction failure)
+*/
 int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 {
 	char	*filename_str;

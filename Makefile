@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/05/30 13:34:20 by bleow            ###   ########.fr        #
+#    Updated: 2025/05/30 16:26:57 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,7 @@ MINISHELL_SRCS = \
 			srcs/append_args_utils.c \
 			srcs/append_args.c \
 			srcs/execute_heredocs.c \
+			srcs/buildast_utils.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
 			srcs/check_permissions.c \
@@ -84,6 +85,7 @@ MINISHELL_SRCS = \
 			srcs/process_redirect.c \
 			srcs/quoted_expansion.c \
 			srcs/quotes.c \
+			srcs/redirect_utils.c \
 			srcs/redirect.c \
 			srcs/setup_redirects.c \
 			srcs/shell_level.c \

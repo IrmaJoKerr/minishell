@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 11:47:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 15:38:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,7 @@ int	try_left_merge(char *curr_text, t_vars *vars)
 	char	*merged;
 
 	redir_node = find_last_redir(vars);
-	if (redir_node && redir_node->right && redir_node->right->args
-		&& redir_node->right->args[0])
+	if (redir_node && redir_node->right && redir_node->right->args[0])
 	{
 		existing = redir_node->right->args[0];
 		merged = ft_strjoin(existing, curr_text);

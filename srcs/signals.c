@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:53:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 15:48:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,32 +19,6 @@ and the main program, preventing race conditions.
 Used by signal handlers to communicate signal reception to the main program.
 */
 volatile sig_atomic_t	g_signal_received = 0;
-
-/*
-Sets up signal handlers for terminal control signals using sigaction.
-- Initialize sigaction structs for SIGINT (Ctrl+C) and SIGQUIT (Ctrl+\)
-- Assigns matching handler functions to each signal
-- Sets flags to 0 for standard behavior
-- Clears the signal masks to prevent blocking of other signals
-- Registers the handlers using sigaction() system call
-Sigaction() is more modern and portable than signal()
-Called during shell startup. Used with init_shell().
-*/
-// void	load_signals(void)
-// {
-// 	// struct sigaction	sa_int;
-// 	// struct sigaction	sa_quit;
-
-// 	// ft_memset(&sa_int, 0, sizeof(sa_int));
-// 	// ft_memset(&sa_quit, 0, sizeof(sa_quit));
-// 	// sa_int.sa_handler = sigint_handler;
-// 	// sa_int.sa_flags = 0;
-// 	// sigemptyset(&sa_int.sa_mask);
-// 	// sa_quit.sa_handler = sigquit_handler;
-// 	// sa_quit.sa_flags = 0;
-// 	// sigemptyset(&sa_quit.sa_mask);
-// 	// sigaction(SIGINT, &sa_int, NULL);
-// }
 
 /*
 Handles Ctrl+C (SIGINT) signal in interactive shell.

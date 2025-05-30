@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 13:25:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 16:06:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,39 +88,6 @@ int	proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim)
 	vars->start = vars->pos;
 	vars->next_flag = 1;
 	return (1);
-}
-
-/*
-Checks if a node is the target of a heredoc redirection.
-- Identifies both direct targets (node follows heredoc)
-- Identifies delimiter nodes matching heredoc_delim
-
-Returns:
-- 1 if node is a heredoc target (don't append to command)
-- 0 if not a heredoc target (can append to command)
-*/
-int	is_heredoc_target(t_node *node, t_vars *vars)
-{
-	t_node	*current;
-
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_HEREDOC)
-		{
-			if (current->next == node)
-				return (1);
-			if (vars->pipes && vars->pipes->heredoc_delim)
-			{
-				if (node->args && node->args[0]
-					&& ft_strcmp(node->args[0]
-						, vars->pipes->heredoc_delim) == 0)
-					return (1);
-			}
-		}
-		current = current->next;
-	}
-	return (0);
 }
 
 /*
