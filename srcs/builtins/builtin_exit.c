@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/29 17:18:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 09:50:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ static int	checking(char **args)
 	if (args[2])
 	{
 		cmdcode = 1;
-		ft_putstr_fd("exit: too many arguments\n", STDERR_FILENO);
 	}
 	else if (ft_strisnum(args[1]) == 0)
 	{

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 21:20:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 11:39:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,34 +87,6 @@ int	get_var_token(char *input, t_vars *vars, char **token, char **var_name)
 	return (1);
 }
 
-// /*
-// Adds quote types to an int array for newly joined characters.
-// Copies existing quote types and appends 0s for expanded portion.
-// Adds a sentinel -1 at end of array.
-// Returns: 
-// - The new length of the quote type array.
-// */
-// int	addon_quo_type_arr(int *dest, int *src, int new_len)
-// {
-// 	int	j;
-// 	int	end_pos;
-
-// 	j = 0;
-// 	while (src[j] != -1)
-// 	{
-// 		dest[j] = src[j];
-// 		j++;
-// 	}
-// 	end_pos = j + new_len;
-// 	while (j < end_pos)
-// 	{
-// 		dest[j] = 0;
-// 		j++;
-// 	}
-// 	dest[j] = -1;
-// 	return (j);
-// }
-
 /*
 Processes expansion token based on adjacency state.
 - Handles token joining with previous tokens if left adjacent (adj_state[0])
@@ -180,4 +152,27 @@ int	make_exp_token(char *input, t_vars *vars)
 	}
 	result = sub_make_exp_token(input, vars, expanded_val, token);
 	return (result);
+}
+
+/*
+Creates a new token based on the expanded value
+Returns: 1 on success, 0 on failure
+*/
+int	new_exp_token(t_vars *vars, char *expanded_val, char *token)
+{
+	t_node		*exp_node;
+	t_tokentype	token_type;
+
+	token_type = TYPE_ARGS;
+	if (!vars->head)
+	{
+		token_type = TYPE_CMD;
+	}
+	exp_node = initnode(token_type, expanded_val);
+	if (!exp_node)
+		return (0);
+	build_token_linklist(vars, exp_node);
+	free(token);
+	free(expanded_val);
+	return (1);
 }

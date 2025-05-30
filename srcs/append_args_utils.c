@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:16:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:10:12 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 12:49:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,4 +99,33 @@ int	process_adj(int *i, t_vars *vars)
 		vars->start = *i;
 	}
 	return (result);
+}
+
+/*
+Appends the given text to a specific argument of the token.
+Handles memory for the argument string and updates quote types.
+Returns:
+- 0 on full success.
+- 1 if ft_strjoin fails.
+- 2 if ft_strjoin succeeds but update_quote_types fails.
+*/
+int	join_arg_strings(t_node *tgt_append_tok, int arg_idx, char *append_str,
+		t_vars *vars)
+{
+	char	*new_joined_arg;
+	int		quote_update_status;
+
+	new_joined_arg = ft_strjoin(tgt_append_tok->args[arg_idx], append_str);
+	if (!new_joined_arg)
+		return (1);
+	free(tgt_append_tok->args[arg_idx]);
+	tgt_append_tok->args[arg_idx] = new_joined_arg;
+	quote_update_status = 0;
+	if (tgt_append_tok->arg_quote_type && \
+		tgt_append_tok->arg_quote_type[arg_idx])
+	{
+		if (update_quote_types(vars, arg_idx, append_str) != 0)
+			quote_update_status = 2;
+	}
+	return (quote_update_status);
 }

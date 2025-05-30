@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 10:29:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,31 +39,6 @@ Creates string token for text preceding an operator.
 Returns:
 - Current position (unchanged).
 */
-// void	handle_string(char *input, t_vars *vars)
-// {
-// 	char		*token;
-// 	int			moves;
-// 	t_tokentype	token_type;
-
-// 	if (vars->pos > vars->start)
-// 	{
-// 		token = ft_substr(input, vars->start, vars->pos - vars->start);
-// 		if (!token)
-// 			return ;
-// 		token_type = get_token_at(token, 0, &moves);
-// 		if (token_type == 0)
-// 		{
-// 			set_token_type(vars, token);
-// 		}
-// 		else
-// 		{
-// 			vars->curr_type = token_type;
-// 		}
-// 		maketoken(token, vars->curr_type, vars);
-// 		free(token);
-// 		vars->start = vars->pos;
-// 	}
-// }
 void	handle_string(char *input, t_vars *vars)
 {
 	char		*token;
@@ -79,9 +54,7 @@ void	handle_string(char *input, t_vars *vars)
 			return ;
 		token_type = get_token_at(token, 0, &moves);
 		if (token_type == 0)
-		{
 			set_token_type(vars, token);
-		}
 		else
 			vars->curr_type = token_type;
 		maketoken(token, vars->curr_type, vars);

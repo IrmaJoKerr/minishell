@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 22:40:07 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:49:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 12:10:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,4 +58,33 @@ void	proc_pipe_chain(t_node *start_pipe, t_vars *vars)
 		}
 		break ;
 	}
+}
+
+/*
+Validates that all redirection operators in the token list have valid targets.
+- Ensures no redirection is at the end of input
+- Ensures no redirection is followed by another operator
+- Reports appropriate syntax errors
+Returns:
+- 1 if all redirections have valid targets
+- 0 otherwise (with error_code set)
+*/
+int	validate_redir_targets(t_vars *vars)
+{
+	t_node	*current;
+
+	current = vars->head;
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			if (!current->args || !current->args[0])
+			{
+				tok_syntax_error_msg("newline", vars);
+				return (0);
+			}
+		}
+		current = current->next;
+	}
+	return (1);
 }

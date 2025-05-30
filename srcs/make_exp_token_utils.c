@@ -6,34 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 21:19:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 11:38:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Creates a new token based on the expanded value
-Returns: 1 on success, 0 on failure
-*/
-int	new_exp_token(t_vars *vars, char *expanded_val, char *token)
-{
-	t_node		*exp_node;
-	t_tokentype	token_type;
-
-	token_type = TYPE_ARGS;
-	if (!vars->head)
-	{
-		token_type = TYPE_CMD;
-	}
-	exp_node = initnode(token_type, expanded_val);
-	if (!exp_node)
-		return (0);
-	build_token_linklist(vars, exp_node);
-	free(token);
-	free(expanded_val);
-	return (1);
-}
 
 /*
 Process argument joining for tokens.

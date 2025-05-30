@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:00:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 10:15:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,42 +37,6 @@ char	*reader(void)
 	if (*line)
 		add_history(line);
 	return (line);
-}
-
-/*
-Master command function that builds and executes the command's
-abstract syntax tree.
-- Creates AST from tokenized input.
-- Executes the command if AST built successfully.
-- Provides debug information about the process.
-Works with process_command().
-
-Example: For "echo hello | grep h"
-- Builds AST with pipe node at root
-- Echo command on left branch, grep on right
-- Executes the pipeline with proper redirection
-*/
-void	build_and_execute(t_vars *vars)
-{
-	if (!validate_redir_targets(vars))
-	{
-		return ;
-	}
-	/*
-	 * Debug example: Uncomment any of these lines to see debug output
-	 * These functions can now be called directly without DEBUG flags
-	 */
-	// debug_print_tokens(vars->head);          // Print token list to stdout
-	// debug_analyze_list(vars->head);          // Detailed token analysis to stderr
-	// debug_save_tokens(vars->head, "tokens.txt"); // Save tokens to file
-	vars->astroot = ast_builder(vars);
-	if (vars->astroot)
-	{
-		// debug_print_ast(vars->astroot);       // Print AST to stdout  
-		// debug_analyze_ast(vars->astroot);     // Detailed AST analysis to stderr
-		// debug_save_ast(vars->astroot, "ast.txt"); // Save AST to file
-		execute_cmd(vars->astroot, vars->env, vars);
-	}
 }
 
 /*
@@ -131,7 +95,11 @@ void	process_command(char *command, t_vars *vars)
 	}
 	if (!handle_pipe_syntax(vars))
 		return ;
-	build_and_execute(vars);
+	if (!validate_redir_targets(vars))
+		return ;
+	vars->astroot = ast_builder(vars);
+	if (vars->astroot)
+		execute_cmd(vars->astroot, vars->env, vars);
 	if (vars->partial_input)
 	{
 		free(vars->partial_input);

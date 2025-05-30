@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:29:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 12:40:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,43 +154,4 @@ char	*get_cmd_path(t_node *node, char **envp, t_vars *vars)
 	if (!path)
 		vars->error_code = 127;
 	return (path);
-}
-
-/*
-Creates a deep copy of environment variables array.
-- Allocates memory for the new array.
-- Duplicates each environment string.
-- Handles memory allocation failures.
-Returns:
-Newly allocated copy of environment or NULL on failure.
-Works with init_shell() and builtin environment commands.
-
-Example: When executing a command with custom environment
-- Duplicates all environment variables safely
-- Provides independent environment array for modification
-- Ensures memory safety with proper cleanup on errors
-*/
-char	**dup_env(char **envp)
-{
-	char	**env;
-	size_t	env_size;
-	size_t	i;
-
-	env_size = ft_arrlen(envp);
-	env = (char **)malloc(sizeof(char *) * (env_size + 1));
-	if (!env)
-		return (NULL);
-	i = 0;
-	while (i < env_size)
-	{
-		env[i] = ft_strdup(envp[i]);
-		if (!env[i])
-		{
-			ft_free_2d(env, i);
-			return (NULL);
-		}
-		i++;
-	}
-	env[env_size] = NULL;
-	return (env);
 }

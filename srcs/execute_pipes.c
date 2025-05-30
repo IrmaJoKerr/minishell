@@ -6,66 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:12:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 13:10:42 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/* 
-Scans a command node for any attached redirections (e.g., cmd > file)
-and processes them.
-
-Returns:
-- 0 on success or if no redirections are attached.
-- vars->error_code if set by proc_redir_chain due to an error.
-- 1 if proc_redir_chain fails and vars->error_code is not set.
-*/
-int	scan_cmd_redirs(t_node *cmd_node, t_vars *vars)
-{
-	int	redir_success;
-
-	if (cmd_node && cmd_node->redir)
-	{
-		redir_success = proc_redir_chain(cmd_node->redir, vars);
-		if (!redir_success)
-		{
-			if (vars->error_code)
-				return (vars->error_code);
-			else
-				return (1);
-		}
-	}
-	return (0);
-}
-
-/*
-Processes the first encountered redirection node, linking the correct command
-to it and executing the redirection.
-
-Returns:
-- 0 on success.
-- 1 if the node to the left of redir_node is not a command, or if
-  proc_redir_chain fails and vars->error_code is not set.
-- vars->error_code if set by proc_redir_chain due to an error.
-*/
-int	proc_first_redir(t_node *redir_node, t_vars *vars, t_node **cmd_out)
-{
-	int	redir_success;
-
-	*cmd_out = redir_node->left;
-	if (!(*cmd_out) || (*cmd_out)->type != TYPE_CMD)
-		return (1);
-	redir_success = proc_redir_chain(redir_node, vars);
-	if (!redir_success)
-	{
-		if (vars->error_code)
-			return (vars->error_code);
-		else
-			return (1);
-	}
-	return (0);
-}
 
 /*
 Prepares a command node for execution within a pipe by:
@@ -172,49 +117,6 @@ int	exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars)
 	return (cmd_code);
 }
 
-pid_t	fork_left_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars)
-{
-	pid_t	pid;
-
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork (left)");
-		close(pipe_fd[0]);
-		close(pipe_fd[1]);
-		return (-1);
-	}
-	if (pid == 0)
-	{
-		exit(exec_pipe_left(node, pipe_fd, vars));
-	}
-	close(pipe_fd[1]);
-	return (pid);
-}
-
-pid_t	fork_right_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars,
-			pid_t left_child_pid)
-{
-	pid_t	pid;
-
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork (right)");
-		close(pipe_fd[0]);
-		if (left_child_pid > 0)
-		{
-			kill(left_child_pid, SIGTERM);
-			waitpid(left_child_pid, NULL, 0);
-		}
-		return (-1);
-	}
-	if (pid == 0)
-		exit(exec_pipe_right(node, pipe_fd, vars));
-	close(pipe_fd[0]);
-	return (pid);
-}
-
 /*
 Executes commands connected by a pipe.
 - Sets up and launches pipeline child processes.
@@ -250,4 +152,41 @@ int	execute_pipes(t_node *pipe_node, t_vars *vars)
 	waitpid(right_pid, &right_status, 0);
 	handle_cmd_status(right_status, vars);
 	return (vars->error_code);
+}
+
+/*
+Executes a solo redirection by creating or modifying the target file.
+- Validates that the redirection node has a valid filename argument.
+- Creates files with standard permissions (0644) if they don't exist.
+Used by proc_solo_redirs() to immediately execute orphaned redirections
+that appear between pipes and commands (e.g., "cmd1 | >file cmd2").
+
+Returns:
+- 1 on success (file created/modified successfully).
+- 0 on failure (invalid arguments, unsupported redirection type, or file error).
+*/
+int	exec_solo_redir(t_node *redir_node, t_vars *vars)
+{
+	char	*filename;
+	int		fd;
+
+	if (!redir_node->args || !redir_node->args[0])
+		return (0);
+	filename = redir_node->args[0];
+	fd = -1;
+	if (!chk_permissions(filename, O_WRONLY, vars))
+		return (0);
+	if (redir_node->type == TYPE_OUT_REDIR)
+		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if (redir_node->type == TYPE_APPD_REDIR)
+		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		return (0);
+	if (fd == -1)
+	{
+		shell_error(filename, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	close(fd);
+	return (1);
 }

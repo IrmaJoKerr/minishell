@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 05:22:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 13:23:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,6 +317,8 @@ In append_args_utils.c
 int			*copy_int_arr(int *original, size_t length);
 void		check_token_adj(char *input, t_vars *vars);
 int			process_adj(int *i, t_vars *vars);
+int			join_arg_strings(t_node *tgt_append_tok, int arg_idx,
+				char *append_str, t_vars *vars);
 
 /*
 Append arguments to a node's argument array.
@@ -329,20 +331,24 @@ int			**resize_quotype_arr(t_node *node, char *new_arg, int quote_type,
 				char **new_args);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 
+
+/*
+AST Building utility functions.
+In buildast_utils.c
+*/
+void		chk_args_match_cmd(t_vars *vars);
+int			is_heredoc_target(t_node *node, t_vars *vars);
+int			is_redirection_target(t_node *node, t_vars *vars);
+int			proc_solo_redirs(t_vars *vars);
+
 /*
 AST token processing and AST tree building.
 In buildast.c
 */
 t_node		*ast_builder(t_vars *vars);
 t_node		*proc_ast_pipes(t_vars *vars);
-void		chk_args_match_cmd(t_vars *vars);
-// t_node		*find_node_in_list(t_node *head, t_node *target);
-int			is_heredoc_target(t_node *node, t_vars *vars);
-int			is_redirection_target(t_node *node, t_vars *vars);
 t_node		*proc_ast_redir(t_vars *vars);
 void		pre_ast_redir_proc(t_vars *vars);
-int			proc_solo_redirs(t_vars *vars);
-int			exec_solo_redir(t_node *redir_node, t_vars *vars);
 
 /*
 Builtin control handling.
@@ -355,11 +361,12 @@ int			execute_builtin(char *cmd, char **args, t_vars *vars);
 Permission checking functions.
 In check_permissions.c
 */
-char		*extract_dir_path(char *filename);
 int			chk_read_permission(char *filename, t_vars *vars);
 int			chk_file_write_permission(char *filename, t_vars *vars);
 int			chk_dir_write_permission(char *filename, t_vars *vars);
 int			chk_permissions(char *filename, int mode, t_vars *vars);
+int			chk_in_file_access(char *file, struct stat *file_stat,
+				t_vars *vars);
 
 /*
 Group A of cleanup functions.
@@ -401,31 +408,22 @@ void		handle_fd_error(int fd, t_vars *vars, const char *error_msg);
 Pipe execution functions.
 In execute_pipes.c
 */
-int			scan_cmd_redirs(t_node *cmd_node, t_vars *vars);
-int			proc_first_redir(t_node *redir_node, t_vars *vars,
-				t_node **cmd_out);
 int			setup_pipe_cmd(t_node *node_in_pipe, t_vars *vars,
 				t_node **cmd_to_exec_out, int pipe_context);
 int			exec_pipe_left(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
 int			exec_pipe_right(t_node *cmd_node, int pipe_fd[2], t_vars *vars);
-pid_t		fork_left_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars);
-pid_t		fork_right_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars,
-				pid_t left_child_pid);
 int			execute_pipes(t_node *pipe_node, t_vars *vars);
+int			exec_solo_redir(t_node *redir_node, t_vars *vars);
 
 /*
 Redirect execution processing functions
 In execute_redirects.c
 */
-int			setup_in_redir(t_node *node, t_vars *vars);
-int			setup_input_redirection(char *file, t_vars *vars);
-int			setup_out_redir(t_node *node, t_vars *vars);
-int			setup_output_redirection(char *file, t_vars *vars);
-int			setup_heredoc_redir(t_node *node, t_vars *vars);
-int			chk_in_file_access(char *file, struct stat *file_stat,
-						t_vars *vars);
 int			handle_bad_infile(t_vars *vars);
 int			proc_redir_chain(t_node *start_node, t_vars *vars);
+int			scan_cmd_redirs(t_node *cmd_node, t_vars *vars);
+int			proc_first_redir(t_node *redir_node, t_vars *vars,
+				t_node **cmd_out);
 
 /*
 Execution utility functions.
@@ -465,6 +463,14 @@ char		*get_env_val(const char *var_name, char **env);
 char		*get_var_name(char *input, int *pos);
 
 /*
+Forking functions.
+In forking.c
+*/
+pid_t		fork_left_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars);
+pid_t		fork_right_pipe_branch(t_node *node, int pipe_fd[2], t_vars *vars,
+				pid_t left_child_pid);
+
+/*
 Heredoc delimiter handling utility functions.
 */
 int			chk_quoted_delim(char *orig_delim, size_t len,
@@ -499,19 +505,25 @@ In heredoc_utils.c
 */
 char		*hd_merge_and_free(char *str, char *chunk);
 void		cleanup_heredoc_fd(int write_fd);
+int			proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim);
+int			is_heredoc_target(t_node *node, t_vars *vars);
+int			read_tmp_buf(t_vars *vars);
 
 /*
 Heredoc main handling.
 In heredoc.c
 */
+void		setpipe(t_vars *vars);
+int			interactive_hd_mode(t_vars *vars, int sss);
+int			hd_term(int saved_signal_state, t_vars *vars, int code,
+				char **line);
 void		exec_hd_child(t_vars *vars);
 int			process_hd_parent(pid_t child_pid, int child_status,
 				int saved_signal_state, t_vars *vars);
-int			interactive_hd_mode(t_vars *vars);
 int			get_interactive_hd(int write_fd, t_vars *vars);
 int			handle_heredoc(t_node *node, t_vars *vars);
 int			process_heredoc(t_node *node, t_vars *vars);
-int			read_tmp_buf(t_vars *vars);
+
 
 /*
 History loading functions.
@@ -586,11 +598,17 @@ void		handle_input(char *input, t_vars *vars);
 // int			check_trailing_chars(const char *line, int start_pos);
 
 /*
+Lexer utility functions.
+In lexer_utils.c
+*/
+void		add_null_token_stop(t_vars *vars);
+
+/*
 Lexer core functions.
+In lexer.c
 */
 t_tokentype	get_token_at(char *input, int pos, int *moves);
 int			tokenizer(char *input, t_vars *vars);
-void		add_null_token_stop(t_vars *vars);
 int			handle_token(char *input, t_vars *vars, int *hd_is_delim);
 char		*get_quoted_str(char *input, t_vars *vars, int *quote_type);
 int			process_operator_char(char *input, int *i, t_vars *vars);
@@ -599,7 +617,7 @@ int			process_operator_char(char *input, int *i, t_vars *vars);
 Make_exp_token utility functions.
 In make_exp_token_utils.c
 */
-int			new_exp_token(t_vars *vars, char *expanded_val, char *token);
+
 int			proc_join_args(t_vars *vars, char *expanded_val);
 int			handle_tok_join(char *input, t_vars *vars, char *expanded_val,
 				char *token);
@@ -619,6 +637,7 @@ int			get_var_token(char *input, t_vars *vars, char **token,
 int			sub_make_exp_token(char *input, t_vars *vars, char *expanded_val,
 				char *token);
 int			make_exp_token(char *input, t_vars *vars);
+int			new_exp_token(t_vars *vars, char *expanded_val, char *token);
 
 /*
 Node array creation functions.
@@ -649,7 +668,6 @@ Minishell program entry point functions.
 In minishell.c
 */
 char		*reader(void);
-void		build_and_execute(t_vars *vars);
 int			handle_pipe_syntax(t_vars *vars);
 void		process_command(char *command, t_vars *vars);
 int			main(int ac, char **av, char **envp);
@@ -693,8 +711,8 @@ int			handle_pipe_operator(char *input, t_vars *vars);
 Parsing functions.
 In parser.c
 */
+void		setpipe(t_vars *vars);
 void		set_token_type(t_vars *vars, char *input);
-int			proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim);
 int			proc_opr_token(char *input, t_vars *vars, int *hd_is_delim,
 				t_tokentype token_type);
 int			finish_tokenizing(char *input, t_vars *vars, int hd_is_delim);
@@ -705,6 +723,8 @@ Path finding utility functions.
 In paths_utils.c
 */
 char		*try_path(char *path, char *cmd);
+char		*extract_dir_path(char *filename);
+char		**dup_env(char **envp);
 
 /*
 Path finding functions.
@@ -714,7 +734,7 @@ char		**get_path_env(char **envp);
 char		*search_in_env(char *cmd, char **envp, t_vars *vars);
 char		*handle_direct_path(char *cmd, t_vars *vars);
 char		*get_cmd_path(t_node *node, char **envp, t_vars *vars);
-char		**dup_env(char **envp);
+
 
 /*
 Pipe analysis functions.
@@ -732,6 +752,18 @@ In pipes.c
 */
 char		*read_until_complete(void);
 int			append_to_cmdline(char **cmd_ptr, const char *addition);
+
+/*
+Quoted redirection target functions.
+In proc_quoted_redir_tgt.c
+*/
+int			proc_quoted_redir_tgt(char *content, t_vars *vars);
+t_node		*find_last_redir(t_vars *vars);
+int			try_merge_adj_target(t_node *redir_node, char *content,
+				t_vars *vars);
+int			try_append_to_prev_cmd(char *content, t_vars *vars);
+int			link_new_file_node_to_redir(t_node *redir_node,
+				char *content, t_vars *vars);
 
 /*
 Process multiline_input functions.
@@ -759,20 +791,22 @@ In process_quote_char_utils.c
 */
 int			token_cleanup_error(char *content, t_vars *vars);
 void		cleanup_and_process_adj(char *content, char *input, t_vars *vars);
-t_node		*find_last_redir(t_vars *vars);
 int			validate_single_redir(t_node *redir_node, t_vars *vars);
+int			try_left_merge(char *curr_text, t_vars *vars);
 
 /*
 Process quote characters.
 In process_quote_char.c
 */
+int			process_quote_char(char *input, t_vars *vars, int is_redir_target);
+int			extract_quoted_strs(char *input, t_vars *vars,
+				char **content_out, int *quote_type_out);
+int			handle_empty_quote(char *input, t_vars *vars, char *curr_text,
+				int curr_quo_type);
 t_node		*process_quoted_str(char **content_ptr, int quote_type,
 				t_vars *vars);
-void		link_file_to_redir(t_node *redir_node, t_node *file_node,
-				t_vars *vars);
-int			handle_redir_target(char *content, t_vars *vars);
-int			process_quote_char(char *input, t_vars *vars, int is_redir_target);
-int			validate_redir_targets(t_vars *vars);
+int			handle_quo_str(char *input, t_vars *vars, char *curr_text,
+				int curr_quo_type);
 
 /*
 Process redirection nodes functions.
@@ -782,9 +816,9 @@ void		store_single_redir_node(t_node *redir_node, t_node *cmd_node,
 				t_vars *vars);
 void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars,
 				t_node **first_redir, t_node **prev_redir);
-// void		make_cmd_redir_chain(t_node *cmd_node, t_vars *vars);
 t_node		*get_redir_target(t_node *current, t_node *last_cmd);
-// void		store_single_redir_node(t_node *redir_node, t_node *cmd_node, t_vars *vars);
+void		link_file_to_redir(t_node *redir_node, t_node *file_node,
+				t_vars *vars);
 
 /*
 Redirection processing utility functions.
@@ -793,14 +827,19 @@ In process_redirect_utils.c
 void		reset_redir_tracking(t_pipe *pipes);
 int			is_valid_redir_node(t_node *current);
 t_node		*find_cmd_redir(t_node *redir_root, t_node *cmd_node);
-int			handle_redirection_token(char *input, int *i, t_vars *vars, t_tokentype type);
+int			handle_redirection_token(char *input, int *i, t_vars *vars,
+				t_tokentype type);
 int			proc_redir_filename(char *input, int *i, t_node *redir_node);
+
 /*
 Redirection processing functions.
 In process_redirect.c
 */
 void		link_redir_to_cmd_node(t_node **node_ptr, t_vars *vars);
 void		proc_pipe_chain(t_node *start_pipe, t_vars *vars);
+void		link_file_to_redir(t_node *redir_node, t_node *file_node,
+				t_vars *vars);
+int			validate_redir_targets(t_vars *vars);
 
 /*
 Handles expansion in quotes.
@@ -820,6 +859,16 @@ void		track_quote_ctx(char quote_char, char *in_quote, int pos,
 				t_vars *vars);
 int			validate_quotes(char *input, t_vars *vars);
 char		*quote_prompt(char quote_type);
+
+/*
+Setup redirection functions.
+In redirect_setup.c
+*/
+int			setup_in_redir(t_node *node, t_vars *vars);
+int			setup_input_redirection(char *file, t_vars *vars);
+int			setup_out_redir(t_node *node, t_vars *vars);
+int			setup_output_redirection(char *file, t_vars *vars);
+int			setup_heredoc_redir(t_node *node, t_vars *vars);
 
 /*
 Redirection handling.
@@ -873,8 +922,6 @@ Tokenizing utility functions.
 In tokenize_utils.c
 */
 int			chk_move_pos(t_vars *vars, int hd_is_delim);
-int			join_arg_strings(t_node *tgt_append_tok, int arg_idx,
-				char *append_str, t_vars *vars);
 t_node		*get_valid_target_token(t_vars *vars);
 void		handle_right_adj(char *input, t_vars *vars);
 char		*get_delim_str(char *input, t_vars *vars, int *error_code);
@@ -895,47 +942,5 @@ Type conversion functions.
 In typeconvert.c
 */
 char		*get_token_str(t_tokentype type);
-
-/*
-Debug utility functions.
-In debug.c
-*/
-void		debug_args_before_after(t_node *cmd_node, char *new_arg, int is_delim);
-void		debug_heredoc_content(const char *content, size_t length);
-int			is_redirection_operator(char *token);
-int			get_redirection_type(char *token);
-int			is_pipe_operator(char *token);
-int			current_comes_after_node(t_node *node1, t_node *node2, t_node *head);
-void		print_node_content(FILE *fp, t_node *node);
-void		print_ast_node(FILE *fp, t_node *node, int indent_level);
-void		print_ast(t_node *root, const char *filename);
-void		print_token_list(t_node *head, const char *filename);
-void		print_node_debug(t_node *node, const char *prefix, const char *location);
-void		print_node_args(t_node *node, const char *prefix);
-void		print_node_linked_list(t_node *head, const char *prefix);
-void		print_ast_detailed(t_node *root, const char *prefix);
-void		debug_tokenize_state(const char *input, int pos, int token_type, const char *context);
-int			determine_token_type_with_debug(char *token, t_vars *vars, int position);
-void		debug_token_creation(char *token_str, int token_type, int position);
-void		debug_tokenization_loop(char *input, int start, int end, int token_count);
-void		debug_pipeline_awareness(t_vars *vars, int token_position);
-
-/*
-Debug convenience functions.
-In debug.c
-*/
-void		debug_print_ast(t_node *root);
-void		debug_print_tokens(t_node *head);
-void		debug_analyze_ast(t_node *root);
-void		debug_analyze_list(t_node *head);
-void		debug_print_node(t_node *node, const char *context);
-void		debug_save_ast(t_node *root, const char *filename);
-void		debug_save_tokens(t_node *head, const char *filename);
-
-/*
-Debug demonstration function.
-In debug_example.c  
-*/
-void		demonstrate_debug_functions(t_vars *vars);
 
 #endif

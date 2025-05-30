@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 16:36:32 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 04:46:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 13:15:03 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,43 +128,6 @@ int	proc_solo_redirs(t_vars *vars)
 }
 
 /*
-Executes a solo redirection by creating or modifying the target file.
-- Validates that the redirection node has a valid filename argument.
-- Creates files with standard permissions (0644) if they don't exist.
-Used by proc_solo_redirs() to immediately execute orphaned redirections
-that appear between pipes and commands (e.g., "cmd1 | >file cmd2").
-
-Returns:
-- 1 on success (file created/modified successfully).
-- 0 on failure (invalid arguments, unsupported redirection type, or file error).
-*/
-int	exec_solo_redir(t_node *redir_node, t_vars *vars)
-{
-	char	*filename;
-	int		fd;
-
-	if (!redir_node->args || !redir_node->args[0])
-		return (0);
-	filename = redir_node->args[0];
-	fd = -1;
-	if (!chk_permissions(filename, O_WRONLY, vars))
-		return (0);
-	if (redir_node->type == TYPE_OUT_REDIR)
-		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if (redir_node->type == TYPE_APPD_REDIR)
-		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	else
-		return (0);
-	if (fd == -1)
-	{
-		shell_error(filename, ERR_PERMISSIONS, vars);
-		return (0);
-	}
-	close(fd);
-	return (1);
-}
-
-/*
 Master function for pipe node processing in token list.
 - Initializes pipe tracking structures.
 - Identifies and processes the first pipe.
@@ -240,48 +203,13 @@ void	chk_args_match_cmd(t_vars *vars)
 }
 
 /*
-Checks if a node is the target of a heredoc redirection.
-- Identifies both direct targets (node follows heredoc)
-- Identifies delimiter nodes matching heredoc_delim
-
-Returns:
-- 1 if node is a heredoc target (don't append to command)
-- 0 if not a heredoc target (can append to command)
-*/
-int	is_heredoc_target(t_node *node, t_vars *vars)
-{
-	t_node	*current;
-
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_HEREDOC)
-		{
-			if (current->next == node)
-				return (1);
-			if (vars->pipes && vars->pipes->heredoc_delim)
-			{
-				if (node->args && node->args[0]
-					&& ft_strcmp(node->args[0]
-						, vars->pipes->heredoc_delim) == 0)
-					return (1);
-			}
-		}
-		current = current->next;
-	}
-	return (0);
-}
-
-/*
 Analyses if a token is the filename target of a redirection operator.
 Prevents redirection filenames from being incorrectly added as command args.
 - Scans the token list to find redirections before the current node.
-
 Detection logic:
 - If node follows a redirection with filename in arg[0]: NOT a target.
 - If node follows a redirection without filename: IS a target.
 - If node doesn't follow any redirection: NOT a target.
-
 Example:
 - [CMD: "cat"] [>: "output.txt"] [ARGS: "extra"] → "extra" == 0 (not a target)
 - [CMD: "cat"] [>: ""] [ARGS: "output.txt"] → "output.txt" == 1 (is a target)

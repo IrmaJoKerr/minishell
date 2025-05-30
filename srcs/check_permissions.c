@@ -6,42 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 08:28:42 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 12:29:30 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-/*
-Extracts directory path from a filename.
-- Finds the last slash in the path.
-- Returns directory containing the file.
-- Handles special cases like root directory.
-- Caller must free the returned string.
-Returns:
-- Allocated string with directory path.
-- "." if no directory component is present.
-Works with file permission checks and path operations.
-*/
-char	*extract_dir_path(char *filename)
-{
-	char	*dir_path;
-	char	*last_slash;
-
-	dir_path = ft_strdup(filename);
-	if (!dir_path)
-		return (NULL);
-	last_slash = ft_strrchr(dir_path, '/');
-	if (last_slash)
-	{
-		*last_slash = '\0';
-		if (*dir_path == '\0')
-			ft_strlcpy(dir_path, "/", 2);
-	}
-	else
-		ft_strlcpy(dir_path, ".", 2);
-	return (dir_path);
-}
 
 /*
 Checks read permission for a file.
@@ -147,4 +116,32 @@ int	chk_permissions(char *filename, int mode, t_vars *vars)
 	else if (mode & O_RDWR)
 		return (1);
 	return (0);
+}
+
+/*
+Checks if input file exists and has correct permissions.
+*/
+int	chk_in_file_access(char *file, struct stat *file_stat, t_vars *vars)
+{
+	if (access(file, F_OK) == -1)
+	{
+		not_found_error(file, vars);
+		return (handle_bad_infile(vars));
+	}
+	if (stat(file, file_stat) == -1)
+	{
+		shell_error(file, ERR_DEFAULT, vars);
+		return (0);
+	}
+	if (S_ISDIR(file_stat->st_mode))
+	{
+		shell_error(file, ERR_ISDIRECTORY, vars);
+		return (0);
+	}
+	if (access(file, R_OK) == -1)
+	{
+		shell_error(file, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	return (1);
 }

@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/04/29 16:49:35 by bleow            ###   ########.fr        #
+#    Updated: 2025/05/30 13:34:20 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,13 +29,13 @@ INCLUDES = $(addprefix -I, $(INCLUDE_DIRS))
 MINISHELL_SRCS = \
 			srcs/append_args_utils.c \
 			srcs/append_args.c \
+			srcs/execute_heredocs.c \
 			srcs/buildast.c \
 			srcs/builtin.c \
 			srcs/check_permissions.c \
 			srcs/cleanup_a.c \
 			srcs/cleanup_b.c \
 			srcs/cmd_finder.c \
-			srcs/debug.c \
 			srcs/errormsg.c \
 			srcs/execute_pipes.c \
 			srcs/execute_redirects.c \
@@ -43,6 +43,7 @@ MINISHELL_SRCS = \
 			srcs/execute.c \
 			srcs/expansion_utils.c \
 			srcs/expansion.c \
+			srcs/forking.c \
 			srcs/heredoc_delim_utils.c \
 			srcs/heredoc_delim.c \
 			srcs/heredoc_expansion.c \
@@ -56,6 +57,7 @@ MINISHELL_SRCS = \
 			srcs/initshell.c \
 			srcs/input_completion.c \
 			srcs/input_handlers.c \
+			srcs/lexer_utils.c \
 			srcs/lexer.c \
 			srcs/make_exp_token_utils.c \
 			srcs/make_exp_token.c \
@@ -72,6 +74,7 @@ MINISHELL_SRCS = \
 			srcs/paths.c \
 			srcs/pipe_analysis.c \
 			srcs/pipes.c \
+			srcs/proc_quoted_redir_tgt.c \
 			srcs/process_multiline_input.c \
 			srcs/process_pipes.c \
 			srcs/process_quote_char_utils.c \
@@ -82,6 +85,7 @@ MINISHELL_SRCS = \
 			srcs/quoted_expansion.c \
 			srcs/quotes.c \
 			srcs/redirect.c \
+			srcs/setup_redirects.c \
 			srcs/shell_level.c \
 			srcs/signals.c \
 			srcs/terminal.c \

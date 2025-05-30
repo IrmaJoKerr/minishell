@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:12:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 11:47:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,45 +42,6 @@ void	cleanup_and_process_adj(char *content, char *input, t_vars *vars)
 }
 
 /*
-Finds the most relevant redirection node in the token list.
-Checks in the following order of priority:
- - Current node if it's a redirection
- - Recent previous nodes (up to 3 back)
- - Last redirection in the entire token list
-Returns:
- - Pointer to the located redirection node
- - NULL if no redirection node exists
-Works with process_quote_char() for redirection target handling.
-*/
-t_node	*find_last_redir(t_vars *vars)
-{
-	t_node	*current;
-	t_node	*last_redir;
-	int		i;
-
-	last_redir = NULL;
-	if (vars->current && is_redirection(vars->current->type))
-		return (vars->current);
-	current = vars->current;
-	i = 0;
-	while (current && current->prev && i < 3)
-	{
-		current = current->prev;
-		i++;
-		if (is_redirection(current->type))
-			return (current);
-	}
-	current = vars->head;
-	while (current)
-	{
-		if (is_redirection(current->type))
-			last_redir = current;
-		current = current->next;
-	}
-	return (last_redir);
-}
-
-/*
 Validates that a single redirection token has a valid target.
 - Checks that the redirection has a next token
 - Ensures the next token isn't another operator
@@ -108,4 +69,44 @@ int	validate_single_redir(t_node *redir_node, t_vars *vars)
 		return (0);
 	}
 	return (1);
+}
+
+/*
+Attempts to merge quoted content with the target of a previous redirection.
+- Finds the most recent redirection node
+- Joins quoted content with existing redirection target
+- Handles memory cleanup for both success and failure
+Returns:
+- 1 on successful merge
+- 0 on memory allocation failure
+- (-1) when merge is not applicable
+Works with process_quote_char() for left-adjacent tokens.
+*/
+int	try_left_merge(char *curr_text, t_vars *vars)
+{
+	t_node	*redir_node;
+	char	*existing;
+	char	*merged;
+
+	redir_node = find_last_redir(vars);
+	if (redir_node && redir_node->right && redir_node->right->args
+		&& redir_node->right->args[0])
+	{
+		existing = redir_node->right->args[0];
+		merged = ft_strjoin(existing, curr_text);
+		if (merged)
+		{
+			free(redir_node->right->args[0]);
+			redir_node->right->args[0] = merged;
+			free(curr_text);
+			return (1);
+		}
+		else
+		{
+			free(curr_text);
+			vars->error_code = ERR_DEFAULT;
+			return (0);
+		}
+	}
+	return (-1);
 }

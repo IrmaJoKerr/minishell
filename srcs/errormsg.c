@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:31:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 13:07:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 09:44:27 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	shell_error(char *element, int error_code, t_vars *vars)
 	else if (error_code == ERR_CMD_NOT_FOUND)
 	{
 		ft_putstr_fd(element, 2);
-		ft_putendl_fd(": No such file or directory", 2);
+		ft_putendl_fd(": command not found", 2);
 	}
 	else if (error_code == ERR_ISDIRECTORY
 		&& ft_strncmp(element, "syntax error", 12) != 0)

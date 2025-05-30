@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 13:25:08 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 04:15:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/30 12:43:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,4 +81,24 @@ t_node	*get_redir_target(t_node *current, t_node *last_cmd)
 	else if (last_cmd)
 		target = last_cmd;
 	return (target);
+}
+
+/*
+Links a file node into the token list after a redirection node.
+- Sets redirection->right pointer to the file node
+- Handles proper linked list connections
+- Updates vars->current pointer
+Works with proc_quoted_redir_tgt().
+*/
+void	link_file_to_redir(t_node *redir_node, t_node *file_node, t_vars *vars)
+{
+	redir_node->right = file_node;
+	if (redir_node->next)
+	{
+		file_node->next = redir_node->next;
+		redir_node->next->prev = file_node;
+	}
+	redir_node->next = file_node;
+	file_node->prev = redir_node;
+	vars->current = file_node;
 }
