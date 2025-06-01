@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 16:32:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:45:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 00:36:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,12 +132,35 @@ Returns:
 - A new environment array.
 - NULL on failure.
 */
+// char	**proc_envop_list(t_envop *envop_list, char **env)
+// {
+// 	int		env_arr_len;
+// 	int		env_arr_idx;
+// 	char	**new_env;
+// 	t_envop	*node;
+
+// 	env_arr_len = calc_new_env_len(envop_list, ft_arrlen(env));
+// 	new_env = malloc(sizeof(char *) * (env_arr_len + 1));
+// 	if (!new_env)
+// 		return (NULL);
+// 	env_arr_idx = copy_env_with_ops(env, envop_list, new_env);
+// 	node = envop_list;
+// 	while (node)
+// 	{
+// 		if (node->flag == 1 && node->matched_idx == -1)
+// 			new_env[env_arr_idx++] = ft_strdup(node->arg_str);
+// 		node = node->next;
+// 	}
+// 	new_env[env_arr_idx] = NULL;
+// 	return (new_env);
+// }
 char	**proc_envop_list(t_envop *envop_list, char **env)
 {
 	int		env_arr_len;
 	int		env_arr_idx;
 	char	**new_env;
 	t_envop	*node;
+	// int		appended = 0;
 
 	env_arr_len = calc_new_env_len(envop_list, ft_arrlen(env));
 	new_env = malloc(sizeof(char *) * (env_arr_len + 1));
@@ -148,9 +171,21 @@ char	**proc_envop_list(t_envop *envop_list, char **env)
 	while (node)
 	{
 		if (node->flag == 1 && node->matched_idx == -1)
-			new_env[env_arr_idx++] = ft_strdup(node->arg_str);
+		{
+			if (env_arr_idx < env_arr_len)
+			// {
+				new_env[env_arr_idx++] = ft_strdup(node->arg_str);
+				// fprintf(stderr, "[DEBUG] proc_envop_list: append [%d] '%s'\n", env_arr_idx-1, node->arg_str);
+				// appended++;
+			// }
+			// else 
+			// {
+			// 	fprintf(stderr, "[ERROR] proc_envop_list: would overflow at [%d] with '%s'\n", env_arr_idx, node->arg_str);
+			// }
+		}
 		node = node->next;
 	}
 	new_env[env_arr_idx] = NULL;
+	// fprintf(stderr, "[DEBUG] proc_envop_list: final env_arr_idx=%d, env_arr_len=%d, appended=%d\n", env_arr_idx, env_arr_len, appended);
 	return (new_env);
 }

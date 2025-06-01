@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 20:32:31 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:48:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 00:37:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,24 +95,57 @@ Copy environment variables into a new array, applying export operations.
 - Overwrites or copies as needed.
 Returns the number of entries copied.
 */
+// int	copy_env_with_ops(char **env, t_envop *env_list, char **new_env)
+// {
+// 	int		i;
+// 	int		j;
+// 	int		action;
+// 	t_envop	*overwrite_node;
+
+// 	i = 0;
+// 	j = 0;
+// 	while (env && env[i])
+// 	{
+// 		overwrite_node = NULL;
+// 		action = decide_action_at_index(i, env_list, &overwrite_node);
+// 		if (action == 0)
+// 			new_env[j++] = ft_strdup(overwrite_node->arg_str);
+// 		else
+// 			new_env[j++] = ft_strdup(env[i]);
+// 		i++;
+// 	}
+// 	return (j);
+// }
 int	copy_env_with_ops(char **env, t_envop *env_list, char **new_env)
 {
-	int		i;
-	int		j;
-	int		action;
-	t_envop	*overwrite_node;
+    int		i;
+    int		j;
+    int		action;
+    t_envop	*overwrite_node;
 
-	i = 0;
-	j = 0;
-	while (env && env[i])
-	{
-		overwrite_node = NULL;
-		action = decide_action_at_index(i, env_list, &overwrite_node);
-		if (action == 0)
-			new_env[j++] = ft_strdup(overwrite_node->arg_str);
-		else
-			new_env[j++] = ft_strdup(env[i]);
-		i++;
-	}
-	return (j);
+    i = 0;
+    j = 0;
+    while (env && env[i])
+    {
+        overwrite_node = NULL;
+        action = decide_action_at_index(i, env_list, &overwrite_node);
+        if (action == 0)
+		{
+            new_env[j] = ft_strdup(overwrite_node->arg_str);
+            // fprintf(stderr, "[DEBUG] copy_env_with_ops: overwrite [%d] with '%s'\n", j, overwrite_node->arg_str);
+            j++;
+        } 
+		else if (action == 1)
+		{
+            new_env[j] = ft_strdup(env[i]);
+            j++;
+        }
+		// else
+		// {
+        //     fprintf(stderr, "[DEBUG] copy_env_with_ops: skip [%d] '%s'\n", i, env[i]);
+        // }
+        i++;
+    }
+    // fprintf(stderr, "[DEBUG] copy_env_with_ops: total copied=%d\n", j);
+    return (j);
 }

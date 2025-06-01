@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 20:30:57 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:49:39 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 00:31:51 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,22 +48,40 @@ Calculate the new length of the environment array after applying envop list.
 - Accounts for additions and deletions.
 Returns the new environment array length.
 */
+// int	calc_new_env_len(t_envop *envop_list, int old_len)
+// {
+// 	t_envop	*node;
+// 	int		env_arr_len;
+
+// 	node = envop_list;
+// 	env_arr_len = old_len;
+// 	while (node)
+// 	{
+// 		if (node->flag == -1 && node->matched_idx != -1)
+// 			env_arr_len--;
+// 		else if (node->flag == 1 && node->matched_idx == -1)
+// 			env_arr_len++;
+// 		node = node->next;
+// 	}
+// 	return (env_arr_len);
+// }
 int	calc_new_env_len(t_envop *envop_list, int old_len)
 {
-	t_envop	*node;
-	int		env_arr_len;
+    t_envop	*node;
+    int		env_arr_len;
 
-	node = envop_list;
-	env_arr_len = old_len;
-	while (node)
-	{
-		if (node->flag == -1 && node->matched_idx != -1)
-			env_arr_len--;
-		else if (node->flag == 1 && node->matched_idx == -1)
-			env_arr_len++;
-		node = node->next;
-	}
-	return (env_arr_len);
+    node = envop_list;
+    env_arr_len = old_len;
+    while (node)
+    {
+        if (node->flag == -1 && node->matched_idx != -1)
+            env_arr_len--;
+        else if (node->flag == 1 && node->matched_idx == -1)
+            env_arr_len++;
+        node = node->next;
+    }
+    // fprintf(stderr, "[DEBUG] calc_new_env_len: old_len=%d, new_len=%d\n", old_len, env_arr_len);
+    return (env_arr_len);
 }
 
 /*

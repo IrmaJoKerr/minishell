@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:05:19 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:26:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 23:24:24 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,55 +165,28 @@ Returns:
 - 1 on success (file created/modified successfully).
 - 0 on failure (invalid arguments, unsupported redirection type, or file error).
 */
-// int	exec_solo_redir(t_node *redir_node, t_vars *vars)
-// {
-// 	char	*filename;
-// 	int		fd;
-
-// 	if (!redir_node->args || !redir_node->args[0])
-// 		return (0);
-// 	filename = redir_node->args[0];
-// 	fd = -1;
-// 	if (!chk_permissions(filename, O_WRONLY, vars))
-// 		return (0);
-// 	if (redir_node->type == TYPE_OUT_REDIR)
-// 		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-// 	else if (redir_node->type == TYPE_APPD_REDIR)
-// 		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-// 	else
-// 		return (0);
-// 	if (fd == -1)
-// 	{
-// 		shell_error(filename, ERR_PERMISSIONS, vars);
-// 		return (0);
-// 	}
-// 	close(fd);
-// 	return (1);
-// }
 int	exec_solo_redir(t_node *redir_node, t_vars *vars)
 {
-    char	*filename;
-    int		fd;
+	char	*filename;
+	int		fd;
 
-    if (!redir_node->args || !redir_node->args[0])
-        return (0);
-    filename = redir_node->args[0];
-    fd = -1;
-    if (!chk_permissions(filename, O_WRONLY, vars))
-        return (0);
-    // DEBUG PRINT
-    fprintf(stderr, "[DEBUG] exec_solo_redir: filename='%s', redir_node->type=%d\n", filename, redir_node->type);
-    if (redir_node->type == TYPE_OUT_REDIR)
-        fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    else if (redir_node->type == TYPE_APPD_REDIR)
-        fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-    else
-        return (0);
-    if (fd == -1)
-    {
-        shell_error(filename, ERR_PERMISSIONS, vars);
-        return (0);
-    }
-    close(fd);
-    return (1);
+	if (!redir_node->args || !redir_node->args[0])
+		return (0);
+	filename = redir_node->args[0];
+	fd = -1;
+	if (!chk_permissions(filename, O_WRONLY, vars))
+		return (0);
+	if (redir_node->type == TYPE_OUT_REDIR)
+		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if (redir_node->type == TYPE_APPD_REDIR)
+		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	else
+		return (0);
+	if (fd == -1)
+	{
+		shell_error(filename, ERR_PERMISSIONS, vars);
+		return (0);
+	}
+	close(fd);
+	return (1);
 }

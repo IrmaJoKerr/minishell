@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:24:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 23:28:29 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,63 +85,33 @@ Returns:
 - Extracted filename string on success
 - NULL on errors (missing closing quote, empty filename)
 */
-// char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
-// 			char *quo_char)
-// {
-// 	char	*file_str;
-
-// 	if (input[*i_ptr] == '\'' || input[*i_ptr] == '"')
-// 	{
-// 		quo_char = &input[*i_ptr];
-// 		(*i_ptr)++;
-// 		tgt_start = *i_ptr;
-// 		while (input[*i_ptr] && input[*i_ptr] != *quo_char)
-// 			(*i_ptr)++;
-// 		if (!input[*i_ptr])
-// 			return (NULL);
-// 		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
-// 		(*i_ptr)++;
-// 	}
-// 	else
-// 	{
-// 		while (input[*i_ptr] && !ft_isspace(input[*i_ptr])
-// 			&& !is_operator_token(get_token_at(input, *i_ptr, &(int){0})))
-// 			(*i_ptr)++;
-// 		if (*i_ptr == tgt_start)
-// 			return (NULL);
-// 		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
-// 	}
-// 	return (file_str);
-// }
 char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
-            char *quo_char)
+			char *quo_char)
 {
-    char	*file_str;
+	char	*file_str;
 
-    if (input[*i_ptr] == '\'' || input[*i_ptr] == '"')
-    {
-        quo_char = &input[*i_ptr];
-        (*i_ptr)++;
-        tgt_start = *i_ptr;
-        while (input[*i_ptr] && input[*i_ptr] != *quo_char)
-            (*i_ptr)++;
-        if (!input[*i_ptr])
-            return (NULL);
-        file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
-        (*i_ptr)++;
-    }
-    else
-    {
-        while (input[*i_ptr] && !ft_isspace(input[*i_ptr])
-            && !is_operator_token(get_token_at(input, *i_ptr, &(int){0})))
-            (*i_ptr)++;
-        if (*i_ptr == tgt_start)
-            return (NULL);
-        file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
-    }
-    // DEBUG PRINT
-    fprintf(stderr, "[DEBUG] parse_and_get_filename: returning file_str='%s'\n", file_str);
-    return (file_str);
+	if (input[*i_ptr] == '\'' || input[*i_ptr] == '"')
+	{
+		quo_char = &input[*i_ptr];
+		(*i_ptr)++;
+		tgt_start = *i_ptr;
+		while (input[*i_ptr] && input[*i_ptr] != *quo_char)
+			(*i_ptr)++;
+		if (!input[*i_ptr])
+			return (NULL);
+		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
+		(*i_ptr)++;
+	}
+	else
+	{
+		while (input[*i_ptr] && !ft_isspace(input[*i_ptr])
+			&& !is_operator_token(get_token_at(input, *i_ptr, &(int){0})))
+			(*i_ptr)++;
+		if (*i_ptr == tgt_start)
+			return (NULL);
+		file_str = ft_substr(input, tgt_start, *i_ptr - tgt_start);
+	}
+	return (file_str);
 }
 
 /*
@@ -154,45 +124,23 @@ Returns:
 - 1 on successful filename extraction and storage
 - 0 on any error (empty input, extraction failure)
 */
-// int	proc_redir_filename(char *input, int *i, t_node *redir_node)
-// {
-// 	char	*filename_str;
-// 	int		tgt_start;
-// 	char	quo_char;
-
-// 	quo_char = 0;
-// 	while (input[*i] && ft_isspace(input[*i]))
-// 		(*i)++;
-// 	if (!input[*i])
-// 		return (0);
-// 	tgt_start = *i;
-// 	filename_str = parse_and_get_filename(input, i, tgt_start, &quo_char);
-// 	if (!filename_str)
-// 		return (0);
-// 	if (redir_node->args[0])
-// 		free(redir_node->args[0]);
-// 	redir_node->args[0] = filename_str;
-// 	return (1);
-// }
 int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 {
-    char	*filename_str;
-    int		tgt_start;
-    char	quo_char;
+	char	*filename_str;
+	int		tgt_start;
+	char	quo_char;
 
-    quo_char = 0;
-    while (input[*i] && ft_isspace(input[*i]))
-        (*i)++;
-    if (!input[*i])
-        return (0);
-    tgt_start = *i;
-    filename_str = parse_and_get_filename(input, i, tgt_start, &quo_char);
-    if (!filename_str)
-        return (0);
-    if (redir_node->args[0])
-        free(redir_node->args[0]);
-    redir_node->args[0] = filename_str;
-    // DEBUG PRINT
-    fprintf(stderr, "[DEBUG] proc_redir_filename: redir_node->args[0]='%s'\n", redir_node->args[0]);
-    return (1);
+	quo_char = 0;
+	while (input[*i] && ft_isspace(input[*i]))
+		(*i)++;
+	if (!input[*i])
+		return (0);
+	tgt_start = *i;
+	filename_str = parse_and_get_filename(input, i, tgt_start, &quo_char);
+	if (!filename_str)
+		return (0);
+	if (redir_node->args[0])
+		free(redir_node->args[0]);
+	redir_node->args[0] = filename_str;
+	return (1);
 }
