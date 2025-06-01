@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 12:18:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:21:23 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:25:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,63 +76,121 @@ Returns:
 - 1 on success.
 - 0 on failure.
 */
+// int	setup_out_redir(t_node *node, t_vars *vars)
+// {
+// 	char	*file;
+// 	int		mode;
+// 	int		result;
+
+// 	if (!node || !node->args || !node->args[0])
+// 		return (0);
+// 	file = node->args[0];
+// 	mode = O_WRONLY | O_CREAT | O_TRUNC;
+// 	vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+// 	if (node->type == TYPE_APPD_REDIR)
+// 	{
+// 		mode = O_WRONLY | O_CREAT | O_APPEND;
+// 		vars->pipes->out_mode = OUT_MODE_APPEND;
+// 	}
+// 	if (vars->pipes->redirection_fd >= 0)
+// 	{
+// 		close(vars->pipes->redirection_fd);
+// 		vars->pipes->redirection_fd = -1;
+// 	}
+// 	if (!chk_permissions(file, mode, vars))
+// 		return (0);
+// 	result = setup_output_redirection(file, vars);
+// 	return (result);
+// }
 int	setup_out_redir(t_node *node, t_vars *vars)
 {
-	char	*file;
-	int		mode;
-	int		result;
+    char	*file;
+    int		mode;
+    int		result;
 
-	if (!node || !node->args || !node->args[0])
-		return (0);
-	file = node->args[0];
-	mode = O_WRONLY | O_CREAT | O_TRUNC;
-	vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-	if (node->type == TYPE_APPD_REDIR)
-	{
-		mode = O_WRONLY | O_CREAT | O_APPEND;
-		vars->pipes->out_mode = OUT_MODE_APPEND;
-	}
-	if (vars->pipes->redirection_fd >= 0)
-	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
-	}
-	if (!chk_permissions(file, mode, vars))
-		return (0);
-	result = setup_output_redirection(file, vars);
-	return (result);
+    if (!node || !node->args || !node->args[0])
+        return (0);
+    file = node->args[0];
+    mode = O_WRONLY | O_CREAT | O_TRUNC;
+    vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+    if (node->type == TYPE_APPD_REDIR)
+    {
+        mode = O_WRONLY | O_CREAT | O_APPEND;
+        vars->pipes->out_mode = OUT_MODE_APPEND;
+    }
+    if (vars->pipes->redirection_fd >= 0)
+    {
+        close(vars->pipes->redirection_fd);
+        vars->pipes->redirection_fd = -1;
+    }
+    // DEBUG PRINT
+    fprintf(stderr, "[DEBUG] setup_out_redir: file='%s', node->type=%d\n", file, node->type);
+    if (!chk_permissions(file, mode, vars))
+        return (0);
+    result = setup_output_redirection(file, vars);
+    return (result);
 }
 
 /*
 Opens output file and sets up stdout redirection.
 */
+// int	setup_output_redirection(char *file, t_vars *vars)
+// {
+// 	int	mode;
+
+// 	if (vars->pipes->redirection_fd >= 0)
+// 	{
+// 		close(vars->pipes->redirection_fd);
+// 		vars->pipes->redirection_fd = -1;
+// 	}
+// 	if (vars->pipes->out_mode == OUT_MODE_APPEND)
+// 		mode = O_WRONLY | O_CREAT | O_APPEND;
+// 	else
+// 		mode = O_WRONLY | O_CREAT | O_TRUNC;
+// 	vars->pipes->redirection_fd = open(file, mode, 0666);
+// 	if (vars->pipes->redirection_fd == -1)
+// 	{
+// 		vars->error_code = ERR_REDIRECTION;
+// 		return (0);
+// 	}
+// 	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
+// 	{
+// 		close(vars->pipes->redirection_fd);
+// 		vars->pipes->redirection_fd = -1;
+// 		vars->error_code = ERR_REDIRECTION;
+// 		return (0);
+// 	}
+// 	return (1);
+// }
 int	setup_output_redirection(char *file, t_vars *vars)
 {
-	int	mode;
+    int	mode;
 
-	if (vars->pipes->redirection_fd >= 0)
-	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
-	}
-	if (vars->pipes->out_mode == OUT_MODE_APPEND)
-		mode = O_WRONLY | O_CREAT | O_APPEND;
-	else
-		mode = O_WRONLY | O_CREAT | O_TRUNC;
-	vars->pipes->redirection_fd = open(file, mode, 0666);
-	if (vars->pipes->redirection_fd == -1)
-	{
-		vars->error_code = ERR_REDIRECTION;
-		return (0);
-	}
-	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
-	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
-		vars->error_code = ERR_REDIRECTION;
-		return (0);
-	}
-	return (1);
+    if (vars->pipes->redirection_fd >= 0)
+    {
+        close(vars->pipes->redirection_fd);
+        vars->pipes->redirection_fd = -1;
+    }
+    if (vars->pipes->out_mode == OUT_MODE_APPEND)
+        mode = O_WRONLY | O_CREAT | O_APPEND;
+    else
+        mode = O_WRONLY | O_CREAT | O_TRUNC;
+    // DEBUG PRINT
+    fprintf(stderr, "[DEBUG] setup_output_redirection: file='%s', mode=%d\n", file, mode);
+    vars->pipes->redirection_fd = open(file, mode, 0666);
+    if (vars->pipes->redirection_fd == -1)
+    {
+        vars->error_code = ERR_REDIRECTION;
+        return (0);
+    }
+    if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
+    {
+        close(vars->pipes->redirection_fd);
+        vars->pipes->redirection_fd = -1;
+        vars->error_code = ERR_REDIRECTION;
+        return (0);
+    }
+    return (1);
 }
 
 /*

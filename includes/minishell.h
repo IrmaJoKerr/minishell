@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:02:05 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:40:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,24 +273,35 @@ Builtin "env" command. Outputs the environment variables.
 In builtin_env.c
 */
 int			builtin_env(t_vars *vars);
+/*
+Builtin environment operations calculation functions.
+In builtin_envops_calc.c
+*/
+int			decide_action_at_index(int idx, t_envop *env_list,
+				t_envop **overwrite_node);
+int			calc_new_env_len(t_envop *envop_list, int old_len);
+int			chk_copy_or_write(int idx, t_envop *envop_list,
+				t_envop **overwrite_node);
+
+/*
+Builtin environment operations calculation functions.
+In builtin_envops_utils.c
+*/
+char		*get_env_key(const char *arg_str, int *key_len);
+void		free_envop_list(t_envop *head);
+void		err_invalid_export_arg(char *arg);
+int			copy_env_with_envop_list(char **env, t_envop *envop_list,
+				char **new_env);
+int			copy_env_with_ops(char **env, t_envop *env_list, char **new_env);
 
 /*
 Builtin environment operations functions. For use with cd, export,unset.
 In builtin_envops.c
 */
 t_envop		*make_envop_node(const char *arg, int flag);
-char		*get_env_key(const char *arg_str, int *key_len);
-void		free_envop_list(t_envop *head);
 t_envop		*parse_envop_list(char **args, int op_type);
-void		err_invalid_export_arg(char *arg);
 void		add_envop_node(t_envop **head, t_envop *node);
 void		match_envline_to_env(t_envop *envop_list, char **env);
-int			copy_env_with_envop_list(char **env, t_envop *envop_list,
-				char **new_env);
-int			decide_action_at_index(int idx, t_envop *env_list,
-				t_envop **overwrite_node);
-int			copy_env_with_ops(char **env, t_envop *env_list, char **new_env);
-int			calc_new_env_len(t_envop *envop_list, int old_len);
 char		**proc_envop_list(t_envop *envop_list, char **env);
 
 /*
@@ -306,7 +317,6 @@ In builtin_export_utils.c
 char		*valid_export(char *args);
 char		**asc_order(char **sort_env, int count);
 char		**make_sorted_env(int count, t_vars *vars);
-
 
 /*
 Builtin "export" command. Sets an environment variable.

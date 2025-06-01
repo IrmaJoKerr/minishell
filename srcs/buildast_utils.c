@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:05:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 16:06:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:27:21 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,32 +27,63 @@ Example: For "cat file.txt > output.txt | grep pattern":
 - Skips "output.txt" (redirection target).
 - Links "pattern" to "grep" command node.
 */
+// void	chk_args_match_cmd(t_vars *vars)
+// {
+// 	t_node	*current;
+// 	t_node	*node;
+// 	int		is_target;
+// 	int		is_heredoc;
+
+// 	node = NULL;
+// 	if (!vars || !vars->head)
+// 		return ;
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (current->type == TYPE_CMD)
+// 			node = current;
+// 		else if (current->type == TYPE_ARGS && node)
+// 		{
+// 			is_target = is_redirection_target(current, vars);
+// 			is_heredoc = is_heredoc_target(current, vars);
+// 			if (!is_target && !is_heredoc)
+// 				append_arg(node, current->args[0], 0);
+// 		}
+// 		else if (current->type == TYPE_PIPE)
+// 			node = NULL;
+// 		current = current->next;
+// 	}
+// }
 void	chk_args_match_cmd(t_vars *vars)
 {
-	t_node	*current;
-	t_node	*node;
-	int		is_target;
-	int		is_heredoc;
+    t_node	*current;
+    t_node	*node;
+    int		is_target;
+    int		is_heredoc;
 
-	node = NULL;
-	if (!vars || !vars->head)
-		return ;
-	current = vars->head;
-	while (current)
-	{
-		if (current->type == TYPE_CMD)
-			node = current;
-		else if (current->type == TYPE_ARGS && node)
-		{
-			is_target = is_redirection_target(current, vars);
-			is_heredoc = is_heredoc_target(current, vars);
-			if (!is_target && !is_heredoc)
-				append_arg(node, current->args[0], 0);
-		}
-		else if (current->type == TYPE_PIPE)
-			node = NULL;
-		current = current->next;
-	}
+    node = NULL;
+    if (!vars || !vars->head)
+        return ;
+    current = vars->head;
+    while (current)
+    {
+        if (current->type == TYPE_CMD)
+            node = current;
+        else if (current->type == TYPE_ARGS && node)
+        {
+            is_target = is_redirection_target(current, vars);
+            is_heredoc = is_heredoc_target(current, vars);
+            if (!is_target && !is_heredoc) {
+                fprintf(stderr, "[DEBUG] chk_args_match_cmd: Appending ARGS '%s' to CMD '%s'\n", current->args[0], node->args[0]);
+                append_arg(node, current->args[0], 0);
+            } else {
+                fprintf(stderr, "[DEBUG] chk_args_match_cmd: Skipping ARGS '%s' (is_target=%d, is_heredoc=%d)\n", current->args[0], is_target, is_heredoc);
+            }
+        }
+        else if (current->type == TYPE_PIPE)
+            node = NULL;
+        current = current->next;
+    }
 }
 
 /*
@@ -71,31 +102,59 @@ Returns:
 - 0 if node is NOT a redirection target (Ok to append to command).
 - 1 if node IS a redirection target (Don't append to command).
 */
+// int	is_redirection_target(t_node *node, t_vars *vars)
+// {
+// 	t_node	*current;
+// 	int		result;
+
+// 	result = 0;
+// 	current = vars->head;
+// 	while (current)
+// 	{
+// 		if (is_redirection(current->type) && current->type != TYPE_HEREDOC)
+// 		{
+// 			if (current->next == node)
+// 			{
+// 				if (current->args && current->args[0]
+// 					&& ft_strcmp(current->args[0]
+// 						, get_token_str(current->type)) != 0)
+// 					result = 0;
+// 				else
+// 					result = 1;
+// 				break ;
+// 			}
+// 		}
+// 		current = current->next;
+// 	}
+// 	return (result);
+// }
 int	is_redirection_target(t_node *node, t_vars *vars)
 {
-	t_node	*current;
-	int		result;
+    t_node	*current;
+    int		result;
 
-	result = 0;
-	current = vars->head;
-	while (current)
-	{
-		if (is_redirection(current->type) && current->type != TYPE_HEREDOC)
-		{
-			if (current->next == node)
-			{
-				if (current->args && current->args[0]
-					&& ft_strcmp(current->args[0]
-						, get_token_str(current->type)) != 0)
-					result = 0;
-				else
-					result = 1;
-				break ;
-			}
-		}
-		current = current->next;
-	}
-	return (result);
+    result = 0;
+    current = vars->head;
+    while (current)
+    {
+        if (is_redirection(current->type) && current->type != TYPE_HEREDOC)
+        {
+            if (current->next == node)
+            {
+                if (current->args && current->args[0]
+                    && ft_strcmp(current->args[0]
+                        , get_token_str(current->type)) != 0)
+                    result = 0;
+                else
+                    result = 1;
+                // DEBUG PRINT
+                fprintf(stderr, "[DEBUG] is_redirection_target: node='%s', result=%d\n", node->args[0], result);
+                break ;
+            }
+        }
+        current = current->next;
+    }
+    return (result);
 }
 
 /*

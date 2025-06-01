@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/06/01 17:28:26 by bleow            ###   ########.fr        #
+#    Updated: 2025/06/01 20:32:00 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -100,6 +100,8 @@ MINISHELL_BUILTIN_SRCS = \
 			srcs/builtins/builtin_cd.c \
 			srcs/builtins/builtin_echo.c \
 			srcs/builtins/builtin_env.c \
+			srcs/builtins/builtin_envops_calc.c \
+			srcs/builtins/builtin_envops_utils.c \
 			srcs/builtins/builtin_envops.c \
 			srcs/builtins/builtin_exit.c \
 			srcs/builtins/builtin_export_utils.c \

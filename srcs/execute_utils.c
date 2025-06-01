@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 03:23:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:26:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,31 +49,59 @@ Returns:
 - 0 on failure (e.g., target processing error, file open error).
 Works with setup_redirection().
 */
+// int	handle_solo_out_redir(t_node *node, t_vars *vars)
+// {
+// 	char	*filename;
+// 	int		flags;
+// 	int		fd;
+
+// 	if (!proc_redir_target(node, vars))
+// 		return (0);
+// 	filename = node->args[0];
+// 	if (node->type == TYPE_APPD_REDIR)
+// 		vars->pipes->out_mode = OUT_MODE_APPEND;
+// 	else
+// 		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+// 	if (vars->pipes->out_mode == OUT_MODE_APPEND)
+// 		flags = (O_WRONLY | O_CREAT | O_APPEND);
+// 	else
+// 		flags = (O_WRONLY | O_CREAT | O_TRUNC);
+// 	fd = open(filename, flags, 0644);
+// 	if (fd == -1)
+// 	{
+// 		shell_error(filename, errno, vars);
+// 		return (0);
+// 	}
+// 	close(fd);
+// 	return (1);
+// }
 int	handle_solo_out_redir(t_node *node, t_vars *vars)
 {
-	char	*filename;
-	int		flags;
-	int		fd;
+    char	*filename;
+    int		flags;
+    int		fd;
 
-	if (!proc_redir_target(node, vars))
-		return (0);
-	filename = node->args[0];
-	if (node->type == TYPE_APPD_REDIR)
-		vars->pipes->out_mode = OUT_MODE_APPEND;
-	else
-		vars->pipes->out_mode = OUT_MODE_TRUNCATE;
-	if (vars->pipes->out_mode == OUT_MODE_APPEND)
-		flags = (O_WRONLY | O_CREAT | O_APPEND);
-	else
-		flags = (O_WRONLY | O_CREAT | O_TRUNC);
-	fd = open(filename, flags, 0644);
-	if (fd == -1)
-	{
-		shell_error(filename, errno, vars);
-		return (0);
-	}
-	close(fd);
-	return (1);
+    if (!proc_redir_target(node, vars))
+        return (0);
+    filename = node->args[0];
+    if (node->type == TYPE_APPD_REDIR)
+        vars->pipes->out_mode = OUT_MODE_APPEND;
+    else
+        vars->pipes->out_mode = OUT_MODE_TRUNCATE;
+    if (vars->pipes->out_mode == OUT_MODE_APPEND)
+        flags = (O_WRONLY | O_CREAT | O_APPEND);
+    else
+        flags = (O_WRONLY | O_CREAT | O_TRUNC);
+    // DEBUG PRINT
+    fprintf(stderr, "[DEBUG] handle_solo_out_redir: filename='%s', node->type=%d\n", filename, node->type);
+    fd = open(filename, flags, 0644);
+    if (fd == -1)
+    {
+        shell_error(filename, errno, vars);
+        return (0);
+    }
+    close(fd);
+    return (1);
 }
 
 /*

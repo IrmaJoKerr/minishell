@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:24:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:25:19 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,25 +62,50 @@ void	set_quote_type(t_node *node, int quote_type)
 Initializes a token node with the given type and content
 Sets up character-level quote tracking when appropriate
 */
+// t_node	*initnode(t_tokentype type, char *token)
+// {
+// 	t_node	*node;
+// 	int		quote_type;
+
+// 	quote_type = 0;
+// 	node = malloc(sizeof(t_node));
+// 	if (!node)
+// 		return (NULL);
+// 	if (type == TYPE_SINGLE_QUOTE)
+// 		quote_type = TYPE_SINGLE_QUOTE;
+// 	else if (type == TYPE_DOUBLE_QUOTE)
+// 		quote_type = TYPE_DOUBLE_QUOTE;
+// 	if (!make_nodeframe(node, type, token))
+// 	{
+// 		free(node);
+// 		return (NULL);
+// 	}
+// 	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
+// 		set_quote_type(node, quote_type);
+// 	return (node);
+// }
 t_node	*initnode(t_tokentype type, char *token)
 {
-	t_node	*node;
-	int		quote_type;
+    t_node	*node;
+    int		quote_type;
 
-	quote_type = 0;
-	node = malloc(sizeof(t_node));
-	if (!node)
-		return (NULL);
-	if (type == TYPE_SINGLE_QUOTE)
-		quote_type = TYPE_SINGLE_QUOTE;
-	else if (type == TYPE_DOUBLE_QUOTE)
-		quote_type = TYPE_DOUBLE_QUOTE;
-	if (!make_nodeframe(node, type, token))
-	{
-		free(node);
-		return (NULL);
-	}
-	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
-		set_quote_type(node, quote_type);
-	return (node);
+    quote_type = 0;
+    node = malloc(sizeof(t_node));
+    if (!node)
+        return (NULL);
+    if (type == TYPE_SINGLE_QUOTE)
+        quote_type = TYPE_SINGLE_QUOTE;
+    else if (type == TYPE_DOUBLE_QUOTE)
+        quote_type = TYPE_DOUBLE_QUOTE;
+    if (!make_nodeframe(node, type, token))
+    {
+        free(node);
+        return (NULL);
+    }
+    if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
+        set_quote_type(node, quote_type);
+    // DEBUG PRINT
+    if (node->args && node->args[0])
+        fprintf(stderr, "[DEBUG] initnode: type=%d, args[0]='%s'\n", type, node->args[0]);
+    return (node);
 }
