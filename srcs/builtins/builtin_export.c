@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/06/01 05:22:15 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:00:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,27 @@ Returns 0 on success, 1 on failure.
 */
 int	builtin_export(char **args, t_vars *vars)
 {
-	int	cmdcode;
+	t_envop	*to_proc;
+	char	**new_env;
+	int		old_len;
 
 	if (!vars || !vars->env)
-	{
-		cmdcode = 1;
-		vars->error_code = cmdcode;
-		return (cmdcode);
-	}
+		return (vars->error_code = 1);
 	if (!args[1])
 		return (export_without_args(vars));
-	return (export_with_args(args, vars));
+	to_proc = parse_envop_list(args, 1);
+	if (!to_proc)
+		return (vars->error_code = 1);
+	match_envline_to_env(to_proc, vars->env);
+	new_env = proc_envop_list(to_proc, vars->env);
+	if (new_env)
+	{
+		old_len = ft_arrlen(vars->env);
+		ft_free_2d(vars->env, old_len);
+		vars->env = new_env;
+	}
+	free_envop_list(to_proc);
+	return (vars->error_code = 0);
 }
 
 /*
@@ -50,88 +60,6 @@ int	export_without_args(t_vars *vars)
 	cmdcode = sort_env(count, vars);
 	vars->error_code = cmdcode;
 	return (cmdcode);
-}
-char	*ft_trim_key(char *args)
-{
-	char	*trimmed_key;
-	int		i;
-
-	if (!args)
-		return (NULL);
-	i = 0;
-	while (args[i] && args[i] != '=')
-		i++;
-	trimmed_key = ft_substr(args, 0, i);
-	if (!trimmed_key)
-		return (NULL);
-	return (trimmed_key);
-}
-
-int is_env(char *args, t_vars *vars)
-{
-	int	i;
-	char *env_k;
-	char *arg_k;
-	
-	i = 0;
-	
-	while (vars->env && vars->env[i])
-	{
-		env_k = ft_trim_key(args);
-		arg_k = ft_trim_key(vars->env[i]);
-		if (ft_strncmp(arg_k, env_k ,ft_strlen(arg_k)) == 0)
-		{
-			if (ft_strncmp(env_k, arg_k ,ft_strlen(env_k)) == 0)
-			{
-				// free(env_k);
-				free(arg_k);
-				return (1);
-			}
-		}
-		free(env_k);
-		free(arg_k);
-		i++;
-	}
-	return (0);
-}
-/*
-Handle export WITH ARGUMENTS.
-- Checks if arguments are valid.
-- Sets environment variables.
-Returns 0 on success, 1 on failure.
-*/
-int	export_with_args(char **args, t_vars *vars)
-{
-	int	i;
-	int	cmdcode;
-
-	cmdcode = 0;
-	i = 1;
-	while (args[i])
-	{
-		if (valid_export(args[i]))
-		{
-			if (is_env(args[i], vars) == 1)
-			{
-				printf("export: '%s': already exists\n", args[i]);
-				modify_env(&vars->env, 0, args[i]);
-			}
-			else
-			{
-				printf("export: '%s': added\n", args[i]);
-				modify_env(&vars->env, 1, args[i]);
-			}
-		}
-		else
-		{
-			ft_putstr_fd("export: '", 2);
-			ft_putstr_fd(args[i], 2);
-			ft_putstr_fd("': not a valid identifier\n", 2);
-			cmdcode = 1;
-		}
-		i++;
-	}
-	return (vars->error_code = cmdcode);
 }
 
 /*
@@ -164,4 +92,50 @@ int	sort_env(int count, t_vars *vars)
 	}
 	free(sort_env);
 	return (cmdcode);
+}
+
+/*
+Master control function to process and print a single environment variable.
+- Checks if the variable has a value (has equals sign).
+- If it has a value, prints the variable with the value.
+- If it doesn't have a value, prints the variable only.
+Returns 0 on success.
+*/
+int	process_export_var(char *env_var)
+{
+	char	*equal_pos;
+
+	equal_pos = ft_strchr(env_var, '=');
+	if (equal_pos)
+	{
+		*equal_pos = '\0';
+		process_var_with_val(env_var, equal_pos + 1);
+		*equal_pos = '=';
+	}
+	else
+	{
+		printf("declare -x %s\n", env_var);
+	}
+	return (0);
+}
+
+/*
+Process and print a variable with a value (has equals sign).
+- Prints the variable name and value in export format.
+Example: "declare -x VAR_NAME="VALUE"
+Returns 0 on success.
+*/
+int	process_var_with_val(char *name, char *value)
+{
+	printf("declare -x %s=\"", name);
+	while (*value)
+	{
+		if (*value == '"')
+			printf("\\\"");
+		else
+			printf("%c", *value);
+		value++;
+	}
+	printf("\"\n");
+	return (0);
 }

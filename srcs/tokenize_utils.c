@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 13:05:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 16:16:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,9 +146,7 @@ void	handle_text(char *input, t_vars *vars)
 		set_token_type(vars, token_preview);
 		handle_string(input, vars);
 		if (token_preview)
-		{
 			free(token_preview);
-		}
 		vars->start = vars->pos;
 	}
 }

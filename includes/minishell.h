@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 04:41:48 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 20:02:05 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,19 @@ typedef struct s_quote_context
 }	t_quote_context;
 
 /*
+Node structure for env operations(cd, export, unset)
+*/
+typedef struct s_envop
+{
+	char			*arg_str;
+	char			*export_key;
+	int				flag;
+	int				arg_len;
+	int				matched_idx;
+	struct s_envop	*next;
+}	t_envop;
+
+/*
 Node structure for linked list and AST.
 Next and prev are for building linked list.
 Left and right are for building AST.
@@ -245,6 +258,7 @@ In builtin_cd.c
 int			builtin_cd(char **args, t_vars *vars);
 int			handle_cd_special(char **args, t_vars *vars, char **path_value);
 int			handle_cd_path(char **args, t_vars *vars);
+int			export_env_var(t_vars *vars, char *key, char *value);
 int			update_env_pwd(t_vars *vars, char *oldpwd);
 
 /*
@@ -261,6 +275,25 @@ In builtin_env.c
 int			builtin_env(t_vars *vars);
 
 /*
+Builtin environment operations functions. For use with cd, export,unset.
+In builtin_envops.c
+*/
+t_envop		*make_envop_node(const char *arg, int flag);
+char		*get_env_key(const char *arg_str, int *key_len);
+void		free_envop_list(t_envop *head);
+t_envop		*parse_envop_list(char **args, int op_type);
+void		err_invalid_export_arg(char *arg);
+void		add_envop_node(t_envop **head, t_envop *node);
+void		match_envline_to_env(t_envop *envop_list, char **env);
+int			copy_env_with_envop_list(char **env, t_envop *envop_list,
+				char **new_env);
+int			decide_action_at_index(int idx, t_envop *env_list,
+				t_envop **overwrite_node);
+int			copy_env_with_ops(char **env, t_envop *env_list, char **new_env);
+int			calc_new_env_len(t_envop *envop_list, int old_len);
+char		**proc_envop_list(t_envop *envop_list, char **env);
+
+/*
 Builtin "exit" command. Exits the shell.
 In builtin_exit.c
 */
@@ -273,8 +306,7 @@ In builtin_export_utils.c
 char		*valid_export(char *args);
 char		**asc_order(char **sort_env, int count);
 char		**make_sorted_env(int count, t_vars *vars);
-int			process_export_var(char *env_var);
-int			process_var_with_val(char *name, char *value);
+
 
 /*
 Builtin "export" command. Sets an environment variable.
@@ -282,35 +314,22 @@ In builtin_export.c
 */
 int			builtin_export(char **args, t_vars *vars);
 int			export_without_args(t_vars *vars);
-int			export_with_args(char **args, t_vars *vars);
 int			sort_env(int count, t_vars *vars);
-int 		is_env(char *args, t_vars *vars);
+int			process_export_var(char *env_var);
+int			process_var_with_val(char *name, char *value);
 
 /*
 Builtin "pwd" command. Outputs the current working directory.
 In builtin_pwd.c
 */
-int			builtin_pwd(t_vars *vars);
-
-/*
-Builtin "unset" command utility functions.
-In builtin_unset_utils.c
-*/
-
-void		copy_env_front(char **src, char **dst, int pos);
-void		copy_env_change(char **src, char **dst, int pos);
-void		copy_env_add(char **src, char **dst, int pos);
-void 		copy_env_unset(char **src, char **dst, int pos);	
+int			builtin_pwd(t_vars *vars);	
 
 /*
 Builtin "unset" command. Unsets an environment variable.
 In builtin_unset.c
 */
 int			builtin_unset(char **args, t_vars *vars);
-char		**realloc_until_var(int changes, char **env, char *var, int count);
-char		**null_env(char **new_env, int count);
 int			get_env_pos(char *key, char **env, int keylen);
-void		modify_env(char ***env, int changes, char *var);
 
 /* Main minishell functions. In srcs directory. */
 

@@ -6,12 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:50 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/30 09:50:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 18:18:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <readline/readline.h>
 
 /*
 Built-in command: exit. Exits the shell.

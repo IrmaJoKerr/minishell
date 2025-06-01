@@ -6,12 +6,11 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/31 22:56:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 18:18:10 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <string.h>
 
 /*
 Built-in command: cd. Changes the current working directory.
@@ -110,6 +109,29 @@ int	handle_cd_path(char **args, t_vars *vars)
 }
 
 /*
+Export a single environment variable using builtin_export.
+Combines key and value, builds argv, and calls builtin_export.
+Returns:
+- 0 on success.
+- 1 on allocation failure.
+*/
+int	export_env_var(t_vars *vars, char *key, char *value)
+{
+	char	*tmp;
+	char	*dummy_argv[3];
+
+	tmp = ft_strjoin(key, value);
+	if (!tmp)
+		return (1);
+	dummy_argv[0] = "export";
+	dummy_argv[1] = tmp;
+	dummy_argv[2] = NULL;
+	builtin_export(dummy_argv, vars);
+	free(tmp);
+	return (0);
+}
+
+/*
 Updates PWD and OLDPWD environment variables after directory change.
 - Temporarily stores the old working directory in OLDPWD.
 - Temporarily buffers the current working directory path in cwd[].
@@ -119,24 +141,17 @@ Returns 0 on success, 1 on failure.
 int	update_env_pwd(t_vars *vars, char *oldpwd)
 {
 	char	cwd[1024];
-	char	*tmp;
 	char	*result;
 
-	tmp = ft_strjoin("OLDPWD=", oldpwd);
-	if (!tmp)
-		return (1);
-	modify_env(&vars->env, 1, tmp);
-	free(tmp);
 	result = getcwd(cwd, sizeof(cwd));
 	if (result == NULL)
 	{
 		ft_putstr_fd("cd: error retrieving current directory\n", 2);
 		return (1);
 	}
-	tmp = ft_strjoin("PWD=", cwd);
-	if (!tmp)
+	if (export_env_var(vars, "OLDPWD=", oldpwd) != 0)
 		return (1);
-	modify_env(&vars->env, 1, tmp);
-	free(tmp);
+	if (export_env_var(vars, "PWD=", cwd) != 0)
+		return (1);
 	return (0);
 }
