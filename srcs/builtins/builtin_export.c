@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 05:22:15 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,49 @@ int	export_without_args(t_vars *vars)
 	vars->error_code = cmdcode;
 	return (cmdcode);
 }
+char	*ft_trim_key(char *args)
+{
+	char	*trimmed_key;
+	int		i;
 
+	if (!args)
+		return (NULL);
+	i = 0;
+	while (args[i] && args[i] != '=')
+		i++;
+	trimmed_key = ft_substr(args, 0, i);
+	if (!trimmed_key)
+		return (NULL);
+	return (trimmed_key);
+}
+
+int is_env(char *args, t_vars *vars)
+{
+	int	i;
+	char *env_k;
+	char *arg_k;
+	
+	i = 0;
+	
+	while (vars->env && vars->env[i])
+	{
+		env_k = ft_trim_key(args);
+		arg_k = ft_trim_key(vars->env[i]);
+		if (ft_strncmp(arg_k, env_k ,ft_strlen(arg_k)) == 0)
+		{
+			if (ft_strncmp(env_k, arg_k ,ft_strlen(env_k)) == 0)
+			{
+				// free(env_k);
+				free(arg_k);
+				return (1);
+			}
+		}
+		free(env_k);
+		free(arg_k);
+		i++;
+	}
+	return (0);
+}
 /*
 Handle export WITH ARGUMENTS.
 - Checks if arguments are valid.
@@ -63,12 +105,23 @@ int	export_with_args(char **args, t_vars *vars)
 	int	i;
 	int	cmdcode;
 
-	i = 1;
 	cmdcode = 0;
+	i = 1;
 	while (args[i])
 	{
 		if (valid_export(args[i]))
-			modify_env(&vars->env, 1, args[i]);
+		{
+			if (is_env(args[i], vars) == 1)
+			{
+				printf("export: '%s': already exists\n", args[i]);
+				modify_env(&vars->env, 0, args[i]);
+			}
+			else
+			{
+				printf("export: '%s': added\n", args[i]);
+				modify_env(&vars->env, 1, args[i]);
+			}
+		}
 		else
 		{
 			ft_putstr_fd("export: '", 2);

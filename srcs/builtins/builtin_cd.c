@@ -6,11 +6,12 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/29 09:38:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/05/31 22:56:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+#include <string.h>
 
 /*
 Built-in command: cd. Changes the current working directory.
@@ -28,7 +29,8 @@ int	builtin_cd(char **args, t_vars *vars)
 
 	if (args[1] && args[2])
 		return (1);
-	oldpwd = ft_strdup(get_env_val("OLDPWD", vars->env));
+	oldpwd = NULL;
+	oldpwd = get_env_val("OLDPWD", vars->env);
 	if (!oldpwd)
 		return (1);
 	cmdcode = handle_cd_path(args, vars);
@@ -45,8 +47,7 @@ int	builtin_cd(char **args, t_vars *vars)
 		return (1);
 	}
 	free(oldpwd);
-	vars->error_code = cmdcode;
-	return (cmdcode);
+	return (vars->error_code = cmdcode);
 }
 
 /*
@@ -56,30 +57,25 @@ Handle changing to special directories (home or previous).
 - Gets the path from the environment variables.
 Returns 0 on success, 1 on failure.
 */
-int	handle_cd_special(char **args, t_vars *vars)
+int	handle_cd_special(char **args, t_vars *vars, char **path_value)
 {
-	char	*path_value;
-	int		cmdcode;
-
 	if ((!args[1]) || ((args[1][0] == '~') && (args[1][1] == '\0')))
 	{
-		path_value = get_env_val("HOME", vars->env);
-		cmdcode = chdir(path_value);
-		if (cmdcode != 0)
+		*path_value = get_env_val("HOME", vars->env);
+		if (!(*path_value) || chdir(*path_value) != 0)
 		{
 			printf("cd: HOME not set or no access\n");
 			return (1);
 		}
 		return (0);
 	}
-	path_value = get_env_val("OLDPWD", vars->env);
-	cmdcode = chdir(path_value);
-	if (cmdcode != 0)
+	*path_value = get_env_val("OLDPWD", vars->env);
+	if (!(*path_value) || chdir(*path_value) != 0)
 	{
 		printf("cd: OLDPWD not set or no access\n");
 		return (1);
 	}
-	printf("%s\n", path_value);
+	printf("%s\n", *path_value);
 	return (0);
 }
 
@@ -91,12 +87,18 @@ Returns 0 on success, 1 on failure.
 */
 int	handle_cd_path(char **args, t_vars *vars)
 {
-	int	cmdcode;
+	int		cmdcode;
+	char	*path_value;
 
+	path_value = NULL;
+	cmdcode = 0;
 	if ((!args[1]) || ((args[1][0] == '~') && (args[1][1] == '\0')) ||
 		(args[1][0] == '-' && args[1][1] == '\0'))
 	{
-		return (handle_cd_special(args, vars));
+		cmdcode = handle_cd_special(args, vars, &path_value);
+		if (path_value)
+			free(path_value);
+		return (cmdcode);
 	}
 	cmdcode = chdir(args[1]);
 	if (cmdcode != 0)
@@ -104,7 +106,7 @@ int	handle_cd_path(char **args, t_vars *vars)
 		shell_error(args[1], ERR_CMD_NOT_FOUND, vars);
 		return (1);
 	}
-	return (0);
+	return (cmdcode);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 16:20:36 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/01 04:41:48 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ builtin_cd.c - Builtin "cd" command. Changes the current working directory.
 In builtin_cd.c
 */
 int			builtin_cd(char **args, t_vars *vars);
-int			handle_cd_special(char **args, t_vars *vars);
+int			handle_cd_special(char **args, t_vars *vars, char **path_value);
 int			handle_cd_path(char **args, t_vars *vars);
 int			update_env_pwd(t_vars *vars, char *oldpwd);
 
@@ -284,6 +284,7 @@ int			builtin_export(char **args, t_vars *vars);
 int			export_without_args(t_vars *vars);
 int			export_with_args(char **args, t_vars *vars);
 int			sort_env(int count, t_vars *vars);
+int 		is_env(char *args, t_vars *vars);
 
 /*
 Builtin "pwd" command. Outputs the current working directory.
@@ -295,17 +296,20 @@ int			builtin_pwd(t_vars *vars);
 Builtin "unset" command utility functions.
 In builtin_unset_utils.c
 */
+
 void		copy_env_front(char **src, char **dst, int pos);
-void		copy_env_back(char **src, char **dst, int idx, int offset);
+void		copy_env_change(char **src, char **dst, int pos);
+void		copy_env_add(char **src, char **dst, int pos);
+void 		copy_env_unset(char **src, char **dst, int pos);	
 
 /*
 Builtin "unset" command. Unsets an environment variable.
 In builtin_unset.c
 */
 int			builtin_unset(char **args, t_vars *vars);
-int			set_next_pos(int changes, char **env, int pos);
 char		**realloc_until_var(int changes, char **env, char *var, int count);
-int			get_env_pos(char *var, char **env);
+char		**null_env(char **new_env, int count);
+int			get_env_pos(char *key, char **env, int keylen);
 void		modify_env(char ***env, int changes, char *var);
 
 /* Main minishell functions. In srcs directory. */
