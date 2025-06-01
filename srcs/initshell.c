@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:23:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:17:56 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,7 @@ void	reset_shell(t_vars *vars)
 {
 	if (!vars)
 		return ;
+	free_null_token_stop(vars);
 	cleanup_token_list(vars);
 	if (vars->partial_input)
 		free(vars->partial_input);

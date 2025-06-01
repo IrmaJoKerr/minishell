@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:17:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ void	cleanup_exit(t_vars *vars)
 	save_history();
 	if (vars->head)
 	{
+		free_null_token_stop(vars);
 		cleanup_token_list(vars);
 	}
 	cleanup_vars(vars);

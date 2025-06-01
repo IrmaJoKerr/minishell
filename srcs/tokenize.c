@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 02:59:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:18:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ int	process_input_tokens(char *command, t_vars *vars)
 {
 	if (!command || !*command)
 		return (0);
+	free_null_token_stop(vars);
 	cleanup_token_list(vars);
 	if (!tokenizer(command, vars))
 		return (0);

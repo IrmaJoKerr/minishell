@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 10:15:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:18:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ int	handle_pipe_syntax(t_vars *vars)
 	}
 	else if (pipe_result == 1)
 	{
+		free_null_token_stop(vars);
 		cleanup_token_list(vars);
 		vars->error_code = 2;
 		free(vars->partial_input);

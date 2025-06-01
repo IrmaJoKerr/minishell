@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:29:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:18:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,7 @@ int	finalize_pipes(t_vars *vars)
 	}
 	free(vars->partial_input);
 	vars->partial_input = completed_cmd;
+	free_null_token_stop(vars);
 	cleanup_token_list(vars);
 	if (!process_input_tokens(vars->partial_input, vars))
 	{

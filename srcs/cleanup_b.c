@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/28 02:43:00 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:16:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,4 +36,25 @@ void	free_token_node(t_node *node)
 		node->arg_quote_type = NULL;
 	}
 	free(node);
+}
+
+void	free_null_token_stop(t_vars *vars)
+{
+	t_node	*last;
+
+	if (!vars || !vars->head)
+		return ;
+	last = vars->head;
+	while (last->next)
+		last = last->next;
+	if (last->type == TYPE_NULL)
+	{
+		if (last->prev)
+			last->prev->next = NULL;
+		else
+			vars->head = NULL;
+		free_token_node(last);
+		if (vars->current == last)
+			vars->current = NULL;
+	}
 }

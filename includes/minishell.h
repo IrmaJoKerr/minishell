@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 20:40:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 03:16:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,6 +415,7 @@ Group B of cleanup functions.
 In cleanup_b.c
 */
 void		free_token_node(t_node *node);
+void		free_null_token_stop(t_vars *vars);
 
 /*
 Command finder function.

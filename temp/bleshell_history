@@ -1,0 +1,19 @@
+echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
+echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
+echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
+echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
+echo "hello world" | tr 'a-z' 'A-Z' | rev | tr -d 'L' | sed 's/O/X/g' | cat
+cat << "END"
+This is a test: $HOME
+END
+cat << "END"
+This is a test: $HOME
+END
+cat << "END"
+This is a test: $HOME
+END
+ls | cat
+ls | cat
+ls | cat
+ls | cat
+exit
