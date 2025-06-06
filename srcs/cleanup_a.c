@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:17:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 13:07:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,15 +45,15 @@ void	cleanup_pipes(t_pipe *pipes)
 		close(pipes->saved_stdin);
 	if (pipes->saved_stdout > 2)
 		close(pipes->saved_stdout);
-	if (pipes->heredoc_fd > 0)
-		close(pipes->heredoc_fd);
+	if (pipes->hd_fd > 0)
+		close(pipes->hd_fd);
 	if (pipes->heredoc_delim)
 	{
 		free(pipes->heredoc_delim);
 		pipes->heredoc_delim = NULL;
 	}
-	if (pipes->redirection_fd > 2)
-		close(pipes->redirection_fd);
+	if (pipes->redir_fd > 2)
+		close(pipes->redir_fd);
 	free(pipes);
 }
 
@@ -69,9 +69,7 @@ void	cleanup_vars(t_vars *vars)
 	int	env_count;
 
 	if (!vars)
-	{
 		return ;
-	}
 	if (vars->pipes)
 		cleanup_pipes(vars->pipes);
 	vars->pipes = NULL;

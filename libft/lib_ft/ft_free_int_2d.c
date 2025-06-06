@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 00:24:49 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/13 00:37:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 13:20:45 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ itself.
 */
 #include "libft.h"
 
+/*
 void	ft_free_int_2d(int **array, size_t len)
 {
 	size_t	i;
@@ -29,4 +30,19 @@ void	ft_free_int_2d(int **array, size_t len)
 		i++;
 	}
 	free(array);
+}
+*/
+void	ft_free_int_2d(int **arr, size_t count)
+{
+	size_t	i;
+
+	if (!arr)
+		return ;
+	i = 0;
+	while (i < count && arr[i])
+	{
+		free(arr[i]);
+		i++;
+	}
+	free(arr);
 }

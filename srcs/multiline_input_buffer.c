@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:40:15 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:26:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:30:20 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,9 @@ int	handle_interactive_hd(int write_fd, int found_in_buf, t_vars *vars)
 
 	status = 0;
 	if (!found_in_buf)
-		status = get_interactive_hd(write_fd, vars);
+	{
+		close(write_fd);
+		status = interactive_hd_mode(vars, g_signal_received, 0);
+	}
 	return (status);
 }

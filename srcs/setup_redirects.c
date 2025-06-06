@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 12:18:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 23:25:22 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:30:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,10 @@ int	setup_in_redir(t_node *node, t_vars *vars)
 	if (!node || !node->args || !node->args[0])
 		return (0);
 	file = node->args[0];
-	if (vars->pipes->redirection_fd >= 0)
+	if (vars->pipes->redir_fd >= 0)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 	}
 	if (!chk_in_file_access(file, &file_stat, vars))
 		return (0);
@@ -46,21 +46,21 @@ Opens input file and sets up stdin redirection.
 */
 int	setup_input_redirection(char *file, t_vars *vars)
 {
-	if (vars->pipes->redirection_fd >= 0)
+	if (vars->pipes->redir_fd >= 0)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 	}
-	vars->pipes->redirection_fd = open(file, O_RDONLY);
-	if (vars->pipes->redirection_fd == -1)
+	vars->pipes->redir_fd = open(file, O_RDONLY);
+	if (vars->pipes->redir_fd == -1)
 	{
 		vars->error_code = ERR_REDIRECTION;
 		return (0);
 	}
-	if (dup2(vars->pipes->redirection_fd, STDIN_FILENO) == -1)
+	if (dup2(vars->pipes->redir_fd, STDIN_FILENO) == -1)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 		vars->error_code = ERR_REDIRECTION;
 		return (0);
 	}
@@ -92,10 +92,10 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 		mode = O_WRONLY | O_CREAT | O_APPEND;
 		vars->pipes->out_mode = OUT_MODE_APPEND;
 	}
-	if (vars->pipes->redirection_fd >= 0)
+	if (vars->pipes->redir_fd >= 0)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 	}
 	if (!chk_permissions(file, mode, vars))
 		return (0);
@@ -110,25 +110,25 @@ int	setup_output_redirection(char *file, t_vars *vars)
 {
 	int	mode;
 
-	if (vars->pipes->redirection_fd >= 0)
+	if (vars->pipes->redir_fd >= 0)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 	}
 	if (vars->pipes->out_mode == OUT_MODE_APPEND)
 		mode = O_WRONLY | O_CREAT | O_APPEND;
 	else
 		mode = O_WRONLY | O_CREAT | O_TRUNC;
-	vars->pipes->redirection_fd = open(file, mode, 0666);
-	if (vars->pipes->redirection_fd == -1)
+	vars->pipes->redir_fd = open(file, mode, 0666);
+	if (vars->pipes->redir_fd == -1)
 	{
 		vars->error_code = ERR_REDIRECTION;
 		return (0);
 	}
-	if (dup2(vars->pipes->redirection_fd, STDOUT_FILENO) == -1)
+	if (dup2(vars->pipes->redir_fd, STDOUT_FILENO) == -1)
 	{
-		close(vars->pipes->redirection_fd);
-		vars->pipes->redirection_fd = -1;
+		close(vars->pipes->redir_fd);
+		vars->pipes->redir_fd = -1;
 		vars->error_code = ERR_REDIRECTION;
 		return (0);
 	}
@@ -157,7 +157,7 @@ int	setup_heredoc_redir(t_node *node, t_vars *vars)
 	}
 	if (!vars->hd_text_ready)
 	{
-		if (!interactive_hd_mode(vars, g_signal_received))
+		if (!interactive_hd_mode(vars, g_signal_received, 0))
 			return (0);
 	}
 	if (!handle_heredoc(node, vars))

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:18:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:34:31 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ int	main(int argc, char **argv, char **envp)
 
 	(void)argc;
 	(void)argv;
+	exit_args[0] = "exit";
+	exit_args[1] = NULL;
 	ft_memset(&vars, 0, sizeof(t_vars));
 	init_shell(&vars, envp);
 	while (1)

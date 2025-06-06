@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 07:58:59 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 15:48:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:28:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ void	hd_child_sigint_handler(int signo)
 {
 	(void)signo;
 	g_signal_received = -2;
+	write(STDOUT_FILENO, "\n", 1);
+	exit(130);
 }
 
 /*

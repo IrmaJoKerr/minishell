@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:16:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:31:25 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,10 +194,10 @@ typedef struct s_pipe
 	pid_t		*pids;
 	int			saved_stdin;
 	int			saved_stdout;
-	int			heredoc_fd;
+	int			hd_fd;
 	char		*heredoc_delim;
 	int			hd_expand;
-	int			redirection_fd;
+	int			redir_fd;
 	int			out_mode;
 	int			in_pipe;
 	t_node		*current_redirect;
@@ -547,7 +547,7 @@ Heredoc main handling.
 In heredoc.c
 */
 void		setpipe(t_vars *vars);
-int			interactive_hd_mode(t_vars *vars, int sss);
+int			interactive_hd_mode(t_vars *vars, int sss, int status);
 int			hd_term(int saved_signal_state, t_vars *vars, int code,
 				char **line);
 void		exec_hd_child(t_vars *vars);
@@ -942,7 +942,6 @@ In terminal.c
 void		term_heredoc(t_vars *vars);
 void		manage_terminal_state(t_vars *vars, int action);
 void		restore_terminal_fd(int target_fd, int source_fd, int mode);
-void		reset_terminal_after_heredoc(void);
 void		setup_terminal_mode(t_vars *vars);
 
 /*

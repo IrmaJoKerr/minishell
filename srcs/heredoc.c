@@ -6,11 +6,12 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 13:25:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:33:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+#include <string.h>
 
 /*
 Creates child process to gather heredoc input interactively.
@@ -23,13 +24,12 @@ Returns:
 - 1 on successful heredoc completion
 - 0 on errors (file open, fork failure, interruption)
 */
-int	interactive_hd_mode(t_vars *vars, int sss)
+int	interactive_hd_mode(t_vars *vars, int sss, int status)
 {
 	pid_t	pid;
-	int		status;
 
-	vars->pipes->heredoc_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-	if (vars->pipes->heredoc_fd == -1)
+	vars->pipes->hd_fd = open(TMP_BUF, O_WRONLY | O_CREAT | O_APPEND, 0600);
+	if (vars->pipes->hd_fd == -1)
 	{
 		vars->error_code = ERR_DEFAULT;
 		return (0);
@@ -37,10 +37,10 @@ int	interactive_hd_mode(t_vars *vars, int sss)
 	pid = fork();
 	if (pid == -1)
 	{
-		if (vars->pipes->heredoc_fd != -1)
+		if (vars->pipes->hd_fd != -1)
 		{
-			close(vars->pipes->heredoc_fd);
-			vars->pipes->heredoc_fd = -1;
+			close(vars->pipes->hd_fd);
+			vars->pipes->hd_fd = -1;
 		}
 		vars->error_code = ERR_DEFAULT;
 		g_signal_received = sss;
@@ -48,7 +48,6 @@ int	interactive_hd_mode(t_vars *vars, int sss)
 	}
 	if (pid == 0)
 		exec_hd_child(vars);
-	waitpid(pid, &status, 0);
 	return (process_hd_parent(pid, status, sss, vars));
 }
 
@@ -92,12 +91,11 @@ int	get_interactive_hd(int write_fd, t_vars *vars)
 	manage_terminal_state(vars, TERM_HEREDOC);
 	while (1)
 	{
-		line = readline("heredoc> ");
 		if (g_signal_received == -2)
 			return (hd_term(saved_signal_state, vars, -1, &line));
+		line = readline("> ");
 		if (!line)
 		{
-			manage_terminal_state(vars, TERM_RESTORE);
 			g_signal_received = saved_signal_state;
 			break ;
 		}
@@ -111,7 +109,7 @@ int	get_interactive_hd(int write_fd, t_vars *vars)
 }
 
 /*
-Sets up redirection using the heredoc fd stored in vars->pipes->heredoc_fd.
+Sets up redirection using the heredoc fd stored in vars->pipes->hd_fd.
 Calls process_heredoc() to ensure content is ready
 (either reads interactively or opens pre-stored file).
 Returns:
@@ -121,27 +119,23 @@ Returns:
 int	handle_heredoc(t_node *node, t_vars *vars)
 {
 	if (!process_heredoc(node, vars))
-	{
 		return (0);
-	}
-	if (vars->pipes->heredoc_fd < 0)
-	{
+	if (vars->pipes->hd_fd < 0)
 		return (0);
-	}
-	if (dup2(vars->pipes->heredoc_fd, STDIN_FILENO) == -1)
+	if (dup2(vars->pipes->hd_fd, STDIN_FILENO) == -1)
 	{
-		close(vars->pipes->heredoc_fd);
-		vars->pipes->heredoc_fd = -1;
+		close(vars->pipes->hd_fd);
+		vars->pipes->hd_fd = -1;
 		vars->error_code = ERR_DEFAULT;
 		return (0);
 	}
-	close(vars->pipes->heredoc_fd);
-	vars->pipes->heredoc_fd = -1;
+	close(vars->pipes->hd_fd);
+	vars->pipes->hd_fd = -1;
 	return (1);
 }
 
 /*
-Opens TMP_BUF for reading and stores the fd in vars->pipes->heredoc_fd.
+Opens TMP_BUF for reading and stores the fd in vars->pipes->hd_fd.
 Assumes heredoc content is already fully gathered in TMP_BUF.
 Returns:
 - 1 on success.
@@ -155,10 +149,10 @@ int	process_heredoc(t_node *node, t_vars *vars)
 		vars->error_code = ERR_DEFAULT;
 		return (0);
 	}
-	if (vars->pipes->heredoc_fd >= 0)
+	if (vars->pipes->hd_fd >= 0)
 	{
-		close(vars->pipes->heredoc_fd);
-		vars->pipes->heredoc_fd = -1;
+		close(vars->pipes->hd_fd);
+		vars->pipes->hd_fd = -1;
 	}
 	if (!vars->hd_text_ready)
 	{
@@ -166,8 +160,6 @@ int	process_heredoc(t_node *node, t_vars *vars)
 		return (0);
 	}
 	if (!read_tmp_buf(vars))
-	{
 		return (0);
-	}
 	return (1);
 }

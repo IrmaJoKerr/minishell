@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:46:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:16:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 15:25:38 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	term_heredoc(t_vars *vars)
 	struct termios	heredoc_term;
 
 	heredoc_term = vars->ori_term_settings;
-	heredoc_term.c_lflag &= ~(ICANON | ECHOCTL);
+	heredoc_term.c_lflag &= ~(ICANON);
 	heredoc_term.c_lflag |= ECHO;
 	heredoc_term.c_cc[VMIN] = 1;
 	heredoc_term.c_cc[VTIME] = 0;
@@ -62,51 +62,23 @@ void	manage_terminal_state(t_vars *vars, int action)
 		}
 	}
 	else if (action == TERM_HEREDOC)
-	{
 		term_heredoc(vars);
-	}
 	else if (action == TERM_RESTORE)
 	{
+		restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
+		restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
 		if (vars->ori_term_saved)
 		{
 			tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);
-			rl_on_new_line();
 		}
 	}
 	return ;
 }
 
 /*
-Restores terminal settings after heredoc processing.
-- Reconnects STDIN and STDOUT to the terminal if redirected.
-- Restores canonical mode and echo settings.
-- Ensures readline library knows about the restored terminal state.
-Works with heredoc processing to maintain proper terminal behavior.
-
-Example: After a heredoc redirects stdin
-- Restores STDIN from STDOUT's terminal
-- Restores STDOUT from STDERR's terminal
-- Resets terminal attributes to interactive mode
-*/
-void	reset_terminal_after_heredoc(void)
-{
-	struct termios	term;
-
-	restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
-	restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
-	if (isatty(STDIN_FILENO))
-	{
-		tcgetattr(STDIN_FILENO, &term);
-		term.c_lflag |= (ICANON | ECHO);
-		tcsetattr(STDIN_FILENO, TCSANOW, &term);
-		rl_on_new_line();
-	}
-}
-
-/*
 Restores a file descriptor to the terminal if it's not already connected.
 Can handle STDIN, STDOUT, or STDERR.
-Works with reset_terminal_after_heredoc().
+Works with manage_terminal_state().
 */
 void	restore_terminal_fd(int target_fd, int source_fd, int mode)
 {

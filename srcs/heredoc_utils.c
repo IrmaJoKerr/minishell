@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 16:06:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 12:21:28 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ int	proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim)
 
 /*
 Opens the temporary heredoc file (TMP_BUF) for reading.
-Stores the file descriptor in vars->pipes->heredoc_fd on success.
+Stores the file descriptor in vars->pipes->hd_fd on success.
 Handles errors and attempts to unlink the TMP_BUF on failure.
 Returns:
 - 1 on success.
@@ -110,6 +110,6 @@ int	read_tmp_buf(t_vars *vars)
 		unlink(TMP_BUF);
 		return (0);
 	}
-	vars->pipes->heredoc_fd = fd;
+	vars->pipes->hd_fd = fd;
 	return (1);
 }

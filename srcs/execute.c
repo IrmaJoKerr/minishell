@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:11:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 13:34:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	if (!proc_redir_chain(node, vars))
 	{
 		reset_redirect_fds(vars);
-		reset_terminal_after_heredoc();
 		if (vars->pipes->in_pipe && vars->error_code == 1)
 			return (0);
 		else
@@ -69,7 +68,6 @@ int	exec_redirect_cmd(t_node *node, char **envp, t_vars *vars)
 	}
 	result = execute_cmd(cmd_node, envp, vars);
 	reset_redirect_fds(vars);
-	reset_terminal_after_heredoc();
 	return (result);
 }
 

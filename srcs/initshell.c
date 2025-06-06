@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:17:56 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/02 12:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,10 @@ t_pipe	*init_pipes(void)
 	ft_memset(pipes, 0, sizeof(t_pipe));
 	pipes->saved_stdin = -1;
 	pipes->saved_stdout = -1;
-	pipes->heredoc_fd = -1;
+	pipes->hd_fd = -1;
 	pipes->heredoc_delim = NULL;
 	pipes->hd_expand = 0;
-	pipes->redirection_fd = -1;
+	pipes->redir_fd = -1;
 	pipes->in_pipe = 0;
 	pipes->last_cmd = NULL;
 	pipes->last_pipe = NULL;
