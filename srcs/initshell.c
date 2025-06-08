@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 02:20:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 12:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,8 +137,10 @@ void	reset_shell(t_vars *vars)
 	free_null_token_stop(vars);
 	cleanup_token_list(vars);
 	if (vars->partial_input)
-		free(vars->partial_input);
-	vars->partial_input = NULL;
+	{
+		ft_safefree((void **)&vars->partial_input);
+		vars->partial_input = NULL;
+	}
 	if (vars->pipes)
 	{
 		reset_redirect_fds(vars);

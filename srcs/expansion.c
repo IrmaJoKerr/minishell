@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 23:01:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:17:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:48:06 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ char	*expand_variable(char *input, int *pos, char *var_name, t_vars *vars)
 	if (!result)
 		result = ft_strdup("");
 	if (free_var_name && local_var_name)
-		free(local_var_name);
+		ft_safefree((void **)&local_var_name);
 	return (result);
 }
 

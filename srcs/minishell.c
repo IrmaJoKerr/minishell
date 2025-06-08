@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 15:34:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:55:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int	handle_pipe_syntax(t_vars *vars)
 		free_null_token_stop(vars);
 		cleanup_token_list(vars);
 		vars->error_code = 2;
-		free(vars->partial_input);
+		ft_safefree((void **)&vars->partial_input);
 		vars->partial_input = NULL;
 		return (0);
 	}
@@ -90,8 +90,7 @@ void	process_command(char *command, t_vars *vars)
 		return ;
 	if (!process_input_tokens(vars->partial_input, vars))
 	{
-		free(vars->partial_input);
-		vars->partial_input = NULL;
+		ft_safefree((void **)&vars->partial_input);
 		return ;
 	}
 	if (!handle_pipe_syntax(vars))
@@ -103,7 +102,7 @@ void	process_command(char *command, t_vars *vars)
 		execute_cmd(vars->astroot, vars->env, vars);
 	if (vars->partial_input)
 	{
-		free(vars->partial_input);
+		ft_safefree((void **)&vars->partial_input);
 		vars->partial_input = NULL;
 	}
 }
@@ -135,11 +134,11 @@ int	main(int argc, char **argv, char **envp)
 			builtin_exit(exit_args, &vars);
 		if (input[0] == '\0')
 		{
-			free(input);
+			ft_safefree((void **)&input);
 			continue ;
 		}
 		handle_input(input, &vars);
-		free(input);
+		ft_safefree((void **)&input);
 		reset_shell(&vars);
 	}
 	return (0);

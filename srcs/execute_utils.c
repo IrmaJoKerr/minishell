@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:30:17 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 23:26:59 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 01:19:13 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	exec_child(char *cmd_path, char **args, char **envp)
 	else
 		error_code = ERR_CMD_NOT_FOUND;
 	shell_error(cmd_path, error_code, NULL);
-	free(cmd_path);
+	ft_safefree((void **)&cmd_path);
 	exit(127);
 }
 

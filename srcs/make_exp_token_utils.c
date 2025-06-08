@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 11:38:47 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:53:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	proc_join_args(t_vars *vars, char *expanded_val)
 	joined = ft_strjoin(vars->current->args[arg_idx], expanded_val);
 	if (!joined)
 		return (-1);
-	free(vars->current->args[arg_idx]);
+	ft_safefree((void **)&vars->current->args[arg_idx]);
 	vars->current->args[arg_idx] = joined;
 	return (arg_idx);
 }
@@ -58,8 +58,8 @@ int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 		if (!update_quote_types(vars, arg_idx, expanded_val))
 			return (0);
 	}
-	free(expanded_val);
-	free(token);
+	ft_safefree((void **)&expanded_val);
+	ft_safefree((void **)&token);
 	if (vars->adj_state[1])
 		process_right_adj(input, vars);
 	return (1);
@@ -113,7 +113,7 @@ int	realloc_quo_arr(int **quo_arr_ptr, size_t new_char_len)
 		i++;
 	}
 	new_int_arr[total_len] = -1;
-	free(old_int_arr);
+	ft_safefree((void **)&old_int_arr);
 	*quo_arr_ptr = new_int_arr;
 	return (1);
 }

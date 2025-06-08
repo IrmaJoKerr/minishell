@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:26 by lechan            #+#    #+#             */
-/*   Updated: 2025/06/01 18:18:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 01:13:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,17 +35,17 @@ int	builtin_cd(char **args, t_vars *vars)
 	cmdcode = handle_cd_path(args, vars);
 	if (cmdcode != 0)
 	{
-		free(oldpwd);
+		ft_safefree((void **)&oldpwd);
 		return (cmdcode);
 	}
 	cmdcode = update_env_pwd(vars, oldpwd);
 	if (cmdcode != 0)
 	{
-		free(oldpwd);
+		ft_safefree((void **)&oldpwd);
 		vars->error_code = cmdcode;
 		return (1);
 	}
-	free(oldpwd);
+	ft_safefree((void **)&oldpwd);
 	return (vars->error_code = cmdcode);
 }
 
@@ -96,7 +96,7 @@ int	handle_cd_path(char **args, t_vars *vars)
 	{
 		cmdcode = handle_cd_special(args, vars, &path_value);
 		if (path_value)
-			free(path_value);
+			ft_safefree((void **)&path_value);
 		return (cmdcode);
 	}
 	cmdcode = chdir(args[1]);
@@ -127,7 +127,7 @@ int	export_env_var(t_vars *vars, char *key, char *value)
 	dummy_argv[1] = tmp;
 	dummy_argv[2] = NULL;
 	builtin_export(dummy_argv, vars);
-	free(tmp);
+	ft_safefree((void **)&tmp);
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 12:21:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ char	*hd_merge_and_free(char *str, char *chunk)
 	if (!str)
 		return (ft_strdup(chunk));
 	new_str = ft_strjoin(str, chunk);
-	free(str);
+	ft_safefree((void **)&str);
 	return (new_str);
 }
 
@@ -79,11 +79,11 @@ int	proc_hd_delim(char *input, t_vars *vars, int *hd_is_delim)
 		return (0);
 	if (!is_valid_delim(ori_delim_str, vars))
 	{
-		free(ori_delim_str);
+		ft_safefree((void **)&ori_delim_str);
 		return (0);
 	}
 	maketoken(ori_delim_str, TYPE_ARGS, vars);
-	free(ori_delim_str);
+	ft_safefree((void **)&ori_delim_str);
 	*hd_is_delim = 0;
 	vars->start = vars->pos;
 	vars->next_flag = 1;

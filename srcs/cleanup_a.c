@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 13:07:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ void	cleanup_env_error(char **env, int n)
 	while (n > 0)
 	{
 		n--;
-		free(env[n]);
+		ft_safefree((void **)&env[n]);
 	}
-	free(env);
+	ft_safefree((void **)&env);
 }
 
 /*
@@ -40,7 +40,7 @@ void	cleanup_pipes(t_pipe *pipes)
 	if (!pipes)
 		return ;
 	if (pipes->pids)
-		free(pipes->pids);
+		ft_safefree((void **)&pipes->pids);
 	if (pipes->saved_stdin > 2)
 		close(pipes->saved_stdin);
 	if (pipes->saved_stdout > 2)
@@ -49,12 +49,12 @@ void	cleanup_pipes(t_pipe *pipes)
 		close(pipes->hd_fd);
 	if (pipes->heredoc_delim)
 	{
-		free(pipes->heredoc_delim);
+		ft_safefree((void **)&pipes->heredoc_delim);
 		pipes->heredoc_delim = NULL;
 	}
 	if (pipes->redir_fd > 2)
 		close(pipes->redir_fd);
-	free(pipes);
+	ft_safefree((void **)&pipes);
 }
 
 /*
@@ -106,7 +106,7 @@ void	cleanup_exit(t_vars *vars)
 	cleanup_vars(vars);
 	if (vars->partial_input)
 	{
-		free(vars->partial_input);
+		ft_safefree((void **)&vars->partial_input);
 		vars->partial_input = NULL;
 	}
 	vars->head = NULL;

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:19:15 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:38:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,10 @@ char	*try_path(char *path, char *cmd)
 
 	part_path = ft_strjoin(path, "/");
 	full_path = ft_strjoin(part_path, cmd);
-	free(part_path);
+	ft_safefree((void **)&part_path);
 	if (access(full_path, F_OK) == 0)
 		return (full_path);
-	free(full_path);
+	ft_safefree((void **)&full_path);
 	return (NULL);
 }
 

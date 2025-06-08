@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:26:13 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 13:34:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,12 +161,12 @@ int	exec_external_cmd(t_node *node, char **envp, t_vars *vars)
 	pid = fork();
 	if (pid < 0)
 	{
-		free(cmd_path);
+		ft_safefree((void **)&cmd_path);
 		return (vars->error_code = 1);
 	}
 	if (pid == 0)
 		exec_child(cmd_path, node->args, envp);
-	free(cmd_path);
+	ft_safefree((void **)&cmd_path);
 	waitpid(pid, &status, 0);
 	return_code = handle_cmd_status(status, vars);
 	return (return_code);

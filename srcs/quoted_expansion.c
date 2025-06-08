@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:47:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:17:24 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,8 @@ char	*expand_quoted_var(char *expanded, char *content, int *pos,
 	if (!var_value)
 		return (expanded);
 	temp = ft_strjoin(expanded, var_value);
-	free(expanded);
-	free(var_value);
+	ft_safefree((void **)&expanded);
+	ft_safefree((void **)&var_value);
 	if (!temp)
 		return (NULL);
 	return (temp);
@@ -117,11 +117,11 @@ char	*append_substr(char *dest, char *src, int start, int len)
 	chunk = ft_substr(src, start, len);
 	if (!chunk)
 	{
-		free(dest);
+		ft_safefree((void **)&dest);
 		return (NULL);
 	}
 	result = ft_strjoin(dest, chunk);
-	free(dest);
-	free(chunk);
+	ft_safefree((void **)&dest);
+	ft_safefree((void **)&chunk);
 	return (result);
 }

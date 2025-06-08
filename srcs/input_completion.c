@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 10:03:35 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:18:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:51:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ char	*append_input(char *original, char *additional)
 	if (!temp)
 		return (NULL);
 	result = ft_strjoin(temp, additional);
-	free(temp);
+	ft_safefree((void **)&temp);
 	return (result);
 }
 
@@ -49,14 +49,14 @@ char	*fix_open_quotes(char *original_input, t_vars *vars)
 	if (!addon_input)
 		return (NULL);
 	merged_input = append_input(original_input, addon_input);
-	free(addon_input);
+	ft_safefree((void **)&addon_input);
 	if (!merged_input)
 		return (NULL);
 	if (!validate_quotes(merged_input, vars))
 	{
 		temp = merged_input;
 		merged_input = fix_open_quotes(temp, vars);
-		free(temp);
+		ft_safefree((void **)&temp);
 	}
 	return (merged_input);
 }
@@ -88,7 +88,7 @@ char	*handle_quote_completion(char *cmd, t_vars *vars)
 		return (NULL);
 	if (new_cmd != cmd)
 	{
-		free(cmd);
+		ft_safefree((void **)&cmd);
 		cmd = new_cmd;
 	}
 	free_null_token_stop(vars);
@@ -122,11 +122,11 @@ char	*complete_pipe_cmd(char *command, t_vars *vars)
 		return (NULL);
 	if (handle_unfinished_pipes(&pipe_cmd, vars) < 0)
 	{
-		free(pipe_cmd);
+		ft_safefree((void **)&pipe_cmd);
 		return (NULL);
 	}
 	temp = ft_strdup(pipe_cmd);
-	free(pipe_cmd);
+	ft_safefree((void **)&pipe_cmd);
 	return (temp);
 }
 
@@ -148,10 +148,10 @@ int	handle_unfinished_pipes(char **processed_cmd, t_vars *vars)
 		return (-1);
 	if (append_to_cmdline(processed_cmd, addon_input) == -1)
 	{
-		free(addon_input);
+		ft_safefree((void **)&addon_input);
 		return (-1);
 	}
-	free(addon_input);
+	ft_safefree((void **)&addon_input);
 	if (!process_input_tokens(*processed_cmd, vars))
 		return (-1);
 	if (analyze_pipe_syntax(vars) == 2)

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 16:32:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 13:31:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:09:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ t_envop	*parse_envop_list(char **args, int op_type)
 			node = make_envop_node(args[i], op_type);
 			if (!node)
 			{
-				free_envop_list(head);
+				free_envop_list(&head);
 				return (NULL);
 			}
 			add_envop_node(&head, node);

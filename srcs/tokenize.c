@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 06:12:16 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:18:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:11:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,9 +104,6 @@ void	init_tokenizer(t_vars *vars)
 	vars->start = 0;
 	vars->quote_depth = 0;
 	if (vars->pipes->heredoc_delim)
-	{
-		free(vars->pipes->heredoc_delim);
-		vars->pipes->heredoc_delim = NULL;
-	}
+		ft_safefree((void **)&vars->pipes->heredoc_delim);
 	vars->pipes->hd_expand = 0;
 }

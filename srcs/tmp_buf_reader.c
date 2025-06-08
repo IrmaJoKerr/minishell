@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 21:25:54 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:53:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:11:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,7 @@ int	init_read_buf(t_read_buf *rb)
 	rb->buffer = malloc(ft_strlen(rb->file_content) + 1);
 	if (!rb->buffer)
 	{
-		free(rb->file_content);
-		rb->file_content = NULL;
+		ft_safefree((void **)&rb->file_content);
 		return (0);
 	}
 	return (1);
@@ -54,15 +53,9 @@ void	cleanup_rd_buf(t_read_buf *rb, int remove_tmp)
 	if (!rb)
 		return ;
 	if (rb->buffer)
-	{
-		free(rb->buffer);
-		rb->buffer = NULL;
-	}
+		ft_safefree((void **)&rb->buffer);
 	if (rb->file_content)
-	{
-		free(rb->file_content);
-		rb->file_content = NULL;
-	}
+		ft_safefree((void **)&rb->file_content);
 	rb->pos = 0;
 	rb->in_quotes = 0;
 	rb->quote_type = 0;

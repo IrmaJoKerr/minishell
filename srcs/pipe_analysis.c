@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:22:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 03:18:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:59:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,17 +158,17 @@ int	finalize_pipes(t_vars *vars)
 	completed_cmd = complete_pipe_cmd(vars->partial_input, vars);
 	if (!completed_cmd)
 	{
-		free(vars->partial_input);
+		ft_safefree((void **)&vars->partial_input);
 		vars->partial_input = NULL;
 		return (0);
 	}
-	free(vars->partial_input);
+	ft_safefree((void **)&vars->partial_input);
 	vars->partial_input = completed_cmd;
 	free_null_token_stop(vars);
 	cleanup_token_list(vars);
 	if (!process_input_tokens(vars->partial_input, vars))
 	{
-		free(vars->partial_input);
+		ft_safefree((void **)&vars->partial_input);
 		vars->partial_input = NULL;
 		return (0);
 	}

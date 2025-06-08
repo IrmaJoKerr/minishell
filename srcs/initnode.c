@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 23:26:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:51:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ t_node	*initnode(t_tokentype type, char *token)
 		quote_type = TYPE_DOUBLE_QUOTE;
 	if (!make_nodeframe(node, type, token))
 	{
-		free(node);
+		ft_safefree((void **)&node);
 		return (NULL);
 	}
 	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)

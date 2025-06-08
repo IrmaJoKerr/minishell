@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 20:32:31 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 13:29:54 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:38:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,21 +38,22 @@ char	*get_env_key(const char *arg_str, int *key_len)
 Free a linked list of t_envop nodes.
 - Frees all associated memory.
 */
-void	free_envop_list(t_envop *head)
+void	free_envop_list(t_envop **head)
 {
 	t_envop	*tmp;
 
-	while (head)
+	while (*head)
 	{
-		tmp = head->next;
-		free(head->arg_str);
-		free(head->export_key);
-		head->arg_str = NULL;
-		head->export_key = NULL;
-		head->next = NULL;
-		free(head);
-		head = tmp;
+		tmp = (*head)->next;
+		ft_safefree((void **)&(*head)->arg_str);
+		ft_safefree((void **)&(*head)->export_key);
+		(*head)->arg_str = NULL;
+		(*head)->export_key = NULL;
+		(*head)->next = NULL;
+		ft_safefree((void **)head);
+		*head = tmp;
 	}
+	*head = NULL;
 }
 
 /*

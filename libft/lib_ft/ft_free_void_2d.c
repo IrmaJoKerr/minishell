@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 00:21:47 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/25 14:31:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 01:31:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ void	ft_free_void_2d(void **array, size_t length)
 	while (i < length)
 	{
 		if (array[i])
-			free(array[i]);
+			ft_safefree((void **)&array[i]);
 		i++;
 	}
-	free(array);
+	ft_safefree((void **)&array);
 }

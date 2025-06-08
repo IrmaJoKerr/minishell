@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 08:28:42 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:29:30 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int	chk_dir_write_permission(char *filename, t_vars *vars)
 		shell_error(filename, ERR_PERMISSIONS, vars);
 		result = 0;
 	}
-	free(dir_path);
+	ft_safefree((void **)&dir_path);
 	return (result);
 }
 

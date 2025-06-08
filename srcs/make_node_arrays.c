@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 21:07:33 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 13:25:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:53:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ char	**setup_args(char *token)
 	args[0] = ft_strdup(token);
 	if (!args[0])
 	{
-		free(args);
+		ft_safefree((void **)&args);
 		return (NULL);
 	}
 	args[1] = NULL;
@@ -52,7 +52,7 @@ int	**setup_quotes(int len)
 	quote_types[0] = malloc(sizeof(int) * (len + 1));
 	if (!quote_types[0])
 	{
-		free(quote_types);
+		ft_safefree((void **)&quote_types);
 		return (NULL);
 	}
 	i = 0;

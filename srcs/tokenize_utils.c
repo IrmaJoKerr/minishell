@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:15:21 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 16:16:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:11:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,18 +80,18 @@ void	handle_right_adj(char *input, t_vars *vars)
 	target_token = get_valid_target_token(vars);
 	if (!target_token)
 	{
-		free(adj_str);
+		ft_safefree((void **)&adj_str);
 		return ;
 	}
 	num_args = ft_arrlen(target_token->args);
 	if (num_args == 0)
 	{
-		free(adj_str);
+		ft_safefree((void **)&adj_str);
 		return ;
 	}
 	arg_idx = num_args - 1;
 	join_arg_strings(target_token, arg_idx, adj_str, vars);
-	free(adj_str);
+	ft_safefree((void **)&adj_str);
 }
 
 /*
@@ -146,7 +146,7 @@ void	handle_text(char *input, t_vars *vars)
 		set_token_type(vars, token_preview);
 		handle_string(input, vars);
 		if (token_preview)
-			free(token_preview);
+			ft_safefree((void **)&token_preview);
 		vars->start = vars->pos;
 	}
 }

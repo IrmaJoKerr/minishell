@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:06 by lechan            #+#    #+#             */
-/*   Updated: 2025/06/02 13:24:20 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:09:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	builtin_unset(char **args, t_vars *vars)
 		ft_free_2d(vars->env, old_len);
 		vars->env = new_env;
 	}
-	free_envop_list(to_proc);
+	free_envop_list(&to_proc);
 	return (vars->error_code = 0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:52:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:32:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:50:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,11 +129,11 @@ int	proc_hd_line(int write_fd, char *line, t_vars *vars)
 	if (ft_strncmp(line, vars->pipes->heredoc_delim, delim_len) == 0
 		&& line[delim_len] == '\0')
 	{
-		free(line);
+		ft_safefree((void **)&line);
 		return (1);
 	}
 	result = write_to_hd(write_fd, line, vars);
-	free(line);
+	ft_safefree((void **)&line);
 	if (!result)
 		return (-1);
 	return (0);
@@ -164,7 +164,7 @@ void	strip_outer_quotes(char **delimiter, t_vars *vars)
 			vars->error_code = ERR_DEFAULT;
 			return ;
 		}
-		free(*delimiter);
+		ft_safefree((void **)&(*delimiter));
 		*delimiter = new_str;
 	}
 }

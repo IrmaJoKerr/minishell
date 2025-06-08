@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:56:07 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ int	handle_empty_quote(char *input, t_vars *vars, char *curr_text,
 					last_token = last_token->next;
 				vars->current = last_token;
 			}
-			free(curr_text);
+			ft_safefree((void **)&curr_text);
 			process_right_adj(input, vars);
 			return (1);
 		}
@@ -135,7 +135,7 @@ t_node	*process_quoted_str(char **content_ptr, int quote_type, t_vars *vars)
 	if (quote_type == TYPE_DOUBLE_QUOTE && ft_strchr(*content_ptr, '$'))
 	{
 		expanded = expand_quoted_str(*content_ptr, vars);
-		free(*content_ptr);
+		ft_safefree((void **)content_ptr);
 		if (!expanded)
 			return (NULL);
 		*content_ptr = expanded;
@@ -176,7 +176,7 @@ int	handle_quo_str(char *input, t_vars *vars,
 		if (vars->adj_state[1] && curr_text && *curr_text != '\0')
 			cleanup_and_process_adj(curr_text, input, vars);
 		else
-			free(curr_text);
+			ft_safefree((void **)&curr_text);
 	}
 	return (1);
 }

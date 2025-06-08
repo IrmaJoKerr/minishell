@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:23:30 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:40:13 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:55:54 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ char	*search_in_env(char *cmd, char **envp, t_vars *vars)
 		if (path)
 		{
 			ft_free_2d(paths, ft_arrlen(paths));
+			path = NULL;
 			return (path);
 		}
 		i++;

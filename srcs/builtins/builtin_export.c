@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/06/02 13:30:17 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:38:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	builtin_export(char **args, t_vars *vars)
 		ft_free_2d(vars->env, old_len);
 		vars->env = new_env;
 	}
-	free_envop_list(to_proc);
+	free_envop_list(&to_proc);
 	return (vars->error_code = 0);
 }
 
@@ -87,10 +87,10 @@ int	sort_env(int count, t_vars *vars)
 	i = 0;
 	while (i < count)
 	{
-		free(sort_env[i]);
+		ft_safefree((void **)&sort_env[i]);
 		i++;
 	}
-	free(sort_env);
+	ft_safefree((void **)&sort_env);
 	return (cmdcode);
 }
 

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:56:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 15:38:10 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:02:47 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Returns:
 */
 int	token_cleanup_error(char *content, t_vars *vars)
 {
-	free(content);
+	ft_safefree((void **)&content);
 	process_adj(NULL, vars);
 	return (0);
 }
@@ -35,7 +35,7 @@ Cleans up after token processing and handles adjacency states.
 */
 void	cleanup_and_process_adj(char *content, char *input, t_vars *vars)
 {
-	free(content);
+	ft_safefree((void **)&content);
 	if (vars->adj_state[1])
 		process_right_adj(input, vars);
 	process_adj(NULL, vars);
@@ -95,14 +95,14 @@ int	try_left_merge(char *curr_text, t_vars *vars)
 		merged = ft_strjoin(existing, curr_text);
 		if (merged)
 		{
-			free(redir_node->right->args[0]);
+			ft_safefree((void **)&redir_node->right->args[0]);
 			redir_node->right->args[0] = merged;
-			free(curr_text);
+			ft_safefree((void **)&curr_text);
 			return (1);
 		}
 		else
 		{
-			free(curr_text);
+			ft_safefree((void **)&curr_text);
 			vars->error_code = ERR_DEFAULT;
 			return (0);
 		}

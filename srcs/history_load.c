@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:48:27 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:17:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:49:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	read_history_lines(int fd)
 				line[len - 1] = '\0';
 			add_history(line);
 		}
-		free(line);
+		ft_safefree((void **)&line);
 		line = get_next_line(fd);
 	}
 }

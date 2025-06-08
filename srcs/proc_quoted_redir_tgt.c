@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 10:46:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 10:56:21 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int	proc_quoted_redir_tgt(char *content, t_vars *vars)
 	redir_node = find_last_redir(vars);
 	if (!redir_node)
 	{
-		free(content);
+		ft_safefree((void **)&content);
 		vars->error_code = ERR_SYNTAX;
 		return (0);
 	}
@@ -115,14 +115,14 @@ int	try_merge_adj_target(t_node *redir_node, char *content,
 		merged = ft_strjoin(existing, content);
 		if (merged)
 		{
-			free(redir_node->right->args[0]);
+			ft_safefree((void **)&redir_node->right->args[0]);
 			redir_node->right->args[0] = merged;
-			free(content);
+			ft_safefree((void **)&content);
 			return (1);
 		}
 		else
 		{
-			free(content);
+			ft_safefree((void **)&content);
 			vars->error_code = ERR_DEFAULT;
 			return (0);
 		}
@@ -146,7 +146,7 @@ int	try_append_to_prev_cmd(char *content, t_vars *vars)
 	if (cmd_node)
 	{
 		append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
-		free(content);
+		ft_safefree((void **)&content);
 		return (1);
 	}
 	return (0);
@@ -167,19 +167,19 @@ int	link_new_file_node_to_redir(t_node *redir_node,
 
 	if (!is_redirection(redir_node->type))
 	{
-		free(content);
+		ft_safefree((void **)&content);
 		vars->error_code = ERR_SYNTAX;
 		return (0);
 	}
 	file_node = initnode(TYPE_ARGS, content);
 	if (!file_node)
 	{
-		free(content);
+		ft_safefree((void **)&content);
 		if (vars->error_code == 0)
 			vars->error_code = ERR_DEFAULT;
 		return (0);
 	}
 	link_file_to_redir(redir_node, file_node, vars);
-	free(content);
+	ft_safefree((void **)&content);
 	return (1);
 }

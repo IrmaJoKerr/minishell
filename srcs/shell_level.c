@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 14:19:12 by bleow             #+#    #+#             */
-/*   Updated: 2025/04/10 23:28:32 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,10 @@ int	update_shlvl_env(char **env, int position, int new_level)
 	if (!new_shlvl)
 		return (1);
 	new_env_entry = ft_strjoin("SHLVL=", new_shlvl);
-	free(new_shlvl);
+	ft_safefree((void **)&new_shlvl);
 	if (!new_env_entry)
 		return (1);
-	free(env[position]);
+	ft_safefree((void **)&env[position]);
 	env[position] = new_env_entry;
 	return (0);
 }

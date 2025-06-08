@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:00:19 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:54:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,5 +135,5 @@ void	free_if_orphan_node(t_node *node, t_vars *vars)
 		check = check->next;
 	}
 	if (!found_in_list)
-		free_token_node(node);
+		ft_safefree((void **)&node);
 }

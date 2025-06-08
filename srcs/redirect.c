@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/01 23:28:29 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	handle_redirection_token(char *input, int *i, t_vars *vars,
 	if (!redir_str)
 		return (0);
 	redir_node = initnode(type, redir_str);
-	free(redir_str);
+	ft_safefree((void **)&redir_str);
 	if (!redir_node)
 		return (0);
 	*i += moves;
@@ -140,7 +140,7 @@ int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 	if (!filename_str)
 		return (0);
 	if (redir_node->args[0])
-		free(redir_node->args[0]);
+		ft_safefree((void **)&redir_node->args[0]);
 	redir_node->args[0] = filename_str;
 	return (1);
 }

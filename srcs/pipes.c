@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 09:52:41 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:29:06 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 03:01:39 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,10 @@ char	*read_until_complete(void)
 	if (!input)
 		return (NULL);
 	trimmed = ft_strtrim(input, " \t\n");
-	free(input);
+	ft_safefree((void **)&input);
 	if (!trimmed || trimmed[0] == '\0')
 	{
-		free(trimmed);
+		ft_safefree((void **)&trimmed);
 		return (read_until_complete());
 	}
 	return (trimmed);
@@ -58,10 +58,12 @@ int	append_to_cmdline(char **cmd_ptr, const char *addition)
 	if (!tmp)
 		return (-1);
 	combined = ft_strjoin(tmp, addition);
-	free(tmp);
+	ft_safefree((void **)&tmp);
+	tmp = NULL;
 	if (!combined)
 		return (-1);
-	free(*cmd_ptr);
+	ft_safefree((void **)&*cmd_ptr);
+	*cmd_ptr = NULL;
 	*cmd_ptr = combined;
 	return (0);
 }

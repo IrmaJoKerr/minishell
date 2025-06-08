@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 10:29:27 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:55:04 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void	handle_string(char *input, t_vars *vars)
 		else
 			vars->curr_type = token_type;
 		maketoken(token, vars->curr_type, vars);
-		free(token);
+		ft_safefree((void **)&token);
 		vars->start = vars->pos;
 		string_token_position++;
 	}
@@ -80,7 +80,7 @@ int	handle_pipe_operator(char *input, t_vars *vars)
 	if (!token)
 		return (vars->pos);
 	maketoken(token, vars->curr_type, vars);
-	free(token);
+	ft_safefree((void **)&token);
 	vars->pos++;
 	vars->start = vars->pos;
 	vars->prev_type = vars->curr_type;

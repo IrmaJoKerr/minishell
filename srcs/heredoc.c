@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/02 05:39:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 15:33:28 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:49:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	hd_term(int saved_signal_state, t_vars *vars, int code, char **line)
 	g_signal_received = saved_signal_state;
 	if (line && *line)
 	{
-		free(*line);
+		ft_safefree((void **)&*line);
 		*line = NULL;
 	}
 	return (code);
@@ -103,7 +103,7 @@ int	get_interactive_hd(int write_fd, t_vars *vars)
 			return (hd_term(saved_signal_state, vars, 0, &line));
 		if (!write_to_hd(write_fd, line, vars))
 			return (hd_term(saved_signal_state, vars, -1, &line));
-		free(line);
+		ft_safefree((void **)&line);
 	}
 	return (hd_term(saved_signal_state, vars, 0, &line));
 }

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 02:41:39 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 17:58:41 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:53:01 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ char	*allocate_and_read(int fd, size_t size)
 	bytes_read = read(fd, buffer, size);
 	if (bytes_read == -1)
 	{
-		free(buffer);
+		ft_safefree((void **)&buffer);
 		return (NULL);
 	}
 	buffer[bytes_read] = '\0';
@@ -83,7 +83,7 @@ void	handle_input(char *input, t_vars *vars)
 	}
 	if (vars->pipes && vars->pipes->heredoc_delim)
 	{
-		free(vars->pipes->heredoc_delim);
+		ft_safefree((void **)&vars->pipes->heredoc_delim);
 		vars->pipes->heredoc_delim = NULL;
 	}
 	reset_redirect_fds(vars);

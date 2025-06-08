@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:30:56 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 18:00:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ char	*hd_expander(char *line, t_vars *vars)
 			segment = read_hd_str(line, &pos);
 			result = hd_merge_and_free(result, segment);
 		}
-		free(segment);
+		ft_safefree((void **)&segment);
 	}
 	if (!result)
 		return (ft_strdup(""));
@@ -142,7 +142,7 @@ int	write_to_hd(int fd, char *line, t_vars *vars)
 	write_result = write(fd, expanded_line, ft_strlen(expanded_line));
 	if (write_result != -1)
 		write(fd, "\n", 1);
-	free(expanded_line);
+	ft_safefree((void **)&expanded_line);
 	if (write_result == -1)
 	{
 		vars->error_code = ERR_DEFAULT;

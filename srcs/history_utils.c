@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 06:15:43 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:17:16 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:50:50 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ int	copy_to_temp(int fd_read)
 	while (line)
 	{
 		write(fd_write, line, ft_strlen(line));
-		free(line);
+		ft_safefree((void **)&line);
 		line = get_next_line(fd_read);
 	}
 	close(fd_write);

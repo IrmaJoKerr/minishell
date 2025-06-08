@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 15:31:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:09:37 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,7 +288,7 @@ Builtin environment operations calculation functions.
 In builtin_envops_utils.c
 */
 char		*get_env_key(const char *arg_str, int *key_len);
-void		free_envop_list(t_envop *head);
+void		free_envop_list(t_envop **head);
 void		err_invalid_export_arg(char *arg);
 int			copy_env_with_envop_list(char **env, t_envop *envop_list,
 				char **new_env);

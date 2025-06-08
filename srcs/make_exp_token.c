@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 20:25:29 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 11:39:25 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	get_expn_name(char *input, t_vars *vars, char **token, char **var_name)
 	var_str = ft_substr(input, start, vars->pos - start);
 	if (!var_str)
 	{
-		free(tokstr);
+		ft_safefree((void **)&tokstr);
 		return (0);
 	}
 	*token = tokstr;
@@ -71,7 +71,7 @@ int	get_var_token(char *input, t_vars *vars, char **token, char **var_name)
 		*var_name = ft_strdup("?");
 		if (!*var_name)
 		{
-			free(*token);
+			ft_safefree((void **)&*token);
 			*token = NULL;
 			return (0);
 		}
@@ -111,8 +111,8 @@ int	sub_make_exp_token(char *input, t_vars *vars, char *expanded_val
 	}
 	if (!new_exp_token(vars, expanded_val, token))
 	{
-		free(expanded_val);
-		free(token);
+		ft_safefree((void **)&expanded_val);
+		ft_safefree((void **)&token);
 		return (0);
 	}
 	if (vars->adj_state[1] && vars->current)
@@ -144,10 +144,10 @@ int	make_exp_token(char *input, t_vars *vars)
 	if (!get_var_token(input, vars, &token, &var_name))
 		return (0);
 	expanded_val = expand_variable(NULL, NULL, var_name, vars);
-	free(var_name);
+	ft_safefree((void **)&var_name);
 	if (!expanded_val)
 	{
-		free(token);
+		ft_safefree((void **)&token);
 		return (0);
 	}
 	result = sub_make_exp_token(input, vars, expanded_val, token);
@@ -172,7 +172,7 @@ int	new_exp_token(t_vars *vars, char *expanded_val, char *token)
 	if (!exp_node)
 		return (0);
 	build_token_linklist(vars, exp_node);
-	free(token);
-	free(expanded_val);
+	ft_safefree((void **)&token);
+	ft_safefree((void **)&expanded_val);
 	return (1);
 }

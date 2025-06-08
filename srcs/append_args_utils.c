@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:16:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:49:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:45:49 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ int	join_arg_strings(t_node *tgt_append_tok, int arg_idx, char *append_str,
 	new_joined_arg = ft_strjoin(tgt_append_tok->args[arg_idx], append_str);
 	if (!new_joined_arg)
 		return (1);
-	free(tgt_append_tok->args[arg_idx]);
+	ft_safefree((void **)&tgt_append_tok->args[arg_idx]);
 	tgt_append_tok->args[arg_idx] = new_joined_arg;
 	quote_update_status = 0;
 	if (tgt_append_tok->arg_quote_type && \

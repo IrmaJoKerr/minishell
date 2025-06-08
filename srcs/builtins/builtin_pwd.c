@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:51:01 by lechan            #+#    #+#             */
-/*   Updated: 2025/05/29 09:39:11 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:38:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	builtin_pwd(t_vars *vars)
 	else
 	{
 		ft_putendl_fd(pwd, STDOUT_FILENO);
-		free(pwd);
+		ft_safefree((void **)&pwd);
 	}
 	vars->error_code = cmdcode;
 	return (cmdcode);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:52:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/22 17:26:40 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/07 02:54:02 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	merge_quoted_token(char *input, char *content, t_vars *vars)
 	join_success = handle_tok_join(input, vars, content, dummy_token);
 	if (!join_success)
 	{
-		free(dummy_token);
+		ft_safefree((void **)&dummy_token);
 	}
 	else
 	{
