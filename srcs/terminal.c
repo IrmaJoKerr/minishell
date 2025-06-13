@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 22:46:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 15:25:38 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/13 05:56:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,8 @@ void	manage_terminal_state(t_vars *vars, int action)
 		term_heredoc(vars);
 	else if (action == TERM_RESTORE)
 	{
-		restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
-		restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
+		// restore_terminal_fd(STDIN_FILENO, STDOUT_FILENO, O_RDONLY);
+		// restore_terminal_fd(STDOUT_FILENO, STDERR_FILENO, O_WRONLY);
 		if (vars->ori_term_saved)
 		{
 			tcsetattr(STDIN_FILENO, TCSANOW, &vars->ori_term_settings);

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 11:31:02 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:55:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/09 01:22:34 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,32 @@ Example: When user types "ls -la"
 - Returns "ls -la" as an allocated string
 - Adds command to history for up-arrow recall
 */
+// char	*reader(void)
+// {
+// 	char	*line;
+
+// 	line = readline(PROMPT);
+// 	if (!line)
+// 		return (NULL);
+// 	if (*line)
+// 		add_history(line);
+// 	return (line);
+// }
 char	*reader(void)
 {
 	char	*line;
 
 	line = readline(PROMPT);
+	if (g_signal_received == 130)
+	{
+		g_signal_received = 0;
+		if (line)
+		{
+			ft_safefree((void **)&line);
+			line = NULL;
+		}
+		return (ft_strdup(""));
+	}
 	if (!line)
 		return (NULL);
 	if (*line)

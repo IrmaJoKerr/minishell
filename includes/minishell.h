@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:09:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/12 23:41:26 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -627,7 +627,14 @@ In input_handlers.c
 char		*allocate_and_read(int fd, size_t size);
 char		*read_tmp_buf_file(const char *filename);
 void		handle_input(char *input, t_vars *vars);
-// int			check_trailing_chars(const char *line, int start_pos);
+
+/*
+Interrupt handling functions.
+In interrupt.c
+*/
+void		hd_abort_cleanup(t_vars *vars);
+void		hd_abort_state_reset(t_vars *vars);
+void		reset_shell_state_for_interrupt(t_vars *vars);
 
 /*
 Lexer utility functions.
@@ -665,7 +672,6 @@ int			get_expn_name(char *input, t_vars *vars, char **token,
 				char **var_name);
 int			get_var_token(char *input, t_vars *vars, char **token,
 				char **var_name);
-// int			addon_quo_type_arr(int *dest, int *src, int new_len);
 int			sub_make_exp_token(char *input, t_vars *vars, char *expanded_val,
 				char *token);
 int			make_exp_token(char *input, t_vars *vars);

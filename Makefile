@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/06/01 20:32:00 by bleow            ###   ########.fr        #
+#    Updated: 2025/06/09 00:53:38 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,7 @@ MINISHELL_SRCS = \
 			srcs/initshell.c \
 			srcs/input_completion.c \
 			srcs/input_handlers.c \
+			srcs/interrupt.c \
 			srcs/lexer_utils.c \
 			srcs/lexer.c \
 			srcs/make_exp_token_utils.c \

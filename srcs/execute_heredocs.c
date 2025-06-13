@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 13:18:09 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/02 15:33:18 by bleow            ###   ########.fr       */
+/*   Updated: 2025/06/09 00:55:22 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ int	process_hd_parent(pid_t child_pid, int child_status,
 	{
 		unlink(TMP_BUF);
 		vars->error_code = 130;
+		hd_abort_cleanup(vars);
 		return (0);
 	}
 	vars->hd_text_ready = 1;
