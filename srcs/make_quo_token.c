@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:52:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:54:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,26 @@ Returns:
 - 1 on success (takes ownership of content)
 - 0 on failure (frees content)
 */
-int	make_quoted_cmd(char *content, char *input, t_vars *vars)
+int	make_quoted_cmd(char *content, char *input, t_vars *vars, int quote_type)
 {
 	t_node	*cmd_node;
 
 	cmd_node = initnode(TYPE_CMD, content);
 	if (!cmd_node)
-	{
 		return (token_cleanup_error(content, vars));
+	/* if the source was quoted, replace the default per-char metadata */
+	if (quote_type != 0 && cmd_node->arg_quote_type && cmd_node->arg_quote_type[0])
+	{
+		free(cmd_node->arg_quote_type[0]);
+		cmd_node->arg_quote_type[0] = set_char_quote_types(content, quote_type);
+		if (!cmd_node->arg_quote_type[0])
+		{
+			free_node_quotypes(cmd_node);
+			ft_safefree((void **)&content);
+			ft_safefree((void **)&cmd_node->args);
+			ft_safefree((void **)&cmd_node);
+			return (token_cleanup_error(NULL, vars));
+		}
 	}
 	build_token_linklist(vars, cmd_node);
 	cleanup_and_process_adj(content, input, vars);

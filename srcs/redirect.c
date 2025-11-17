@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,16 +86,18 @@ Returns:
 - NULL on errors (missing closing quote, empty filename)
 */
 char	*parse_and_get_filename(char *input, int *i_ptr, int tgt_start,
-			char *quo_char)
+				char *quo_char_out)
 {
 	char	*file_str;
 
 	if (input[*i_ptr] == '\'' || input[*i_ptr] == '"')
 	{
-		quo_char = &input[*i_ptr];
+		/* report the quote character back to caller */
+		if (quo_char_out)
+			*quo_char_out = input[*i_ptr];
 		(*i_ptr)++;
 		tgt_start = *i_ptr;
-		while (input[*i_ptr] && input[*i_ptr] != *quo_char)
+		while (input[*i_ptr] && input[*i_ptr] != *quo_char_out)
 			(*i_ptr)++;
 		if (!input[*i_ptr])
 			return (NULL);
@@ -142,5 +144,24 @@ int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 	if (redir_node->args[0])
 		ft_safefree((void **)&redir_node->args[0]);
 	redir_node->args[0] = filename_str;
+	/* If the filename was quoted, set per-character quote metadata */
+	if (quo_char && redir_node->arg_quote_type && redir_node->arg_quote_type[0])
+	{
+		int qt = 0;
+		if (quo_char == '"')
+			qt = TYPE_DOUBLE_QUOTE;
+		else if (quo_char == '\'')
+			qt = TYPE_SINGLE_QUOTE;
+		if (qt != 0)
+		{
+			free(redir_node->arg_quote_type[0]);
+			redir_node->arg_quote_type[0] = set_char_quote_types(filename_str, qt);
+			if (!redir_node->arg_quote_type[0])
+			{
+				/* allocation failed: caller will cleanup the redir_node */
+				return (0);
+			}
+		}
+	}
 	return (1);
 }

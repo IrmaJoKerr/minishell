@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 09:28:10 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 14:34:57 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,35 @@ int	push_quote_type(t_node *node, int arg_idx, int quote_type)
         return (0);
     node->arg_quote_type[arg_idx][curr_len] = quote_type;
     return (1);
+}
+
+
+/*
+ * Create a per-character quote-type array for `new_arg` where all
+ * characters are initialized to `quote_type`. The returned array is
+ * terminated with -1. This was previously defined in `append_args.c` but
+ * is more appropriate here alongside other quote-accessor helpers.
+ */
+int	*set_char_quote_types(char *arg_text, int quote_type)
+{
+    int		*char_quote_types;
+    size_t	len;
+    size_t	i;
+
+    if (!arg_text)
+        return (NULL);
+    len = ft_strlen(arg_text);
+    char_quote_types = malloc(sizeof(int) * (len + 1));
+    if (!char_quote_types)
+        return (NULL);
+    i = 0;
+    while (i < len)
+    {
+        char_quote_types[i] = quote_type;
+        i++;
+    }
+    char_quote_types[len] = -1;
+    return (char_quote_types);
 }
 
 

@@ -1,15 +1,14 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 14:34:57 by bleow            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
+#/* ************************************************************************** */
+#/*                                                                            */
+#/*                                                        :::      ::::::::   */
+#/*   minishell.h                                        :+:      :+:    :+:   */
+#/*                                                    +:+ +:+         +:+     */
+#/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+#/*                                                +#+#+#+#+#+   +#+           */
+#/*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
+#/*   Updated: 2025/11/17 14:34:57 by bleow            ###   ########.fr       */
+#/*                                                                            */
+#/* ************************************************************************** */
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -129,7 +128,7 @@ Example: "'Hello 'world'!'" has 2 quotes, one single and one double.
 */
 typedef struct s_quote_context
 {
-	char	type;
+	char		type;
 	int		start_pos;
 	int		depth;
 }	t_quote_context;
@@ -358,10 +357,6 @@ Append arguments to a node's argument array.
 In append_args.c
 */
 char		**dup_node_args(t_node *node, size_t len);
-int			**dup_quote_types(t_node *node, size_t len);
-int			*set_char_quote_types(char *arg_text, int quote_type);
-int			**resize_quotype_arr(t_node *node, char *new_arg, int quote_type,
-				char **new_args);
 void		append_arg(t_node *node, char *new_arg, int quote_type);
 
 /*
@@ -688,8 +683,8 @@ void		make_node_arrays(t_node *node, char *token);
 Make quoted token functions.
 In make_quo_token.c
 */
-int			merge_quoted_token(char *input, char *content, t_vars *vars);
-int			make_quoted_cmd(char *content, char *input, t_vars *vars);
+int		merge_quoted_token(char *input, char *content, t_vars *vars);
+int		make_quoted_cmd(char *content, char *input, t_vars *vars, int quote_type);
 
 /*
 Token creation core functions.
@@ -793,13 +788,13 @@ int			append_to_cmdline(char **cmd_ptr, const char *addition);
 Quoted redirection target functions.
 In proc_quoted_redir_tgt.c
 */
-int			proc_quoted_redir_tgt(char *content, t_vars *vars);
+int		proc_quoted_redir_tgt(char *content, int quote_type, t_vars *vars);
 t_node		*find_last_redir(t_vars *vars);
-int			try_merge_adj_target(t_node *redir_node, char *content,
+int		try_merge_adj_target(t_node *redir_node, char *content,
 				t_vars *vars);
-int			try_append_to_prev_cmd(char *content, t_vars *vars);
-int			link_new_file_node_to_redir(t_node *redir_node,
-				char *content, t_vars *vars);
+int		try_append_to_prev_cmd(char *content, t_vars *vars);
+int		link_new_file_node_to_redir(t_node *redir_node,
+				char *content, int quote_type, t_vars *vars);
 
 /*
 Process multiline_input functions.
@@ -894,6 +889,7 @@ int	push_quote_type(t_node *node, int arg_idx, int quote_type);
 void	free_node_quotypes(t_node *node);
 int	**dup_node_quotetypes_and_append(t_node *node, char *new_arg,
 		int quote_type, char **new_args);
+int	*set_char_quote_types(char *arg_text, int quote_type);
 
 
 /*

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 10:46:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Works with process_quote_char() for handling quoted filenames.
 Example:
 - For "echo > "file.txt"", creates file node for "file.txt".
 */
-int	proc_quoted_redir_tgt(char *content, t_vars *vars)
+int	proc_quoted_redir_tgt(char *content, int quote_type, t_vars *vars)
 {
 	t_node	*redir_node;
 	int		status;
@@ -48,7 +48,7 @@ int	proc_quoted_redir_tgt(char *content, t_vars *vars)
 		if (try_append_to_prev_cmd(content, vars))
 			return (1);
 	}
-	return (link_new_file_node_to_redir(redir_node, content, vars));
+	return (link_new_file_node_to_redir(redir_node, content, quote_type, vars));
 }
 
 /*
@@ -161,7 +161,7 @@ or if previous conditional handling didn't consume the content.
 - 0 on failure (e.g., initnode fails, content is freed).
 */
 int	link_new_file_node_to_redir(t_node *redir_node,
-		char *content, t_vars *vars)
+	char *content, int quote_type, t_vars *vars)
 {
 	t_node	*file_node;
 
@@ -178,6 +178,26 @@ int	link_new_file_node_to_redir(t_node *redir_node,
 		if (vars->error_code == 0)
 			vars->error_code = ERR_DEFAULT;
 		return (0);
+	}
+	/* Replace default zeroed quote metadata with proper per-char types
+	   corresponding to the quoted content that produced `content`. */
+	if (content && quote_type != 0 && file_node->arg_quote_type
+		&& file_node->arg_quote_type[0])
+	{
+		free(file_node->arg_quote_type[0]);
+		file_node->arg_quote_type[0] = set_char_quote_types(content, quote_type);
+		if (!file_node->arg_quote_type[0])
+		{
+			/* allocation failure: clean up and propagate error */
+			free_node_quotypes(file_node);
+			ft_safefree((void **)&content);
+			free(file_node->args[0]);
+			ft_safefree((void **)&file_node->args);
+			ft_safefree((void **)&file_node);
+			if (vars->error_code == 0)
+				vars->error_code = ERR_DEFAULT;
+			return (0);
+		}
 	}
 	link_file_to_redir(redir_node, file_node, vars);
 	ft_safefree((void **)&content);

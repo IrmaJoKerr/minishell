@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 11:54:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int	process_quote_char(char *input, t_vars *vars, int redir_tgt_flag)
 			return (0);
 	}
 	if (redir_tgt_flag)
-		return (proc_quoted_redir_tgt(content, vars));
+		return (proc_quoted_redir_tgt(content, quote_type, vars));
 	return (handle_quo_str(input, vars, content, quote_type));
 }
 
@@ -163,7 +163,7 @@ int	handle_quo_str(char *input, t_vars *vars,
 
 	cmd_node = process_quoted_str(&curr_text, curr_quo_type, vars);
 	if (!cmd_node && vars->adj_state[0] == 0)
-		return (make_quoted_cmd(curr_text, input, vars));
+		return (make_quoted_cmd(curr_text, input, vars, curr_quo_type));
 	else if (!cmd_node)
 	{
 		if (!merge_quoted_token(input, curr_text, vars))

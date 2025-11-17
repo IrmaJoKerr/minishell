@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 14:34:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,35 +49,6 @@ Returns:
 - A newly allocated 2D array of quote types
 - NULL (with proper cleanup of any partial allocations) on error.
 */
-int	**dup_quote_types(t_node *node, size_t len)
-{
-	size_t	i;
-	size_t	qlen;
-	int		**new_quote_types;
-
-	new_quote_types = malloc(sizeof(int *) * (len + 2));
-	if (!new_quote_types)
-		return (NULL);
-	i = 0;
-	while (i < len)
-	{
-		if (has_arg_quotype(node, i))
-		{
-			qlen = ft_strlen(node->args[i]);
-			new_quote_types[i] = copy_int_arr(node->arg_quote_type[i], qlen);
-			if (!new_quote_types[i])
-			{
-				ft_free_int_2d(new_quote_types, i);
-				return (NULL);
-			}
-		}
-		else
-			new_quote_types[i] = NULL;
-		i++;
-	}
-	return (new_quote_types);
-}
-
 /*
 Creates a character-level quote type array for a new argument.
 - Single quotes are represented by 4, double quotes by 5.
@@ -88,28 +59,6 @@ Returns:
 - Pointer to the new quote_types array on success
 - NULL on failure
 */
-int	*set_char_quote_types(char *arg_text, int quote_type)
-{
-	int		*char_quote_types;
-	size_t	len;
-	size_t	i;
-
-	if (!arg_text)
-		return (NULL);
-	len = ft_strlen(arg_text);
-	char_quote_types = malloc(sizeof(int) * (len + 1));
-	if (!char_quote_types)
-		return (NULL);
-	i = 0;
-	while (i < len)
-	{
-		char_quote_types[i] = quote_type;
-		i++;
-	}
-	char_quote_types[len] = -1;
-	return (char_quote_types);
-}
-
 /*
 Creates a new quote types array with the new argument's quote type information.
 This function expands the quote types array when adding a new argument.
@@ -117,31 +66,13 @@ Returns:
 - A newly allocated 2D array of quote types with the new entry.
 - NULL (with proper cleanup of all related memory) on error.
 */
-int	**resize_quotype_arr(t_node *node, char *new_arg, int quote_type,
-			char **new_args)
-{
-	int		**new_quote_types;
-	size_t	len;
-
-	if (!node || !node->args || !new_args)
-		return (NULL);
-	len = ft_arrlen(node->args);
-	new_quote_types = dup_quote_types(node, len);
-	if (!new_quote_types)
-	{
-		ft_free_2d(new_args, len + 1);
-		return (NULL);
-	}
-	new_quote_types[len] = set_char_quote_types(new_arg, quote_type);
-	if (!new_quote_types[len])
-	{
-		ft_free_int_2d(new_quote_types, len);
-		ft_free_2d(new_args, len + 1);
-		return (NULL);
-	}
-	new_quote_types[len + 1] = NULL;
-	return (new_quote_types);
-}
+/*
+ * The legacy helpers for duplicating and resizing per-argument quote-type
+ * arrays were removed from this compilation unit to centralize quote-array
+ * management in `quote_accessor.c`. The append path already uses
+ * `dup_node_quotetypes_and_append()` which is the canonical helper and
+ * avoids direct manipulation of `node->arg_quote_type` here.
+ */
 
 /*
 Appends an argument to a node's argument array
