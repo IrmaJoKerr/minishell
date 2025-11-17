@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:53:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 09:01:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,7 @@ int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 	arg_idx = proc_join_args(vars, expanded_val);
 	if (arg_idx == -1)
 		return (0);
-	if (vars->current->arg_quote_type
-		&& vars->current->arg_quote_type[arg_idx])
+	if (has_arg_quotype(vars->current, arg_idx))
 	{
 		if (!update_quote_types(vars, arg_idx, expanded_val))
 			return (0);

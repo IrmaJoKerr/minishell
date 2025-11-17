@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 08:11:09 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 09:01:53 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	**dup_quote_types(t_node *node, size_t len)
 	i = 0;
 	while (i < len)
 	{
-		if (node->arg_quote_type && node->arg_quote_type[i])
+		if (has_arg_quotype(node, i))
 		{
 			qlen = ft_strlen(node->args[i]);
 			new_quote_types[i] = copy_int_arr(node->arg_quote_type[i], qlen);

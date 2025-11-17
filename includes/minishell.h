@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/12 23:41:26 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 09:01:52 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -893,6 +893,14 @@ void		track_quote_ctx(char quote_char, char *in_quote, int pos,
 				t_vars *vars);
 int			validate_quotes(char *input, t_vars *vars);
 char		*quote_prompt(char quote_type);
+
+/* Quote accessor PoC: small API to read per-arg per-char quote metadata.
+	This is a lightweight compatibility shim to let callers read quote
+	metadata without depending directly on the `arg_quote_type` layout.
+*/
+int		quote_type_at(t_node *node, int arg_idx, int pos);
+int		is_pos_single_quoted(t_node *node, int arg_idx, int pos);
+int		has_arg_quotype(t_node *node, int arg_idx);
 
 /*
 Setup redirection functions.

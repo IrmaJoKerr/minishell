@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:12:20 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/29 09:12:45 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 09:00:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,10 @@ int	process_multiline_input(char *input, t_vars *vars)
 {
 	char	*first_line_end;
 	char	*content_start;
+	char	*first_line;
+	char	*completed_first;
+	char	*tmp;
+	char	*work_input;
 
 	first_line_end = ft_strchr(input, '\n');
 	if (!first_line_end)
@@ -34,14 +38,92 @@ int	process_multiline_input(char *input, t_vars *vars)
 		return (1);
 	}
 	content_start = first_line_end + 1;
-	if (!proc_first_line(input, first_line_end, vars))
+
+	/*
+	Perform a lightweight, stateful pre-scan of the first line to detect
+	unclosed quotes and prompt for completion using existing helpers.
+	If completion occurs we build a temporary work_input that contains
+	the completed first line + '\n' + the rest of the original content
+	and use that for downstream processing. This preserves current
+	tokenizer/ heredoc logic while centralizing quote completion here.
+	*/
+	first_line = ft_substr(input, 0, (size_t)(first_line_end - input));
+	if (!first_line)
+	{
+		vars->error_code = ERR_DEFAULT;
 		return (0);
-	if (vars->pipes->heredoc_delim != NULL)
-		return (process_heredoc_path(input, first_line_end,
-				content_start, vars));
+	}
+	work_input = NULL;
+	completed_first = NULL;
+	if (!validate_quotes(first_line, vars))
+	{
+		/* prompt until quotes are balanced */
+		completed_first = fix_open_quotes(first_line, vars);
+		if (!completed_first)
+		{
+			ft_safefree((void **)&first_line);
+			return (0);
+		}
+		tmp = ft_strjoin(completed_first, "\n");
+		if (!tmp)
+		{
+			ft_safefree((void **)&first_line);
+			ft_safefree((void **)&completed_first);
+			vars->error_code = ERR_DEFAULT;
+			return (0);
+		}
+		work_input = ft_strjoin(tmp, content_start);
+		ft_safefree((void **)&tmp);
+		ft_safefree((void **)&completed_first);
+		if (!work_input)
+		{
+			ft_safefree((void **)&first_line);
+			vars->error_code = ERR_DEFAULT;
+			return (0);
+		}
+		/* recompute line pointers into the new buffer */
+		first_line_end = ft_strchr(work_input, '\n');
+		if (!first_line_end)
+		{
+			ft_safefree((void **)&first_line);
+			ft_safefree((void **)&work_input);
+			vars->error_code = ERR_DEFAULT;
+			return (0);
+		}
+		content_start = first_line_end + 1;
+	}
+	ft_safefree((void **)&first_line);
+
+	if (work_input)
+	{
+		if (!proc_first_line(work_input, first_line_end, vars))
+		{
+			ft_safefree((void **)&work_input);
+			return (0);
+		}
+		if (vars->pipes->heredoc_delim != NULL)
+		{
+			int res = process_heredoc_path(work_input, first_line_end,
+					content_start, vars);
+			ft_safefree((void **)&work_input);
+			return (res);
+		}
+		else
+		{
+			int res = process_standard(work_input, vars);
+			ft_safefree((void **)&work_input);
+			return (res);
+		}
+	}
 	else
 	{
-		return (process_standard(input, vars));
+		if (!proc_first_line(input, first_line_end, vars))
+			return (0);
+		if (vars->pipes->heredoc_delim != NULL)
+			return (process_heredoc_path(input, first_line_end,
+					content_start, vars));
+		else
+			return (process_standard(input, vars));
 	}
 }
 
