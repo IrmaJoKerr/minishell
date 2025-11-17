@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 23:59:48 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:54:02 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 22:09:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,12 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 
 	if (!token || !vars)
 		return ;
+	/* Pre-init trace: log the token type and token text so we can trace
+	   callers that pass legacy token types into initnode. This helps find
+	   where TYPE_DOUBLE_QUOTE / TYPE_SINGLE_QUOTE / TYPE_EXPANSION are
+	   coming from. */
+	fprintf(stderr, "DEBUG TOK: maketoken called with type=%d token='%s'\n",
+		(int)type, token ? token : "(null)");
 	node = initnode(type, token);
 	if (!node)
 		return ;

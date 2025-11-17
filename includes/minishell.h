@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 09:01:52 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 14:34:57 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -661,7 +661,6 @@ int			proc_join_args(t_vars *vars, char *expanded_val);
 int			handle_tok_join(char *input, t_vars *vars, char *expanded_val,
 				char *token);
 void		process_right_adj(char *input, t_vars *vars);
-int			realloc_quo_arr(int **quo_arr_ptr, size_t new_char_len);
 int			update_quote_types(t_vars *vars, int arg_idx, char *expanded_val);
 
 /*
@@ -874,6 +873,28 @@ void		proc_pipe_chain(t_node *start_pipe, t_vars *vars);
 void		link_file_to_redir(t_node *redir_node, t_node *file_node,
 				t_vars *vars);
 int			validate_redir_targets(t_vars *vars);
+
+/*
+Modify quoted expansion utility functions.
+In quote_accessor.c
+*/
+int	quote_type_at(t_node *node, int arg_idx, int pos);
+int	is_pos_single_quoted(t_node *node, int arg_idx, int pos);
+int	has_arg_quotype(t_node *node, int arg_idx);
+/* Writer / helper adapters for argument quote metadata.
+ * - ensure_arg_quotype_len: allocate/resize the per-arg quote array so it
+ *   can store at least `needed_len` entries (not counting sentinel).
+ * - set_quote_type_at: set the type at a specific position (will ensure size).
+ * - push_quote_type: append a quote-type for the next character in the arg.
+ * - free_node_quotypes: free the entire node->arg_quote_type 2D array.
+ */
+int	ensure_arg_quotype_len(t_node *node, int arg_idx, size_t needed_len);
+int	set_quote_type_at(t_node *node, int arg_idx, int pos, int quote_type);
+int	push_quote_type(t_node *node, int arg_idx, int quote_type);
+void	free_node_quotypes(t_node *node);
+int	**dup_node_quotetypes_and_append(t_node *node, char *new_arg,
+		int quote_type, char **new_args);
+
 
 /*
 Handles expansion in quotes.

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 01:14:22 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 13:04:49 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 22:09:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,37 @@ void	set_token_type(t_vars *vars, char *input)
 	token_position = 0;
 	special_type = 0;
 	if (input && input[0] == '$')
+	{
 		vars->curr_type = TYPE_EXPANSION;
+		fprintf(stderr, "DEBUG TOK: set_token_type detected expansion, setting curr_type=%d for token='%s'\n", (int)vars->curr_type, input ? input : "(null)");
+	}
 	else if (input && *input)
 	{
 		special_type = get_token_at(input, 0, &moves);
 		if (special_type != 0)
-			vars->curr_type = special_type;
+		{
+			/*
+			 * Don't propagate legacy token sentinel types (single-quote,
+			 * double-quote, expansion) into vars->curr_type. These are
+			 * handled by the quote/expansion tokenizers which will create
+			 * proper TYPE_ARGS/TYPE_CMD nodes and update per-char quote
+			 * metadata via the quote_accessor APIs. If get_token_at returns
+			 * one of those sentinel types, treat this as plain text for the
+			 * purposes of deciding CMD vs ARGS.
+			 */
+			if (special_type == TYPE_SINGLE_QUOTE || special_type == TYPE_DOUBLE_QUOTE || special_type == TYPE_EXPANSION)
+			{
+				setpipe(vars);
+				fprintf(stderr, "DEBUG TOK: set_token_type got legacy special_type=%d for token='%s' — overriding to curr_type=%d\n",
+					(int)special_type, input ? input : "(null)", (int)vars->curr_type);
+			}
+			else
+			{
+				vars->curr_type = special_type;
+				fprintf(stderr, "DEBUG TOK: set_token_type got special_type=%d for token='%s' -> curr_type=%d\n",
+					(int)special_type, input ? input : "(null)", (int)vars->curr_type);
+			}
+		}
 		else
 			setpipe(vars);
 	}

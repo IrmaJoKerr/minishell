@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:17:46 by bleow             #+#    #+#             */
-/*   Updated: 2025/05/30 12:35:44 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 14:54:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,27 @@ int	handle_token(char *input, t_vars *vars, int *hd_is_delim)
 	token_type = get_token_at(input, vars->pos, &moves);
 	if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
 		return (handle_quotes(input, vars, adj_saved));
-	if (input[vars->pos] == '$' && !vars->quote_depth)
+	if (input[vars->pos] == '$')
 	{
-		ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
-		tokenize_expan(input, vars);
-		return (1);
+		if (!vars->quote_depth)
+		{
+			/* Old behaviour: expansion allowed only when not in any quotes */
+			fprintf(stderr, "DEBUG OLD: expansion at pos %d (no quotes)\n", vars->pos);
+			ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
+			tokenize_expan(input, vars);
+			return (1);
+		}
+		else
+		{
+			/* New behaviour: allow expansion inside double quotes but not single */
+			if (vars->quote_ctx[vars->quote_depth - 1].type == '"')
+			{
+				fprintf(stderr, "DEBUG NEW: expansion at pos %d inside double quotes\n", vars->pos);
+				ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
+				tokenize_expan(input, vars);
+				return (1);
+			}
+		}
 	}
 	if (is_operator_token(token_type))
 		return (proc_opr_token(input, vars, hd_is_delim, token_type));

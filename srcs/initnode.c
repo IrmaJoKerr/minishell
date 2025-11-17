@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:51:55 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 22:09:43 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,16 @@ t_node	*initnode(t_tokentype type, char *token)
 	{
 		ft_safefree((void **)&node);
 		return (NULL);
+	}
+	/* Trace creation of certain legacy/rare token types so we can detect
+	   unintended behaviour in the new tokenisation system. These should
+	   normally not be created anymore; if they are, the debug line helps
+	   pinpoint where and with what token text. */
+	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE
+	    || type == TYPE_EXPANSION)
+	{
+		fprintf(stderr, "DEBUG TOK: initnode created type=%d token='%s'\n",
+			(int)type, token ? token : "(null)");
 	}
 	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
 		set_quote_type(node, quote_type);

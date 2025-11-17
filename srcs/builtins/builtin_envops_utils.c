@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 20:32:31 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:38:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 15:07:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,13 +112,16 @@ int	copy_env_with_ops(char **env, t_envop *env_list, char **new_env)
 	{
 		overwrite_node = NULL;
 		action = decide_action_at_index(i, env_list, &overwrite_node);
+		/* Debug: decision for old env index */
 		if (action == 0)
 		{
+			fprintf(stderr, "DEBUG EXPORT: copy_env_with_ops old[%d]='%s' -> OVERWRITE with '%s' at new[%d]\n", i, env[i], overwrite_node->arg_str, j);
 			new_env[j] = ft_strdup(overwrite_node->arg_str);
 			j++;
 		}
 		else if (action == 1)
 		{
+			fprintf(stderr, "DEBUG EXPORT: copy_env_with_ops old[%d]='%s' -> COPY to new[%d]\n", i, env[i], j);
 			new_env[j] = ft_strdup(env[i]);
 			j++;
 		}

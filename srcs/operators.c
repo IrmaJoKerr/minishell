@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 21:13:52 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:55:04 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 22:09:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,23 @@ void	handle_string(char *input, t_vars *vars)
 		if (token_type == 0)
 			set_token_type(vars, token);
 		else
-			vars->curr_type = token_type;
+		{
+			/* If get_token_at returned a legacy sentinel (quote/expansion)
+			 * treat it as ordinary text for deciding CMD vs ARGS so we don't
+			 * propagate TYPE_SINGLE_QUOTE/TYPE_DOUBLE_QUOTE/TYPE_EXPANSION
+			 * into maketoken calls. The actual quote/expansion handling will
+			 * be performed by the tokenizer functions which update the
+			 * character-level quote metadata via the quote_accessor APIs.
+			 */
+			if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE || token_type == TYPE_EXPANSION)
+			{
+				set_token_type(vars, token);
+				fprintf(stderr, "DEBUG TOK: handle_string detected legacy token_type=%d for token='%s' — using curr_type=%d instead\n",
+					(int)token_type, token ? token : "(null)", (int)vars->curr_type);
+			}
+			else
+				vars->curr_type = token_type;
+		}
 		maketoken(token, vars->curr_type, vars);
 		ft_safefree((void **)&token);
 		vars->start = vars->pos;

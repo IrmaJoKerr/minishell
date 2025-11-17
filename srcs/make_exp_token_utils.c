@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 09:01:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 14:54:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,40 +82,7 @@ void	process_right_adj(char *input, t_vars *vars)
 	vars->start = vars->pos;
 }
 
-/*
-Reallocates and extends a single quote type array (int *).
-Modifies *quo_arr_ptr directly.
-Returns:
-- 0 on success.
-- 1 on error.
-*/
-int	realloc_quo_arr(int **quo_arr_ptr, size_t new_char_len)
-{
-	int		*old_int_arr;
-	int		*new_int_arr;
-	size_t	old_len;
-	size_t	total_len;
-	size_t	i;
-
-	old_int_arr = *quo_arr_ptr;
-	old_len = ft_intarrlen(old_int_arr);
-	total_len = old_len + new_char_len;
-	new_int_arr = malloc(sizeof(int) * (total_len + 1));
-	if (!new_int_arr)
-		return (0);
-	if (old_len > 0)
-		ft_memcpy(new_int_arr, old_int_arr, sizeof(int) * old_len);
-	i = 0;
-	while (i < new_char_len)
-	{
-		new_int_arr[old_len + i] = 0;
-		i++;
-	}
-	new_int_arr[total_len] = -1;
-	ft_safefree((void **)&old_int_arr);
-	*quo_arr_ptr = new_int_arr;
-	return (1);
-}
+/* Old manual realloc path removed. Use quote_accessor write adapters instead. */
 
 /*
 Updates quote types for joined arguments.
@@ -135,6 +102,18 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *appended_text)
 	appended_len = ft_strlen(appended_text);
 	if (appended_len == 0)
 		return (1);
-	return (realloc_quo_arr(&(vars->current->arg_quote_type[arg_idx]),
-			appended_len));
+	/* New path: use accessor API to ensure and set appended quote types. */
+	fprintf(stderr, "DEBUG NEW: update_quote_types using accessor for arg %d append %zu\n", arg_idx, appended_len);
+	{
+		t_node *node = vars->current;
+		size_t curr_len = ft_intarrlen(node->arg_quote_type[arg_idx]);
+		if (!ensure_arg_quotype_len(node, arg_idx, curr_len + appended_len))
+			return (0);
+		for (size_t i = 0; i < appended_len; ++i)
+		{
+			if (!set_quote_type_at(node, arg_idx, (int)(curr_len + i), 0))
+				return (0);
+		}
+		return (1);
+	}
 }

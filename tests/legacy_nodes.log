@@ -1,0 +1,485 @@
+bleshell$> #!/bin/bash
+DEBUG TOK: maketoken called with type=2 token='#!/bin/bash'
+bleshell: #!/bin/bash: command not found
+bleshell$> # Detect creation of legacy token types (single-quote/double-quote/expansion)
+DEBUG TOK: maketoken called with type=2 token='#'
+DEBUG TOK: maketoken called with type=3 token='Detect'
+DEBUG TOK: maketoken called with type=3 token='creation'
+DEBUG TOK: maketoken called with type=3 token='of'
+DEBUG TOK: maketoken called with type=3 token='legacy'
+DEBUG TOK: maketoken called with type=3 token='token'
+DEBUG TOK: maketoken called with type=3 token='types'
+DEBUG TOK: maketoken called with type=3 token='(single-quote/double-quote/expansion)'
+bleshell: #: command not found
+bleshell$> set -euo pipefail
+DEBUG TOK: maketoken called with type=2 token='set'
+DEBUG TOK: maketoken called with type=3 token='-euo'
+DEBUG TOK: maketoken called with type=3 token='pipefail'
+bleshell: set: command not found
+bleshell$> cd "$(dirname "$0")/.."
+DEBUG TOK: maketoken called with type=2 token='cd'
+DEBUG QE: expand_quoted_str content='$(dirname ' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='$' at pos=1
+DEBUG QE: expand_quoted_var combined expanded='$'
+DEBUG QE: after var expansion expanded='$'
+DEBUG QE: append_basic_strs start=1 end=10 len=9
+DEBUG QE: after append_basic_strs expanded='$(dirname '
+DEBUG OLD: expansion at pos 15 (no quotes)
+DEBUG NEW: update_quote_types using accessor for arg 1 append 8
+DEBUG NEW: update_quote_types using accessor for arg 1 append 4
+bleshell: $(dirname bleshell)/..: command not found
+bleshell$> LOG="tests/legacy_nodes.log"
+DEBUG TOK: maketoken called with type=2 token='LOG='
+DEBUG NEW: update_quote_types using accessor for arg 0 append 22
+bleshell: LOG=tests/legacy_nodes.log: command not found
+bleshell$> rm -f "$LOG"
+DEBUG TOK: maketoken called with type=2 token='rm'
+DEBUG TOK: maketoken called with type=3 token='-f'
+DEBUG QE: expand_quoted_str content='$LOG' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='' at pos=4
+DEBUG QE: expand_quoted_var combined expanded=''
+DEBUG QE: after var expansion expanded=''
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$LOG"' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$LOG"' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='"$LOG"' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='"$LOG"'
+bleshell$> 
+bleshell$> ./minishell > "$LOG" 2>&1 <<'EOF'
+DEBUG TOK: maketoken called with type=2 token='./minishell'
+DEBUG TOK: maketoken called with type=3 token='2'
+DEBUG TOK: maketoken called with type=6 token='<<'
+DEBUG TOK: maketoken called with type=3 token=''EOF''
+DEBUG TOK: maketoken called with type=2 token='#'
+DEBUG TOK: maketoken called with type=3 token='Basic'
+DEBUG TOK: maketoken called with type=3 token='cases'
+DEBUG TOK: maketoken called with type=3 token='that'
+DEBUG TOK: maketoken called with type=3 token='previously'
+DEBUG TOK: maketoken called with type=3 token='triggered'
+DEBUG TOK: maketoken called with type=3 token='legacy'
+DEBUG TOK: maketoken called with type=3 token='nodes'
+bleshell: #: command not found
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG OLD: expansion at pos 5 (no quotes)
+DEBUG TOK: maketoken called with type=2 token='export'
+DEBUG TOK: maketoken called with type=3 token='VAR=val'
+DEBUG EXPORT: called builtin_export with args: 'export' 'VAR=val'
+DEBUG EXPORT: make_envop_node arg='VAR=val' key='VAR' len=3 flag=1
+DEBUG EXPORT: parse_envop_list appended node arg='VAR=val' key='VAR' len=3 flag=1
+DEBUG EXPORT: copy_env_with_ops old[0]='SHELL=/bin/bash' -> COPY to new[0]
+DEBUG EXPORT: copy_env_with_ops old[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899' -> COPY to new[1]
+DEBUG EXPORT: copy_env_with_ops old[2]='QT_ACCESSIBILITY=1' -> COPY to new[2]
+DEBUG EXPORT: copy_env_with_ops old[3]='COLORTERM=truecolor' -> COPY to new[3]
+DEBUG EXPORT: copy_env_with_ops old[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg' -> COPY to new[4]
+DEBUG EXPORT: copy_env_with_ops old[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0' -> COPY to new[5]
+DEBUG EXPORT: copy_env_with_ops old[6]='XDG_MENU_PREFIX=xfce-' -> COPY to new[6]
+DEBUG EXPORT: copy_env_with_ops old[7]='TERM_PROGRAM_VERSION=1.105.1' -> COPY to new[7]
+DEBUG EXPORT: copy_env_with_ops old[8]='CLUTTER_BACKEND=x11' -> COPY to new[8]
+DEBUG EXPORT: copy_env_with_ops old[9]='LANGUAGE=en_US' -> COPY to new[9]
+DEBUG EXPORT: copy_env_with_ops old[10]='LC_ADDRESS=ms_MY.UTF-8' -> COPY to new[10]
+DEBUG EXPORT: copy_env_with_ops old[11]='LC_NAME=ms_MY.UTF-8' -> COPY to new[11]
+DEBUG EXPORT: copy_env_with_ops old[12]='SSH_AUTH_SOCK=/tmp/ssh-bRHK2TcFlcdJ/agent.3221' -> COPY to new[12]
+DEBUG EXPORT: copy_env_with_ops old[13]='DESKTOP_SESSION=xfce' -> COPY to new[13]
+DEBUG EXPORT: copy_env_with_ops old[14]='LC_MONETARY=ms_MY.UTF-8' -> COPY to new[14]
+DEBUG EXPORT: copy_env_with_ops old[15]='SSH_AGENT_PID=3222' -> COPY to new[15]
+DEBUG EXPORT: copy_env_with_ops old[16]='GTK_MODULES=gail:atk-bridge' -> COPY to new[16]
+DEBUG EXPORT: copy_env_with_ops old[17]='XDG_SEAT=seat0' -> COPY to new[17]
+DEBUG EXPORT: copy_env_with_ops old[18]='PWD=/home/bleow/Coding/Core/minishell' -> COPY to new[18]
+DEBUG EXPORT: copy_env_with_ops old[19]='XDG_SESSION_DESKTOP=xfce' -> COPY to new[19]
+DEBUG EXPORT: copy_env_with_ops old[20]='LOGNAME=bleow' -> COPY to new[20]
+DEBUG EXPORT: copy_env_with_ops old[21]='XDG_SESSION_TYPE=x11' -> COPY to new[21]
+DEBUG EXPORT: copy_env_with_ops old[22]='MLX_PATH=/home/bleow/Coding/minilibx-linux' -> COPY to new[22]
+DEBUG EXPORT: copy_env_with_ops old[23]='XAUTHORITY=/home/bleow/.Xauthority' -> COPY to new[23]
+DEBUG EXPORT: copy_env_with_ops old[24]='VSCODE_GIT_ASKPASS_NODE=/usr/share/code/code' -> COPY to new[24]
+DEBUG EXPORT: copy_env_with_ops old[25]='XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/bleow' -> COPY to new[25]
+DEBUG EXPORT: copy_env_with_ops old[26]='GDM_LANG=en_US' -> COPY to new[26]
+DEBUG EXPORT: copy_env_with_ops old[27]='HOME=/home/bleow' -> COPY to new[27]
+DEBUG EXPORT: copy_env_with_ops old[28]='LC_PAPER=ms_MY.UTF-8' -> COPY to new[28]
+DEBUG EXPORT: copy_env_with_ops old[29]='LANG=en_US.UTF-8' -> COPY to new[29]
+DEBUG EXPORT: copy_env_with_ops old[30]='LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:' -> COPY to new[30]
+DEBUG EXPORT: copy_env_with_ops old[31]='XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[31]
+DEBUG EXPORT: copy_env_with_ops old[32]='GIT_ASKPASS=/usr/share/code/resources/app/extensions/git/dist/askpass.sh' -> COPY to new[32]
+DEBUG EXPORT: copy_env_with_ops old[33]='XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0' -> COPY to new[33]
+DEBUG EXPORT: copy_env_with_ops old[34]='CHROME_DESKTOP=code.desktop' -> COPY to new[34]
+DEBUG EXPORT: copy_env_with_ops old[35]='VSCODE_GIT_ASKPASS_EXTRA_ARGS=' -> COPY to new[35]
+DEBUG EXPORT: copy_env_with_ops old[36]='VSCODE_PYTHON_AUTOACTIVATE_GUARD=1' -> COPY to new[36]
+DEBUG EXPORT: copy_env_with_ops old[37]='LESSCLOSE=/usr/bin/lesspipe %s %s' -> COPY to new[37]
+DEBUG EXPORT: copy_env_with_ops old[38]='XDG_SESSION_CLASS=user' -> COPY to new[38]
+DEBUG EXPORT: copy_env_with_ops old[39]='TERM=xterm-256color' -> COPY to new[39]
+DEBUG EXPORT: copy_env_with_ops old[40]='LC_IDENTIFICATION=ms_MY.UTF-8' -> COPY to new[40]
+DEBUG EXPORT: copy_env_with_ops old[41]='LESSOPEN=| /usr/bin/lesspipe %s' -> COPY to new[41]
+DEBUG EXPORT: copy_env_with_ops old[42]='USER=bleow' -> COPY to new[42]
+DEBUG EXPORT: copy_env_with_ops old[43]='GIT_PAGER=cat' -> COPY to new[43]
+DEBUG EXPORT: copy_env_with_ops old[44]='VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-e801df7577.sock' -> COPY to new[44]
+DEBUG EXPORT: copy_env_with_ops old[45]='DISPLAY=:0.0' -> COPY to new[45]
+DEBUG EXPORT: copy_env_with_ops old[46]='SHLVL=3' -> COPY to new[46]
+DEBUG EXPORT: copy_env_with_ops old[47]='LC_TELEPHONE=ms_MY.UTF-8' -> COPY to new[47]
+DEBUG EXPORT: copy_env_with_ops old[48]='LC_MEASUREMENT=ms_MY.UTF-8' -> COPY to new[48]
+DEBUG EXPORT: copy_env_with_ops old[49]='XDG_VTNR=7' -> COPY to new[49]
+DEBUG EXPORT: copy_env_with_ops old[50]='XDG_SESSION_ID=c1' -> COPY to new[50]
+DEBUG EXPORT: copy_env_with_ops old[51]='XDG_RUNTIME_DIR=/run/user/1000' -> COPY to new[51]
+DEBUG EXPORT: copy_env_with_ops old[52]='COMPIZ_CONFIG_PROFILE=mint' -> COPY to new[52]
+DEBUG EXPORT: copy_env_with_ops old[53]='VSCODE_GIT_ASKPASS_MAIN=/usr/share/code/resources/app/extensions/git/dist/askpass-main.js' -> COPY to new[53]
+DEBUG EXPORT: copy_env_with_ops old[54]='GTK3_MODULES=xapp-gtk3-module' -> COPY to new[54]
+DEBUG EXPORT: copy_env_with_ops old[55]='XDG_DATA_DIRS=/usr/share/xfce4:/home/bleow/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share' -> COPY to new[55]
+DEBUG EXPORT: copy_env_with_ops old[56]='GDK_BACKEND=x11' -> COPY to new[56]
+DEBUG EXPORT: copy_env_with_ops old[57]='PATH=/home/bleow/.local/bin:/home/bleow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/bleow/.local/bin:/home/bleow/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/bleow/.local/bin:/home/bleow/.venv/bin' -> COPY to new[57]
+DEBUG EXPORT: copy_env_with_ops old[58]='GDMSESSION=xfce' -> COPY to new[58]
+DEBUG EXPORT: copy_env_with_ops old[59]='ORIGINAL_XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[59]
+DEBUG EXPORT: copy_env_with_ops old[60]='DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus' -> COPY to new[60]
+DEBUG EXPORT: copy_env_with_ops old[61]='LC_NUMERIC=ms_MY.UTF-8' -> COPY to new[61]
+DEBUG EXPORT: copy_env_with_ops old[62]='TERM_PROGRAM=vscode' -> COPY to new[62]
+DEBUG EXPORT: copy_env_with_ops old[63]='_=./minishell' -> COPY to new[63]
+DEBUG EXPORT: proc_envop_list returned new_env len=65 (will replace old)
+DEBUG EXPORT: new_env[0]='SHELL=/bin/bash'
+DEBUG EXPORT: new_env[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899'
+DEBUG EXPORT: new_env[2]='QT_ACCESSIBILITY=1'
+DEBUG EXPORT: new_env[3]='COLORTERM=truecolor'
+DEBUG EXPORT: new_env[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg'
+DEBUG EXPORT: new_env[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0'
+DEBUG EXPORT: new_env[6]='XDG_MENU_PREFIX=xfce-'
+DEBUG EXPORT: new_env[7]='TERM_PROGRAM_VERSION=1.105.1'
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG QE: expand_quoted_str content='$VAR' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='val' at pos=4
+DEBUG QE: expand_quoted_var combined expanded='val'
+DEBUG QE: after var expansion expanded='val'
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG TOK: set_token_type got legacy special_type=5 for token='""quoted' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='""quoted' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='""quoted' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='""quoted'
+DEBUG TOK: maketoken called with type=2 token='unset'
+DEBUG TOK: maketoken called with type=3 token='UNDEF'
+DEBUG EXPORT: make_envop_node arg='UNDEF' key='UNDEF' len=5 flag=-1
+DEBUG EXPORT: parse_envop_list appended node arg='UNDEF' key='UNDEF' len=5 flag=-1
+DEBUG EXPORT: copy_env_with_ops old[0]='SHELL=/bin/bash' -> COPY to new[0]
+DEBUG EXPORT: copy_env_with_ops old[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899' -> COPY to new[1]
+DEBUG EXPORT: copy_env_with_ops old[2]='QT_ACCESSIBILITY=1' -> COPY to new[2]
+DEBUG EXPORT: copy_env_with_ops old[3]='COLORTERM=truecolor' -> COPY to new[3]
+DEBUG EXPORT: copy_env_with_ops old[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg' -> COPY to new[4]
+DEBUG EXPORT: copy_env_with_ops old[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0' -> COPY to new[5]
+DEBUG EXPORT: copy_env_with_ops old[6]='XDG_MENU_PREFIX=xfce-' -> COPY to new[6]
+DEBUG EXPORT: copy_env_with_ops old[7]='TERM_PROGRAM_VERSION=1.105.1' -> COPY to new[7]
+DEBUG EXPORT: copy_env_with_ops old[8]='CLUTTER_BACKEND=x11' -> COPY to new[8]
+DEBUG EXPORT: copy_env_with_ops old[9]='LANGUAGE=en_US' -> COPY to new[9]
+DEBUG EXPORT: copy_env_with_ops old[10]='LC_ADDRESS=ms_MY.UTF-8' -> COPY to new[10]
+DEBUG EXPORT: copy_env_with_ops old[11]='LC_NAME=ms_MY.UTF-8' -> COPY to new[11]
+DEBUG EXPORT: copy_env_with_ops old[12]='SSH_AUTH_SOCK=/tmp/ssh-bRHK2TcFlcdJ/agent.3221' -> COPY to new[12]
+DEBUG EXPORT: copy_env_with_ops old[13]='DESKTOP_SESSION=xfce' -> COPY to new[13]
+DEBUG EXPORT: copy_env_with_ops old[14]='LC_MONETARY=ms_MY.UTF-8' -> COPY to new[14]
+DEBUG EXPORT: copy_env_with_ops old[15]='SSH_AGENT_PID=3222' -> COPY to new[15]
+DEBUG EXPORT: copy_env_with_ops old[16]='GTK_MODULES=gail:atk-bridge' -> COPY to new[16]
+DEBUG EXPORT: copy_env_with_ops old[17]='XDG_SEAT=seat0' -> COPY to new[17]
+DEBUG EXPORT: copy_env_with_ops old[18]='PWD=/home/bleow/Coding/Core/minishell' -> COPY to new[18]
+DEBUG EXPORT: copy_env_with_ops old[19]='XDG_SESSION_DESKTOP=xfce' -> COPY to new[19]
+DEBUG EXPORT: copy_env_with_ops old[20]='LOGNAME=bleow' -> COPY to new[20]
+DEBUG EXPORT: copy_env_with_ops old[21]='XDG_SESSION_TYPE=x11' -> COPY to new[21]
+DEBUG EXPORT: copy_env_with_ops old[22]='MLX_PATH=/home/bleow/Coding/minilibx-linux' -> COPY to new[22]
+DEBUG EXPORT: copy_env_with_ops old[23]='XAUTHORITY=/home/bleow/.Xauthority' -> COPY to new[23]
+DEBUG EXPORT: copy_env_with_ops old[24]='VSCODE_GIT_ASKPASS_NODE=/usr/share/code/code' -> COPY to new[24]
+DEBUG EXPORT: copy_env_with_ops old[25]='XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/bleow' -> COPY to new[25]
+DEBUG EXPORT: copy_env_with_ops old[26]='GDM_LANG=en_US' -> COPY to new[26]
+DEBUG EXPORT: copy_env_with_ops old[27]='HOME=/home/bleow' -> COPY to new[27]
+DEBUG EXPORT: copy_env_with_ops old[28]='LC_PAPER=ms_MY.UTF-8' -> COPY to new[28]
+DEBUG EXPORT: copy_env_with_ops old[29]='LANG=en_US.UTF-8' -> COPY to new[29]
+DEBUG EXPORT: copy_env_with_ops old[30]='LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:' -> COPY to new[30]
+DEBUG EXPORT: copy_env_with_ops old[31]='XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[31]
+DEBUG EXPORT: copy_env_with_ops old[32]='GIT_ASKPASS=/usr/share/code/resources/app/extensions/git/dist/askpass.sh' -> COPY to new[32]
+DEBUG EXPORT: copy_env_with_ops old[33]='XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0' -> COPY to new[33]
+DEBUG EXPORT: copy_env_with_ops old[34]='CHROME_DESKTOP=code.desktop' -> COPY to new[34]
+DEBUG EXPORT: copy_env_with_ops old[35]='VSCODE_GIT_ASKPASS_EXTRA_ARGS=' -> COPY to new[35]
+DEBUG EXPORT: copy_env_with_ops old[36]='VSCODE_PYTHON_AUTOACTIVATE_GUARD=1' -> COPY to new[36]
+DEBUG EXPORT: copy_env_with_ops old[37]='LESSCLOSE=/usr/bin/lesspipe %s %s' -> COPY to new[37]
+DEBUG EXPORT: copy_env_with_ops old[38]='XDG_SESSION_CLASS=user' -> COPY to new[38]
+DEBUG EXPORT: copy_env_with_ops old[39]='TERM=xterm-256color' -> COPY to new[39]
+DEBUG EXPORT: copy_env_with_ops old[40]='LC_IDENTIFICATION=ms_MY.UTF-8' -> COPY to new[40]
+DEBUG EXPORT: copy_env_with_ops old[41]='LESSOPEN=| /usr/bin/lesspipe %s' -> COPY to new[41]
+DEBUG EXPORT: copy_env_with_ops old[42]='USER=bleow' -> COPY to new[42]
+DEBUG EXPORT: copy_env_with_ops old[43]='GIT_PAGER=cat' -> COPY to new[43]
+DEBUG EXPORT: copy_env_with_ops old[44]='VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-e801df7577.sock' -> COPY to new[44]
+DEBUG EXPORT: copy_env_with_ops old[45]='DISPLAY=:0.0' -> COPY to new[45]
+DEBUG EXPORT: copy_env_with_ops old[46]='SHLVL=3' -> COPY to new[46]
+DEBUG EXPORT: copy_env_with_ops old[47]='LC_TELEPHONE=ms_MY.UTF-8' -> COPY to new[47]
+DEBUG EXPORT: copy_env_with_ops old[48]='LC_MEASUREMENT=ms_MY.UTF-8' -> COPY to new[48]
+DEBUG EXPORT: copy_env_with_ops old[49]='XDG_VTNR=7' -> COPY to new[49]
+DEBUG EXPORT: copy_env_with_ops old[50]='XDG_SESSION_ID=c1' -> COPY to new[50]
+DEBUG EXPORT: copy_env_with_ops old[51]='XDG_RUNTIME_DIR=/run/user/1000' -> COPY to new[51]
+DEBUG EXPORT: copy_env_with_ops old[52]='COMPIZ_CONFIG_PROFILE=mint' -> COPY to new[52]
+DEBUG EXPORT: copy_env_with_ops old[53]='VSCODE_GIT_ASKPASS_MAIN=/usr/share/code/resources/app/extensions/git/dist/askpass-main.js' -> COPY to new[53]
+DEBUG EXPORT: copy_env_with_ops old[54]='GTK3_MODULES=xapp-gtk3-module' -> COPY to new[54]
+DEBUG EXPORT: copy_env_with_ops old[55]='XDG_DATA_DIRS=/usr/share/xfce4:/home/bleow/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share' -> COPY to new[55]
+DEBUG EXPORT: copy_env_with_ops old[56]='GDK_BACKEND=x11' -> COPY to new[56]
+DEBUG EXPORT: copy_env_with_ops old[57]='PATH=/home/bleow/.local/bin:/home/bleow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/bleow/.local/bin:/home/bleow/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/bleow/.local/bin:/home/bleow/.venv/bin' -> COPY to new[57]
+DEBUG EXPORT: copy_env_with_ops old[58]='GDMSESSION=xfce' -> COPY to new[58]
+DEBUG EXPORT: copy_env_with_ops old[59]='ORIGINAL_XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[59]
+DEBUG EXPORT: copy_env_with_ops old[60]='DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus' -> COPY to new[60]
+DEBUG EXPORT: copy_env_with_ops old[61]='LC_NUMERIC=ms_MY.UTF-8' -> COPY to new[61]
+DEBUG EXPORT: copy_env_with_ops old[62]='TERM_PROGRAM=vscode' -> COPY to new[62]
+DEBUG EXPORT: copy_env_with_ops old[63]='_=./minishell' -> COPY to new[63]
+DEBUG EXPORT: copy_env_with_ops old[64]='VAR=val' -> COPY to new[64]
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG QE: expand_quoted_str content='$UNDEF' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='' at pos=6
+DEBUG QE: expand_quoted_var combined expanded=''
+DEBUG QE: after var expansion expanded=''
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$UNDEF"' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$UNDEF"' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='"$UNDEF"' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='"$UNDEF"'
+DEBUG TOK: maketoken called with type=2 token='export'
+DEBUG TOK: maketoken called with type=3 token='A=a'
+DEBUG EXPORT: called builtin_export with args: 'export' 'A=a'
+DEBUG EXPORT: make_envop_node arg='A=a' key='A' len=1 flag=1
+DEBUG EXPORT: parse_envop_list appended node arg='A=a' key='A' len=1 flag=1
+DEBUG EXPORT: copy_env_with_ops old[0]='SHELL=/bin/bash' -> COPY to new[0]
+DEBUG EXPORT: copy_env_with_ops old[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899' -> COPY to new[1]
+DEBUG EXPORT: copy_env_with_ops old[2]='QT_ACCESSIBILITY=1' -> COPY to new[2]
+DEBUG EXPORT: copy_env_with_ops old[3]='COLORTERM=truecolor' -> COPY to new[3]
+DEBUG EXPORT: copy_env_with_ops old[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg' -> COPY to new[4]
+DEBUG EXPORT: copy_env_with_ops old[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0' -> COPY to new[5]
+DEBUG EXPORT: copy_env_with_ops old[6]='XDG_MENU_PREFIX=xfce-' -> COPY to new[6]
+DEBUG EXPORT: copy_env_with_ops old[7]='TERM_PROGRAM_VERSION=1.105.1' -> COPY to new[7]
+DEBUG EXPORT: copy_env_with_ops old[8]='CLUTTER_BACKEND=x11' -> COPY to new[8]
+DEBUG EXPORT: copy_env_with_ops old[9]='LANGUAGE=en_US' -> COPY to new[9]
+DEBUG EXPORT: copy_env_with_ops old[10]='LC_ADDRESS=ms_MY.UTF-8' -> COPY to new[10]
+DEBUG EXPORT: copy_env_with_ops old[11]='LC_NAME=ms_MY.UTF-8' -> COPY to new[11]
+DEBUG EXPORT: copy_env_with_ops old[12]='SSH_AUTH_SOCK=/tmp/ssh-bRHK2TcFlcdJ/agent.3221' -> COPY to new[12]
+DEBUG EXPORT: copy_env_with_ops old[13]='DESKTOP_SESSION=xfce' -> COPY to new[13]
+DEBUG EXPORT: copy_env_with_ops old[14]='LC_MONETARY=ms_MY.UTF-8' -> COPY to new[14]
+DEBUG EXPORT: copy_env_with_ops old[15]='SSH_AGENT_PID=3222' -> COPY to new[15]
+DEBUG EXPORT: copy_env_with_ops old[16]='GTK_MODULES=gail:atk-bridge' -> COPY to new[16]
+DEBUG EXPORT: copy_env_with_ops old[17]='XDG_SEAT=seat0' -> COPY to new[17]
+DEBUG EXPORT: copy_env_with_ops old[18]='PWD=/home/bleow/Coding/Core/minishell' -> COPY to new[18]
+DEBUG EXPORT: copy_env_with_ops old[19]='XDG_SESSION_DESKTOP=xfce' -> COPY to new[19]
+DEBUG EXPORT: copy_env_with_ops old[20]='LOGNAME=bleow' -> COPY to new[20]
+DEBUG EXPORT: copy_env_with_ops old[21]='XDG_SESSION_TYPE=x11' -> COPY to new[21]
+DEBUG EXPORT: copy_env_with_ops old[22]='MLX_PATH=/home/bleow/Coding/minilibx-linux' -> COPY to new[22]
+DEBUG EXPORT: copy_env_with_ops old[23]='XAUTHORITY=/home/bleow/.Xauthority' -> COPY to new[23]
+DEBUG EXPORT: copy_env_with_ops old[24]='VSCODE_GIT_ASKPASS_NODE=/usr/share/code/code' -> COPY to new[24]
+DEBUG EXPORT: copy_env_with_ops old[25]='XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/bleow' -> COPY to new[25]
+DEBUG EXPORT: copy_env_with_ops old[26]='GDM_LANG=en_US' -> COPY to new[26]
+DEBUG EXPORT: copy_env_with_ops old[27]='HOME=/home/bleow' -> COPY to new[27]
+DEBUG EXPORT: copy_env_with_ops old[28]='LC_PAPER=ms_MY.UTF-8' -> COPY to new[28]
+DEBUG EXPORT: copy_env_with_ops old[29]='LANG=en_US.UTF-8' -> COPY to new[29]
+DEBUG EXPORT: copy_env_with_ops old[30]='LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:' -> COPY to new[30]
+DEBUG EXPORT: copy_env_with_ops old[31]='XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[31]
+DEBUG EXPORT: copy_env_with_ops old[32]='GIT_ASKPASS=/usr/share/code/resources/app/extensions/git/dist/askpass.sh' -> COPY to new[32]
+DEBUG EXPORT: copy_env_with_ops old[33]='XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0' -> COPY to new[33]
+DEBUG EXPORT: copy_env_with_ops old[34]='CHROME_DESKTOP=code.desktop' -> COPY to new[34]
+DEBUG EXPORT: copy_env_with_ops old[35]='VSCODE_GIT_ASKPASS_EXTRA_ARGS=' -> COPY to new[35]
+DEBUG EXPORT: copy_env_with_ops old[36]='VSCODE_PYTHON_AUTOACTIVATE_GUARD=1' -> COPY to new[36]
+DEBUG EXPORT: copy_env_with_ops old[37]='LESSCLOSE=/usr/bin/lesspipe %s %s' -> COPY to new[37]
+DEBUG EXPORT: copy_env_with_ops old[38]='XDG_SESSION_CLASS=user' -> COPY to new[38]
+DEBUG EXPORT: copy_env_with_ops old[39]='TERM=xterm-256color' -> COPY to new[39]
+DEBUG EXPORT: copy_env_with_ops old[40]='LC_IDENTIFICATION=ms_MY.UTF-8' -> COPY to new[40]
+DEBUG EXPORT: copy_env_with_ops old[41]='LESSOPEN=| /usr/bin/lesspipe %s' -> COPY to new[41]
+DEBUG EXPORT: copy_env_with_ops old[42]='USER=bleow' -> COPY to new[42]
+DEBUG EXPORT: copy_env_with_ops old[43]='GIT_PAGER=cat' -> COPY to new[43]
+DEBUG EXPORT: copy_env_with_ops old[44]='VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-e801df7577.sock' -> COPY to new[44]
+DEBUG EXPORT: copy_env_with_ops old[45]='DISPLAY=:0.0' -> COPY to new[45]
+DEBUG EXPORT: copy_env_with_ops old[46]='SHLVL=3' -> COPY to new[46]
+DEBUG EXPORT: copy_env_with_ops old[47]='LC_TELEPHONE=ms_MY.UTF-8' -> COPY to new[47]
+DEBUG EXPORT: copy_env_with_ops old[48]='LC_MEASUREMENT=ms_MY.UTF-8' -> COPY to new[48]
+DEBUG EXPORT: copy_env_with_ops old[49]='XDG_VTNR=7' -> COPY to new[49]
+DEBUG EXPORT: copy_env_with_ops old[50]='XDG_SESSION_ID=c1' -> COPY to new[50]
+DEBUG EXPORT: copy_env_with_ops old[51]='XDG_RUNTIME_DIR=/run/user/1000' -> COPY to new[51]
+DEBUG EXPORT: copy_env_with_ops old[52]='COMPIZ_CONFIG_PROFILE=mint' -> COPY to new[52]
+DEBUG EXPORT: copy_env_with_ops old[53]='VSCODE_GIT_ASKPASS_MAIN=/usr/share/code/resources/app/extensions/git/dist/askpass-main.js' -> COPY to new[53]
+DEBUG EXPORT: copy_env_with_ops old[54]='GTK3_MODULES=xapp-gtk3-module' -> COPY to new[54]
+DEBUG EXPORT: copy_env_with_ops old[55]='XDG_DATA_DIRS=/usr/share/xfce4:/home/bleow/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share' -> COPY to new[55]
+DEBUG EXPORT: copy_env_with_ops old[56]='GDK_BACKEND=x11' -> COPY to new[56]
+DEBUG EXPORT: copy_env_with_ops old[57]='PATH=/home/bleow/.local/bin:/home/bleow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/bleow/.local/bin:/home/bleow/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/bleow/.local/bin:/home/bleow/.venv/bin' -> COPY to new[57]
+DEBUG EXPORT: copy_env_with_ops old[58]='GDMSESSION=xfce' -> COPY to new[58]
+DEBUG EXPORT: copy_env_with_ops old[59]='ORIGINAL_XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[59]
+DEBUG EXPORT: copy_env_with_ops old[60]='DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus' -> COPY to new[60]
+DEBUG EXPORT: copy_env_with_ops old[61]='LC_NUMERIC=ms_MY.UTF-8' -> COPY to new[61]
+DEBUG EXPORT: copy_env_with_ops old[62]='TERM_PROGRAM=vscode' -> COPY to new[62]
+DEBUG EXPORT: copy_env_with_ops old[63]='_=./minishell' -> COPY to new[63]
+DEBUG EXPORT: copy_env_with_ops old[64]='VAR=val' -> COPY to new[64]
+DEBUG EXPORT: proc_envop_list returned new_env len=66 (will replace old)
+DEBUG EXPORT: new_env[0]='SHELL=/bin/bash'
+DEBUG EXPORT: new_env[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899'
+DEBUG EXPORT: new_env[2]='QT_ACCESSIBILITY=1'
+DEBUG EXPORT: new_env[3]='COLORTERM=truecolor'
+DEBUG EXPORT: new_env[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg'
+DEBUG EXPORT: new_env[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0'
+DEBUG EXPORT: new_env[6]='XDG_MENU_PREFIX=xfce-'
+DEBUG EXPORT: new_env[7]='TERM_PROGRAM_VERSION=1.105.1'
+DEBUG TOK: maketoken called with type=2 token='export'
+DEBUG TOK: maketoken called with type=3 token='B=b'
+DEBUG EXPORT: called builtin_export with args: 'export' 'B=b'
+DEBUG EXPORT: make_envop_node arg='B=b' key='B' len=1 flag=1
+DEBUG EXPORT: parse_envop_list appended node arg='B=b' key='B' len=1 flag=1
+DEBUG EXPORT: copy_env_with_ops old[0]='SHELL=/bin/bash' -> COPY to new[0]
+DEBUG EXPORT: copy_env_with_ops old[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899' -> COPY to new[1]
+DEBUG EXPORT: copy_env_with_ops old[2]='QT_ACCESSIBILITY=1' -> COPY to new[2]
+DEBUG EXPORT: copy_env_with_ops old[3]='COLORTERM=truecolor' -> COPY to new[3]
+DEBUG EXPORT: copy_env_with_ops old[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg' -> COPY to new[4]
+DEBUG EXPORT: copy_env_with_ops old[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0' -> COPY to new[5]
+DEBUG EXPORT: copy_env_with_ops old[6]='XDG_MENU_PREFIX=xfce-' -> COPY to new[6]
+DEBUG EXPORT: copy_env_with_ops old[7]='TERM_PROGRAM_VERSION=1.105.1' -> COPY to new[7]
+DEBUG EXPORT: copy_env_with_ops old[8]='CLUTTER_BACKEND=x11' -> COPY to new[8]
+DEBUG EXPORT: copy_env_with_ops old[9]='LANGUAGE=en_US' -> COPY to new[9]
+DEBUG EXPORT: copy_env_with_ops old[10]='LC_ADDRESS=ms_MY.UTF-8' -> COPY to new[10]
+DEBUG EXPORT: copy_env_with_ops old[11]='LC_NAME=ms_MY.UTF-8' -> COPY to new[11]
+DEBUG EXPORT: copy_env_with_ops old[12]='SSH_AUTH_SOCK=/tmp/ssh-bRHK2TcFlcdJ/agent.3221' -> COPY to new[12]
+DEBUG EXPORT: copy_env_with_ops old[13]='DESKTOP_SESSION=xfce' -> COPY to new[13]
+DEBUG EXPORT: copy_env_with_ops old[14]='LC_MONETARY=ms_MY.UTF-8' -> COPY to new[14]
+DEBUG EXPORT: copy_env_with_ops old[15]='SSH_AGENT_PID=3222' -> COPY to new[15]
+DEBUG EXPORT: copy_env_with_ops old[16]='GTK_MODULES=gail:atk-bridge' -> COPY to new[16]
+DEBUG EXPORT: copy_env_with_ops old[17]='XDG_SEAT=seat0' -> COPY to new[17]
+DEBUG EXPORT: copy_env_with_ops old[18]='PWD=/home/bleow/Coding/Core/minishell' -> COPY to new[18]
+DEBUG EXPORT: copy_env_with_ops old[19]='XDG_SESSION_DESKTOP=xfce' -> COPY to new[19]
+DEBUG EXPORT: copy_env_with_ops old[20]='LOGNAME=bleow' -> COPY to new[20]
+DEBUG EXPORT: copy_env_with_ops old[21]='XDG_SESSION_TYPE=x11' -> COPY to new[21]
+DEBUG EXPORT: copy_env_with_ops old[22]='MLX_PATH=/home/bleow/Coding/minilibx-linux' -> COPY to new[22]
+DEBUG EXPORT: copy_env_with_ops old[23]='XAUTHORITY=/home/bleow/.Xauthority' -> COPY to new[23]
+DEBUG EXPORT: copy_env_with_ops old[24]='VSCODE_GIT_ASKPASS_NODE=/usr/share/code/code' -> COPY to new[24]
+DEBUG EXPORT: copy_env_with_ops old[25]='XDG_GREETER_DATA_DIR=/var/lib/lightdm-data/bleow' -> COPY to new[25]
+DEBUG EXPORT: copy_env_with_ops old[26]='GDM_LANG=en_US' -> COPY to new[26]
+DEBUG EXPORT: copy_env_with_ops old[27]='HOME=/home/bleow' -> COPY to new[27]
+DEBUG EXPORT: copy_env_with_ops old[28]='LC_PAPER=ms_MY.UTF-8' -> COPY to new[28]
+DEBUG EXPORT: copy_env_with_ops old[29]='LANG=en_US.UTF-8' -> COPY to new[29]
+DEBUG EXPORT: copy_env_with_ops old[30]='LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:' -> COPY to new[30]
+DEBUG EXPORT: copy_env_with_ops old[31]='XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[31]
+DEBUG EXPORT: copy_env_with_ops old[32]='GIT_ASKPASS=/usr/share/code/resources/app/extensions/git/dist/askpass.sh' -> COPY to new[32]
+DEBUG EXPORT: copy_env_with_ops old[33]='XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0' -> COPY to new[33]
+DEBUG EXPORT: copy_env_with_ops old[34]='CHROME_DESKTOP=code.desktop' -> COPY to new[34]
+DEBUG EXPORT: copy_env_with_ops old[35]='VSCODE_GIT_ASKPASS_EXTRA_ARGS=' -> COPY to new[35]
+DEBUG EXPORT: copy_env_with_ops old[36]='VSCODE_PYTHON_AUTOACTIVATE_GUARD=1' -> COPY to new[36]
+DEBUG EXPORT: copy_env_with_ops old[37]='LESSCLOSE=/usr/bin/lesspipe %s %s' -> COPY to new[37]
+DEBUG EXPORT: copy_env_with_ops old[38]='XDG_SESSION_CLASS=user' -> COPY to new[38]
+DEBUG EXPORT: copy_env_with_ops old[39]='TERM=xterm-256color' -> COPY to new[39]
+DEBUG EXPORT: copy_env_with_ops old[40]='LC_IDENTIFICATION=ms_MY.UTF-8' -> COPY to new[40]
+DEBUG EXPORT: copy_env_with_ops old[41]='LESSOPEN=| /usr/bin/lesspipe %s' -> COPY to new[41]
+DEBUG EXPORT: copy_env_with_ops old[42]='USER=bleow' -> COPY to new[42]
+DEBUG EXPORT: copy_env_with_ops old[43]='GIT_PAGER=cat' -> COPY to new[43]
+DEBUG EXPORT: copy_env_with_ops old[44]='VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-e801df7577.sock' -> COPY to new[44]
+DEBUG EXPORT: copy_env_with_ops old[45]='DISPLAY=:0.0' -> COPY to new[45]
+DEBUG EXPORT: copy_env_with_ops old[46]='SHLVL=3' -> COPY to new[46]
+DEBUG EXPORT: copy_env_with_ops old[47]='LC_TELEPHONE=ms_MY.UTF-8' -> COPY to new[47]
+DEBUG EXPORT: copy_env_with_ops old[48]='LC_MEASUREMENT=ms_MY.UTF-8' -> COPY to new[48]
+DEBUG EXPORT: copy_env_with_ops old[49]='XDG_VTNR=7' -> COPY to new[49]
+DEBUG EXPORT: copy_env_with_ops old[50]='XDG_SESSION_ID=c1' -> COPY to new[50]
+DEBUG EXPORT: copy_env_with_ops old[51]='XDG_RUNTIME_DIR=/run/user/1000' -> COPY to new[51]
+DEBUG EXPORT: copy_env_with_ops old[52]='COMPIZ_CONFIG_PROFILE=mint' -> COPY to new[52]
+DEBUG EXPORT: copy_env_with_ops old[53]='VSCODE_GIT_ASKPASS_MAIN=/usr/share/code/resources/app/extensions/git/dist/askpass-main.js' -> COPY to new[53]
+DEBUG EXPORT: copy_env_with_ops old[54]='GTK3_MODULES=xapp-gtk3-module' -> COPY to new[54]
+DEBUG EXPORT: copy_env_with_ops old[55]='XDG_DATA_DIRS=/usr/share/xfce4:/home/bleow/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share' -> COPY to new[55]
+DEBUG EXPORT: copy_env_with_ops old[56]='GDK_BACKEND=x11' -> COPY to new[56]
+DEBUG EXPORT: copy_env_with_ops old[57]='PATH=/home/bleow/.local/bin:/home/bleow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/bleow/.local/bin:/home/bleow/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/bleow/.local/bin:/home/bleow/.venv/bin' -> COPY to new[57]
+DEBUG EXPORT: copy_env_with_ops old[58]='GDMSESSION=xfce' -> COPY to new[58]
+DEBUG EXPORT: copy_env_with_ops old[59]='ORIGINAL_XDG_CURRENT_DESKTOP=XFCE' -> COPY to new[59]
+DEBUG EXPORT: copy_env_with_ops old[60]='DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus' -> COPY to new[60]
+DEBUG EXPORT: copy_env_with_ops old[61]='LC_NUMERIC=ms_MY.UTF-8' -> COPY to new[61]
+DEBUG EXPORT: copy_env_with_ops old[62]='TERM_PROGRAM=vscode' -> COPY to new[62]
+DEBUG EXPORT: copy_env_with_ops old[63]='_=./minishell' -> COPY to new[63]
+DEBUG EXPORT: copy_env_with_ops old[64]='VAR=val' -> COPY to new[64]
+DEBUG EXPORT: copy_env_with_ops old[65]='A=a' -> COPY to new[65]
+DEBUG EXPORT: proc_envop_list returned new_env len=67 (will replace old)
+DEBUG EXPORT: new_env[0]='SHELL=/bin/bash'
+DEBUG EXPORT: new_env[1]='SESSION_MANAGER=local/bleow-VirtualBox:@/tmp/.ICE-unix/2899,unix/bleow-VirtualBox:/tmp/.ICE-unix/2899'
+DEBUG EXPORT: new_env[2]='QT_ACCESSIBILITY=1'
+DEBUG EXPORT: new_env[3]='COLORTERM=truecolor'
+DEBUG EXPORT: new_env[4]='XDG_CONFIG_DIRS=/etc/xdg/xdg-xfce:/etc/xdg'
+DEBUG EXPORT: new_env[5]='XDG_SESSION_PATH=/org/freedesktop/DisplayManager/Session0'
+DEBUG EXPORT: new_env[6]='XDG_MENU_PREFIX=xfce-'
+DEBUG EXPORT: new_env[7]='TERM_PROGRAM_VERSION=1.105.1'
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG QE: expand_quoted_str content='$A$B' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='a' at pos=2
+DEBUG QE: expand_quoted_var combined expanded='a'
+DEBUG QE: after var expansion expanded='a'
+DEBUG QE: expand_quoted_str encountering $ at pos=2
+DEBUG QE: expand_quoted_var got var_value='b' at pos=4
+DEBUG QE: expand_quoted_var combined expanded='ab'
+DEBUG QE: after var expansion expanded='ab'
+DEBUG TOK: maketoken called with type=2 token='exit'
+bleshell$> 
+bleshell$> OUT=$(cat "$LOG")
+DEBUG OLD: expansion at pos 4 (no quotes)
+DEBUG TOK: maketoken called with type=2 token='OUT='
+DEBUG NEW: update_quote_types using accessor for arg 0 append 1
+DEBUG NEW: update_quote_types using accessor for arg 0 append 4
+DEBUG QE: expand_quoted_str content='$LOG' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='' at pos=4
+DEBUG QE: expand_quoted_var combined expanded=''
+DEBUG QE: after var expansion expanded=''
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$LOG")' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$LOG")' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='"$LOG")' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='"$LOG")'
+bleshell: OUT=$(cat: command not found
+bleshell$> echo "Captured output written to $LOG"
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG QE: expand_quoted_str content='Captured output written to $LOG' quote_depth=0
+DEBUG QE: append_basic_strs start=0 end=27 len=27
+DEBUG QE: after append_basic_strs expanded='Captured output written to '
+DEBUG QE: expand_quoted_str encountering $ at pos=27
+DEBUG QE: expand_quoted_var got var_value='' at pos=31
+DEBUG QE: expand_quoted_var combined expanded='Captured output written to '
+DEBUG QE: after var expansion expanded='Captured output written to '
+Captured output written to 
+bleshell$> 
+bleshell$> # Fail if any legacy initnode token creation was logged
+DEBUG TOK: maketoken called with type=2 token='#'
+DEBUG TOK: maketoken called with type=3 token='Fail'
+DEBUG TOK: maketoken called with type=3 token='if'
+DEBUG TOK: maketoken called with type=3 token='any'
+DEBUG TOK: maketoken called with type=3 token='legacy'
+DEBUG TOK: maketoken called with type=3 token='initnode'
+DEBUG TOK: maketoken called with type=3 token='token'
+DEBUG TOK: maketoken called with type=3 token='creation'
+DEBUG TOK: maketoken called with type=3 token='was'
+DEBUG TOK: maketoken called with type=3 token='logged'
+bleshell: #: command not found
+bleshell$> if echo "$OUT" | grep -Fq 'DEBUG TOK: initnode created type='; then
+DEBUG TOK: maketoken called with type=2 token='if'
+DEBUG TOK: maketoken called with type=3 token='echo'
+DEBUG QE: expand_quoted_str content='$OUT' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='' at pos=4
+DEBUG QE: expand_quoted_var combined expanded=''
+DEBUG QE: after var expansion expanded=''
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$OUT"' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$OUT"' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='"$OUT"' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='"$OUT"'
+DEBUG TOK: maketoken called with type=11 token='|'
+DEBUG TOK: maketoken called with type=2 token='grep'
+DEBUG TOK: maketoken called with type=3 token='-Fq'
+DEBUG NEW: update_quote_types using accessor for arg 2 append 1
+DEBUG TOK: maketoken called with type=3 token='then'
+bleshell: if: command not found
+grep: then: No such file or directory
+bleshell$>     echo "FAIL: legacy token creation detected"
+DEBUG TOK: maketoken called with type=2 token='echo'
+FAIL: legacy token creation detected
+bleshell$>     echo "=== OFFENDING LINES ==="
+DEBUG TOK: maketoken called with type=2 token='echo'
+=== OFFENDING LINES ===
+bleshell$>     echo "$OUT" | grep -F 'DEBUG TOK: initnode created type='
+DEBUG TOK: maketoken called with type=2 token='echo'
+DEBUG QE: expand_quoted_str content='$OUT' quote_depth=0
+DEBUG QE: expand_quoted_str encountering $ at pos=0
+DEBUG QE: expand_quoted_var got var_value='' at pos=4
+DEBUG QE: expand_quoted_var combined expanded=''
+DEBUG QE: after var expansion expanded=''
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$OUT"' — overriding to curr_type=3
+DEBUG TOK: set_token_type got legacy special_type=5 for token='"$OUT"' — overriding to curr_type=3
+DEBUG TOK: handle_string detected legacy token_type=5 for token='"$OUT"' — using curr_type=3 instead
+DEBUG TOK: maketoken called with type=3 token='"$OUT"'
+DEBUG TOK: maketoken called with type=11 token='|'
+DEBUG TOK: maketoken called with type=2 token='grep'
+DEBUG TOK: maketoken called with type=3 token='-F'
+bleshell$>     exit 1
+DEBUG TOK: maketoken called with type=2 token='exit'
+DEBUG TOK: maketoken called with type=3 token='1'
+exit

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 09:01:53 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 14:34:58 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,8 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 		return ;
 	}
 	new_args[len + 1] = NULL;
-	new_quote_types = resize_quotype_arr(node, new_arg, quote_type, new_args);
+	new_quote_types = dup_node_quotetypes_and_append(node, new_arg,
+			quote_type, new_args);
 	if (!new_quote_types)
 		return ;
 	ft_free_2d(node->args, len);

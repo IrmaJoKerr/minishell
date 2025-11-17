@@ -1,0 +1,32 @@
+> # Basic cases that previously triggered legacy nodes
+> echo $HOME
+> export VAR=val
+> echo "$VAR"
+> echo '$VAR'
+> echo ""quoted""
+> unset UNDEF
+> echo "$UNDEF"
+> export A=a
+> export B=b
+> echo "$A$B"
+> exit
+> EOF
+bleshell$> # Basic cases that previously triggered legacy nodes
+bleshell$> echo $HOME
+/home/bleow
+bleshell$> export VAR=val
+bleshell$> echo "$VAR"
+val
+bleshell$> echo '$VAR'
+$VAR
+bleshell$> echo ""quoted""
+ ""quoted
+bleshell$> unset UNDEF
+bleshell$> echo "$UNDEF"
+ "$UNDEF"
+bleshell$> export A=a
+bleshell$> export B=b
+bleshell$> echo "$A$B"
+ab
+bleshell$> exit
+exit

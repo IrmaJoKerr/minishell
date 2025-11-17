@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 22:50:56 by lechan            #+#    #+#             */
-/*   Updated: 2025/06/07 02:38:58 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 15:07:40 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,19 @@ int	builtin_export(char **args, t_vars *vars)
 	char	**new_env;
 	int		old_len;
 
+	/* Debug: entry */
+	fprintf(stderr, "DEBUG EXPORT: called builtin_export with args:");
+	if (args)
+	{
+		int ai = 0;
+		while (args[ai])
+		{
+			fprintf(stderr, " '%s'", args[ai]);
+			ai++;
+		}
+	}
+	fprintf(stderr, "\n");
+
 	if (!vars || !vars->env)
 		return (vars->error_code = 1);
 	if (!args[1])
@@ -34,6 +47,17 @@ int	builtin_export(char **args, t_vars *vars)
 		return (vars->error_code = 1);
 	match_envline_to_env(to_proc, vars->env);
 	new_env = proc_envop_list(to_proc, vars->env);
+	/* Debug: produced new_env (or NULL) */
+	if (new_env)
+	{
+		int new_len = ft_arrlen(new_env);
+		fprintf(stderr, "DEBUG EXPORT: proc_envop_list returned new_env len=%d (will replace old)\n", new_len);
+		/* show first few entries */
+		for (int i = 0; i < new_len && i < 8; i++)
+			fprintf(stderr, "DEBUG EXPORT: new_env[%d]='%s'\n", i, new_env[i]);
+	}
+	else
+		fprintf(stderr, "DEBUG EXPORT: proc_envop_list returned NULL (no change)\n");
 	if (new_env)
 	{
 		old_len = ft_arrlen(vars->env);

@@ -1,0 +1,12 @@
+# Basic cases that previously triggered legacy nodes
+echo $HOME
+export VAR=val
+echo "$VAR"
+echo '$VAR'
+echo ""quoted""
+unset UNDEF
+echo "$UNDEF"
+export A=a
+export B=b
+echo "$A$B"
+exit

@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/01 16:32:37 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:09:37 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 15:07:41 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,9 @@ t_envop	*make_envop_node(const char *arg, int flag)
 	node->next = NULL;
 	if (node->arg_str)
 		node->export_key = get_env_key(node->arg_str, &node->arg_len);
+	/* Debug: created envop node */
+	fprintf(stderr, "DEBUG EXPORT: make_envop_node arg='%s' key='%s' len=%d flag=%d\n",
+		node->arg_str ? node->arg_str : "(null)", node->export_key ? node->export_key : "(null)", node->arg_len, node->flag);
 	return (node);
 }
 
@@ -67,6 +70,9 @@ t_envop	*parse_envop_list(char **args, int op_type)
 				return (NULL);
 			}
 			add_envop_node(&head, node);
+			/* Debug: parsed node appended */
+			fprintf(stderr, "DEBUG EXPORT: parse_envop_list appended node arg='%s' key='%s' len=%d flag=%d\n",
+				args[i], node->export_key ? node->export_key : "(null)", node->arg_len, node->flag);
 		}
 		i++;
 	}
@@ -116,6 +122,9 @@ void	match_envline_to_env(t_envop *envop_list, char **env)
 				node->matched_idx = i;
 				if (node->flag == 1 && ft_strchr(node->arg_str, '='))
 					node->flag = 0;
+				/* Debug: found match for node */
+				fprintf(stderr, "DEBUG EXPORT: match_envline_to_env node key='%s' matched_idx=%d new_flag=%d (env='%s')\n",
+					node->export_key ? node->export_key : "(null)", node->matched_idx, node->flag, env[i]);
 				break ;
 			}
 			i++;

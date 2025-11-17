@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:47:36 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 03:08:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/17 14:54:44 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,19 +34,24 @@ char	*expand_quoted_str(char *content, t_vars *vars)
 	expanded = ft_strdup("");
 	if (!expanded)
 		return (NULL);
+	/* Debug: initial state */
+	fprintf(stderr, "DEBUG QE: expand_quoted_str content='%s' quote_depth=%d\n", content, vars->quote_depth);
 	while (content[pos])
 	{
 		if (content[pos] == '$')
 		{
+			fprintf(stderr, "DEBUG QE: expand_quoted_str encountering $ at pos=%d\n", pos);
 			expanded = expand_quoted_var(expanded, content, &pos, vars);
 			if (!expanded)
 				return (NULL);
+			fprintf(stderr, "DEBUG QE: after var expansion expanded='%s'\n", expanded);
 		}
 		else
 		{
 			expanded = append_basic_strs(expanded, content, &pos);
 			if (!expanded)
 				return (NULL);
+			fprintf(stderr, "DEBUG QE: after append_basic_strs expanded='%s'\n", expanded);
 		}
 	}
 	return (expanded);
@@ -69,7 +74,10 @@ char	*expand_quoted_var(char *expanded, char *content, int *pos,
 	var_value = expand_variable(content, pos, NULL, vars);
 	if (!var_value)
 		return (expanded);
+	fprintf(stderr, "DEBUG QE: expand_quoted_var got var_value='%s' at pos=%d\n", var_value, *pos);
 	temp = ft_strjoin(expanded, var_value);
+	if (temp)
+		fprintf(stderr, "DEBUG QE: expand_quoted_var combined expanded='%s'\n", temp);
 	ft_safefree((void **)&expanded);
 	ft_safefree((void **)&var_value);
 	if (!temp)
@@ -93,7 +101,10 @@ char	*append_basic_strs(char *expanded, char *content, int *pos)
 	while (content[*pos] && content[*pos] != '$')
 		(*pos)++;
 	if (*pos > start)
+	{
+		fprintf(stderr, "DEBUG QE: append_basic_strs start=%d end=%d len=%d\n", start, *pos, (*pos - start));
 		return (append_substr(expanded, content, start, *pos - start));
+	}
 	return (NULL);
 }
 

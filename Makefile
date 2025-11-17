@@ -6,7 +6,7 @@
 #    By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/25 00:56:19 by bleow             #+#    #+#              #
-#    Updated: 2025/11/17 09:01:38 by bleow            ###   ########.fr        #
+#    Updated: 2025/11/17 09:31:32 by bleow            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -119,12 +119,17 @@ $(MINISHELL_OBJS_DIR):
 	@mkdir -p $(MINISHELL_BI_OBJS_DIR)
 	@mkdir -p $(TEMP_DIR)
 
+$(MINISHELL_BI_OBJS_DIR):
+	@mkdir -p $(MINISHELL_BI_OBJS_DIR)
+
 $(MINISHELL_OBJS_DIR)/%.o: srcs/%.c | $(MINISHELL_OBJS_DIR)
 	@echo "Compiling BleShell $<"
+	@mkdir -p $(MINISHELL_OBJS_DIR) $(MINISHELL_BI_OBJS_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(MINISHELL_BI_OBJS_DIR)/%.o: srcs/builtins/%.c | $(MINISHELL_OBJS_DIR)
 	@echo "Compiling BleShell $<"
+	@mkdir -p $(MINISHELL_OBJS_DIR) $(MINISHELL_BI_OBJS_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 MINISHELL_OBJS = $(MINISHELL_SRCS:srcs/%.c=$(MINISHELL_OBJS_DIR)/%.o)
@@ -161,7 +166,9 @@ fclean: clean
 		rm -f $(TEMP_DIR)/bleshell_history_tmp; \
 	fi
 
-re: fclean all
+
+re: fclean
+	@$(MAKE) all
 
 debug: CFLAGS += $(DEBUG_FLAGS)
 debug: re
