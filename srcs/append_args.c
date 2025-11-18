@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 20:53:44 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 15:37:07 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,9 +106,31 @@ void	append_arg(t_node *node, char *new_arg, int quote_type)
 			quote_type, new_args);
 	if (!new_quote_types)
 		return ;
+	/* Duplicate compact per-arg flags as well so the lightweight accessor
+	   remains populated during migration. If this allocation fails, undo
+	   the newly allocated quote types and args to avoid leaks and return. */
+	{
+		int *new_flags;
+		new_flags = dup_node_arg_flags_and_append(node, new_arg, quote_type,
+			new_args);
+		if (!new_flags)
+		{
+			ft_free_int_2d(new_quote_types, len);
+			ft_free_2d(new_args, len + 1);
+			return ;
+		}
+		/* Free old arg flags and assign the new compact flags */
+		if (node->arg_quote_flags)
+		{
+			free(node->arg_quote_flags);
+			node->arg_quote_flags = NULL;
+		}
+		node->arg_quote_flags = new_flags;
+	}
 	ft_free_2d(node->args, len);
 	if (node->arg_quote_type)
 		ft_free_int_2d(node->arg_quote_type, len);
 	node->args = new_args;
 	node->arg_quote_type = new_quote_types;
+
 }

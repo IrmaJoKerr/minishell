@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/17 22:09:43 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 15:37:08 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,12 +85,18 @@ t_node	*initnode(t_tokentype type, char *token)
 	   normally not be created anymore; if they are, the debug line helps
 	   pinpoint where and with what token text. */
 	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE
-	    || type == TYPE_EXPANSION)
+		|| type == TYPE_EXPANSION)
 	{
-		fprintf(stderr, "DEBUG TOK: initnode created type=%d token='%s'\n",
-			(int)type, token ? token : "(null)");
+		/* Print human-readable token type alongside numeric value */
+		fprintf(stderr, "DEBUG TOK: initnode created type=%d(%s) token='%s'\n",
+			(int)type, get_token_str(type), token ? token : "(null)");
 	}
 	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
 		set_quote_type(node, quote_type);
+	/* If this node originated from an explicit quoted token, mark the compact
+	   per-argument flag accordingly so readers can consult the lightweight
+	   accessor during migration. This complements the per-char metadata. */
+	if (quote_type != 0)
+		set_arg_quote_flag(node, 0, quote_type);
 	return (node);
 }

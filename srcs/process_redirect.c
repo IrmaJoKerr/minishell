@@ -30,6 +30,14 @@ void	link_redir_to_cmd_node(t_node **node_ptr, t_vars *vars)
 		if (redir_node)
 		{
 			(*node_ptr)->redir = redir_node;
+
+			/* Observation: log when we attach a redirection and whether it has
+			   the compact per-arg flag set for its filename argument. */
+			{
+				int qf = get_arg_quote_flag(redir_node, 0);
+				if (qf != 0)
+					fprintf(stderr, "DEBUG NEW: %s attached redir with compact flag %d\n", __func__, qf);
+			}
 		}
 	}
 }

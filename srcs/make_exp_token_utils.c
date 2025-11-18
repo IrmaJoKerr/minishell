@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:02:14 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 19:50:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@ Returns:
 */
 int	proc_join_args(t_vars *vars, char *expanded_val)
 {
+	/* Tripwire removed here; writer-side code below will set compact flags
+	   and log DEBUG NEW when appropriate. */
+
 	int		arg_idx;
 	char	*joined;
 
@@ -34,6 +37,13 @@ int	proc_join_args(t_vars *vars, char *expanded_val)
 		return (-1);
 	ft_safefree((void **)&vars->current->args[arg_idx]);
 	vars->current->args[arg_idx] = joined;
+	/* Writer-side: mark the final argument as (conservatively) unquoted
+	   since we're appending expanded/unquoted text. Populate the compact
+	   per-arg flag so readers can prefer it during migration. */
+	if (set_arg_quote_flag(vars->current, arg_idx, 0))
+		fprintf(stderr, "DEBUG NEW: %s set compact flag for arg %d\n", __func__, arg_idx);
+	else
+		fprintf(stderr, "DEBUG OLD: %s failed to set compact flag for arg %d\n", __func__, arg_idx);
 	return (arg_idx);
 }
 
@@ -52,7 +62,11 @@ int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 	arg_idx = proc_join_args(vars, expanded_val);
 	if (arg_idx == -1)
 		return (0);
-	if (has_arg_quotype(vars->current, arg_idx))
+	/* Prefer the compact per-arg accessor; fall back to legacy per-char
+	   arrays when necessary. If the compact flag indicates the argument was
+	   quoted (non-zero), we still need to update the per-char metadata so
+	   older readers continue to work during migration. */
+	if (get_arg_quote_flag(vars->current, arg_idx) != 0)
 	{
 		if (!update_quote_types(vars, arg_idx, expanded_val))
 			return (0);
@@ -96,8 +110,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *appended_text)
 {
 	size_t	appended_len;
 
-	if (!vars || !vars->current || !vars->current->arg_quote_type
-		|| !vars->current->arg_quote_type[arg_idx] || !appended_text)
+	if (!vars || !vars->current || !appended_text)
 		return (0);
 	appended_len = ft_strlen(appended_text);
 	if (appended_len == 0)
@@ -106,7 +119,16 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *appended_text)
 	fprintf(stderr, "DEBUG NEW: update_quote_types using accessor for arg %d append %zu\n", arg_idx, appended_len);
 	{
 		t_node *node = vars->current;
-		size_t curr_len = ft_intarrlen(node->arg_quote_type[arg_idx]);
+		size_t curr_len;
+
+		  /* Safely obtain current per-char quote array length. Use the
+			  accessor `has_arg_quotype()` instead of directly dereferencing
+			  `node->arg_quote_type` so this reader path is robust while the
+			  migration is in-progress. If per-char metadata hasn't been
+			  allocated yet, treat current length as 0. */
+		  curr_len = 0;
+		  if (has_arg_quotype(node, arg_idx))
+				curr_len = ft_intarrlen(node->arg_quote_type[arg_idx]);
 		if (!ensure_arg_quotype_len(node, arg_idx, curr_len + appended_len))
 			return (0);
 		for (size_t i = 0; i < appended_len; ++i)

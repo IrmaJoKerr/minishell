@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 21:07:33 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 02:53:01 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 15:37:09 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,4 +80,9 @@ void	make_node_arrays(t_node *node, char *token)
 		return ;
 	len = ft_strlen(token);
 	node->arg_quote_type = setup_quotes(len);
+	/* Initialize compact per-arg flags (migration target). Default 0 = unquoted.
+	   Allocate one slot for the single initial argument. If allocation fails
+	   leave arg_quote_flags NULL and rely on legacy per-char arrays as a
+	   fallback; this keeps the change low-risk. */
+	node->arg_quote_flags = setup_arg_flags(1);
 }

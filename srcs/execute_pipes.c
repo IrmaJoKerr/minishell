@@ -172,6 +172,12 @@ int	exec_solo_redir(t_node *redir_node, t_vars *vars)
 
 	if (!redir_node->args || !redir_node->args[0])
 		return (0);
+	/* Executor-side observation of compact per-arg flag for metrics */
+	{
+		int qf = get_arg_quote_flag(redir_node, 0);
+		if (qf != 0)
+			fprintf(stderr, "DEBUG NEW: %s saw compact flag %d for solo redir\n", __func__, qf);
+	}
 	filename = redir_node->args[0];
 	fd = -1;
 	if (!chk_permissions(filename, O_WRONLY, vars))

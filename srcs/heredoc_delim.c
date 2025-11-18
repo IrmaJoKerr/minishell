@@ -33,6 +33,53 @@ int	is_valid_delim(char *orig_delim, t_vars *vars)
 	if (!orig_delim)
 		return (0);
 	len = ft_strlen(orig_delim);
+	/*
+	 * Migration-friendly path: if there's a delimiter node, prefer the
+	 * compact per-argument flag to determine whether the delimiter was
+	 * quoted. This avoids scanning per-character metadata and lets the
+	 * writer-side set the compact flag at token creation time.
+	 */
+	{
+		t_node *delim_node = find_delim_token(vars->head);
+		int compact_flag = 0;
+
+		if (delim_node && delim_node->args && delim_node->args[0]
+			&& ft_strcmp(delim_node->args[0], orig_delim) == 0)
+		{
+			compact_flag = is_arg_whole_quoted(delim_node, 0);
+			if (compact_flag != 0)
+			{
+				/* Treat as quoted and produce the cleaned delimiter. */
+				quoted = 1;
+				if (len >= 2 && ((orig_delim[0] == '"' && orig_delim[len - 1] == '"')
+					|| (orig_delim[0] == '\'' && orig_delim[len - 1] == '\'')))
+				{
+					clean_delim = ft_substr(orig_delim, 1, len - 2);
+					if (!clean_delim)
+					{
+						if (vars->error_code == 0)
+							vars->error_code = ERR_DEFAULT;
+						return (0);
+					}
+				}
+				else
+				{
+					/* Nothing to strip; duplicate the original. */
+					clean_delim = ft_strdup(orig_delim);
+					if (!clean_delim)
+					{
+						if (vars->error_code == 0)
+							vars->error_code = ERR_DEFAULT;
+						return (0);
+					}
+				}
+				store_cln_delim(vars, clean_delim, quoted);
+				return (1);
+			}
+		}
+	}
+
+	/* Fallback: old behaviour that inspects the literal delimiter text. */
 	processed = chk_quoted_delim(orig_delim, len, &clean_delim, &quoted);
 	if (!processed)
 		processed = chk_normal_delim(orig_delim, len, &clean_delim, &quoted);

@@ -1,15 +1,16 @@
-#/* ************************************************************************** */
-#/*                                                                            */
-#/*                                                        :::      ::::::::   */
-#/*   minishell.h                                        :+:      :+:    :+:   */
-#/*                                                    +:+ +:+         +:+     */
-#/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
-#/*                                                +#+#+#+#+#+   +#+           */
-#/*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-#/*   Updated: 2025/11/17 14:34:57 by bleow            ###   ########.fr       */
-#/*                                                                            */
-#/* ************************************************************************** */
-#ifndef MINISHELL_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
+/*   Updated: 2025/11/18 20:53:03 by bleow            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+# ifndef MINISHELL_H
 # define MINISHELL_H
 
 # include "../libft/includes/libft.h"
@@ -104,6 +105,16 @@ Error code settings.
 # define ERR_REDIRECTION 127
 
 /*
+This enum handles the quotation states.
+*/
+typedef enum e_quotype
+{
+	QUOTE_NONE = 0,
+	QUOTE_SINGLE = 1,
+	QUOTE_DOUBLE = 2,
+}	t_quotype;
+
+/*
 This enum stores the possible token types.
 */
 typedef enum e_tokentype
@@ -156,6 +167,13 @@ typedef struct s_node
 	t_tokentype		type;
 	char			**args;
 	int				**arg_quote_type;
+	/* Compact per-argument quote flag array. One entry per final arg.
+	   Values: 0 = unquoted, 4 = single-quoted, 5 = double-quoted.
+	   This is an incremental migration target; the legacy
+	   arg_quote_type (per-char arrays) is kept for compatibility
+	   until callers are migrated to use this compact field.
+	*/
+	int				*arg_quote_flags;
 	struct s_node	*next;
 	struct s_node	*prev;
 	struct s_node	*left;
@@ -891,6 +909,11 @@ int	**dup_node_quotetypes_and_append(t_node *node, char *new_arg,
 		int quote_type, char **new_args);
 int	*set_char_quote_types(char *arg_text, int quote_type);
 
+/* Compact per-arg flag helper: returns 0/4/5 for unquoted/single/double
+	quoted entire-argument semantics. This prefers the compact accessor and
+	falls back to scanning the per-char `arg_quote_type` array when needed. */
+int	is_arg_whole_quoted(t_node *node, int arg_idx);
+
 
 /*
 Handles expansion in quotes.
@@ -918,6 +941,17 @@ char		*quote_prompt(char quote_type);
 int		quote_type_at(t_node *node, int arg_idx, int pos);
 int		is_pos_single_quoted(t_node *node, int arg_idx, int pos);
 int		has_arg_quotype(t_node *node, int arg_idx);
+
+/* Compact per-arg flags helper prototypes (migration additions).
+	These provide a minimal API to allocate/free and read/write the
+	new `arg_quote_flags` array on t_node.
+*/
+int		*setup_arg_flags(int len);
+void		free_node_arg_flags(t_node *node);
+int		*dup_node_arg_flags_and_append(t_node *node, char *new_arg,
+				int quote_flag, char **new_args);
+int		get_arg_quote_flag(t_node *node, int arg_idx);
+int		set_arg_quote_flag(t_node *node, int arg_idx, int flag);
 
 /*
 Setup redirection functions.

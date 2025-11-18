@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 01:03:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/06/07 01:25:31 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 19:51:00 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@ void	free_token_node(t_node *node)
 	{
 		ft_free_int_2d(node->arg_quote_type, arg_count);
 		node->arg_quote_type = NULL;
+	}
+	/* free compact per-arg flags if present */
+	if (node->arg_quote_flags)
+	{
+		free_node_arg_flags(node);
 	}
 	node->args = NULL;
 	node->arg_quote_type = NULL;

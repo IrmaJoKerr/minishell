@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 00:52:50 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 19:50:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,18 +58,29 @@ int	make_quoted_cmd(char *content, char *input, t_vars *vars, int quote_type)
 	cmd_node = initnode(TYPE_CMD, content);
 	if (!cmd_node)
 		return (token_cleanup_error(content, vars));
-	/* if the source was quoted, replace the default per-char metadata */
-	if (quote_type != 0 && cmd_node->arg_quote_type && cmd_node->arg_quote_type[0])
+	/* If the source was quoted, set the compact per-arg flag and populate
+	   per-character metadata using the accessor helpers (which will
+	   allocate node->arg_quote_type when needed). This avoids direct
+	   manipulation of node->arg_quote_type and is safe during migration. */
+	if (quote_type != 0)
 	{
-		free(cmd_node->arg_quote_type[0]);
-		cmd_node->arg_quote_type[0] = set_char_quote_types(content, quote_type);
-		if (!cmd_node->arg_quote_type[0])
+		size_t i;
+		size_t len = ft_strlen(content);
+		/* mark compact flag first so readers can prefer it */
+		set_arg_quote_flag(cmd_node, 0, quote_type);
+		/* populate per-char metadata via accessor; abort on allocation error */
+		i = 0;
+		while (i < len)
 		{
-			free_node_quotypes(cmd_node);
-			ft_safefree((void **)&content);
-			ft_safefree((void **)&cmd_node->args);
-			ft_safefree((void **)&cmd_node);
-			return (token_cleanup_error(NULL, vars));
+			if (!set_quote_type_at(cmd_node, 0, (int)i, quote_type))
+			{
+				free_node_quotypes(cmd_node);
+				ft_safefree((void **)&content);
+				ft_safefree((void **)&cmd_node->args);
+				ft_safefree((void **)&cmd_node);
+				return (token_cleanup_error(NULL, vars));
+			}
+			i++;
 		}
 	}
 	build_token_linklist(vars, cmd_node);

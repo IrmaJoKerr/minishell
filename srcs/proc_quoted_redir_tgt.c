@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 10:46:04 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 19:50:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,24 +179,32 @@ int	link_new_file_node_to_redir(t_node *redir_node,
 			vars->error_code = ERR_DEFAULT;
 		return (0);
 	}
-	/* Replace default zeroed quote metadata with proper per-char types
-	   corresponding to the quoted content that produced `content`. */
-	if (content && quote_type != 0 && file_node->arg_quote_type
-		&& file_node->arg_quote_type[0])
+	/* If content was quoted, set compact per-arg flag and populate the
+	   per-character metadata via the accessor helpers. This will allocate
+	   node->arg_quote_type as needed and avoids directly touching the raw
+	   arg_quote_type pointer. */
+	if (content && quote_type != 0)
 	{
-		free(file_node->arg_quote_type[0]);
-		file_node->arg_quote_type[0] = set_char_quote_types(content, quote_type);
-		if (!file_node->arg_quote_type[0])
+		size_t i;
+		size_t len = ft_strlen(content);
+		/* set compact flag first */
+		set_arg_quote_flag(file_node, 0, quote_type);
+		i = 0;
+		while (i < len)
 		{
-			/* allocation failure: clean up and propagate error */
-			free_node_quotypes(file_node);
-			ft_safefree((void **)&content);
-			free(file_node->args[0]);
-			ft_safefree((void **)&file_node->args);
-			ft_safefree((void **)&file_node);
-			if (vars->error_code == 0)
-				vars->error_code = ERR_DEFAULT;
-			return (0);
+			if (!set_quote_type_at(file_node, 0, (int)i, quote_type))
+			{
+				/* allocation failure: clean up and propagate error */
+				free_node_quotypes(file_node);
+				ft_safefree((void **)&content);
+				free(file_node->args[0]);
+				ft_safefree((void **)&file_node->args);
+				ft_safefree((void **)&file_node);
+				if (vars->error_code == 0)
+					vars->error_code = ERR_DEFAULT;
+				return (0);
+			}
+			i++;
 		}
 	}
 	link_file_to_redir(redir_node, file_node, vars);

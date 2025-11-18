@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 22:51:05 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 03:22:35 by bleow            ###   ########.fr       */
+/*   Updated: 2025/11/18 19:50:59 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,11 @@ int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 	if (redir_node->args[0])
 		ft_safefree((void **)&redir_node->args[0]);
 	redir_node->args[0] = filename_str;
-	/* If the filename was quoted, set per-character quote metadata */
-	if (quo_char && redir_node->arg_quote_type && redir_node->arg_quote_type[0])
+	/* If the filename was quoted, set compact per-arg flag and populate
+	   per-character metadata using accessor helpers which will allocate
+	   as necessary. This avoids direct manipulation of raw arg_quote_type
+	   pointers. */
+	if (quo_char)
 	{
 		int qt = 0;
 		if (quo_char == '"')
@@ -154,12 +157,19 @@ int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 			qt = TYPE_SINGLE_QUOTE;
 		if (qt != 0)
 		{
-			free(redir_node->arg_quote_type[0]);
-			redir_node->arg_quote_type[0] = set_char_quote_types(filename_str, qt);
-			if (!redir_node->arg_quote_type[0])
+			size_t i;
+			size_t len = ft_strlen(filename_str);
+			/* set compact flag first */
+			set_arg_quote_flag(redir_node, 0, qt);
+			i = 0;
+			while (i < len)
 			{
-				/* allocation failed: caller will cleanup the redir_node */
-				return (0);
+				if (!set_quote_type_at(redir_node, 0, (int)i, qt))
+				{
+					/* allocation failed: caller will cleanup the redir_node */
+					return (0);
+				}
+				i++;
 			}
 		}
 	}
