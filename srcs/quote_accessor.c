@@ -16,8 +16,8 @@
  * Return the quote type for the character at `pos` in argument `arg_idx` of
  * `node`. Returns 0 if no metadata is present or on invalid inputs.
  *
- * Quote type values follow the enum in minishell.h (e.g. TYPE_SINGLE_QUOTE==4,
- * TYPE_DOUBLE_QUOTE==5). Arrays use -1 as a sentinel; helper ft_intarrlen
+ * Quote type values follow the enum in minishell.h (QUOTE_SINGLE/QUOTE_DOUBLE).
+ * Arrays use -1 as a sentinel; helper ft_intarrlen
  * (from lib_ft) is used to check bounds safely.
  */
 int	quote_type_at(t_node *node, int arg_idx, int pos)
@@ -42,7 +42,7 @@ int	quote_type_at(t_node *node, int arg_idx, int pos)
  */
 int	is_pos_single_quoted(t_node *node, int arg_idx, int pos)
 {
-    return (quote_type_at(node, arg_idx, pos) == TYPE_SINGLE_QUOTE);
+    return (quote_type_at(node, arg_idx, pos) == QUOTE_SINGLE);
 }
 
 /* Return 1 if the node contains a quotype array for the given argument */

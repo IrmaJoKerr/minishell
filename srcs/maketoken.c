@@ -30,10 +30,7 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 
 	if (!token || !vars)
 		return ;
-	/* Pre-init trace: log the token type and token text so we can trace
-	   callers that pass legacy token types into initnode. This helps find
-	   where TYPE_DOUBLE_QUOTE / TYPE_SINGLE_QUOTE / TYPE_EXPANSION are
-	   coming from. */
+	/* Pre-init trace: log the token type and token text for debugging. */
 	fprintf(stderr, "DEBUG TOK: maketoken called with type=%d token='%s'\n",
 		(int)type, token ? token : "(null)");
 	node = initnode(type, token);

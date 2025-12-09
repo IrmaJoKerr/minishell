@@ -145,7 +145,7 @@ int	try_append_to_prev_cmd(char *content, t_vars *vars)
 	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
 	if (cmd_node)
 	{
-		append_arg(cmd_node, content, TYPE_DOUBLE_QUOTE);
+		append_arg(cmd_node, content, QUOTE_DOUBLE);
 		ft_safefree((void **)&content);
 		return (1);
 	}

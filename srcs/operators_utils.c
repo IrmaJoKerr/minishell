@@ -12,10 +12,10 @@
 
 #include "../includes/minishell.h"
 
-/* 
+/*
 Checks if character at position is a single-character token
 Returns the token type enum value, 0 if not a special token
-Handles: ', ", <, >, $, |
+Handles: <, >, |
 */
 int	is_single_token(char *input, int pos, int *moves)
 {
@@ -25,16 +25,10 @@ int	is_single_token(char *input, int pos, int *moves)
 	*moves = 0;
 	if (!input || !input[pos])
 		return (token_type);
-	if (input[pos] == '\'')
-		token_type = TYPE_SINGLE_QUOTE;
-	else if (input[pos] == '\"')
-		token_type = TYPE_DOUBLE_QUOTE;
-	else if (input[pos] == '<')
+	if (input[pos] == '<')
 		token_type = TYPE_IN_REDIR;
 	else if (input[pos] == '>')
 		token_type = TYPE_OUT_REDIR;
-	else if (input[pos] == '$')
-		token_type = TYPE_EXPANSION;
 	else if (input[pos] == '|')
 		token_type = TYPE_PIPE;
 	if (token_type != 0)
@@ -43,8 +37,8 @@ int	is_single_token(char *input, int pos, int *moves)
 }
 
 /* 
-Checks if characters at position form a double-character token
-Returns the token type enum value, 0 if not a double token
+Checks if characters at position form a double-character token.
+Returns the token type enum value, 0 if not a double token.
 Handles: >>, <<, $?
 */
 int	is_double_token(char *input, int pos, int *moves)

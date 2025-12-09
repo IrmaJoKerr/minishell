@@ -152,9 +152,9 @@ int	proc_redir_filename(char *input, int *i, t_node *redir_node)
 	{
 		int qt = 0;
 		if (quo_char == '"')
-			qt = TYPE_DOUBLE_QUOTE;
+			qt = QUOTE_DOUBLE;
 		else if (quo_char == '\'')
-			qt = TYPE_SINGLE_QUOTE;
+			qt = QUOTE_SINGLE;
 		if (qt != 0)
 		{
 			size_t i;

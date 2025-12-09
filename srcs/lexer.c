@@ -23,6 +23,11 @@ t_tokentype	get_token_at(char *input, int pos, int *moves)
 
 	token_type = 0;
 	*moves = 0;
+	if (input && input[pos] && (input[pos] == '\'' || input[pos] == '\"'))
+	{
+		*moves = 1;
+		return (0);
+	}
 	token_type = is_double_token(input, pos, moves);
 	if (token_type != 0)
 		return (token_type);
@@ -89,24 +94,20 @@ int	handle_token(char *input, t_vars *vars, int *hd_is_delim)
 
 	ft_memcpy(adj_saved, vars->adj_state, sizeof(adj_saved));
 	token_type = get_token_at(input, vars->pos, &moves);
-	if (token_type == TYPE_SINGLE_QUOTE || token_type == TYPE_DOUBLE_QUOTE)
+	if (input[vars->pos] == '\'' || input[vars->pos] == '\"')
 		return (handle_quotes(input, vars, adj_saved));
 	if (input[vars->pos] == '$')
 	{
 		if (!vars->quote_depth)
 		{
-			/* Old behaviour: expansion allowed only when not in any quotes */
-			fprintf(stderr, "DEBUG OLD: expansion at pos %d (no quotes)\n", vars->pos);
 			ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
 			tokenize_expan(input, vars);
 			return (1);
 		}
 		else
 		{
-			/* New behaviour: allow expansion inside double quotes but not single */
 			if (vars->quote_ctx[vars->quote_depth - 1].type == '"')
 			{
-				fprintf(stderr, "DEBUG NEW: expansion at pos %d inside double quotes\n", vars->pos);
 				ft_memcpy(vars->adj_state, adj_saved, sizeof(adj_saved));
 				tokenize_expan(input, vars);
 				return (1);
@@ -125,7 +126,7 @@ int	handle_token(char *input, t_vars *vars, int *hd_is_delim)
 
 /*
 Extracts quoted content from input.
-Sets the quote_type to TYPE_SINGLE_QUOTE or TYPE_DOUBLE_QUOTE.
+Sets the quote_type to QUOTE_SINGLE or QUOTE_DOUBLE.
 Returns:
 - The quoted string.
 - NULL on error.
@@ -138,9 +139,9 @@ char	*get_quoted_str(char *input, t_vars *vars, int *quote_type)
 
 	quote_char = input[vars->pos];
 	if (quote_char == '\"')
-		*quote_type = TYPE_DOUBLE_QUOTE;
+		*quote_type = QUOTE_DOUBLE;
 	else
-		*quote_type = TYPE_SINGLE_QUOTE;
+		*quote_type = QUOTE_SINGLE;
 	vars->pos++;
 	end = vars->pos;
 	while (input[end] && input[end] != quote_char)

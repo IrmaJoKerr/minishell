@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 15:16:53 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 20:53:03 by bleow            ###   ########.fr       */
+/*   Updated: 2025/12/09 13:14:14 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,14 +62,16 @@ This enables easy conversion between enum and string.
 # define TOKEN_TYPE_NULL			 "NULL"
 # define TOKEN_TYPE_CMD              "CMD"
 # define TOKEN_TYPE_ARGS             "ARGS"
-# define TOKEN_TYPE_DOUBLE_QUOTE     "\""
-# define TOKEN_TYPE_SINGLE_QUOTE     "'"
+// # define TOKEN_TYPE_DOUBLE_QUOTE     "\""
+// # define TOKEN_TYPE_SINGLE_QUOTE     "'"
 # define TOKEN_TYPE_HEREDOC          "<<"
 # define TOKEN_TYPE_IN_REDIR      "<"
 # define TOKEN_TYPE_OUT_REDIR     ">"
 # define TOKEN_TYPE_APPD_REDIR  ">>"
-# define TOKEN_TYPE_EXPANSION        "$"
+// # define TOKEN_TYPE_EXPANSION        "$"
 # define TOKEN_TYPE_PIPE             "|"
+# define TOKEN_TYPE_ANDAND          "&&"
+# define TOKEN_TYPE_OROR             "||"
 # define TOKEN_TYPE_EXIT_STATUS      "$?"
 
 /*
@@ -122,15 +124,17 @@ typedef enum e_tokentype
 	TYPE_NULL = 1,
 	TYPE_CMD = 2,
 	TYPE_ARGS = 3,
-	TYPE_SINGLE_QUOTE = 4,
-	TYPE_DOUBLE_QUOTE = 5,
-	TYPE_HEREDOC = 6,
-	TYPE_IN_REDIR = 7,
-	TYPE_OUT_REDIR = 8,
-	TYPE_APPD_REDIR = 9,
-	TYPE_EXPANSION = 10,
-	TYPE_PIPE = 11,
-	TYPE_EXIT_STATUS = 12,
+	// TYPE_SINGLE_QUOTE = 4,
+	// TYPE_DOUBLE_QUOTE = 5,
+	TYPE_HEREDOC = 4,
+	TYPE_IN_REDIR = 5,
+	TYPE_OUT_REDIR = 6,
+	TYPE_APPD_REDIR = 7,
+	// TYPE_EXPANSION = 8,
+	TYPE_PIPE = 8,
+	TYPE_ANDAND = 9,
+	TYPE_OROR = 10,
+	TYPE_EXIT_STATUS = 11,
 }	t_tokentype;
 
 /*
@@ -168,7 +172,7 @@ typedef struct s_node
 	char			**args;
 	int				**arg_quote_type;
 	/* Compact per-argument quote flag array. One entry per final arg.
-	   Values: 0 = unquoted, 4 = single-quoted, 5 = double-quoted.
+	   Values: 0 = unquoted, 1 = single-quoted, 2 = double-quoted.
 	   This is an incremental migration target; the legacy
 	   arg_quote_type (per-char arrays) is kept for compatibility
 	   until callers are migrated to use this compact field.

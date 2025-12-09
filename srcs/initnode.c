@@ -6,7 +6,7 @@
 /*   By: bleow <bleow@student.42kl.edu.my>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 15:53:06 by bleow             #+#    #+#             */
-/*   Updated: 2025/11/18 15:37:08 by bleow            ###   ########.fr       */
+/*   Updated: 2025/12/09 13:46:55 by bleow            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,16 +65,9 @@ Sets up character-level quote tracking when appropriate
 t_node	*initnode(t_tokentype type, char *token)
 {
 	t_node	*node;
-	int		quote_type;
-
-	quote_type = 0;
 	node = malloc(sizeof(t_node));
 	if (!node)
 		return (NULL);
-	if (type == TYPE_SINGLE_QUOTE)
-		quote_type = TYPE_SINGLE_QUOTE;
-	else if (type == TYPE_DOUBLE_QUOTE)
-		quote_type = TYPE_DOUBLE_QUOTE;
 	if (!make_nodeframe(node, type, token))
 	{
 		ft_safefree((void **)&node);
@@ -84,19 +77,12 @@ t_node	*initnode(t_tokentype type, char *token)
 	   unintended behaviour in the new tokenisation system. These should
 	   normally not be created anymore; if they are, the debug line helps
 	   pinpoint where and with what token text. */
-	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE
-		|| type == TYPE_EXPANSION)
+	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIR || type == TYPE_OUT_REDIR
+		|| type == TYPE_APPD_REDIR)
 	{
-		/* Print human-readable token type alongside numeric value */
+		/* Trace creation of redirection-like token types for diagnostics. */
 		fprintf(stderr, "DEBUG TOK: initnode created type=%d(%s) token='%s'\n",
 			(int)type, get_token_str(type), token ? token : "(null)");
 	}
-	if (type == TYPE_SINGLE_QUOTE || type == TYPE_DOUBLE_QUOTE)
-		set_quote_type(node, quote_type);
-	/* If this node originated from an explicit quoted token, mark the compact
-	   per-argument flag accordingly so readers can consult the lightweight
-	   accessor during migration. This complements the per-char metadata. */
-	if (quote_type != 0)
-		set_arg_quote_flag(node, 0, quote_type);
 	return (node);
 }

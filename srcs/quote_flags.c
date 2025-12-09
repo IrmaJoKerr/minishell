@@ -132,8 +132,8 @@ int set_arg_quote_flag(t_node *node, int arg_idx, int flag)
 }
 
 
-/* Return 0 if not wholly quoted, or the quote type (4 or 5) if the whole
-   argument is single- or double-quoted. Prefers the compact per-arg flags
+/* Return 0 if not wholly quoted, or the quote type (QUOTE_SINGLE/QUOTE_DOUBLE)
+   if the whole argument is single- or double-quoted. Prefers the compact per-arg flags
    and falls back to scanning the per-character `arg_quote_type` array. */
 int is_arg_whole_quoted(t_node *node, int arg_idx)
 {
@@ -168,7 +168,7 @@ int is_arg_whole_quoted(t_node *node, int arg_idx)
             return (0);
         i++;
     }
-    if (arr[0] == TYPE_SINGLE_QUOTE || arr[0] == TYPE_DOUBLE_QUOTE)
+    if (arr[0] == QUOTE_SINGLE || arr[0] == QUOTE_DOUBLE)
         return (arr[0]);
     return (0);
 }

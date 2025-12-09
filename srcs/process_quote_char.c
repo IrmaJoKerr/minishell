@@ -132,7 +132,7 @@ t_node	*process_quoted_str(char **content_ptr, int quote_type, t_vars *vars)
 	t_node	*cmd_node;
 	char	*expanded;
 
-	if (quote_type == TYPE_DOUBLE_QUOTE && ft_strchr(*content_ptr, '$'))
+	if (quote_type == QUOTE_DOUBLE && ft_strchr(*content_ptr, '$'))
 	{
 		expanded = expand_quoted_str(*content_ptr, vars);
 		ft_safefree((void **)content_ptr);

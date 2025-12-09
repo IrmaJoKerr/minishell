@@ -22,22 +22,20 @@ char	*get_token_str(t_tokentype type)
 		return (TOKEN_TYPE_ARGS);
 	else if (type == TYPE_CMD)
 		return (TOKEN_TYPE_CMD);
-	else if (type == TYPE_DOUBLE_QUOTE)
-		return (TOKEN_TYPE_DOUBLE_QUOTE);
-	else if (type == TYPE_SINGLE_QUOTE)
-		return (TOKEN_TYPE_SINGLE_QUOTE);
 	else if (type == TYPE_HEREDOC)
 		return (TOKEN_TYPE_HEREDOC);
 	else if (type == TYPE_PIPE)
 		return (TOKEN_TYPE_PIPE);
-	else if (type == TYPE_EXPANSION)
-		return (TOKEN_TYPE_EXPANSION);
 	else if (type == TYPE_IN_REDIR)
 		return (TOKEN_TYPE_IN_REDIR);
 	else if (type == TYPE_OUT_REDIR)
 		return (TOKEN_TYPE_OUT_REDIR);
 	else if (type == TYPE_APPD_REDIR)
 		return (TOKEN_TYPE_APPD_REDIR);
+	else if (type == TYPE_ANDAND)
+		return (TOKEN_TYPE_ANDAND);
+	else if (type == TYPE_OROR)
+		return (TOKEN_TYPE_OROR);
 	else if (type == TYPE_EXIT_STATUS)
 		return (TOKEN_TYPE_EXIT_STATUS);
 	else
