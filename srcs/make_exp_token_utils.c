@@ -21,11 +21,9 @@ Returns:
 */
 int	proc_join_args(t_vars *vars, char *expanded_val)
 {
-	/* Tripwire removed here; writer-side code below will set compact flags
-	   and log DEBUG NEW when appropriate. */
-
 	int		arg_idx;
 	char	*joined;
+	int		base_flag;
 
 	arg_idx = 0;
 	while (vars->current->args[arg_idx + 1])
@@ -37,13 +35,11 @@ int	proc_join_args(t_vars *vars, char *expanded_val)
 		return (-1);
 	ft_safefree((void **)&vars->current->args[arg_idx]);
 	vars->current->args[arg_idx] = joined;
-	/* Writer-side: mark the final argument as (conservatively) unquoted
-	   since we're appending expanded/unquoted text. Populate the compact
-	   per-arg flag so readers can prefer it during migration. */
-	if (set_arg_quote_flag(vars->current, arg_idx, 0))
-		fprintf(stderr, "DEBUG NEW: %s set compact flag for arg %d\n", __func__, arg_idx);
-	else
-		fprintf(stderr, "DEBUG OLD: %s failed to set compact flag for arg %d\n", __func__, arg_idx);
+	/* Preserve existing quote semantics on the arg. */
+	base_flag = get_arg_quote_flag(vars->current, arg_idx);
+	if (base_flag < 0)
+		base_flag = 0;
+	set_arg_quote_flag(vars->current, arg_idx, base_flag);
 	return (arg_idx);
 }
 
@@ -62,10 +58,7 @@ int	handle_tok_join(char *input, t_vars *vars, char *expanded_val, char *token)
 	arg_idx = proc_join_args(vars, expanded_val);
 	if (arg_idx == -1)
 		return (0);
-	/* Prefer the compact per-arg accessor; fall back to legacy per-char
-	   arrays when necessary. If the compact flag indicates the argument was
-	   quoted (non-zero), we still need to update the per-char metadata so
-	   older readers continue to work during migration. */
+	/* If the arg is marked quoted, update the per-char metadata for compatibility. */
 	if (get_arg_quote_flag(vars->current, arg_idx) != 0)
 	{
 		if (!update_quote_types(vars, arg_idx, expanded_val))
@@ -116,7 +109,7 @@ int	update_quote_types(t_vars *vars, int arg_idx, char *appended_text)
 	if (appended_len == 0)
 		return (1);
 	/* New path: use accessor API to ensure and set appended quote types. */
-	fprintf(stderr, "DEBUG NEW: update_quote_types using accessor for arg %d append %zu\n", arg_idx, appended_len);
+	/* fprintf(stderr, "DEBUG NEW: update_quote_types using accessor for arg %d append %zu\n", arg_idx, appended_len); */
 	{
 		t_node *node = vars->current;
 		size_t curr_len;

@@ -7,6 +7,8 @@ WORKDIR=$(cd "$(dirname "$0")/.." && pwd)
 MSH="$WORKDIR/minishell"
 OUTDIR=/tmp/minishell_compare
 mkdir -p "$OUTDIR"
+# Ensure VAR is defined to avoid set -u aborts in this driver.
+VAR="__placeholder__"
 
 run_case() {
   local name="$1"; shift

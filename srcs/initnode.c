@@ -77,12 +77,11 @@ t_node	*initnode(t_tokentype type, char *token)
 	   unintended behaviour in the new tokenisation system. These should
 	   normally not be created anymore; if they are, the debug line helps
 	   pinpoint where and with what token text. */
-	if (type == TYPE_HEREDOC || type == TYPE_IN_REDIR || type == TYPE_OUT_REDIR
+	/* if (type == TYPE_HEREDOC || type == TYPE_IN_REDIR || type == TYPE_OUT_REDIR
 		|| type == TYPE_APPD_REDIR)
 	{
-		/* Trace creation of redirection-like token types for diagnostics. */
 		fprintf(stderr, "DEBUG TOK: initnode created type=%d(%s) token='%s'\n",
 			(int)type, get_token_str(type), token ? token : "(null)");
-	}
+	} */
 	return (node);
 }

@@ -47,7 +47,12 @@ void	chk_args_match_cmd(t_vars *vars)
 			is_target = is_redirection_target(current, vars);
 			is_heredoc = is_heredoc_target(current, vars);
 			if (!is_target && !is_heredoc)
-				append_arg(node, current->args[0], 0);
+			{
+				int qf = get_arg_quote_flag(current, 0);
+				if (qf < 0)
+					qf = 0;
+				append_arg(node, current->args[0], qf);
+			}
 		}
 		else if (current->type == TYPE_PIPE)
 			node = NULL;

@@ -30,9 +30,8 @@ void	maketoken(char *token, t_tokentype type, t_vars *vars)
 
 	if (!token || !vars)
 		return ;
-	/* Pre-init trace: log the token type and token text for debugging. */
-	fprintf(stderr, "DEBUG TOK: maketoken called with type=%d token='%s'\n",
-		(int)type, token ? token : "(null)");
+	/* fprintf(stderr, "DEBUG TOK: maketoken called with type=%d token='%s'\n",
+		(int)type, token ? token : "(null)"); */
 	node = initnode(type, token);
 	if (!node)
 		return ;

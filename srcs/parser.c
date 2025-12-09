@@ -50,8 +50,8 @@ void	set_token_type(t_vars *vars, char *input)
 		if (special_type != 0)
 		{
 			vars->curr_type = special_type;
-			fprintf(stderr, "DEBUG TOK: set_token_type got special_type=%d for token='%s' -> curr_type=%d\n",
-				(int)special_type, input ? input : "(null)", (int)vars->curr_type);
+			/* fprintf(stderr, "DEBUG TOK: set_token_type got special_type=%d for token='%s' -> curr_type=%d\n",
+				(int)special_type, input ? input : "(null)", (int)vars->curr_type); */
 		}
 		else
 			setpipe(vars);

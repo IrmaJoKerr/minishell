@@ -33,7 +33,7 @@ int	setup_in_redir(t_node *node, t_vars *vars)
 	{
 		int qf = get_arg_quote_flag(node, 0);
 		if (qf != 0)
-			fprintf(stderr, "DEBUG NEW: %s saw compact flag %d\n", __func__, qf);
+			/* fprintf(stderr, "DEBUG NEW: %s saw compact flag %d\n", __func__, qf); */
 	}
 	file = node->args[0];
 	if (vars->pipes->redir_fd >= 0)
@@ -94,7 +94,7 @@ int	setup_out_redir(t_node *node, t_vars *vars)
 	{
 		int qf = get_arg_quote_flag(node, 0);
 		if (qf != 0)
-			fprintf(stderr, "DEBUG NEW: %s saw compact flag %d\n", __func__, qf);
+			/* fprintf(stderr, "DEBUG NEW: %s saw compact flag %d\n", __func__, qf); */
 	}
 	file = node->args[0];
 	mode = O_WRONLY | O_CREAT | O_TRUNC;

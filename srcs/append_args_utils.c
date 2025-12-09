@@ -112,9 +112,8 @@ Returns:
 int	join_arg_strings(t_node *tgt_append_tok, int arg_idx, char *append_str,
 		t_vars *vars)
 {
-	/* Tripwire removed here; prefer writer-side compact flag updates below */
-
 	char	*new_joined_arg;
+	int		base_flag;
 	int		quote_update_status;
 
 	new_joined_arg = ft_strjoin(tgt_append_tok->args[arg_idx], append_str);
@@ -122,18 +121,14 @@ int	join_arg_strings(t_node *tgt_append_tok, int arg_idx, char *append_str,
 		return (1);
 	ft_safefree((void **)&tgt_append_tok->args[arg_idx]);
 	tgt_append_tok->args[arg_idx] = new_joined_arg;
-	/* Writer-side: conservatively mark the final argument as unquoted (0)
-	   because appended text is from an expansion/adjacent text. This
-	   populates the compact per-arg accessor so readers can prefer it.
-	*/
-	if (set_arg_quote_flag(tgt_append_tok, arg_idx, 0))
-		fprintf(stderr, "DEBUG NEW: %s set compact flag for arg %d\n", __func__, arg_idx);
-	else
-		fprintf(stderr, "DEBUG OLD: %s failed to set compact flag for arg %d\n", __func__, arg_idx);
+	/* Preserve existing quote semantics when joining adjacency. */
+	base_flag = get_arg_quote_flag(tgt_append_tok, arg_idx);
+	if (base_flag < 0)
+		base_flag = 0;
+	set_arg_quote_flag(tgt_append_tok, arg_idx, base_flag);
 
 	quote_update_status = 0;
-	/* Prefer compact accessor; if the compact flag indicates the arg was
-	   quoted, update the per-character quote array for compatibility. */
+	/* If the arg is marked quoted, backfill per-char array for compatibility. */
 	if (get_arg_quote_flag(tgt_append_tok, arg_idx) != 0)
 	{
 		if (update_quote_types(vars, arg_idx, append_str) != 0)

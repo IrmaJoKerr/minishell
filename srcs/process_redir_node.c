@@ -102,10 +102,4 @@ void	link_file_to_redir(t_node *redir_node, t_node *file_node, t_vars *vars)
 	file_node->prev = redir_node;
 	vars->current = file_node;
 
-	/* Executor-side observation: record when file node has compact flag */
-	{
-		int qf = get_arg_quote_flag(file_node, 0);
-		if (qf != 0)
-			fprintf(stderr, "DEBUG NEW: %s linked file node with compact flag %d\n", __func__, qf);
-	}
 }

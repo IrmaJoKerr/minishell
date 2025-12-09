@@ -45,7 +45,7 @@ int	proc_quoted_redir_tgt(char *content, int quote_type, t_vars *vars)
 			return (1);
 		if (status == 0)
 			return (0);
-		if (try_append_to_prev_cmd(content, vars))
+		if (try_append_to_prev_cmd(content, quote_type, vars))
 			return (1);
 	}
 	return (link_new_file_node_to_redir(redir_node, content, quote_type, vars));
@@ -138,14 +138,19 @@ Return:
 - 1 if successfully appended (content is freed).
 - 0 if no command found to append to (content is NOT freed).
 */
-int	try_append_to_prev_cmd(char *content, t_vars *vars)
+int	try_append_to_prev_cmd(char *content, int quote_type, t_vars *vars)
 {
 	t_node	*cmd_node;
 
 	cmd_node = find_cmd(vars->head, NULL, FIND_LAST, vars);
 	if (cmd_node)
 	{
-		append_arg(cmd_node, content, QUOTE_DOUBLE);
+		int	qf;
+
+		qf = quote_type;
+		if (qf < 0)
+			qf = 0;
+		append_arg(cmd_node, content, qf);
 		ft_safefree((void **)&content);
 		return (1);
 	}

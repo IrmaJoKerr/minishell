@@ -87,7 +87,7 @@ int get_arg_quote_flag(t_node *node, int arg_idx)
         return (node->arg_quote_flags[arg_idx]);
     /* Fallback to legacy path for now. Emit debug tripwire so we can
        identify callsites still using old metadata. */
-    fprintf(stderr, "DEBUG OLD: %s falling back for arg %d\n", __func__, arg_idx);
+    /* fprintf(stderr, "DEBUG OLD: %s falling back for arg %d\n", __func__, arg_idx); */
     return (0);
 }
 
